@@ -1,6 +1,6 @@
 /**
  * ================================================================
- * ColibriX BI — JavaScript Principal
+ * HummingX-BI — JavaScript Principal
  * Versión: 1.0.0
  * Descripción: Lógica del preloader, navbar, partículas, formulario
  *              multistep, animaciones de scroll y botones de envío.
@@ -25,38 +25,34 @@
 /* ================================================================
    1. CONFIGURACIÓN — Edita aquí los datos de contacto
    ================================================================ */
+/* ================================================================
+   1. CONFIGURACIÓN — Edita aquí los datos de contacto
+   ================================================================ */
 const CONFIG = {
   /**
    * WHATSAPP:
    * Número en formato internacional sin '+' ni espacios.
    * Ejemplo: '5215551234567' (México, Ciudad de México)
    */
-  WA_NUMBER: '521XXXXXXXXXX',
+  WA_NUMBER: '5215519802943',
 
   /**
    * INSTAGRAM:
    * Nombre de usuario SIN el @
-   * Ejemplo: 'colibrixbi'
+   * Ejemplo: 'hummingxbi'
    */
-  IG_USERNAME: 'colibrixbi',
+  IG_USERNAME: 'hummingx.bi',
 
   /**
    * EMAIL:
    * Dirección de correo electrónico donde recibirás solicitudes
    */
-  EMAIL_ADDRESS: 'hola@colibrixbi.com',
+  EMAIL_ADDRESS: 'hola@hummingxbi.com',
 
   /**
    * NOMBRE DE LA EMPRESA (para mensajes pre-llenados)
    */
-  COMPANY_NAME: 'ColibriX BI',
-
-  /**
-   * DURACIÓN DEL PRELOADER en milisegundos.
-   * El preloader se ocultará automáticamente después de este tiempo
-   * o cuando el evento 'load' dispare, lo que ocurra primero.
-   */
-  PRELOADER_MIN_DURATION: 2200,
+  COMPANY_NAME: 'HummingX-BI',
 
   /**
    * UMBRAL DEL SCROLL para activar el estilo "scrolled" de la navbar
@@ -67,67 +63,148 @@ const CONFIG = {
 
 
 /* ================================================================
-   2. MÓDULO: PRELOADER (Coordinador para loader 3D)
-   La animación de entrada/salida la gestiona js/loader3d.js (Three.js).
-   Este módulo escucha el evento 'colibrix:loader-done' que loader3d.js
-   dispara al finalizar su transición de salida, y entonces revela el
-   contenido principal.
-
-   FALLBACK DE SEGURIDAD: Si Three.js no carga (sin internet, error de red,
-   navegador incompatible), el fallback CSS activa la animación clásica
-   después de 8 segundos para que la página nunca quede bloqueada.
+   2. MÓDULO: PRELOADER (Vuelo y Aterrizaje del Colibrí)
+   Un colibrí vectorial aletea en el centro de la pantalla. Al completar
+   la carga, vuela orgánicamente y aterriza sobre el logo de la navbar,
+   mientras el fondo oscuro del preloader se desvanece.
    ================================================================ */
 const PreloaderModule = (() => {
-  const preloader   = document.getElementById('preloader');
-  const mainContent = document.getElementById('main-content');
-  let hasHidden     = false;
+  const preloader    = document.getElementById('preloader');
+  const mainContent  = document.getElementById('main-content');
+  const bird         = document.getElementById('preloader-bird');
+  const progressBar  = document.getElementById('preloader-progress-bar');
+  const loadingText  = document.getElementById('loading-text');
+  const targetLogo   = document.querySelector('.nav__logo-icon');
+  const navLogo      = document.querySelector('.nav__logo');
 
-  /** Revela el contenido principal y oculta el loader 3D */
-  function hidePreloader() {
+  let hasHidden      = false;
+  let progress       = 0;
+  let progressInterval;
+  let pageLoaded     = false;
+
+  // Frases estratégicas para HummingX-BI
+  const loadingPhrases = [
+    'Preparando entorno estratégico...',
+    'Alineando variables de Business Intelligence...',
+    'Calibrando arquitectura de alta precisión...',
+    'Estructurando microservicios y flujos de datos...',
+    'Evolución digital en vuelo...',
+    'Sincronizando HummingX-BI...'
+  ];
+
+  /** Simula e incrementa la barra de progreso */
+  function startProgress() {
+    progressInterval = setInterval(() => {
+      // Avanzar más rápido si la carga real ya terminó
+      const increment = pageLoaded ? Math.random() * 12 + 8 : Math.random() * 2 + 1;
+      progress = Math.min(progress + increment, 100);
+
+      if (progressBar) {
+        progressBar.style.width = `${progress}%`;
+      }
+
+      // Actualizar mensajes descriptivos de carga
+      if (loadingText) {
+        const phraseIdx = Math.min(
+          Math.floor((progress / 100) * loadingPhrases.length),
+          loadingPhrases.length - 1
+        );
+        loadingText.textContent = loadingPhrases[phraseIdx];
+      }
+
+      if (progress >= 100) {
+        clearInterval(progressInterval);
+        setTimeout(triggerFlightAnimation, 450); // Breve pausa dramática
+      }
+    }, 45);
+  }
+
+  /** Transiciona el colibrí volando del centro al logo de cabecera */
+  function triggerFlightAnimation() {
     if (hasHidden) return;
     hasHidden = true;
 
-    // Ejecutar la lógica de salida del motor 3D
-    if (window.colibrix_3dLoader && typeof window.colibrix_3dLoader.hide === 'function') {
-      window.colibrix_3dLoader.hide();
-    } else {
-      // Fallback si el script 3D falló
-      if (preloader) {
-        preloader.style.transition = 'opacity 1s, transform 1s cubic-bezier(0.68, -0.55, 0.27, 1.55)';
-        preloader.style.opacity = '0';
-        preloader.style.transform = 'translateY(-100%)';
-      }
+    // 1. Revelar la página principal (pero sin hacer visible el logo del header aún)
+    document.body.classList.remove('loading');
+    if (mainContent) {
+      mainContent.setAttribute('aria-hidden', 'false');
+      mainContent.classList.add('is-visible');
     }
 
-    // Revelar contenido principal
-    document.body.classList.remove('loading');
-    mainContent?.setAttribute('aria-hidden', 'false');
-    mainContent?.classList.add('is-visible');
+    if (targetLogo) {
+      targetLogo.style.opacity = '0';
+      targetLogo.style.transition = 'opacity 0.2s ease';
+    }
 
-    // Limpiar del DOM después de la transición
+    // 2. Obtener dimensiones de inicio y fin en pantalla (fixed coordinates)
+    const startRect = bird.getBoundingClientRect();
+    const targetRect = targetLogo.getBoundingClientRect();
+
+    // 3. Calcular diferencias y factor de escala
+    const deltaX = targetRect.left - startRect.left;
+    const deltaY = targetRect.top - startRect.top;
+    const scale  = targetRect.width / startRect.width;
+
+    // 4. Modificar velocidad de aleteo en CSS y rotación para el viaje
+    bird.classList.add('is-migrating');
+    void bird.offsetWidth; // Forzar reflow para registrar la transición antes del transform
+
+    // 5. Transformar y trasladar el colibrí con curva bez de vuelo acelerado
+    bird.style.transformOrigin = 'top left';
+    bird.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${scale}) rotate(12deg)`;
+
+    // 6. Desvanecer el fondo del preloader suavemente
+    if (preloader) {
+      preloader.style.transition = 'opacity 1s cubic-bezier(0.4, 0, 0.2, 1), visibility 1s';
+      preloader.style.opacity = '0';
+      preloader.style.visibility = 'hidden';
+    }
+
+    // 7. Al aterrizar en el header (duración de la transición: 1.2s en style.css)
     setTimeout(() => {
-      if (preloader) {
-        preloader.style.display = 'none';
-        preloader.setAttribute('aria-hidden', 'true');
+      // Disparar destello luminoso en el logo del header
+      if (navLogo) {
+        navLogo.classList.add('logo-landing-glow');
       }
-    }, 1000);
+
+      // Revelar logo real en la navbar
+      if (targetLogo) {
+        targetLogo.style.opacity = '1';
+      }
+
+      // Ocultar preloader definitivamente
+      setTimeout(() => {
+        if (preloader) {
+          preloader.style.display = 'none';
+          preloader.setAttribute('aria-hidden', 'true');
+        }
+      }, 200);
+
+    }, 1200);
   }
 
   function init() {
-    // Bloquear scroll mientras carga
     document.body.classList.add('loading');
+    startProgress();
 
-    // Esperar a que la página cargue, más un pequeño tiempo mínimo para lucir el 3D
     if (document.readyState === 'complete') {
-      setTimeout(hidePreloader, 2500);
+      pageLoaded = true;
     } else {
       window.addEventListener('load', () => {
-        setTimeout(hidePreloader, 2500);
+        pageLoaded = true;
       }, { once: true });
     }
 
-    // Fallback de seguridad extrema (8 segundos)
-    setTimeout(hidePreloader, 8000);
+    // Fallback de seguridad por si falla la carga real
+    setTimeout(() => {
+      pageLoaded = true;
+      if (progress < 100) {
+        clearInterval(progressInterval);
+        progress = 100;
+        if (progressBar) progressBar.style.width = '100%';
+        triggerFlightAnimation();
+      }
+    }, 7000);
   }
 
   return { init };
@@ -501,15 +578,15 @@ const FormModule = (() => {
     currentStep: 1,
     totalSteps:  4,
     data: {
-      objetivo:    'menu_digital', // valor default del HTML
-      etapa:       'idea',         // valor default del HTML
-      desafio:     'ventas',       // default
-      tiempo:      '1mes',         // default
-      presupuesto: '',
-      negocio:     '',
-      nombre:      '',
-      telefono:    '',
-      mensaje:     '',
+      objetivo:    'bi_analytics', 
+      etapa:       'operando',     
+      desafio:     'datos',        
+      tiempo:      '1mes',         
+      presupuesto: '15k_50k',
+      negocio:     'Mi Negocio de Prueba',
+      nombre:      'Cliente Prueba',
+      telefono:    '+52 1 55 1980 2943',
+      mensaje:     'Hola, me gustaría recibir más información sobre el servicio de BI & Analytics.',
     }
   };
 
@@ -786,7 +863,7 @@ const SendButtonsModule = (() => {
       lines.push('', `💬 *Mensaje adicional:*`, data.mensaje);
     }
 
-    lines.push('', '---', 'Enviado desde colibrixbi.com');
+    lines.push('', '---', 'Enviado desde hummingxbi.com');
 
     return lines.join('\n');
   }
@@ -805,19 +882,18 @@ const SendButtonsModule = (() => {
     window.open(url, '_blank', 'noopener,noreferrer');
   }
 
-  /** Abre Instagram (no hay pre-fill en DMs, se abre el perfil) */
+  /** Abre Instagram con el mensaje pre-llenado en DMs */
   function sendInstagram(data) {
-    // Instagram no permite pre-llenar mensajes por URL.
-    // Abre el perfil para que el usuario inicie el DM manualmente.
-    const url = `https://www.instagram.com/${CONFIG.IG_USERNAME}/`;
+    const msg = buildMessage(data);
+    const encodedMsg = encodeURIComponent(msg);
+    const url = `https://ig.me/m/hummingx.bi?text=${encodedMsg}`;
 
-    // Copiar el mensaje al portapapeles para facilitar el pegado
+    // Copiamos al portapapeles como respaldo de seguridad en caso de fallas de redirección en algunas versiones de la app
     if (navigator.clipboard && data) {
-      const msg = buildMessage(data);
       navigator.clipboard.writeText(msg).then(() => {
-        showToast('✅ Mensaje copiado. Pégalo en el DM de Instagram.');
+        showToast('✅ Solicitud copiada. ¡Pégala en el chat de Instagram si no se auto-llena!');
       }).catch(() => {
-        // Silenciar error si el portapapeles no está disponible
+        // Silenciar error
       });
     }
 

@@ -1,0 +1,1051 @@
+/* ================================================================
+   ColibriX BI — Sistema de Diseño Principal
+   Versión: 1.0.0
+   Descripción: Variables CSS, reset, preloader, navegación y hero.
+   Arquitectura: Mobile-first, BEM, Variables CSS nativas.
+   ================================================================ */
+
+
+/* ================================================================
+   1. VARIABLES DEL SISTEMA DE DISEÑO (Design Tokens)
+   ================================================================ */
+:root {
+  /* --- Paleta de colores --- */
+  /* Fondos oscuros (gradiente Azul Marino Profundo) */
+  --color-bg-deepest:     #070E1A;
+  --color-bg-base:        #0B1325;
+  --color-bg-mid:         #0F1D38;
+  --color-bg-elevated:    #132040;
+  --color-bg-card:        rgba(15, 29, 56, 0.6);
+  --color-bg-card-hover:  rgba(19, 38, 70, 0.8);
+
+  /* Acentos principales */
+  --color-teal:           #0D9488;
+  --color-teal-light:     #14B8AA;
+  --color-teal-glow:      rgba(13, 148, 136, 0.25);
+  --color-teal-glow-strong: rgba(13, 148, 136, 0.5);
+  --color-purple:         #581C87;
+  --color-purple-light:   #7C3AED;
+  --color-purple-glow:    rgba(88, 28, 135, 0.3);
+
+  /* Textos */
+  --color-text-primary:   #F8FAFC;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted:     #4A5568;
+  --color-text-accent:    #0D9488;
+
+  /* Bordes */
+  --color-border:         rgba(255, 255, 255, 0.06);
+  --color-border-accent:  rgba(13, 148, 136, 0.3);
+  --color-border-hover:   rgba(13, 148, 136, 0.7);
+
+  /* --- Tipografía --- */
+  --font-display:   'Syncopate', 'Montserrat', sans-serif;
+  --font-heading:   'Montserrat', 'Inter', sans-serif;
+  --font-body:      'Inter', sans-serif;
+
+  /* Escala tipográfica (base 16px, ratio 1.25) */
+  --text-xs:        0.75rem;    /* 12px */
+  --text-sm:        0.875rem;   /* 14px */
+  --text-base:      1rem;       /* 16px */
+  --text-lg:        1.125rem;   /* 18px */
+  --text-xl:        1.25rem;    /* 20px */
+  --text-2xl:       1.5rem;     /* 24px */
+  --text-3xl:       1.875rem;   /* 30px */
+  --text-4xl:       2.25rem;    /* 36px */
+  --text-5xl:       3rem;       /* 48px */
+  --text-6xl:       3.75rem;    /* 60px */
+  --text-7xl:       4.5rem;     /* 72px */
+
+  /* --- Espaciado --- */
+  --space-1:   0.25rem;
+  --space-2:   0.5rem;
+  --space-3:   0.75rem;
+  --space-4:   1rem;
+  --space-5:   1.25rem;
+  --space-6:   1.5rem;
+  --space-8:   2rem;
+  --space-10:  2.5rem;
+  --space-12:  3rem;
+  --space-16:  4rem;
+  --space-20:  5rem;
+  --space-24:  6rem;
+  --space-32:  8rem;
+
+  /* --- Contenedor --- */
+  --container-max:  1280px;
+  --container-pad:  var(--space-6);
+
+  /* --- Bordes redondeados --- */
+  --radius-sm:   6px;
+  --radius-md:   12px;
+  --radius-lg:   18px;
+  --radius-xl:   24px;
+  --radius-full: 9999px;
+
+  /* --- Sombras --- */
+  --shadow-glow-teal:   0 0 30px rgba(13, 148, 136, 0.2), 0 0 60px rgba(13, 148, 136, 0.05);
+  --shadow-glow-purple: 0 0 30px rgba(88, 28, 135, 0.2), 0 0 60px rgba(88, 28, 135, 0.05);
+  --shadow-card:        0 4px 24px rgba(0, 0, 0, 0.4), 0 1px 4px rgba(0, 0, 0, 0.3);
+  --shadow-card-hover:  0 8px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(13, 148, 136, 0.15);
+  --shadow-btn:         0 4px 20px rgba(13, 148, 136, 0.3);
+  --shadow-btn-hover:   0 6px 30px rgba(13, 148, 136, 0.5), 0 0 20px rgba(13, 148, 136, 0.3);
+
+  /* --- Transiciones --- */
+  --transition-fast:   150ms ease;
+  --transition-base:   300ms ease;
+  --transition-slow:   600ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* --- Z-index --- */
+  --z-preloader: 9999;
+  --z-navbar:    1000;
+  --z-overlay:    800;
+  --z-dropdown:   900;
+  --z-base:         1;
+}
+
+
+/* ================================================================
+   2. RESET & BASE STYLES
+   ================================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ocultar scroll-bar cuando el preloader está activo */
+body.loading {
+  overflow: hidden;
+}
+
+img, svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+
+input, textarea, select {
+  font-family: inherit;
+}
+
+/* Focus visible accesible */
+:focus-visible {
+  outline: 2px solid var(--color-teal);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Selección de texto */
+::selection {
+  background: var(--color-teal-glow);
+  color: var(--color-text-primary);
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg-deepest);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-teal);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-teal-light);
+}
+
+
+/* ================================================================
+   3. UTILIDADES GLOBALES
+   ================================================================ */
+
+/* Contenedor centrado responsive */
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-pad);
+}
+
+/* Texto en gradiente Teal → Purple */
+.gradient-text {
+  background: linear-gradient(135deg, var(--color-teal-light) 0%, var(--color-purple-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* X de ColibriX en color acento */
+.accent-x {
+  color: var(--color-teal);
+}
+
+/* Encabezados de sección */
+.section-header {
+  text-align: center;
+  margin-bottom: var(--space-16);
+}
+
+.section-tag {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-teal);
+  background: rgba(13, 148, 136, 0.1);
+  border: 1px solid rgba(13, 148, 136, 0.3);
+  padding: var(--space-1) var(--space-4);
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-6);
+}
+
+.section-title {
+  font-family: var(--font-heading);
+  font-size: clamp(var(--text-3xl), 5vw, var(--text-5xl));
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-6);
+}
+
+.section-subtitle {
+  font-size: var(--text-lg);
+  color: var(--color-text-secondary);
+  max-width: 600px;
+  margin-inline: auto;
+  line-height: 1.7;
+}
+
+
+/* ================================================================
+   4. BOTONES (Sistema global)
+   ================================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-6);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+/* Botón primario (Teal sólido) */
+.btn--primary {
+  background: linear-gradient(135deg, var(--color-teal) 0%, var(--color-teal-light) 100%);
+  color: white;
+  box-shadow: var(--shadow-btn);
+}
+
+.btn--primary:hover {
+  box-shadow: var(--shadow-btn-hover);
+  transform: translateY(-2px);
+}
+
+.btn--primary:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-btn);
+}
+
+/* Botón con efecto glow pulsante */
+.btn--glow {
+  animation: btn-glow-pulse 3s ease-in-out infinite;
+}
+
+.btn--glow:hover {
+  animation: none;
+  box-shadow: 0 0 0 4px var(--color-teal-glow), var(--shadow-btn-hover);
+}
+
+@keyframes btn-glow-pulse {
+  0%, 100% { box-shadow: var(--shadow-btn); }
+  50%       { box-shadow: 0 0 0 6px var(--color-teal-glow), var(--shadow-btn-hover); }
+}
+
+/* Botón ghost (contorno) */
+.btn--ghost {
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  padding: var(--space-3) var(--space-5);
+}
+
+.btn--ghost:hover {
+  border-color: var(--color-border-hover);
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Botón en navbar */
+.btn--nav {
+  background: linear-gradient(135deg, var(--color-teal) 0%, var(--color-teal-light) 100%);
+  color: white;
+  padding: var(--space-2) var(--space-5);
+  font-size: var(--text-sm);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-btn);
+}
+
+.btn--nav:hover {
+  box-shadow: var(--shadow-btn-hover);
+  transform: translateY(-1px);
+}
+
+/* Botón ancho completo */
+.btn--full {
+  width: 100%;
+  padding-block: var(--space-4);
+  font-size: var(--text-base);
+}
+
+/* Efecto shimmer en botones (pseudo-elemento) */
+.btn--primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+}
+
+.btn--primary:hover::before {
+  transform: translateX(100%);
+}
+
+
+/* ================================================================
+   5. PRE-LOADER 3D — Three.js Glassmorphism
+   ================================================================ */
+
+/* Contenedor principal: ocupa toda la pantalla */
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-preloader);
+  background: #050b14;                /* Fondo oscuro profundo para el 3D */
+  overflow: hidden;
+  /* La transición la aplica loader3d.js directamente en el style inline
+     con la curva cubic-bezier de Google Material Design */
+}
+
+/* Estado: saliendo (fallback CSS para navegadores sin Three.js) */
+.preloader.is-hiding {
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Estado: oculto del DOM */
+.preloader.is-hidden {
+  display: none;
+}
+
+/* —— Contenedor del canvas Three.js —— */
+.preloader__canvas-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* El canvas inyectado por Three.js ocupa todo el contenedor */
+.preloader__canvas-container canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* —— Marca flotante sobre la escena 3D —— */
+.preloader__overlay-brand {
+  position: absolute;
+  bottom: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  z-index: 10;
+  pointer-events: none;
+  /* Aparición suave con retraso para que el canvas arranque primero */
+  animation: brand-appear 0.8s ease 0.6s both;
+}
+
+@keyframes brand-appear {
+  from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.preloader__brand-name {
+  font-family: var(--font-display);
+  font-size: clamp(var(--text-xl), 3vw, var(--text-2xl));
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 0 30px rgba(13, 148, 136, 0.5);
+}
+
+.preloader__brand-sub {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: var(--color-teal);
+  padding: 2px 6px;
+  border: 1px solid rgba(13, 148, 136, 0.7);
+  border-radius: 4px;
+  box-shadow: 0 0 12px rgba(13, 148, 136, 0.3);
+}
+
+/* —— Texto de estado dinámico —— */
+.preloader__status-text {
+  position: absolute;
+  bottom: 6%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.28);
+  z-index: 10;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+  white-space: nowrap;
+}
+
+/* Pulso en el nodo de red (icono de tarjeta 3) — conservado para la sección de atributos */
+.node-pulse {
+  animation: node-pulse-anim 2s ease-in-out infinite;
+}
+
+@keyframes node-pulse-anim {
+  0%   { r: 8;  opacity: 0.4; }
+  50%  { r: 14; opacity: 0.1; }
+  100% { r: 8;  opacity: 0.4; }
+}
+
+
+
+/* ================================================================
+   6. CONTENIDO PRINCIPAL (Oculto mientras carga)
+   ================================================================ */
+.main-content {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.7s ease 0.1s, transform 0.7s ease 0.1s;
+}
+
+.main-content.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+/* ================================================================
+   7. NAVEGACIÓN
+   ================================================================ */
+.nav-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-navbar);
+  padding-block: var(--space-4);
+  transition: all var(--transition-base);
+}
+
+/* Navbar con blur al hacer scroll */
+.nav-header.scrolled {
+  padding-block: var(--space-3);
+  background: rgba(7, 14, 26, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+}
+
+/* Logo */
+.nav__logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.nav__logo-icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+.nav__logo-text {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--color-text-primary);
+  line-height: 1;
+}
+
+.nav__logo-sub {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-teal);
+  padding: 1px 5px;
+  border: 1px solid var(--color-teal);
+  border-radius: 3px;
+  letter-spacing: 0.15em;
+  vertical-align: middle;
+  margin-left: 2px;
+}
+
+/* Menú desktop */
+.nav__menu {
+  display: none;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.nav__link {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.03em;
+  position: relative;
+  transition: color var(--transition-fast);
+}
+
+.nav__link::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--color-teal);
+  transition: width var(--transition-base);
+}
+
+.nav__link:hover {
+  color: var(--color-text-primary);
+}
+
+.nav__link:hover::after,
+.nav__link[aria-current="page"]::after {
+  width: 100%;
+}
+
+.nav__link[aria-current="page"] {
+  color: var(--color-text-primary);
+}
+
+/* Hamburger (móvil) */
+.nav__hamburger {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.nav__hamburger:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.hamburger-line {
+  display: block;
+  width: 22px;
+  height: 1.5px;
+  background: var(--color-text-secondary);
+  border-radius: var(--radius-full);
+  transition: all var(--transition-base);
+}
+
+/* Hamburger → X cuando el menú está abierto */
+.nav__hamburger.is-active .hamburger-line:nth-child(1) {
+  transform: translateY(6.5px) rotate(45deg);
+  background: var(--color-teal);
+}
+.nav__hamburger.is-active .hamburger-line:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+.nav__hamburger.is-active .hamburger-line:nth-child(3) {
+  transform: translateY(-6.5px) rotate(-45deg);
+  background: var(--color-teal);
+}
+
+/* Menú móvil */
+.mobile-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgba(7, 14, 26, 0.97);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--color-border);
+  transform: translateY(-10px);
+  opacity: 0;
+  pointer-events: none;
+  transition: all var(--transition-base);
+  padding: var(--space-6);
+}
+
+.mobile-menu.is-open {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mobile-menu__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.mobile-menu__link {
+  display: block;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-base);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.mobile-menu__link:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text-primary);
+  padding-left: var(--space-5);
+}
+
+.mobile-menu__cta {
+  margin-top: var(--space-4);
+  text-align: center;
+}
+
+
+/* ================================================================
+   8. HERO SECTION
+   ================================================================ */
+.hero {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding-block: var(--space-32) var(--space-20);
+  background: linear-gradient(
+    165deg,
+    var(--color-bg-deepest)  0%,
+    var(--color-bg-base)    40%,
+    var(--color-bg-mid)     70%,
+    var(--color-bg-elevated) 100%
+  );
+}
+
+/* Canvas de partículas */
+.hero__particles {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  opacity: 1; /* Eliminada la opacidad 0.6 para que brillen con todo su resplandor */
+}
+
+/* Rejilla decorativa de fondo */
+.hero__grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(13, 148, 136, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(13, 148, 136, 0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%);
+  z-index: 0;
+}
+
+/* Orbes de luz */
+.hero__orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hero__orb--1 {
+  width: 600px;
+  height: 600px;
+  top: -200px;
+  right: -200px;
+  background: radial-gradient(circle, rgba(13, 148, 136, 0.12) 0%, transparent 70%);
+  animation: orb-float 8s ease-in-out infinite;
+}
+
+.hero__orb--2 {
+  width: 500px;
+  height: 500px;
+  bottom: -150px;
+  left: -150px;
+  background: radial-gradient(circle, rgba(88, 28, 135, 0.1) 0%, transparent 70%);
+  animation: orb-float 10s ease-in-out infinite 2s;
+}
+
+@keyframes orb-float {
+  0%, 100% { transform: translate(0, 0)   scale(1);    }
+  33%       { transform: translate(20px, -30px) scale(1.05); }
+  66%       { transform: translate(-15px, 20px) scale(0.95); }
+}
+
+/* Contenido del hero */
+.hero__content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  max-width: 900px;
+  margin-inline: auto;
+}
+
+/* Eyebrow label */
+.hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-teal);
+  background: rgba(13, 148, 136, 0.08);
+  border: 1px solid rgba(13, 148, 136, 0.25);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-8);
+}
+
+.hero__eyebrow-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-teal);
+  animation: dot-blink 2s ease-in-out infinite;
+}
+
+@keyframes dot-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+/* Titular principal */
+.hero__title {
+  font-family: var(--font-display);
+  font-size: clamp(var(--text-4xl), 7vw, var(--text-7xl));
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-8);
+}
+
+/* Subtítulo */
+.hero__subtitle {
+  font-size: clamp(var(--text-base), 2vw, var(--text-xl));
+  color: var(--color-text-secondary);
+  max-width: 680px;
+  margin-inline: auto;
+  margin-bottom: var(--space-10);
+  line-height: 1.7;
+}
+
+/* Grupo de CTAs */
+.hero__cta-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-16);
+}
+
+.hero__cta-group .btn--primary {
+  padding: var(--space-4) var(--space-8);
+  font-size: var(--text-base);
+  border-radius: var(--radius-lg);
+}
+
+.hero__cta-group .btn--ghost {
+  padding: var(--space-4) var(--space-8);
+  font-size: var(--text-base);
+  border-radius: var(--radius-lg);
+}
+
+/* Métricas de confianza */
+.hero__metrics {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  flex-wrap: wrap;
+  padding: var(--space-5) var(--space-8);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  max-width: fit-content;
+  margin-inline: auto;
+  gap: var(--space-6);
+}
+
+.hero__metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.hero__metric-number {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1;
+}
+
+.hero__metric-number span {
+  color: var(--color-teal);
+  font-size: var(--text-xl);
+}
+
+.hero__metric-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.hero__metric-divider {
+  width: 1px;
+  height: 40px;
+  background: var(--color-border);
+  flex-shrink: 0;
+}
+
+/* Indicador de scroll */
+.hero__scroll-indicator {
+  position: absolute;
+  bottom: var(--space-8);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.scroll-text {
+  font-size: var(--text-xs);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.scroll-dot-wrapper {
+  width: 24px;
+  height: 38px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 6px;
+}
+
+.scroll-dot {
+  width: 4px;
+  height: 8px;
+  background: var(--color-teal);
+  border-radius: var(--radius-full);
+  animation: scroll-dot-anim 1.8s ease-in-out infinite;
+}
+
+@keyframes scroll-dot-anim {
+  0%   { transform: translateY(0);   opacity: 1;   }
+  80%  { transform: translateY(16px); opacity: 0;   }
+  100% { transform: translateY(0);   opacity: 0;   }
+}
+
+
+/* ================================================================
+   9. ANIMACIONES DE REVEAL (Scroll-triggered)
+   ================================================================ */
+
+/* Estado inicial: elementos ocultos */
+.reveal-up {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-40px);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal-right {
+  opacity: 0;
+  transform: translateX(40px);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Estado visible: después del IntersectionObserver */
+.reveal-up.is-visible,
+.reveal-left.is-visible,
+.reveal-right.is-visible {
+  opacity: 1;
+  transform: translate(0);
+}
+
+/* Delay escalonado para hijos de un grupo */
+.reveal-up:nth-child(1) { transition-delay: 0ms;   }
+.reveal-up:nth-child(2) { transition-delay: 100ms;  }
+.reveal-up:nth-child(3) { transition-delay: 200ms;  }
+.reveal-up:nth-child(4) { transition-delay: 300ms;  }
+.reveal-up:nth-child(5) { transition-delay: 400ms;  }
+
+/* Dentro del hero: delay acumulado por clase custom */
+.hero__eyebrow.reveal-up  { transition-delay: 300ms; }
+.hero__title.reveal-up    { transition-delay: 450ms; }
+.hero__subtitle.reveal-up { transition-delay: 600ms; }
+.hero__cta-group.reveal-up{ transition-delay: 750ms; }
+.hero__metrics.reveal-up  { transition-delay: 900ms; }
+
+
+/* ================================================================
+   10. RESPONSIVE — BREAKPOINTS
+   ================================================================ */
+
+/* Tablet: ≥ 768px */
+@media (min-width: 768px) {
+  :root {
+    --container-pad: var(--space-8);
+  }
+
+  .nav__menu {
+    display: flex;
+  }
+
+  .nav__hamburger {
+    display: none;
+  }
+
+  .mobile-menu {
+    display: none;
+  }
+
+  .hero__metrics {
+    gap: var(--space-10);
+  }
+}
+
+/* Desktop: ≥ 1024px */
+@media (min-width: 1024px) {
+  :root {
+    --container-pad: var(--space-10);
+  }
+}
+
+/* Large Desktop: ≥ 1280px */
+@media (min-width: 1280px) {
+  :root {
+    --container-pad: var(--space-12);
+  }
+}
+
+/* Preferencias de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .bird-wing-top,
+  .bird-wing-bottom,
+  .btn--glow,
+  .hero__orb--1,
+  .hero__orb--2,
+  .preloader__bar {
+    animation: none !important;
+  }
+}

@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <!-- ============================================================
+       ColibriX BI — Landing Page
+       Versión: 1.0.0
+       Autor: ColibriX BI Engineering Team
+       Descripción: Landing page de alta gama para agencia de
+                    software e inteligencia de negocios.
+  ============================================================ -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="ColibríX BI — Ingeniería de Software de Alta Precisión. Aceleramos la evolución digital de tu negocio con arquitectura escalable y rendimiento absoluto." />
+  <meta name="keywords"
+    content="desarrollo de software, inteligencia de negocios, BI, arquitectura escalable, ColibriX" />
+  <meta property="og:title" content="ColibríX BI — Ingeniería de Software de Alta Precisión" />
+  <meta property="og:description"
+    content="Aceleramos la evolución digital de tu negocio con arquitectura escalable y rendimiento absoluto." />
+  <meta property="og:type" content="website" />
+  <title>ColibríX BI — Ingeniería de Software de Alta Precisión</title>
+
+  <!-- Google Fonts: Syncopate (títulos) + Inter (cuerpo) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@300;400;600;700;800&display=swap"
+    rel="stylesheet" />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/components.css" />
+
+  <!-- ============================================================
+       THREE.JS IMPORT MAP — Carga modular sin bundler.
+       IMPORTANTE: debe estar ANTES de cualquier <script type="module">
+  ============================================================ -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+
+<body>
+
+  <!-- ============================================================
+       PRE-LOADER 3D — Three.js Glassmorphism + Burbujas Flotantes
+       El canvas 3D es inyectado automáticamente por js/loader3d.js
+       dentro de #canvas-3d-container.
+       La transición de salida (fade+slide) la gestiona loader3d.js
+       y dispara el evento 'colibrix:loader-done' al terminar.
+  ============================================================ -->
+  <div id="preloader" class="preloader" aria-hidden="true" role="presentation">
+
+    <!-- Canvas Three.js se inyecta aquí (loader3d.js) -->
+    <div id="canvas-3d-container" class="preloader__canvas-container"></div>
+
+    <!-- Marca superpuesta sobre la escena 3D -->
+    <div class="preloader__overlay-brand" aria-hidden="true">
+      <span class="preloader__brand-name">COLIBRI<span class="accent-x">X</span></span>
+      <span class="preloader__brand-sub">BI</span>
+    </div>
+
+    <!-- Texto de estado (se oculta cuando el SVG 3D termina de cargar) -->
+    <p id="loading-text" class="preloader__status-text" aria-live="polite">Cargando 3D...</p>
+
+  </div>
+  <!-- FIN: PRE-LOADER 3D -->
+
+
+  <!-- ============================================================
+       PÁGINA PRINCIPAL (oculta mientras carga el preloader)
+  ============================================================ -->
+  <div id="main-content" class="main-content" aria-hidden="true">
+
+    <!-- ========================
+         NAVEGACIÓN
+    ======================== -->
+    <header class="nav-header" id="navbar" role="banner">
+      <nav class="nav container" aria-label="Navegación principal">
+        <!-- Logo en la navbar -->
+        <a href="#inicio" class="nav__logo" aria-label="ColibriX BI - Inicio">
+          <!-- Logo SVG inline (versión compacta para navbar) -->
+          <svg class="nav__logo-icon" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <ellipse cx="32" cy="34" rx="10" ry="6" fill="#0D9488" />
+            <circle cx="40" cy="28" r="6" fill="#0D9488" />
+            <path d="M 45 28 L 58 27 L 45 29 Z" fill="white" opacity="0.9" />
+            <path d="M 33 33 C 31 22, 19 14, 12 16 C 21 22, 28 28, 33 33 Z" fill="white" opacity="0.85" />
+            <path d="M 33 35 C 31 46, 19 52, 12 50 C 21 45, 28 40, 33 35 Z" fill="#0D9488" opacity="0.5" />
+            <circle cx="42" cy="26" r="1.5" fill="#0B1325" />
+          </svg>
+          <span class="nav__logo-text">COLIBRI<span class="accent-x">X</span> <span
+              class="nav__logo-sub">BI</span></span>
+        </a>
+
+        <!-- Menú de navegación desktop -->
+        <ul class="nav__menu" role="list">
+          <li><a href="#inicio" class="nav__link" aria-current="page">Inicio</a></li>
+          <li><a href="#atributos" class="nav__link">Filosofía</a></li>
+          <li><a href="#servicios" class="nav__link">Servicios</a></li>
+          <li><a href="#contacto" class="nav__link">Contacto</a></li>
+        </ul>
+
+        <!-- Botón CTA en navbar -->
+        <a href="#contacto" class="btn btn--nav" id="nav-cta-btn">Iniciar Proyecto</a>
+
+        <!-- Hamburger (mobile) -->
+        <button class="nav__hamburger" id="hamburger-btn" aria-label="Abrir menú" aria-expanded="false"
+          aria-controls="mobile-menu">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
+      </nav>
+
+      <!-- Menú móvil -->
+      <div class="mobile-menu" id="mobile-menu" role="dialog" aria-label="Menú móvil" aria-hidden="true">
+        <ul class="mobile-menu__list" role="list">
+          <li><a href="#inicio" class="mobile-menu__link" data-close-menu>Inicio</a></li>
+          <li><a href="#atributos" class="mobile-menu__link" data-close-menu>Filosofía</a></li>
+          <li><a href="#servicios" class="mobile-menu__link" data-close-menu>Servicios</a></li>
+          <li><a href="#contacto" class="mobile-menu__link" data-close-menu>Contacto</a></li>
+          <li><a href="#contacto" class="btn btn--primary mobile-menu__cta" data-close-menu>Iniciar Proyecto</a></li>
+        </ul>
+      </div>
+    </header>
+    <!-- FIN: NAVEGACIÓN -->
+
+
+    <!-- ========================
+         HERO SECTION
+    ======================== -->
+    <section class="hero" id="inicio" aria-labelledby="hero-title">
+
+      <!-- Partículas de fondo (canvas manejado por JS) -->
+      <canvas class="hero__particles" id="particles-canvas" aria-hidden="true"></canvas>
+
+      <!-- Rejilla de fondo decorativa -->
+      <div class="hero__grid-bg" aria-hidden="true"></div>
+
+      <!-- Orbes de luz de fondo -->
+      <div class="hero__orb hero__orb--1" aria-hidden="true"></div>
+      <div class="hero__orb hero__orb--2" aria-hidden="true"></div>
+
+      <div class="hero__content container">
+        <!-- Eyebrow tag -->
+        <div class="hero__eyebrow reveal-up" aria-label="Categoría">
+          <span class="hero__eyebrow-dot" aria-hidden="true"></span>
+          <span>Soluciones de Software & Business Intelligence</span>
+        </div>
+
+        <!-- Titular principal -->
+        <h1 class="hero__title reveal-up" id="hero-title">
+          Ingeniería de Software<br />
+          <span class="gradient-text">de Alta Precisión.</span>
+        </h1>
+
+        <!-- Subtítulo -->
+        <p class="hero__subtitle reveal-up">
+          Aceleramos la evolución digital de tu negocio con arquitectura escalable
+          y rendimiento absoluto. Cada línea de código, una decisión estratégica.
+        </p>
+
+        <!-- Botones CTA -->
+        <div class="hero__cta-group reveal-up">
+          <a href="#contacto" class="btn btn--primary btn--glow" id="hero-cta-primary">
+            <span>Construyamos tu Sistema</span>
+            <!-- Icono de flecha -->
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              aria-hidden="true">
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </a>
+          <a href="#atributos" class="btn btn--ghost" id="hero-cta-secondary">
+            <span>Conocer más</span>
+          </a>
+        </div>
+
+        <!-- Métricas de confianza -->
+        <div class="hero__metrics reveal-up" role="list" aria-label="Métricas de la empresa">
+          <div class="hero__metric" role="listitem">
+            <span class="hero__metric-number" data-target="98"
+              aria-label="98 por ciento de satisfacción">98<span>%</span></span>
+            <span class="hero__metric-label">Satisfacción</span>
+          </div>
+          <div class="hero__metric-divider" aria-hidden="true"></div>
+          <div class="hero__metric" role="listitem">
+            <span class="hero__metric-number" data-target="50" aria-label="más de 50 proyectos">50<span>+</span></span>
+            <span class="hero__metric-label">Proyectos</span>
+          </div>
+          <div class="hero__metric-divider" aria-hidden="true"></div>
+          <div class="hero__metric" role="listitem">
+            <span class="hero__metric-number" data-target="5" aria-label="5 años de experiencia">5<span>+</span></span>
+            <span class="hero__metric-label">Años de expertise</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Indicador de scroll -->
+      <div class="hero__scroll-indicator" aria-label="Desplázate hacia abajo">
+        <span class="scroll-text">Explorar</span>
+        <div class="scroll-dot-wrapper" aria-hidden="true">
+          <div class="scroll-dot"></div>
+        </div>
+      </div>
+    </section>
+    <!-- FIN: HERO SECTION -->
+
+
+    <!-- ========================
+         SECCIÓN DE ATRIBUTOS (Filosofía del Colibrí)
+    ======================== -->
+    <section class="attributes" id="atributos" aria-labelledby="attributes-title">
+      <div class="container">
+        <!-- Encabezado de sección -->
+        <div class="section-header reveal-up">
+          <span class="section-tag">La Filosofía ColibriX</span>
+          <h2 class="section-title" id="attributes-title">
+            Los atributos del<br /><span class="gradient-text">Colibrí Aplicados</span>
+          </h2>
+          <p class="section-subtitle">
+            El colibrí es el único ser que vuela en todas las direcciones con precisión absoluta.
+            Eso somos nosotros — tecnología que se adapta, nunca se detiene.
+          </p>
+        </div>
+
+        <!-- Grid de tarjetas Glassmorphism -->
+        <div class="attributes__grid" role="list">
+
+          <!-- Tarjeta 1: Arquitectura Ágil -->
+          <article class="attr-card reveal-up" role="listitem" tabindex="0" id="attr-card-agil">
+            <div class="attr-card__glow" aria-hidden="true"></div>
+            <div class="attr-card__border-top" aria-hidden="true"></div>
+            <div class="attr-card__icon-wrapper" aria-hidden="true">
+              <svg class="attr-card__icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Ícono: flechas omnidireccionales -->
+                <circle cx="24" cy="24" r="22" stroke="url(#grad1)" stroke-width="1.5" opacity="0.3" />
+                <path d="M24 8 L24 16 M24 32 L24 40 M8 24 L16 24 M32 24 L40 24" stroke="#0D9488" stroke-width="2"
+                  stroke-linecap="round" />
+                <path d="M13 13 L18 18 M30 30 L35 35 M13 35 L18 30 M30 18 L35 13" stroke="#0D9488" stroke-width="1.5"
+                  stroke-linecap="round" opacity="0.6" />
+                <circle cx="24" cy="24" r="5" fill="none" stroke="#0D9488" stroke-width="2" />
+                <circle cx="24" cy="24" r="2" fill="#0D9488" />
+                <defs>
+                  <linearGradient id="grad1" x1="0" y1="0" x2="48" y2="48">
+                    <stop offset="0%" stop-color="#0D9488" />
+                    <stop offset="100%" stop-color="#581C87" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <div class="attr-card__content">
+              <h3 class="attr-card__title">Arquitectura Ágil</h3>
+              <p class="attr-card__description">
+                Como el vuelo omnidireccional del colibrí, construimos sistemas que se adaptan
+                a cualquier dirección: microservicios, APIs REST, arquitecturas escalables en la nube.
+                Sin límites de movimiento.
+              </p>
+              <ul class="attr-card__tags" aria-label="Tecnologías">
+                <li>Microservicios</li>
+                <li>Cloud</li>
+                <li>API-First</li>
+              </ul>
+            </div>
+          </article>
+
+          <!-- Tarjeta 2: Precisión de Código -->
+          <article class="attr-card attr-card--center reveal-up" role="listitem" tabindex="0" id="attr-card-precision">
+            <div class="attr-card__glow" aria-hidden="true"></div>
+            <div class="attr-card__border-top" aria-hidden="true"></div>
+            <div class="attr-card__icon-wrapper" aria-hidden="true">
+              <svg class="attr-card__icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Ícono: retícula de precisión / crosshair -->
+                <circle cx="24" cy="24" r="20" stroke="url(#grad2)" stroke-width="1" opacity="0.3" />
+                <circle cx="24" cy="24" r="12" stroke="#0D9488" stroke-width="1.5" opacity="0.6" />
+                <circle cx="24" cy="24" r="4" stroke="#0D9488" stroke-width="2" />
+                <path d="M24 4 L24 12 M24 36 L24 44 M4 24 L12 24 M36 24 L44 24" stroke="white" stroke-width="1.5"
+                  stroke-linecap="round" opacity="0.5" />
+                <!-- Líneas de mira diagonal -->
+                <path d="M 14 14 L 18 18 M 30 30 L 34 34 M 14 34 L 18 30 M 30 18 L 34 14" stroke="#581C87"
+                  stroke-width="1.5" stroke-linecap="round" opacity="0.7" />
+                <defs>
+                  <linearGradient id="grad2" x1="0" y1="0" x2="48" y2="48">
+                    <stop offset="0%" stop-color="#581C87" />
+                    <stop offset="100%" stop-color="#0D9488" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <div class="attr-card__content">
+              <h3 class="attr-card__title">Precisión de Código</h3>
+              <p class="attr-card__description">
+                El colibrí alcanza su destino con exactitud milimétrica. Nosotros también.
+                Código limpio, documentado y optimizado. Cero errores tolerados en producción.
+              </p>
+              <ul class="attr-card__tags" aria-label="Prácticas">
+                <li>Clean Code</li>
+                <li>CI/CD</li>
+                <li>Testing</li>
+              </ul>
+            </div>
+          </article>
+
+          <!-- Tarjeta 3: Conexión Absoluta -->
+          <article class="attr-card reveal-up" role="listitem" tabindex="0" id="attr-card-conexion">
+            <div class="attr-card__glow" aria-hidden="true"></div>
+            <div class="attr-card__border-top" aria-hidden="true"></div>
+            <div class="attr-card__icon-wrapper" aria-hidden="true">
+              <svg class="attr-card__icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Ícono: red de nodos / flujo de datos -->
+                <circle cx="24" cy="24" r="4" fill="#0D9488" />
+                <circle cx="8" cy="12" r="3" fill="#581C87" opacity="0.8" />
+                <circle cx="40" cy="12" r="3" fill="#0D9488" opacity="0.8" />
+                <circle cx="8" cy="36" r="3" fill="#0D9488" opacity="0.8" />
+                <circle cx="40" cy="36" r="3" fill="#581C87" opacity="0.8" />
+                <circle cx="24" cy="6" r="2.5" fill="white" opacity="0.5" />
+                <circle cx="24" cy="42" r="2.5" fill="white" opacity="0.5" />
+                <path d="M24 24 L8 12 M24 24 L40 12 M24 24 L8 36 M24 24 L40 36 M24 24 L24 6 M24 24 L24 42"
+                  stroke="url(#grad3)" stroke-width="1.5" opacity="0.6" />
+                <!-- Pulso animado -->
+                <circle class="node-pulse" cx="24" cy="24" r="8" stroke="#0D9488" stroke-width="1" fill="none"
+                  opacity="0.4" />
+                <defs>
+                  <linearGradient id="grad3" x1="0" y1="0" x2="48" y2="48">
+                    <stop offset="0%" stop-color="#0D9488" />
+                    <stop offset="100%" stop-color="#581C87" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <div class="attr-card__content">
+              <h3 class="attr-card__title">Conexión Absoluta</h3>
+              <p class="attr-card__description">
+                Como el mensajero de la mitología mexica, conectamos sistemas, datos y personas
+                en tiempo real. Integraciones, dashboards BI y flujos de datos sin interrupciones.
+              </p>
+              <ul class="attr-card__tags" aria-label="Servicios">
+                <li>BI & Analytics</li>
+                <li>Real-time</li>
+                <li>Integraciones</li>
+              </ul>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+    <!-- FIN: ATRIBUTOS -->
+
+
+    <!-- ========================
+         SECCIÓN DE SERVICIOS
+    ======================== -->
+    <section class="services" id="servicios" aria-labelledby="services-title">
+      <div class="container">
+        <div class="section-header reveal-up">
+          <span class="section-tag">Lo que construimos</span>
+          <h2 class="section-title" id="services-title">
+            Sistemas que <span class="gradient-text">Evolucionan</span><br />contigo
+          </h2>
+        </div>
+
+        <div class="services__grid">
+
+          <!-- Servicio 1 -->
+          <div class="service-item reveal-left" id="service-software">
+            <div class="service-item__number" aria-hidden="true">01</div>
+            <div class="service-item__content">
+              <h3 class="service-item__title">Desarrollo de Software a Medida</h3>
+              <p class="service-item__desc">Sistemas empresariales, apps web y móviles, plataformas SaaS. Arquitectura
+                que escala con tu negocio desde el día uno.</p>
+              <div class="service-item__tech" aria-label="Tecnologías usadas">
+                <span>Node.js</span><span>React</span><span>Python</span><span>PostgreSQL</span>
+              </div>
+            </div>
+            <div class="service-item__arrow" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M7 17L17 7M17 7H7M17 7v10" />
+              </svg>
+            </div>
+          </div>
+
+          <!-- Servicio 2 -->
+          <div class="service-item reveal-left" id="service-bi">
+            <div class="service-item__number" aria-hidden="true">02</div>
+            <div class="service-item__content">
+              <h3 class="service-item__title">Business Intelligence & Analytics</h3>
+              <p class="service-item__desc">Dashboards en tiempo real, pipelines de datos, KPIs estratégicos. Convierte
+                tus datos en decisiones que generan resultados.</p>
+              <div class="service-item__tech" aria-label="Tecnologías usadas">
+                <span>Power BI</span><span>Tableau</span><span>ETL</span><span>SQL</span>
+              </div>
+            </div>
+            <div class="service-item__arrow" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M7 17L17 7M17 7H7M17 7v10" />
+              </svg>
+            </div>
+          </div>
+
+          <!-- Servicio 3 -->
+          <div class="service-item reveal-left" id="service-ecommerce">
+            <div class="service-item__number" aria-hidden="true">03</div>
+            <div class="service-item__content">
+              <h3 class="service-item__title">Plataformas & E-commerce</h3>
+              <p class="service-item__desc">Sistemas de cobro, menús digitales, catálogos y tiendas online. Cada click
+                de tu cliente, un ingreso asegurado.</p>
+              <div class="service-item__tech" aria-label="Tecnologías usadas">
+                <span>WooCommerce</span><span>Stripe</span><span>Firebase</span><span>PWA</span>
+              </div>
+            </div>
+            <div class="service-item__arrow" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M7 17L17 7M17 7H7M17 7v10" />
+              </svg>
+            </div>
+          </div>
+
+          <!-- Servicio 4 -->
+          <div class="service-item reveal-left" id="service-api">
+            <div class="service-item__number" aria-hidden="true">04</div>
+            <div class="service-item__content">
+              <h3 class="service-item__title">APIs & Integraciones</h3>
+              <p class="service-item__desc">Conectamos tus sistemas actuales con cualquier plataforma del mercado. Flujo
+                de información sin fricción, 24/7.</p>
+              <div class="service-item__tech" aria-label="Tecnologías usadas">
+                <span>REST</span><span>GraphQL</span><span>Webhooks</span><span>OAuth</span>
+              </div>
+            </div>
+            <div class="service-item__arrow" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M7 17L17 7M17 7H7M17 7v10" />
+              </svg>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+    <!-- FIN: SERVICIOS -->
+
+
+    <!-- ========================
+         SECCIÓN DE PROCESO
+    ======================== -->
+    <section class="process" id="proceso" aria-labelledby="process-title">
+      <div class="container">
+        <div class="section-header reveal-up">
+          <span class="section-tag">Metodología</span>
+          <h2 class="section-title" id="process-title">
+            Del concepto al<br /><span class="gradient-text">sistema en vuelo</span>
+          </h2>
+        </div>
+
+        <div class="process__timeline" role="list">
+          <div class="process__step reveal-up" role="listitem">
+            <div class="process__step-number" aria-hidden="true">
+              <span>01</span>
+            </div>
+            <div class="process__step-content">
+              <h3>Diagnóstico</h3>
+              <p>Entendemos tu negocio, tus datos y tus objetivos antes de escribir la primera línea.</p>
+            </div>
+          </div>
+          <div class="process__connector" aria-hidden="true"></div>
+          <div class="process__step reveal-up" role="listitem">
+            <div class="process__step-number" aria-hidden="true">
+              <span>02</span>
+            </div>
+            <div class="process__step-content">
+              <h3>Arquitectura</h3>
+              <p>Diseñamos la estructura técnica óptima. Sin improvizar. Cada decisión, documentada.</p>
+            </div>
+          </div>
+          <div class="process__connector" aria-hidden="true"></div>
+          <div class="process__step reveal-up" role="listitem">
+            <div class="process__step-number" aria-hidden="true">
+              <span>03</span>
+            </div>
+            <div class="process__step-content">
+              <h3>Construcción</h3>
+              <p>Sprints iterativos con entregas reales. Código limpio y testeado en cada iteración.</p>
+            </div>
+          </div>
+          <div class="process__connector" aria-hidden="true"></div>
+          <div class="process__step reveal-up" role="listitem">
+            <div class="process__step-number" aria-hidden="true">
+              <span>04</span>
+            </div>
+            <div class="process__step-content">
+              <h3>Despliegue & Escala</h3>
+              <p>Lanzamos y monitoreamos. Tu sistema evoluciona contigo, sin límites de velocidad.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- FIN: PROCESO -->
+
+
+    <!-- ============================================================
+         SECCIÓN DE CONVERSIÓN — Formulario Inteligente por Pasos
+    ============================================================ -->
+    <section class="contact" id="contacto" aria-labelledby="contact-title">
+      <div class="container">
+        <div class="contact__layout">
+
+          <!-- Columna izquierda: info -->
+          <div class="contact__info reveal-left">
+            <span class="section-tag">Empieza Hoy</span>
+            <h2 class="section-title" id="contact-title">
+              Construyamos<br />
+              <span class="gradient-text">tu Sistema.</span>
+            </h2>
+            <p class="contact__info-text">
+              Cuéntanos qué quieres evolucionar. En menos de 24 horas tendrás una propuesta técnica
+              personalizada sin compromiso.
+            </p>
+
+            <!-- Datos de contacto directo -->
+            <div class="contact__direct" aria-label="Contacto directo">
+              <!-- ================================================
+                   CONFIGURACIÓN: Reemplaza los datos de contacto aquí
+                   ================================================ -->
+              <!-- WhatsApp: reemplaza el número en el href (formato internacional sin +) -->
+              <a href="https://wa.me/521XXXXXXXXXX" class="contact__direct-item" id="direct-whatsapp" target="_blank"
+                rel="noopener noreferrer" aria-label="Contactar por WhatsApp">
+                <div class="contact__direct-icon contact__direct-icon--wa">
+                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path
+                      d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                  </svg>
+                </div>
+                <div>
+                  <span class="contact__direct-label">WhatsApp</span>
+                  <!-- CONFIGURACIÓN: Reemplaza el número visible aquí -->
+                  <span class="contact__direct-value">+52 1 XXX XXX XXXX</span>
+                </div>
+              </a>
+
+              <!-- Email: reemplaza el mailto con tu correo real -->
+              <a href="mailto:hola@colibrixbi.com" class="contact__direct-item" id="direct-email" target="_blank"
+                rel="noopener noreferrer" aria-label="Contactar por correo">
+                <div class="contact__direct-icon contact__direct-icon--mail">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                    <polyline points="22,6 12,13 2,6" />
+                  </svg>
+                </div>
+                <div>
+                  <span class="contact__direct-label">Correo</span>
+                  <!-- CONFIGURACIÓN: Reemplaza con tu correo real -->
+                  <span class="contact__direct-value">hola@colibrixbi.com</span>
+                </div>
+              </a>
+
+              <!-- Instagram: reemplaza el username en el href -->
+              <a href="https://www.instagram.com/TUNOMBREDEINSTAGRAM" class="contact__direct-item" id="direct-instagram"
+                target="_blank" rel="noopener noreferrer" aria-label="Contactar por Instagram">
+                <div class="contact__direct-icon contact__direct-icon--ig">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                    <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" />
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                  </svg>
+                </div>
+                <div>
+                  <span class="contact__direct-label">Instagram</span>
+                  <!-- CONFIGURACIÓN: Reemplaza con tu @username -->
+                  <span class="contact__direct-value">@colibrixbi</span>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          <!-- Columna derecha: Formulario por pasos -->
+          <div class="contact__form-wrapper reveal-right">
+            <div class="form-glass" id="smart-form" role="form" aria-label="Formulario inteligente de contacto">
+
+              <!-- Indicador de progreso -->
+              <div class="form__progress" aria-label="Progreso del formulario">
+                <div class="form__progress-bar" id="form-progress-bar" role="progressbar" aria-valuenow="25"
+                  aria-valuemin="0" aria-valuemax="100" style="width: 25%"></div>
+                <div class="form__steps-indicator" aria-live="polite">
+                  <span id="current-step-label">Paso 1 de 4</span>
+                </div>
+              </div>
+
+              <!-- ========================
+                   PASO 1: ¿Qué quieres evolucionar?
+              ======================== -->
+              <div class="form__step form__step--active" id="step-1" role="group" aria-labelledby="step1-title">
+                <h3 class="form__step-title" id="step1-title">
+                  ¿Qué quieres<br /><span class="gradient-text">evolucionar hoy?</span>
+                </h3>
+                <p class="form__step-subtitle">Selecciona el área principal de tu proyecto</p>
+
+                <div class="form__options-grid" role="radiogroup" aria-labelledby="step1-title">
+                  <label class="form__option" id="opt-menu" tabindex="0">
+                    <input type="radio" name="objetivo" value="menu_digital" class="form__radio"
+                      aria-label="Mi menú digital" />
+                    <div class="form__option-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M4 6h16M4 12h16M4 18h16" />
+                      </svg>
+                    </div>
+                    <span class="form__option-label">Mi Menú Digital</span>
+                    <span class="form__option-desc">QR, carta digital, pedidos online</span>
+                  </label>
+
+                  <label class="form__option" id="opt-sistema" tabindex="0">
+                    <input type="radio" name="objetivo" value="sistema_cobro" class="form__radio"
+                      aria-label="Mi sistema de cobro" />
+                    <div class="form__option-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <rect x="1" y="4" width="22" height="16" rx="2" />
+                        <line x1="1" y1="10" x2="23" y2="10" />
+                      </svg>
+                    </div>
+                    <span class="form__option-label">Sistema de Cobro</span>
+                    <span class="form__option-desc">POS, pagos, facturación</span>
+                  </label>
+
+                  <label class="form__option" id="opt-web" tabindex="0">
+                    <input type="radio" name="objetivo" value="web_medida" class="form__radio"
+                      aria-label="Web o app a la medida" />
+                    <div class="form__option-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <rect x="2" y="3" width="20" height="14" rx="2" />
+                        <polyline points="8 21 12 17 16 21" />
+                      </svg>
+                    </div>
+                    <span class="form__option-label">Web / App a Medida</span>
+                    <span class="form__option-desc">Plataforma o sistema empresarial</span>
+                  </label>
+
+                  <label class="form__option" id="opt-bi" tabindex="0">
+                    <input type="radio" name="objetivo" value="bi_analytics" class="form__radio"
+                      aria-label="Business Intelligence y Analytics" />
+                    <div class="form__option-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                      </svg>
+                    </div>
+                    <span class="form__option-label">BI & Analytics</span>
+                    <span class="form__option-desc">Dashboards, reportes, datos</span>
+                  </label>
+                </div>
+
+                <!-- Campo: Nombre del negocio -->
+                <div class="form__field-group">
+                  <label class="form__label" for="business-name">Nombre de tu Negocio</label>
+                  <input type="text" id="business-name" name="negocio" class="form__input"
+                    placeholder="Ej. Restaurante El Origen" autocomplete="organization" aria-required="true" />
+                </div>
+
+                <button class="btn btn--primary btn--full form__next-btn" id="step1-next" type="button"
+                  aria-label="Continuar al paso 2">
+                  <span>Continuar</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    aria-hidden="true">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+
+              <!-- ========================
+                   PASO 2: ¿En qué etapa estás?
+              ======================== -->
+              <div class="form__step" id="step-2" role="group" aria-labelledby="step2-title" hidden>
+                <h3 class="form__step-title" id="step2-title">
+                  ¿En qué etapa<br /><span class="gradient-text">se encuentra tu negocio?</span>
+                </h3>
+                <p class="form__step-subtitle">Nos ayuda a dimensionar la solución correcta</p>
+
+                <div class="form__options-grid form__options-grid--col3" role="radiogroup"
+                  aria-labelledby="step2-title">
+                  <label class="form__option" id="opt-idea" tabindex="0">
+                    <input type="radio" name="etapa" value="idea" class="form__radio" aria-label="Tengo la idea" />
+                    <div class="form__option-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                      </svg>
+                    </div>
+                    <span class="form__option-label">Tengo la Idea</span>
+                    <span class="form__option-desc">Aún no empiezo</span>
+                  </label>
+
+                  <label class="form__option" id="opt-opera" tabindex="0">
+                    <input type="radio" name="etapa" value="operando" class="form__radio" aria-label="Ya opero" />
+                    <div class="form__option-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    </div>
+                    <span class="form__option-label">Ya Opero</span>
+                    <span class="form__option-desc">Necesito tecnología</span>
+                  </label>
+
+                  <label class="form__option" id="opt-escalar" tabindex="0">
+                    <input type="radio" name="etapa" value="escalar" class="form__radio" aria-label="Busco escalar" />
+                    <div class="form__option-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                        <polyline points="17 6 23 6 23 12" />
+                      </svg>
+                    </div>
+                    <span class="form__option-label">Busco Escalar</span>
+                    <span class="form__option-desc">Quiero crecer</span>
+                  </label>
+                </div>
+
+                <!-- Campo: Desafío Principal -->
+                <div class="form__field-group" style="margin-top: var(--space-8);">
+                  <label class="form__label" id="challenge-label">¿Cuál es tu desafío o meta principal?</label>
+                  <div class="form__options-grid" role="radiogroup" aria-labelledby="challenge-label">
+                    <label class="form__option" id="opt-ventas" tabindex="0">
+                      <input type="radio" name="desafio" value="ventas" class="form__radio" aria-label="Atraer más clientes y vender" />
+                      <div class="form__option-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                          <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                        </svg>
+                      </div>
+                      <span class="form__option-label">Más Ventas</span>
+                      <span class="form__option-desc">Atraer y convertir clientes</span>
+                    </label>
+
+                    <label class="form__option" id="opt-automatizar" tabindex="0">
+                      <input type="radio" name="desafio" value="automatizar" class="form__radio" aria-label="Automatizar operaciones" />
+                      <div class="form__option-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                          <circle cx="12" cy="12" r="3" />
+                          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" />
+                        </svg>
+                      </div>
+                      <span class="form__option-label">Automatizar</span>
+                      <span class="form__option-desc">Ahorrar tiempo y reducir errores</span>
+                    </label>
+
+                    <label class="form__option" id="opt-ux" tabindex="0">
+                      <input type="radio" name="desafio" value="ux" class="form__radio" aria-label="Mejorar UX" />
+                      <div class="form__option-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                          <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+                          <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+                          <line x1="9" y1="9" x2="9.01" y2="9" />
+                          <line x1="15" y1="9" x2="15.01" y2="9" />
+                        </svg>
+                      </div>
+                      <span class="form__option-label">Mejorar UX</span>
+                      <span class="form__option-desc">Experiencia y retención</span>
+                    </label>
+
+                    <label class="form__option" id="opt-datos" tabindex="0">
+                      <input type="radio" name="desafio" value="datos" class="form__radio" aria-label="Tomar mejores decisiones con datos" />
+                      <div class="form__option-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                          <rect x="18" y="3" width="4" height="18" />
+                          <rect x="10" y="8" width="4" height="13" />
+                          <rect x="2" y="13" width="4" height="8" />
+                        </svg>
+                      </div>
+                      <span class="form__option-label">Toma de Datos</span>
+                      <span class="form__option-desc">Control y visibilidad</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="form__btn-row">
+                  <button class="btn btn--ghost form__back-btn" id="step2-back" type="button"
+                    aria-label="Volver al paso 1">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                      aria-hidden="true">
+                      <path d="M19 12H5M12 19l-7-7 7-7" />
+                    </svg>
+                    <span>Atrás</span>
+                  </button>
+                  <button class="btn btn--primary form__next-btn" id="step2-next" type="button"
+                    aria-label="Continuar al paso 3">
+                    <span>Continuar</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                      aria-hidden="true">
+                      <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- ========================
+                   PASO 3: Tiempos y Presupuesto
+              ======================== -->
+              <div class="form__step" id="step-3" role="group" aria-labelledby="step3-title" hidden>
+                <h3 class="form__step-title" id="step3-title">
+                  Detalles del<br /><span class="gradient-text">Proyecto</span>
+                </h3>
+                <p class="form__step-subtitle">Para estructurar una propuesta realista</p>
+
+                <!-- Campo: Tiempos -->
+                <div class="form__field-group">
+                  <label class="form__label" id="time-label">¿Para cuándo necesitas el proyecto?</label>
+                  <div class="form__options-grid" role="radiogroup" aria-labelledby="time-label">
+                    <label class="form__option" id="opt-urgente" tabindex="0">
+                      <input type="radio" name="tiempo" value="urgente" class="form__radio" aria-label="Lo antes posible (Urgente)" />
+                      <div class="form__option-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                        </svg>
+                      </div>
+                      <span class="form__option-label">Urgente</span>
+                      <span class="form__option-desc">Lo antes posible</span>
+                    </label>
+
+                    <label class="form__option" id="opt-1mes" tabindex="0">
+                      <input type="radio" name="tiempo" value="1mes" class="form__radio" aria-label="En 1 mes" />
+                      <div class="form__option-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                          <circle cx="12" cy="12" r="10" />
+                          <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                      </div>
+                      <span class="form__option-label">En 1 mes</span>
+                      <span class="form__option-desc">Plazo normal</span>
+                    </label>
+
+                    <label class="form__option" id="opt-2-3meses" tabindex="0">
+                      <input type="radio" name="tiempo" value="2-3meses" class="form__radio" aria-label="En 2 o 3 meses" />
+                      <div class="form__option-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                          <line x1="16" y1="2" x2="16" y2="6" />
+                          <line x1="8" y1="2" x2="8" y2="6" />
+                          <line x1="3" y1="10" x2="21" y2="10" />
+                        </svg>
+                      </div>
+                      <span class="form__option-label">En 2-3 meses</span>
+                      <span class="form__option-desc">A medio plazo</span>
+                    </label>
+
+                    <label class="form__option" id="opt-flexible" tabindex="0">
+                      <input type="radio" name="tiempo" value="flexible" class="form__radio" aria-label="Flexible / Planeando" />
+                      <div class="form__option-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                          <polyline points="14 2 14 8 20 8" />
+                          <line x1="16" y1="13" x2="8" y2="13" />
+                          <line x1="16" y1="17" x2="8" y2="17" />
+                          <polyline points="10 9 9 9 8 9" />
+                        </svg>
+                      </div>
+                      <span class="form__option-label">Flexible</span>
+                      <span class="form__option-desc">Aún planeando</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Campo: Presupuesto estimado -->
+                <div class="form__field-group" style="margin-top: var(--space-8);">
+                  <label class="form__label" for="budget-select">Presupuesto Estimado</label>
+                  <select class="form__input form__select" id="budget-select" name="presupuesto" aria-required="true">
+                    <option value="" disabled selected>Selecciona un rango</option>
+                    <option value="menos_5k">Menos de $5,000 MXN</option>
+                    <option value="5k_15k">$5,000 — $15,000 MXN</option>
+                    <option value="15k_50k">$15,000 — $50,000 MXN</option>
+                    <option value="50k_150k">$50,000 — $150,000 MXN</option>
+                    <option value="mas_150k">Más de $150,000 MXN</option>
+                    <option value="por_definir">Por definir / Consultar</option>
+                  </select>
+                </div>
+
+                <div class="form__btn-row">
+                  <button class="btn btn--ghost form__back-btn" id="step3-back" type="button"
+                    aria-label="Volver al paso 2">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                      aria-hidden="true">
+                      <path d="M19 12H5M12 19l-7-7 7-7" />
+                    </svg>
+                    <span>Atrás</span>
+                  </button>
+                  <button class="btn btn--primary form__next-btn" id="step3-next" type="button"
+                    aria-label="Continuar al paso 4">
+                    <span>Continuar</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                      aria-hidden="true">
+                      <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- ========================
+                   PASO 4: Información de contacto + Enviar
+              ======================== -->
+              <div class="form__step" id="step-4" role="group" aria-labelledby="step4-title" hidden>
+                <h3 class="form__step-title" id="step4-title">
+                  ¡Casi listo!<br /><span class="gradient-text">¿Cómo te contactamos?</span>
+                </h3>
+                <p class="form__step-subtitle">Elige tu canal preferido para recibir la propuesta</p>
+
+                <!-- Campo: Nombre de contacto -->
+                <div class="form__field-group">
+                  <label class="form__label" for="contact-name">Tu Nombre</label>
+                  <input type="text" id="contact-name" name="nombre" class="form__input" placeholder="Ej. María García"
+                    autocomplete="name" aria-required="true" />
+                </div>
+
+                <!-- Campo: Teléfono (opcional) -->
+                <div class="form__field-group">
+                  <label class="form__label" for="contact-phone">
+                    Teléfono / WhatsApp
+                    <span class="form__optional" aria-label="campo opcional">(opcional)</span>
+                  </label>
+                  <input type="tel" id="contact-phone" name="telefono" class="form__input"
+                    placeholder="+52 1 XXX XXX XXXX" autocomplete="tel" />
+                </div>
+
+                <!-- Campo: Mensaje adicional -->
+                <div class="form__field-group">
+                  <label class="form__label" for="contact-message">
+                    ¿Algo más que quieras compartir?
+                    <span class="form__optional" aria-label="campo opcional">(opcional)</span>
+                  </label>
+                  <textarea id="contact-message" name="mensaje" class="form__input form__textarea"
+                    placeholder="Cuéntanos más detalles sobre tu proyecto, plazos, o lo que quieras que sepamos..."
+                    rows="3"></textarea>
+                </div>
+
+                <!-- BOTONES DE ENVÍO FINAL -->
+                <!-- ============================================================
+                     CONFIGURACIÓN DE ENVÍO:
+                     Cada botón ensambla el mensaje con los datos del formulario
+                     y lo envía al canal elegido.
+
+                     WhatsApp:  Modifica el número en JS (archivo js/main.js)
+                                Busca la constante: WA_NUMBER = '521XXXXXXXXXX'
+
+                     Instagram: Enlace directo al perfil (DMs no son automatizables vía URL).
+                                Busca la constante: IG_USERNAME = 'TUNOMBREUSUARIO'
+
+                     Email:     Modifica la dirección en JS.
+                                Busca la constante: EMAIL_ADDRESS = 'hola@colibrixbi.com'
+                ============================================================ -->
+                <div class="form__btn-row" style="margin-bottom: var(--space-6);">
+                  <button class="btn btn--ghost form__back-btn" id="step4-back" type="button"
+                    aria-label="Volver al paso 3">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                      aria-hidden="true">
+                      <path d="M19 12H5M12 19l-7-7 7-7" />
+                    </svg>
+                    <span>Atrás</span>
+                  </button>
+                </div>
+
+                <div class="form__send-group" role="group" aria-label="Opciones de envío">
+                  <p class="form__send-label">Enviar mi solicitud por:</p>
+
+                  <div class="form__send-buttons">
+                    <!-- Botón WhatsApp -->
+                    <button type="button" class="btn btn--send btn--send-wa" id="send-whatsapp"
+                      aria-label="Enviar solicitud por WhatsApp">
+                      <div class="btn__send-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                          <path
+                            d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                        </svg>
+                      </div>
+                      <div class="btn__send-text">
+                        <span class="btn__send-name">WhatsApp</span>
+                        <span class="btn__send-desc">Respuesta en minutos</span>
+                      </div>
+                    </button>
+
+                    <!-- Botón Instagram -->
+                    <button type="button" class="btn btn--send btn--send-ig" id="send-instagram"
+                      aria-label="Enviar solicitud por Instagram">
+                      <div class="btn__send-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                          aria-hidden="true">
+                          <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                          <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" />
+                          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                        </svg>
+                      </div>
+                      <div class="btn__send-text">
+                        <span class="btn__send-name">Instagram</span>
+                        <span class="btn__send-desc">Escríbenos un DM</span>
+                      </div>
+                    </button>
+
+                    <!-- Botón Email -->
+                    <button type="button" class="btn btn--send btn--send-mail" id="send-email"
+                      aria-label="Enviar solicitud por correo electrónico">
+                      <div class="btn__send-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                          aria-hidden="true">
+                          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                          <polyline points="22,6 12,13 2,6" />
+                        </svg>
+                      </div>
+                      <div class="btn__send-text">
+                        <span class="btn__send-name">Correo</span>
+                        <span class="btn__send-desc">Propuesta formal</span>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Botón de regreso -->
+                <button class="btn btn--ghost form__back-btn form__back-btn--small" id="step3-back" type="button"
+                  aria-label="Volver al paso 2">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    aria-hidden="true">
+                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                  </svg>
+                  <span>Atrás</span>
+                </button>
+              </div>
+
+              <!-- Estado de éxito (oculto inicialmente) -->
+              <div class="form__success" id="form-success" hidden aria-live="polite" role="status">
+                <div class="form__success-icon" aria-hidden="true">
+                  <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="30" cy="30" r="28" stroke="#0D9488" stroke-width="2" />
+                    <polyline points="15,30 26,41 45,20" stroke="#0D9488" stroke-width="3" stroke-linecap="round"
+                      stroke-linejoin="round" />
+                  </svg>
+                </div>
+                <h3 class="form__success-title">¡Solicitud enviada!</h3>
+                <p class="form__success-text">En menos de 24 horas recibirás una propuesta técnica personalizada para tu
+                  proyecto.</p>
+              </div>
+
+            </div>
+            <!-- FIN: form-glass -->
+          </div>
+          <!-- FIN: contact__form-wrapper -->
+
+        </div>
+        <!-- FIN: contact__layout -->
+      </div>
+    </section>
+    <!-- FIN: CONTACTO -->
+
+
+    <!-- ========================
+         FOOTER
+    ======================== -->
+    <footer class="footer" role="contentinfo">
+      <div class="container">
+        <div class="footer__layout">
+          <!-- Logo y tagline -->
+          <div class="footer__brand">
+            <span class="footer__logo">COLIBRI<span class="accent-x">X</span> <span
+                class="footer__logo-sub">BI</span></span>
+            <p class="footer__tagline">Ingeniería de Software de Alta Precisión.</p>
+          </div>
+
+          <!-- Links rápidos -->
+          <nav class="footer__nav" aria-label="Navegación footer">
+            <h4 class="footer__nav-title">Navegación</h4>
+            <ul role="list">
+              <li><a href="#inicio">Inicio</a></li>
+              <li><a href="#atributos">Filosofía</a></li>
+              <li><a href="#servicios">Servicios</a></li>
+              <li><a href="#contacto">Contacto</a></li>
+            </ul>
+          </nav>
+
+          <!-- Servicios -->
+          <nav class="footer__nav" aria-label="Servicios footer">
+            <h4 class="footer__nav-title">Servicios</h4>
+            <ul role="list">
+              <li><a href="#servicios">Software a Medida</a></li>
+              <li><a href="#servicios">Business Intelligence</a></li>
+              <li><a href="#servicios">E-commerce & Plataformas</a></li>
+              <li><a href="#servicios">APIs & Integraciones</a></li>
+            </ul>
+          </nav>
+
+          <!-- Contacto -->
+          <div class="footer__contact">
+            <h4 class="footer__nav-title">Contacto</h4>
+            <!-- CONFIGURACIÓN: Actualiza estos datos de contacto -->
+            <a href="mailto:hola@colibrixbi.com" class="footer__contact-link">hola@colibrixbi.com</a>
+            <a href="https://wa.me/521XXXXXXXXXX" class="footer__contact-link" target="_blank"
+              rel="noopener">WhatsApp</a>
+            <a href="https://www.instagram.com/TUNOMBREUSUARIO" class="footer__contact-link" target="_blank"
+              rel="noopener">@colibrixbi</a>
+          </div>
+        </div>
+
+        <!-- Bottom bar -->
+        <div class="footer__bottom">
+          <p>&copy; <span id="footer-year"></span> ColibriX BI. Todos los derechos reservados.</p>
+          <p class="footer__craft">Hecho con precisión en México 🇲🇽</p>
+        </div>
+      </div>
+    </footer>
+    <!-- FIN: FOOTER -->
+
+  </div>
+  <!-- FIN: main-content -->
+
+  <!-- ========================
+       SCRIPTS
+       Orden CRÍTICO:
+       1. preloader-3d.js (type=module, Three.js, gestiona el preloader 3D)
+       2. main.js     (regular script, gestiona el resto de la app)
+  ======================== -->
+  <!-- Motor 3D del preloader (ES Module, usa importmap de Three.js) -->
+  <script type="module" src="js/preloader-3d.js"></script>
+  <!-- Lógica principal de la app -->
+  <script src="js/main.js"></script>
+</body>
+
+</html>

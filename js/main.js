@@ -47,7 +47,7 @@ const CONFIG = {
    * EMAIL:
    * Dirección de correo electrónico donde recibirás solicitudes
    */
-  EMAIL_ADDRESS: 'hola@hummingxbi.com',
+  EMAIL_ADDRESS: 'colibrixbi@gmail.com',
 
   /**
    * NOMBRE DE LA EMPRESA (para mensajes pre-llenados)
@@ -69,18 +69,18 @@ const CONFIG = {
    mientras el fondo oscuro del preloader se desvanece.
    ================================================================ */
 const PreloaderModule = (() => {
-  const preloader    = document.getElementById('preloader');
-  const mainContent  = document.getElementById('main-content');
-  const bird         = document.getElementById('preloader-bird');
-  const progressBar  = document.getElementById('preloader-progress-bar');
-  const loadingText  = document.getElementById('loading-text');
-  const targetLogo   = document.querySelector('.nav__logo-icon');
-  const navLogo      = document.querySelector('.nav__logo');
+  const preloader = document.getElementById('preloader');
+  const mainContent = document.getElementById('main-content');
+  const bird = document.getElementById('preloader-bird');
+  const progressBar = document.getElementById('preloader-progress-bar');
+  const loadingText = document.getElementById('loading-text');
+  const targetLogo = document.querySelector('.nav__logo-icon');
+  const navLogo = document.querySelector('.nav__logo');
 
-  let hasHidden      = false;
-  let progress       = 0;
+  let hasHidden = false;
+  let progress = 0;
   let progressInterval;
-  let pageLoaded     = false;
+  let pageLoaded = false;
 
   // Frases estratégicas para HummingX-BI
   const loadingPhrases = [
@@ -143,7 +143,7 @@ const PreloaderModule = (() => {
     // 3. Calcular diferencias y factor de escala
     const deltaX = targetRect.left - startRect.left;
     const deltaY = targetRect.top - startRect.top;
-    const scale  = targetRect.width / startRect.width;
+    const scale = targetRect.width / startRect.width;
 
     // 4. Modificar velocidad de aleteo en CSS y rotación para el viaje
     bird.classList.add('is-migrating');
@@ -218,10 +218,10 @@ const PreloaderModule = (() => {
    - Actualiza el link activo según la sección visible
    ================================================================ */
 const NavbarModule = (() => {
-  const navbar        = document.getElementById('navbar');
-  const hamburger     = document.getElementById('hamburger-btn');
-  const mobileMenu    = document.getElementById('mobile-menu');
-  const navLinks      = document.querySelectorAll('.nav__link');
+  const navbar = document.getElementById('navbar');
+  const hamburger = document.getElementById('hamburger-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const navLinks = document.querySelectorAll('.nav__link');
   const closeMenuLinks = document.querySelectorAll('[data-close-menu]');
 
   let isMenuOpen = false;
@@ -305,21 +305,25 @@ const NavbarModule = (() => {
    ================================================================ */
 const ParticlesModule = (() => {
   const canvas = document.getElementById('particles-canvas');
-  if (!canvas) return { init: () => {} };
+  if (!canvas) return { init: () => { } };
 
-  const ctx    = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d');
   let particles = [];
-  let animId    = null;
+  let animId = null;
   let W, H;
 
+  // Detectar si es un dispositivo móvil / táctil
+  const IS_MOBILE_DEVICE = ('ontouchstart' in window) || (window.innerWidth <= 768);
+
   const PARTICLE_CONFIG = {
-    count:         100,       // número de partículas (aumentado para más densidad)
-    maxRadius:     2.5,       // radio máximo en px (aumentado)
-    speed:         0.3,       // velocidad base
-    connectDist:   150,       // distancia para trazar conexiones (aumentada)
-    color:         '13, 148, 136',  // RGB del color teal
-    opacity:       0.9,       // opacidad base aumentada
+    count: IS_MOBILE_DEVICE ? 35 : 100,  // Reducido en móvil para evitar saturación
+    maxRadius: IS_MOBILE_DEVICE ? 1.8 : 2.5, // Nodos más pequeños en móvil
+    speed: IS_MOBILE_DEVICE ? 0.15 : 0.3, // Más lentos en móvil (menos agresivos)
+    connectDist: IS_MOBILE_DEVICE ? 80 : 150,  // Conexiones más cortas en móvil
+    color: '13, 148, 136',  // RGB del color teal
+    opacity: IS_MOBILE_DEVICE ? 0.6 : 0.9, // Más suaves en móvil
   };
+
 
   class Particle {
     constructor() {
@@ -327,11 +331,11 @@ const ParticlesModule = (() => {
     }
 
     reset() {
-      this.x     = Math.random() * W;
-      this.y     = Math.random() * H;
-      this.vx    = (Math.random() - 0.5) * PARTICLE_CONFIG.speed;
-      this.vy    = (Math.random() - 0.5) * PARTICLE_CONFIG.speed;
-      this.r     = Math.random() * PARTICLE_CONFIG.maxRadius + 0.5;
+      this.x = Math.random() * W;
+      this.y = Math.random() * H;
+      this.vx = (Math.random() - 0.5) * PARTICLE_CONFIG.speed;
+      this.vy = (Math.random() - 0.5) * PARTICLE_CONFIG.speed;
+      this.r = Math.random() * PARTICLE_CONFIG.maxRadius + 0.5;
       this.alpha = Math.random() * 0.5 + 0.4; // Nodos más brillantes (0.4 a 0.9)
     }
 
@@ -353,15 +357,15 @@ const ParticlesModule = (() => {
   }
 
   function resize() {
-    W = canvas.width  = canvas.offsetWidth;
+    W = canvas.width = canvas.offsetWidth;
     H = canvas.height = canvas.offsetHeight;
   }
 
   function drawConnections() {
     for (let i = 0; i < particles.length; i++) {
       for (let j = i + 1; j < particles.length; j++) {
-        const dx   = particles[i].x - particles[j].x;
-        const dy   = particles[i].y - particles[j].y;
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
         const dist = Math.hypot(dx, dy);
 
         if (dist < PARTICLE_CONFIG.connectDist) {
@@ -371,7 +375,7 @@ const ParticlesModule = (() => {
           ctx.moveTo(particles[i].x, particles[i].y);
           ctx.lineTo(particles[j].x, particles[j].y);
           ctx.strokeStyle = `rgba(${PARTICLE_CONFIG.color}, ${alpha})`;
-          ctx.lineWidth   = 1.0; // Líneas un poco más gruesas
+          ctx.lineWidth = 1.0; // Líneas un poco más gruesas
           ctx.stroke();
         }
       }
@@ -449,7 +453,7 @@ const ScrollRevealModule = (() => {
         });
       },
       {
-        threshold:   0.12,     // 12% visible antes de activar
+        threshold: 0.12,     // 12% visible antes de activar
         rootMargin: '-40px 0px -40px 0px',
       }
     );
@@ -468,16 +472,16 @@ const ScrollRevealModule = (() => {
    ================================================================ */
 const CountersModule = (() => {
   function animateCounter(el, target, duration = 1500) {
-    const start     = performance.now();
-    const suffix    = el.querySelector('span')?.textContent || '';
-    const textNode  = el.childNodes[0];
+    const start = performance.now();
+    const suffix = el.querySelector('span')?.textContent || '';
+    const textNode = el.childNodes[0];
 
     function tick(now) {
-      const elapsed  = now - start;
+      const elapsed = now - start;
       const progress = Math.min(elapsed / duration, 1);
       // Easing: ease-out cubico
-      const eased    = 1 - Math.pow(1 - progress, 3);
-      const current  = Math.round(eased * target);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(eased * target);
 
       if (textNode.nodeType === Node.TEXT_NODE) {
         textNode.textContent = current;
@@ -523,14 +527,14 @@ const CardTiltModule = (() => {
   const TILT_MAX = 8; // grados máximos de inclinación
 
   function applyTilt(card, e) {
-    const rect   = card.getBoundingClientRect();
-    const centerX = rect.left + rect.width  / 2;
-    const centerY = rect.top  + rect.height / 2;
-    const dx     = (e.clientX - centerX) / (rect.width  / 2);
-    const dy     = (e.clientY - centerY) / (rect.height / 2);
+    const rect = card.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const dx = (e.clientX - centerX) / (rect.width / 2);
+    const dy = (e.clientY - centerY) / (rect.height / 2);
 
     const rotateX = -dy * TILT_MAX;
-    const rotateY =  dx * TILT_MAX;
+    const rotateY = dx * TILT_MAX;
 
     card.style.transform = `
       translateY(-8px)
@@ -576,43 +580,43 @@ const FormModule = (() => {
   // Estado del formulario
   const state = {
     currentStep: 1,
-    totalSteps:  4,
+    totalSteps: 4,
     data: {
-      objetivo:    'bi_analytics', 
-      etapa:       'operando',     
-      desafio:     'datos',        
-      tiempo:      '1mes',         
+      objetivo: 'bi_analytics',
+      etapa: 'operando',
+      desafio: 'datos',
+      tiempo: '1mes',
       presupuesto: '15k_50k',
-      negocio:     'Mi Negocio de Prueba',
-      nombre:      'Cliente Prueba',
-      telefono:    '+52 1 55 1980 2943',
-      mensaje:     'Hola, me gustaría recibir más información sobre el servicio de BI & Analytics.',
+      negocio: 'Mi Negocio de Prueba',
+      nombre: 'Cliente Prueba',
+      telefono: '+52 1 55 1980 2943',
+      mensaje: 'Hola, me gustaría recibir más información sobre el servicio de BI & Analytics.',
     }
   };
 
   // Referencias al DOM
-  const steps         = [
+  const steps = [
     document.getElementById('step-1'),
     document.getElementById('step-2'),
     document.getElementById('step-3'),
     document.getElementById('step-4')
   ];
-  const progressBar   = document.getElementById('form-progress-bar');
-  const stepLabel     = document.getElementById('current-step-label');
-  const formSuccess   = document.getElementById('form-success');
+  const progressBar = document.getElementById('form-progress-bar');
+  const stepLabel = document.getElementById('current-step-label');
+  const formSuccess = document.getElementById('form-success');
 
-  const step1Next     = document.getElementById('step1-next');
-  const step2Next     = document.getElementById('step2-next');
-  const step3Next     = document.getElementById('step3-next');
-  const step2Back     = document.getElementById('step2-back');
-  const step3Back     = document.getElementById('step3-back');
-  const step4Back     = document.getElementById('step4-back');
+  const step1Next = document.getElementById('step1-next');
+  const step2Next = document.getElementById('step2-next');
+  const step3Next = document.getElementById('step3-next');
+  const step2Back = document.getElementById('step2-back');
+  const step3Back = document.getElementById('step3-back');
+  const step4Back = document.getElementById('step4-back');
 
   const businessInput = document.getElementById('business-name');
-  const contactName   = document.getElementById('contact-name');
-  const contactPhone  = document.getElementById('contact-phone');
-  const contactMsg    = document.getElementById('contact-message');
-  const budgetSelect  = document.getElementById('budget-select');
+  const contactName = document.getElementById('contact-name');
+  const contactPhone = document.getElementById('contact-phone');
+  const contactMsg = document.getElementById('contact-message');
+  const budgetSelect = document.getElementById('budget-select');
 
   /** Actualiza la barra de progreso y el label */
   function updateProgress() {
@@ -715,9 +719,9 @@ const FormModule = (() => {
 
         // Guardar en estado
         if (groupName === 'objetivo') state.data.objetivo = radio.value;
-        if (groupName === 'etapa')    state.data.etapa    = radio.value;
-        if (groupName === 'desafio')  state.data.desafio  = radio.value;
-        if (groupName === 'tiempo')   state.data.tiempo   = radio.value;
+        if (groupName === 'etapa') state.data.etapa = radio.value;
+        if (groupName === 'desafio') state.data.desafio = radio.value;
+        if (groupName === 'tiempo') state.data.tiempo = radio.value;
       });
 
       // Accesibilidad: keyboard
@@ -780,9 +784,9 @@ const FormModule = (() => {
   /** Expone el estado del formulario para el módulo de envío */
   function getState() {
     // Capturar valores actuales del DOM al momento de enviar
-    state.data.nombre    = contactName?.value.trim()  || '';
-    state.data.telefono  = contactPhone?.value.trim() || '';
-    state.data.mensaje   = contactMsg?.value.trim()   || '';
+    state.data.nombre = contactName?.value.trim() || '';
+    state.data.telefono = contactPhone?.value.trim() || '';
+    state.data.mensaje = contactMsg?.value.trim() || '';
     return { ...state.data };
   }
 
@@ -791,7 +795,7 @@ const FormModule = (() => {
     steps.forEach(s => { if (s) s.setAttribute('hidden', ''); });
     if (formSuccess) formSuccess.removeAttribute('hidden');
     if (progressBar) progressBar.style.width = '100%';
-    if (stepLabel)   stepLabel.textContent = '¡Listo!';
+    if (stepLabel) stepLabel.textContent = '¡Listo!';
   }
 
   return { init, getState, showSuccess };
@@ -808,38 +812,38 @@ const SendButtonsModule = (() => {
    * Traduce los valores internos del formulario a texto legible
    */
   const OBJETIVO_LABELS = {
-    menu_digital:  'Menú Digital (QR / Carta / Pedidos)',
+    menu_digital: 'Menú Digital (QR / Carta / Pedidos)',
     sistema_cobro: 'Sistema de Cobro / POS',
-    web_medida:    'Web o App a la Medida',
-    bi_analytics:  'Business Intelligence & Analytics',
+    web_medida: 'Web o App a la Medida',
+    bi_analytics: 'Business Intelligence & Analytics',
   };
 
   const ETAPA_LABELS = {
-    idea:     'Tengo la Idea',
+    idea: 'Tengo la Idea',
     operando: 'Ya Opero',
-    escalar:  'Busco Escalar',
+    escalar: 'Busco Escalar',
   };
 
   const DESAFIO_LABELS = {
-    ventas:      'Más Ventas / Atraer clientes',
+    ventas: 'Más Ventas / Atraer clientes',
     automatizar: 'Automatizar operaciones',
-    ux:          'Mejorar la experiencia (UX)',
-    datos:       'Toma de decisiones con datos',
+    ux: 'Mejorar la experiencia (UX)',
+    datos: 'Toma de decisiones con datos',
   };
 
   const TIEMPO_LABELS = {
-    urgente:    'Lo antes posible (Urgente)',
-    '1mes':     'En 1 mes',
+    urgente: 'Lo antes posible (Urgente)',
+    '1mes': 'En 1 mes',
     '2-3meses': 'En 2 o 3 meses',
-    flexible:   'Flexible / Aún planeando',
+    flexible: 'Flexible / Aún planeando',
   };
 
   const PRESUPUESTO_LABELS = {
-    menos_5k:    'Menos de $5,000 MXN',
-    '5k_15k':    '$5,000 — $15,000 MXN',
-    '15k_50k':   '$15,000 — $50,000 MXN',
-    '50k_150k':  '$50,000 — $150,000 MXN',
-    mas_150k:    'Más de $150,000 MXN',
+    menos_5k: 'Menos de $5,000 MXN',
+    '5k_15k': '$5,000 — $15,000 MXN',
+    '15k_50k': '$15,000 — $50,000 MXN',
+    '50k_150k': '$50,000 — $150,000 MXN',
+    mas_150k: 'Más de $150,000 MXN',
     por_definir: 'Por definir / Consultar',
   };
 
@@ -903,7 +907,7 @@ const SendButtonsModule = (() => {
   /** Abre el cliente de correo con el mensaje pre-llenado */
   function sendEmail(data) {
     const subject = buildEmailSubject(data);
-    const body    = buildMessage(data)
+    const body = buildMessage(data)
       .replace(/\*/g, '')        // Eliminar formato Markdown del cuerpo
       .replace(/🦅|📌|🎯|📊|💰|👤|📞|💬/g, ''); // Quitar emojis opcionales en email
 
@@ -924,24 +928,24 @@ const SendButtonsModule = (() => {
       toast = document.createElement('div');
       toast.id = 'app-toast';
       Object.assign(toast.style, {
-        position:   'fixed',
-        bottom:     '24px',
-        left:       '50%',
-        transform:  'translateX(-50%) translateY(20px)',
+        position: 'fixed',
+        bottom: '24px',
+        left: '50%',
+        transform: 'translateX(-50%) translateY(20px)',
         background: 'rgba(13, 148, 136, 0.95)',
-        color:      'white',
-        padding:    '12px 24px',
+        color: 'white',
+        padding: '12px 24px',
         borderRadius: '12px',
-        fontSize:   '14px',
+        fontSize: '14px',
         fontWeight: '600',
-        zIndex:     '99999',
-        opacity:    '0',
+        zIndex: '99999',
+        opacity: '0',
         transition: 'all 0.3s ease',
         backdropFilter: 'blur(10px)',
-        border:     '1px solid rgba(255,255,255,0.1)',
-        boxShadow:  '0 8px 32px rgba(0,0,0,0.3)',
-        maxWidth:   '90vw',
-        textAlign:  'center',
+        border: '1px solid rgba(255,255,255,0.1)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+        maxWidth: '90vw',
+        textAlign: 'center',
       });
       document.body.appendChild(toast);
     }
@@ -950,7 +954,7 @@ const SendButtonsModule = (() => {
     // Mostrar
     requestAnimationFrame(() => {
       Object.assign(toast.style, {
-        opacity:   '1',
+        opacity: '1',
         transform: 'translateX(-50%) translateY(0)',
       });
     });
@@ -958,15 +962,15 @@ const SendButtonsModule = (() => {
     // Ocultar después de 4 segundos
     setTimeout(() => {
       Object.assign(toast.style, {
-        opacity:   '0',
+        opacity: '0',
         transform: 'translateX(-50%) translateY(20px)',
       });
     }, 4000);
   }
 
   function init() {
-    const btnWa   = document.getElementById('send-whatsapp');
-    const btnIg   = document.getElementById('send-instagram');
+    const btnWa = document.getElementById('send-whatsapp');
+    const btnIg = document.getElementById('send-instagram');
     const btnMail = document.getElementById('send-email');
 
     function handleSend(channel) {
@@ -989,8 +993,8 @@ const SendButtonsModule = (() => {
       setTimeout(() => FormModule.showSuccess(), 300);
     }
 
-    btnWa?.addEventListener('click',   () => handleSend('whatsapp'));
-    btnIg?.addEventListener('click',   () => handleSend('instagram'));
+    btnWa?.addEventListener('click', () => handleSend('whatsapp'));
+    btnIg?.addEventListener('click', () => handleSend('instagram'));
     btnMail?.addEventListener('click', () => handleSend('email'));
   }
 

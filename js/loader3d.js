@@ -39,6 +39,9 @@ import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
 /* ================================================================
    1. CONFIGURACIÓN
    ================================================================ */
+// Detectar si es dispositivo táctil/móvil
+const IS_MOBILE = ('ontouchstart' in window) || (window.innerWidth <= 768);
+
 const CFG = {
   /** Ruta al SVG. "mi_imagen.svg" está en la raíz del proyecto. */
   SVG_PATH: '/mi_imagen.svg',
@@ -49,37 +52,37 @@ const CFG = {
   /** FOV de la cámara en grados */
   CAMERA_FOV: 50,
 
-  /** Número de burbujas de cristal flotantes */
-  NUM_BUBBLES: 20,
+  /** Número de burbujas de cristal flotantes — reducido en móvil para evitar saturación */
+  NUM_BUBBLES: IS_MOBILE ? 8 : 20,
 
-  /** Tiempo mínimo que el loader permanece visible (ms) */
-  MIN_DURATION_MS: 8600,
+  /** Tiempo mínimo que el loader permanece visible (ms) — más largo para una experiencia más serena */
+  MIN_DURATION_MS: 11000,
 
   /** Duración de la fase 1 de salida: logo vuela hacia arriba (s) */
-  EXIT_PHASE1_S: 0.45,
+  EXIT_PHASE1_S: 0.55,
 
   /** Retraso antes del fade del overlay (ms) */
-  EXIT_FADE_DELAY_MS: 180,
+  EXIT_FADE_DELAY_MS: 220,
 
   /** Duración del fade del overlay (ms) */
-  EXIT_FADE_DURATION: 720,
+  EXIT_FADE_DURATION: 900,
 
-  /** Suavizado del parallax (0.01 = muy lento, 0.12 = rápido) */
-  PARALLAX_LERP: 0.06,
+  /** Suavizado del parallax — desactivado en móvil para evitar movimiento agresivo al scroll */
+  PARALLAX_LERP: IS_MOBILE ? 0.0 : 0.04,
 
-  /** Rango máximo del parallax en unidades 3D */
-  PARALLAX_X: 18,
-  PARALLAX_Y: 12,
+  /** Rango máximo del parallax en unidades 3D — reducido para suavidad */
+  PARALLAX_X: IS_MOBILE ? 0 : 12,
+  PARALLAX_Y: IS_MOBILE ? 0 : 8,
 
-  /** Animación del logo: flotación */
-  LOGO_FLOAT_SPEED: 1.2,
-  LOGO_FLOAT_AMP: 9,
+  /** Animación del logo: flotación — más lenta y serena */
+  LOGO_FLOAT_SPEED: 0.65,
+  LOGO_FLOAT_AMP: 7,
 
-  /** Animación del logo: rotación oscilante */
-  LOGO_ROT_Y_SPEED: 0.65,
-  LOGO_ROT_Y_AMP: 0.14,
-  LOGO_ROT_Z_SPEED: 1.05,
-  LOGO_ROT_Z_AMP: 0.04,
+  /** Animación del logo: rotación oscilante — más suave */
+  LOGO_ROT_Y_SPEED: 0.38,
+  LOGO_ROT_Y_AMP: 0.09,
+  LOGO_ROT_Z_SPEED: 0.55,
+  LOGO_ROT_Z_AMP: 0.025,
 
   /** Tamaño del logo en pantalla (unidades Three.js) */
   LOGO_TARGET_SIZE: 130,
@@ -397,14 +400,14 @@ function createBubbles() {
 
     // Metadatos de animación individuales (sin contaminación del objeto)
     bubble.userData = {
-      speedY: Math.random() * 0.32 + 0.07,   // Velocidad de ascenso
-      wobbleAmp: Math.random() * 35 + 10,        // Amplitud del bamboleo X (unidades)
-      wobbleFreq: Math.random() * 0.025 + 0.008,  // Frecuencia del bamboleo
+      speedY: (Math.random() * 0.18 + 0.04) * (IS_MOBILE ? 0.6 : 1.0),  // Más lento en móvil
+      wobbleAmp: (Math.random() * 18 + 6) * (IS_MOBILE ? 0.5 : 1.0),    // Bamboleo más sutil en móvil
+      wobbleFreq: Math.random() * 0.015 + 0.004,   // Frecuencia más suave
       wobblePhase: Math.random() * Math.PI * 2,    // Fase inicial aleatoria
-      driftX: (Math.random() - 0.5) * 0.06,  // Deriva lateral lenta
-      rotSpeedX: (Math.random() - 0.5) * 0.012,
-      rotSpeedY: (Math.random() - 0.5) * 0.014,
-      baseX: startX,                          // Referencia X para el wobble
+      driftX: (Math.random() - 0.5) * 0.03,        // Deriva lateral lenta
+      rotSpeedX: (Math.random() - 0.5) * 0.007,
+      rotSpeedY: (Math.random() - 0.5) * 0.008,
+      baseX: startX,                               // Referencia X para el wobble
     };
 
     scene.add(bubble);
@@ -419,6 +422,9 @@ function createBubbles() {
    El lerp suavizado en el bucle de animación hace la transición fluida.
    ================================================================ */
 function setupMouseParallax() {
+  // En móvil, no registrar parallax de mouse para evitar movimientos agresivos al scroll
+  if (IS_MOBILE) return;
+
   window.addEventListener('mousemove', (e) => {
     mouseNDX = (e.clientX / window.innerWidth - 0.5) * 2;   // -1 a 1
     mouseNDY = (e.clientY / window.innerHeight - 0.5) * 2;  // -1 a 1

@@ -299,8 +299,10 @@
   transition: color var(--transition-base);
 }
 
-.service-item:hover .service-item__number {
-  color: rgba(13, 148, 136, 0.15);
+.service-item:hover .service-item__number,
+.service-item:active .service-item__number {
+  color: rgba(13, 148, 136, 0.5);
+  text-shadow: 0 0 15px rgba(13, 148, 136, 0.3);
 }
 
 /* Contenido del servicio */
@@ -1333,12 +1335,162 @@
 
   .process__step {
     flex-direction: column;
-    align-items: center;
-    text-align: center;
-    flex: 1;
+  }
+}
+
+/* ================================================================
+   7. MEJORAS MÓVIL — Respiración y Organización (< 768px)
+   ================================================================ */
+@media (max-width: 767px) {
+
+  /* Secciones con más respiración vertical */
+  .attributes,
+  .services,
+  .process,
+  .contact {
+    padding-block: var(--space-20);
   }
 
-  .process__step-content {
-    padding-top: var(--space-4);
+  /* Mejoras en la línea de tiempo de Metodología (Proceso) en celular */
+  .process__connector {
+    display: none !important;
+  }
+
+  .process__timeline {
+    gap: var(--space-10) !important;
+  }
+
+  .process__step {
+    position: relative;
+    gap: var(--space-5);
+  }
+
+  /* Línea conectora secuencial perfecta de círculo a círculo */
+  .process__step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 70px;
+    left: 34px;
+    width: 2px;
+    height: calc(100% - 70px + var(--space-10));
+    background: linear-gradient(180deg, var(--color-teal) 0%, rgba(13, 148, 136, 0.15) 100%);
+    border-radius: 2px;
+    z-index: 0;
+  }
+
+  /* Encabezados de sección más compactos y claros */
+  .section-header {
+    margin-bottom: var(--space-12);
+  }
+
+  .section-title {
+    font-size: clamp(var(--text-2xl), 7vw, var(--text-3xl));
+    line-height: 1.2;
+    margin-bottom: var(--space-3);
+  }
+
+  .section-subtitle {
+    font-size: var(--text-base);
+    line-height: 1.65;
+  }
+
+  /* Tarjetas de atributos con más espacio interno y mejor lectura */
+  .attr-card {
+    padding: var(--space-8);
+  }
+
+  .attr-card__title {
+    font-size: var(--text-xl);
+    margin-bottom: var(--space-4);
+  }
+
+  .attr-card__description {
+    font-size: var(--text-base);
+    line-height: 1.75;
+  }
+
+  /* Service items más legibles con espacio adecuado */
+  .service-item {
+    padding: var(--space-8) 0;
+    gap: var(--space-4);
+  }
+
+  .service-item__number {
+    font-size: var(--text-4xl);
+    width: 60px;
+  }
+
+  .service-item__title {
+    font-size: var(--text-lg);
+    line-height: 1.3;
+    margin-bottom: var(--space-3);
+  }
+
+  .service-item__desc {
+    font-size: var(--text-base);
+    line-height: 1.7;
+  }
+
+  .service-item__tech {
+    margin-top: var(--space-3);
+    gap: var(--space-2);
+  }
+
+  .service-item__tech span {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+
+  /* Ocultar flecha en móvil */
+  .service-item__arrow {
+    display: none;
+  }
+
+  /* Formulario: opciones siempre en columna en móvil */
+  .form__options-grid,
+  .form__options-grid--col3 {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .form__option {
+    padding: var(--space-4) var(--space-5);
+    flex-direction: row;
+    gap: var(--space-4);
+    align-items: center;
+  }
+
+  .form-glass {
+    padding: var(--space-8) var(--space-6);
+  }
+
+  .form__step-title {
+    font-size: var(--text-2xl);
+    line-height: 1.35;
+    margin-bottom: var(--space-3);
+  }
+
+  /* Botones de envío en columna */
+  .form__send-buttons {
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .btn--send {
+    padding: var(--space-4) var(--space-5);
+    gap: var(--space-4);
+  }
+
+  /* Contacto: más margen entre items */
+  .contact__direct-item {
+    padding: var(--space-4);
+    margin-bottom: var(--space-2);
+  }
+
+  /* Footer limpio */
+  .footer__bottom {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--space-2);
   }
 }

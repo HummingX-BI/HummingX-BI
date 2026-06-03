@@ -415,26 +415,25 @@ input, textarea, select {
   padding: var(--space-6);
 }
 
-/* Contenedor del colibrí */
+/* Contenedor del colibrí — flotación serena */
 .preloader__bird-container {
-  width: 220px;
-  height: 180px;
+  width: 280px;
+  height: 280px;
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: hover-flight 2.8s ease-in-out infinite,
-             hummingbird-vibe 0.09s linear infinite;
-  transform-style: preserve-3d;
+  animation: hover-flight 5s ease-in-out infinite;
   will-change: transform;
 }
 
 .preloader__bird {
-  height: 140px;
-  width: 140px;
+  width: 280px;
+  height: 280px;
   max-width: 100%;
-  filter: drop-shadow(0 8px 32px rgba(13, 148, 136, 0.45));
+  filter:
+    drop-shadow(0 0 28px rgba(13, 200, 196, 0.55))
+    drop-shadow(0 0 60px rgba(13, 148, 136, 0.3));
   will-change: transform;
-  transition: transform 1.2s cubic-bezier(0.25, 1, 0.35, 1);
 }
 
 /* --- Animación de Partes Internas del Colibrí (SVG Inline) --- */
@@ -449,17 +448,17 @@ input, textarea, select {
   will-change: transform;
 }
 
-/* Animaciones del preloader (Aleteo ultra rápido) */
+/* Animaciones del preloader (Aleteo relajado y serenínimo) */
 #preloader-bird .logo-wing-top {
-  animation: flap-top 0.08s ease-in-out infinite alternate;
+  animation: flap-top 0.22s ease-in-out infinite alternate;
 }
 
 #preloader-bird .logo-wing-bottom {
-  animation: flap-bottom 0.08s ease-in-out infinite alternate;
+  animation: flap-bottom 0.22s ease-in-out infinite alternate;
 }
 
 #preloader-bird .logo-body {
-  animation: body-bob 0.16s ease-in-out infinite alternate;
+  animation: body-bob 0.44s ease-in-out infinite alternate;
 }
 
 /* Animaciones en la navbar al hacer HOVER (Aleteo interactivo premium) */
@@ -506,16 +505,15 @@ input, textarea, select {
 
 @keyframes hover-flight {
   0%, 100% { transform: translateY(0) rotate(0deg); }
-  33%      { transform: translateY(-9px) translateX(6px) rotate(1deg); }
-  66%      { transform: translateY(7px) translateX(-6px) rotate(-1deg); }
+  33%      { transform: translateY(-6px) translateX(4px) rotate(0.5deg); }
+  66%      { transform: translateY(5px) translateX(-4px) rotate(-0.5deg); }
 }
 
 @keyframes hummingbird-vibe {
   0%, 100% { transform: translate(0, 0) scale(1) rotate(0); }
-  20%      { transform: translate(-1px, 1px) scale(0.99) rotate(-0.3deg); }
-  40%      { transform: translate(1px, -1px) scale(1.01) rotate(0.3deg); }
-  60%      { transform: translate(-1.5px, -0.5px) scale(1) rotate(0); }
-  80%      { transform: translate(1px, 1.5px) scale(0.99) rotate(-0.2deg); }
+  25%      { transform: translate(-0.5px, 0.5px) scale(0.995) rotate(-0.15deg); }
+  50%      { transform: translate(0.5px, -0.5px) scale(1.005) rotate(0.15deg); }
+  75%      { transform: translate(-0.5px, -0.3px) scale(1) rotate(0); }
 }
 
 /* Título de marca */
@@ -1275,3 +1273,103 @@ input, textarea, select {
     animation: none !important;
   }
 }
+
+
+/* ================================================================
+   11. MEJORAS HERO EN MÓVIL — Respiración y organización
+   ================================================================ */
+@media (max-width: 767px) {
+  /* Ocultar botón Iniciar Proyecto del navbar en móvil para evitar amontonamiento */
+  #nav-cta-btn {
+    display: none;
+  }
+
+  /* Hero con más espacio para respirar */
+  .hero {
+    padding-block: var(--space-20) var(--space-16);
+    justify-content: flex-start;
+    padding-top: calc(var(--space-20) + 60px); /* Navbar + espacio */
+  }
+
+  .hero__content {
+    padding-inline: var(--space-2);
+  }
+
+  /* Eyebrow más compacto */
+  .hero__eyebrow {
+    font-size: 10px;
+    padding: var(--space-1) var(--space-3);
+    margin-bottom: var(--space-6);
+    text-align: center;
+  }
+
+  /* Título adaptado */
+  .hero__title {
+    font-size: clamp(var(--text-3xl), 9vw, var(--text-5xl));
+    margin-bottom: var(--space-5);
+    line-height: 1.1;
+  }
+
+  /* Subtítulo más legible */
+  .hero__subtitle {
+    font-size: var(--text-sm);
+    line-height: 1.7;
+    margin-bottom: var(--space-8);
+    padding-inline: var(--space-2);
+  }
+
+  /* Botones CTA apilados */
+  .hero__cta-group {
+    flex-direction: column;
+    gap: var(--space-4);
+    margin-bottom: var(--space-12);
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .hero__cta-group .btn--primary,
+  .hero__cta-group .btn--ghost {
+    width: 100%;
+    justify-content: center;
+    padding: var(--space-4) var(--space-6);
+    font-size: var(--text-base);
+  }
+
+  /* Métricas: flex column en móvil, más compactas */
+  .hero__metrics {
+    flex-direction: column;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-6);
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .hero__metric {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    min-width: unset;
+    flex: none;
+    width: 100%;
+  }
+
+  .hero__metric-number {
+    font-size: var(--text-xl);
+    line-height: 1;
+  }
+
+  .hero__metric-number span {
+    font-size: var(--text-sm);
+  }
+
+  .hero__metric-label {
+    font-size: var(--text-xs);
+    letter-spacing: 0.03em;
+  }
+
+  /* Ocultar divisores verticales en móvil */
+  .hero__metric-divider {
+    display: none;
+  }
+}
+

@@ -53,10 +53,10 @@ const CFG = {
   CAMERA_FOV: 50,
 
   /** Número de burbujas de cristal flotantes — reducido en móvil para evitar saturación */
-  NUM_BUBBLES: IS_MOBILE ? 8 : 20,
+  NUM_BUBBLES: IS_MOBILE ? 6 : 20,
 
-  /** Tiempo mínimo que el loader permanece visible (ms) — más largo para una experiencia más serena */
-  MIN_DURATION_MS: 11000,
+  /** Tiempo mínimo que el loader permanece visible (ms) */
+  MIN_DURATION_MS: 5500,
 
   /** Duración de la fase 1 de salida: logo vuela hacia arriba (s) */
   EXIT_PHASE1_S: 0.55,
@@ -137,12 +137,13 @@ function initScene() {
 
   // ── Renderer WebGL ──
   renderer = new THREE.WebGLRenderer({
-    antialias: true,
-    alpha: true,      // Fondo transparente → fondo CSS visible
+    antialias: !IS_MOBILE,   // Desactivar antialias en móvil — alto costo de GPU
+    alpha: true,             // Fondo transparente → fondo CSS visible
     powerPreference: 'high-performance',
   });
   renderer.setSize(W, H);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Max 2× para mobile
+  // Limitar pixel ratio: 1.5 en móvil para reducir carga de GPU
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, IS_MOBILE ? 1.5 : 2));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.35;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -675,9 +676,12 @@ function onResize() {
 function waitAndExit() {
   let pageReady = false;
   let minTimeDone = false;
+  let exited = false;
 
   function maybeExit() {
+    if (exited) return;
     if (pageReady && minTimeDone) {
+      exited = true;
       triggerExitAnimation();
     }
   }
@@ -697,6 +701,16 @@ function waitAndExit() {
     minTimeDone = true;
     maybeExit();
   }, CFG.MIN_DURATION_MS);
+
+  // (c) TIMEOUT DE SEGURIDAD: Si por cualquier bug el loader no termina en 15s,
+  // se fuerza la salida para que el usuario nunca quede atrapado.
+  setTimeout(() => {
+    if (!exited) {
+      console.warn('[Loader3D] Timeout de seguridad activado — forzando salida.');
+      exited = true;
+      triggerExitAnimation();
+    }
+  }, 15000);
 
   // Chequeo inicial (por si la página ya está lista y el min time también)
   maybeExit();

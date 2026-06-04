@@ -669,7 +669,7 @@ input, textarea, select {
 
 .main-content.is-visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: none; /* Usa 'none' en lugar de 'translateY(0)' para no romper el position: fixed del header interno */
 }
 
 

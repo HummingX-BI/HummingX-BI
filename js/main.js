@@ -316,12 +316,12 @@ const ParticlesModule = (() => {
   const IS_MOBILE_DEVICE = ('ontouchstart' in window) || (window.innerWidth <= 768);
 
   const PARTICLE_CONFIG = {
-    count: IS_MOBILE_DEVICE ? 35 : 100,  // Reducido en móvil para evitar saturación
-    maxRadius: IS_MOBILE_DEVICE ? 1.8 : 2.5, // Nodos más pequeños en móvil
-    speed: IS_MOBILE_DEVICE ? 0.15 : 0.3, // Más lentos en móvil (menos agresivos)
-    connectDist: IS_MOBILE_DEVICE ? 80 : 150,  // Conexiones más cortas en móvil
+    count: IS_MOBILE_DEVICE ? 30 : 100,  // Reducido en móvil para no saturar
+    maxRadius: IS_MOBILE_DEVICE ? 1.6 : 2.5, // Nodos más pequeños en móvil
+    speed: IS_MOBILE_DEVICE ? 0.12 : 0.3, // Más lentos en móvil (más pasivos)
+    connectDist: IS_MOBILE_DEVICE ? 75 : 150,  // Conexiones más cortas en móvil
     color: '13, 148, 136',  // RGB del color teal
-    opacity: IS_MOBILE_DEVICE ? 0.6 : 0.9, // Más suaves en móvil
+    opacity: IS_MOBILE_DEVICE ? 0.55 : 0.9, // Más suaves en móvil
   };
 
 
@@ -395,16 +395,41 @@ const ParticlesModule = (() => {
   }
 
   function init() {
-    resize();
-    window.addEventListener('resize', () => {
-      resize();
-      // Reiniciar partículas al redimensionar
-      particles.forEach(p => p.reset());
-    }, { passive: true });
+    // Inicialización: dimensiones reales del canvas
+    W = canvas.width = canvas.offsetWidth;
+    H = canvas.height = canvas.offsetHeight;
 
     for (let i = 0; i < PARTICLE_CONFIG.count; i++) {
       particles.push(new Particle());
     }
+
+    // FIX BUG MÓVIL: En navegadores móviles, la barra de URL aparece/desaparece
+    // al hacer scroll, disparando eventos 'resize' con cambio de altura.
+    // Esto causaba que las partículas saltaran agresivamente.
+    // Solución: solo responder a cambios de ANCHO (orientación real del dispositivo).
+    let lastWidth = W;
+    window.addEventListener('resize', () => {
+      const currentWidth = canvas.offsetWidth;
+      if (IS_MOBILE_DEVICE) {
+        if (currentWidth !== lastWidth) {
+          // Cambio real de orientación — sí actualizar
+          lastWidth = currentWidth;
+          W = canvas.width = canvas.offsetWidth;
+          H = canvas.height = canvas.offsetHeight;
+          // Reposicionar solo partículas que quedaron fuera del área
+          particles.forEach(p => {
+            if (p.x > W) p.x = Math.random() * W;
+            if (p.y > H) p.y = Math.random() * H;
+          });
+        }
+        // Si solo cambió la altura (barra del browser al scroll): ignorar completamente
+      } else {
+        // Desktop: resize normal con reinicio de posiciones
+        W = canvas.width = canvas.offsetWidth;
+        H = canvas.height = canvas.offsetHeight;
+        particles.forEach(p => p.reset());
+      }
+    }, { passive: true });
 
     // Pausar animación cuando la pestaña está en segundo plano
     document.addEventListener('visibilitychange', () => {
@@ -812,10 +837,15 @@ const SendButtonsModule = (() => {
    * Traduce los valores internos del formulario a texto legible
    */
   const OBJETIVO_LABELS = {
-    menu_digital: 'Menú Digital (QR / Carta / Pedidos)',
-    sistema_cobro: 'Sistema de Cobro / POS',
-    web_medida: 'Web o App a la Medida',
+    plataforma_empresarial: 'Plataforma Empresarial a la Medida (ERP/CRM)',
+    automatizacion_ia: 'Automatización Inteligente con Agentes IA',
+    web_medida: 'Desarrollo de Software a la Medida',
     bi_analytics: 'Business Intelligence & Analytics',
+    integracion_datos: 'Integración de Sistemas & Arquitectura de Datos',
+    transformacion_digital: 'Transformación Digital Integral',
+    // Legacy compatibility
+    menu_digital: 'Plataforma Empresarial a la Medida',
+    sistema_cobro: 'Sistema de Cobro / POS',
   };
 
   const ETAPA_LABELS = {

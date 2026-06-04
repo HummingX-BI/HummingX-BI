@@ -208,6 +208,11 @@ input, textarea, select {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  padding-top: 0.15em;
+  margin-top: -0.15em;
+  padding-bottom: 0.1em;
+  margin-bottom: -0.1em;
+  display: inline-block;
 }
 
 /* X de HummingX en color acento */
@@ -988,11 +993,12 @@ input, textarea, select {
 .hero__title {
   font-family: var(--font-display);
   font-size: clamp(var(--text-4xl), 7vw, var(--text-7xl));
-  font-weight: 700;
-  line-height: 1.05;
-  letter-spacing: -0.03em;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
   color: var(--color-text-primary);
   margin-bottom: var(--space-8);
+  text-transform: uppercase;
 }
 
 /* Subtítulo */

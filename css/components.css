@@ -1214,6 +1214,9 @@
   font-size: var(--text-sm);
   color: var(--color-text-muted);
   line-height: 1.6;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
 }
 
 /* Navegación del footer */
@@ -1311,30 +1314,47 @@
   .process__timeline {
     flex-direction: row;
     align-items: flex-start;
-  }
-
-  .process__connector {
-    width: 60px;
-    height: 1px;
-    margin-left: 0;
-    margin-top: 35px;
-    background: linear-gradient(
-      90deg,
-      var(--color-teal) 0%,
-      rgba(13, 148, 136, 0.2) 100%
-    );
-  }
-
-  .process__connector::after {
-    bottom: unset;
-    right: -3px;
-    left: unset;
-    top: 50%;
-    transform: translateY(-50%);
+    justify-content: center;
+    flex-wrap: nowrap;
   }
 
   .process__step {
     flex-direction: column;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+  }
+
+  .process__step-content {
+    padding-top: var(--space-3);
+    text-align: center;
+  }
+
+  .process__connector {
+    flex-shrink: 0;
+    width: 40px;
+    height: 2px;
+    margin-left: 0;
+    margin-top: 34px;
+    background: linear-gradient(
+      90deg,
+      var(--color-teal) 0%,
+      rgba(13, 148, 136, 0.3) 100%
+    );
+    position: relative;
+  }
+
+  .process__connector::after {
+    bottom: unset;
+    right: -4px;
+    left: unset;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    background: var(--color-teal);
+    opacity: 0.7;
   }
 }
 
@@ -1446,18 +1466,22 @@
     display: none;
   }
 
-  /* Formulario: opciones siempre en columna en móvil */
-  .form__options-grid,
+  /* Formulario: 2 columnas en móvil, 1 columna para grid normal */
+  .form__options-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+  }
+
   .form__options-grid--col3 {
-    grid-template-columns: 1fr;
-    gap: var(--space-4);
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
   }
 
   .form__option {
-    padding: var(--space-4) var(--space-5);
-    flex-direction: row;
-    gap: var(--space-4);
-    align-items: center;
+    padding: var(--space-3) var(--space-3);
+    flex-direction: column;
+    gap: var(--space-2);
+    align-items: flex-start;
   }
 
   .form-glass {

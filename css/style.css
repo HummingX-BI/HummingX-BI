@@ -393,6 +393,9 @@ input, textarea, select {
   height: 100%;
   object-fit: cover;
   display: block;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  will-change: transform;
 }
 
 /* Capa de oscurecimiento y gradiente sobre el video */

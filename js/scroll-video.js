@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let targetTime = 0;
   let currentTime = 0;
-  const lerpFactor = 0.08; // Factor de suavizado (menor = más suave/lento)
+  const lerpFactor = 0.05; // Factor de suavizado (menor = más suave/lento)
   let videoDuration = 0;
   let isReady = false;
 

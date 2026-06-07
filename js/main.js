@@ -71,143 +71,79 @@ const CONFIG = {
 const PreloaderModule = (() => {
   const preloader = document.getElementById('preloader');
   const mainContent = document.getElementById('main-content');
-  const bird = document.getElementById('preloader-bird');
-  const progressBar = document.getElementById('preloader-progress-bar');
   const loadingText = document.getElementById('loading-text');
-  const targetLogo = document.querySelector('.nav__logo-icon');
-  const navLogo = document.querySelector('.nav__logo');
 
   let hasHidden = false;
-  let progress = 0;
-  let progressInterval;
-  let pageLoaded = false;
+  let phraseIdx = 0;
+  let phraseInterval;
 
   // Frases estratégicas para HummingX-BI
   const loadingPhrases = [
     'Preparando entorno estratégico...',
     'Alineando variables de Business Intelligence...',
     'Calibrando arquitectura de alta precisión...',
-    'Estructurando microservicios y flujos de datos...',
+    'Estructurando flujos de datos...',
     'Evolución digital en vuelo...',
     'Sincronizando HummingX-BI...'
   ];
 
-  /** Simula e incrementa la barra de progreso */
-  function startProgress() {
-    progressInterval = setInterval(() => {
-      // Avanzar más rápido si la carga real ya terminó
-      const increment = pageLoaded ? Math.random() * 12 + 8 : Math.random() * 2 + 1;
-      progress = Math.min(progress + increment, 100);
-
-      if (progressBar) {
-        progressBar.style.width = `${progress}%`;
-      }
-
-      // Actualizar mensajes descriptivos de carga
+  /** Rota las frases de carga de forma periódica */
+  function rotatePhrases() {
+    if (loadingText) {
+      loadingText.textContent = loadingPhrases[phraseIdx];
+      phraseIdx = (phraseIdx + 1) % loadingPhrases.length;
+    }
+    phraseInterval = setInterval(() => {
       if (loadingText) {
-        const phraseIdx = Math.min(
-          Math.floor((progress / 100) * loadingPhrases.length),
-          loadingPhrases.length - 1
-        );
         loadingText.textContent = loadingPhrases[phraseIdx];
+        phraseIdx = (phraseIdx + 1) % loadingPhrases.length;
       }
-
-      if (progress >= 100) {
-        clearInterval(progressInterval);
-        setTimeout(triggerFlightAnimation, 450); // Breve pausa dramática
-      }
-    }, 45);
+    }, 800);
   }
 
-  /** Transiciona el colibrí volando del centro al logo de cabecera */
-  function triggerFlightAnimation() {
+  /** Oculta el preloader minimalista estilo Apple */
+  function hidePreloader() {
     if (hasHidden) return;
     hasHidden = true;
 
-    // 1. Revelar la página principal (pero sin hacer visible el logo del header aún)
+    clearInterval(phraseInterval);
+
     document.body.classList.remove('loading');
     if (mainContent) {
       mainContent.setAttribute('aria-hidden', 'false');
       mainContent.classList.add('is-visible');
     }
 
-    if (targetLogo) {
-      targetLogo.style.opacity = '0';
-      targetLogo.style.transition = 'opacity 0.2s ease';
-    }
-
-    // 2. Obtener dimensiones de inicio y fin en pantalla (fixed coordinates)
-    const startRect = bird.getBoundingClientRect();
-    const targetRect = targetLogo.getBoundingClientRect();
-
-    // 3. Calcular diferencias y factor de escala
-    const deltaX = targetRect.left - startRect.left;
-    const deltaY = targetRect.top - startRect.top;
-    const scale = targetRect.width / startRect.width;
-
-    // 4. Modificar velocidad de aleteo en CSS y rotación para el viaje
-    bird.classList.add('is-migrating');
-    void bird.offsetWidth; // Forzar reflow para registrar la transición antes del transform
-
-    // 5. Transformar y trasladar el colibrí con curva bez de vuelo acelerado
-    bird.style.transformOrigin = 'top left';
-    bird.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${scale}) rotate(12deg)`;
-
-    // 6. Desvanecer el fondo del preloader suavemente
     if (preloader) {
-      preloader.style.transition = 'opacity 1s cubic-bezier(0.4, 0, 0.2, 1), visibility 1s';
-      preloader.style.opacity = '0';
-      preloader.style.visibility = 'hidden';
+      preloader.classList.add('is-hidden');
     }
 
-    // 7. Al aterrizar en el header (duración de la transición: 1.2s en style.css)
+    // Ocultar del DOM tras completarse la animación CSS (0.8s)
     setTimeout(() => {
-      // Disparar destello luminoso en el logo del header
-      if (navLogo) {
-        navLogo.classList.add('logo-landing-glow');
+      if (preloader) {
+        preloader.style.display = 'none';
+        preloader.setAttribute('aria-hidden', 'true');
       }
-
-      // Revelar logo real en la navbar
-      if (targetLogo) {
-        targetLogo.style.opacity = '1';
-      }
-
-      // Ocultar preloader definitivamente
-      setTimeout(() => {
-        if (preloader) {
-          preloader.style.display = 'none';
-          preloader.setAttribute('aria-hidden', 'true');
-        }
-      }, 200);
-
-    }, 1200);
+    }, 800);
   }
 
   function init() {
     document.body.classList.add('loading');
-    startProgress();
+    rotatePhrases();
 
     if (document.readyState === 'complete') {
-      pageLoaded = true;
+      setTimeout(hidePreloader, 600); // Dar un breve momento para percibir el logo
     } else {
       window.addEventListener('load', () => {
-        pageLoaded = true;
+        setTimeout(hidePreloader, 600);
       }, { once: true });
     }
 
-    // Fallback de seguridad por si falla la carga real
-    setTimeout(() => {
-      pageLoaded = true;
-      if (progress < 100) {
-        clearInterval(progressInterval);
-        progress = 100;
-        if (progressBar) progressBar.style.width = '100%';
-        triggerFlightAnimation();
-      }
-    }, 7000);
+    // Fallback de seguridad (2.5 segundos máximo)
+    setTimeout(hidePreloader, 2500);
   }
 
-  return { init };
+  return { init, hide: hidePreloader };
 })();
 
 
@@ -1061,7 +997,55 @@ function setFooterYear() {
 
 
 /* ================================================================
-   12. INICIALIZACIÓN GLOBAL
+   12. INYECTOR DINÁMICO DE SVG
+   Busca elementos con la etiqueta data-inject-svg y reemplaza el
+   marcado con el contenido del archivo SVG conservando las clases.
+   ================================================================ */
+function injectSVGs() {
+  const elements = document.querySelectorAll('[data-inject-svg]');
+  const promises = Array.from(elements).map(el => {
+    const src = el.getAttribute('data-src');
+    if (!src) return Promise.resolve();
+    return fetch(src)
+      .then(response => {
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return response.text();
+      })
+      .then(text => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(text, 'image/svg+xml');
+        const svg = doc.querySelector('svg');
+        if (!svg) {
+          console.warn(`[SVG Injector] No se encontró elemento <svg> en ${src}`);
+          return;
+        }
+
+        // Transferir clases
+        const containerClasses = el.className;
+        if (containerClasses) {
+          svg.classList.add(...containerClasses.split(/\s+/).filter(Boolean));
+        }
+
+        // Transferir otros atributos
+        Array.from(el.attributes).forEach(attr => {
+          if (attr.name !== 'data-inject-svg' && attr.name !== 'data-src' && attr.name !== 'class') {
+            svg.setAttribute(attr.name, attr.value);
+          }
+        });
+
+        // Reemplazar elemento
+        el.parentNode.replaceChild(svg, el);
+      })
+      .catch(error => {
+        console.error(`[SVG Injector] Error al inyectar SVG desde ${src}:`, error);
+      });
+  });
+  return Promise.all(promises);
+}
+
+
+/* ================================================================
+   13. INICIALIZACIÓN GLOBAL
    Arranca todos los módulos en el orden correcto.
    ================================================================ */
 function initApp() {
@@ -1070,14 +1054,17 @@ function initApp() {
 
   // El resto se inicializa después de que el DOM esté completamente listo
   const onReady = () => {
-    NavbarModule.init();
-    ParticlesModule.init();
-    ScrollRevealModule.init();
-    CountersModule.init();
-    CardTiltModule.init();
-    FormModule.init();
-    SendButtonsModule.init();
-    setFooterYear();
+    // Inyectar SVGs dinámicamente antes de arrancar módulos que interactúan con ellos
+    injectSVGs().then(() => {
+      NavbarModule.init();
+      ParticlesModule.init();
+      ScrollRevealModule.init();
+      CountersModule.init();
+      CardTiltModule.init();
+      FormModule.init();
+      SendButtonsModule.init();
+      setFooterYear();
+    });
   };
 
   if (document.readyState === 'loading') {

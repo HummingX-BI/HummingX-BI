@@ -45,11 +45,16 @@
                 isVideoLoaded = true;
                 container.style.opacity = '1';
                 video.play().catch(e => console.warn('Autoplay evitado por el navegador:', e));
+                
+                // Remover la transición CSS después del fade-in inicial para permitir cambios instantáneos sin lag al scroll
+                setTimeout(() => {
+                  container.style.transition = 'none';
+                }, 1200);
               }
             }, { once: true });
           } else if (isVideoLoaded) {
             // Ya estaba cargado, solo reanudar
-            video.play().catch(e => {});
+            video.play().catch(e => { });
           }
         } else {
           // Si salió de pantalla, pausar para ahorrar batería y CPU
@@ -80,11 +85,17 @@
     if (scrollY <= window.innerHeight * 1.5) {
       const targetTranslateY = scrollY * parallaxFactor;
       currentTranslateY += (targetTranslateY - currentTranslateY) * lerpFactor;
-      
+
       // Aplicar el transform a la etiqueta video dentro del contenedor
       // Usamos translate3d para forzar aceleración por hardware (GPU)
       if (Math.abs(targetTranslateY - currentTranslateY) > 0.1) {
-        video.style.transform = `translate3d(0, ${currentTranslateY}px, 0)`;
+        video.style.transform = `translate3d(0, ${currentTranslateY}px, 0) scale(1.3)`;
+      }
+
+      // Desvanecimiento suave en base al scroll para no ver "el cuadro del video bajando"
+      if (isVideoLoaded) {
+        const opacity = Math.max(0, 1 - scrollY / (window.innerHeight * 0.8));
+        container.style.opacity = opacity;
       }
     }
     rafId = requestAnimationFrame(renderParallax);

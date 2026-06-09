@@ -35,15 +35,20 @@
    ================================================================ */
 const CONFIG = {
   /**
-   * WHATSAPP: Número en formato internacional sin '+' ni espacios.
-   * Ejemplo: '5215551234567' (México, Ciudad de México)
+   * WHATSAPP: Números en formato internacional sin '+' ni espacios.
    */
-  WA_NUMBER: '5215519802943',
+  WA_NUMBER_1: '5215519802943',
+  WA_NUMBER_2: '525568905795',
 
   /**
    * INSTAGRAM: Nombre de usuario SIN el @
    */
   IG_USERNAME: 'hummingx.bi',
+
+  /**
+   * FACEBOOK: Link de la página oficial
+   */
+  FB_PAGE_URL: 'https://www.facebook.com/profile.php?id=61590401354021',
 
   /**
    * EMAIL: Dirección de correo electrónico donde recibirás solicitudes
@@ -62,66 +67,55 @@ const CONFIG = {
 
   /**
    * ENDPOINT SERVERLESS — Lead Ingestion API
-   * Consume este payload nuestro microservicio en Spring Boot.
-   * El agente perfilador en LangChain (Python) lee el mismo endpoint.
-   * Cambiar a la URL real del entorno de producción:
-   * Ej: 'https://api.hummingxbi.com/api/leads/ingest'
    */
   LEAD_ENDPOINT: '/api/leads/ingest',
 
   /**
    * TIMEOUT para la llamada fetch (ms).
-   * Si el endpoint tarda más, se activa el fallback de canal directo.
    */
   FETCH_TIMEOUT_MS: 8000,
 };
 
 
 /* ================================================================
-   2. MÓDULO: PRELOADER (Vuelo y Aterrizaje del Colibrí)
-   Un colibrí vectorial aletea en el centro de la pantalla. Al completar
-   la carga, vuela orgánicamente y aterriza sobre el logo de la navbar,
-   mientras el fondo oscuro del preloader se desvanece.
+   2. MÓDULO: PRELOADER (Barra de progreso minimalista)
+   Barra de 2px en la parte superior + logo centrado.
+   Se completa al 100% con la carga de la página y desaparece.
    ================================================================ */
 const PreloaderModule = (() => {
   const preloader = document.getElementById('preloader');
   const mainContent = document.getElementById('main-content');
-  const loadingText = document.getElementById('loading-text');
+  const ringFill = document.getElementById('preloader-ring-fill');
 
   let hasHidden = false;
-  let phraseIdx = 0;
-  let phraseInterval;
+  let progress = 0;
+  let animId = null;
 
-  // Frases estratégicas para HummingX-BI
-  const loadingPhrases = [
-    'Preparando entorno estratégico...',
-    'Alineando variables de Business Intelligence...',
-    'Calibrando arquitectura de alta precisión...',
-    'Estructurando flujos de datos...',
-    'Evolución digital en vuelo...',
-    'Sincronizando HummingX-BI...'
-  ];
-
-  /** Rota las frases de carga de forma periódica */
-  function rotatePhrases() {
-    if (loadingText) {
-      loadingText.textContent = loadingPhrases[phraseIdx];
-      phraseIdx = (phraseIdx + 1) % loadingPhrases.length;
-    }
-    phraseInterval = setInterval(() => {
-      if (loadingText) {
-        loadingText.textContent = loadingPhrases[phraseIdx];
-        phraseIdx = (phraseIdx + 1) % loadingPhrases.length;
+  /** Anima el anillo de progreso circular SVG */
+  function setProgress(target) {
+    const animate = () => {
+      progress += (target - progress) * 0.08;
+      if (ringFill) {
+        // Circunferencia del círculo (r=46): 2 * PI * 46 ≈ 289
+        const circumference = 289;
+        const offset = circumference - (circumference * Math.min(progress, 100)) / 100;
+        ringFill.style.strokeDashoffset = offset;
       }
-    }, 800);
+      if (Math.abs(target - progress) > 0.5) {
+        animId = requestAnimationFrame(animate);
+      }
+    };
+    if (animId) cancelAnimationFrame(animId);
+    animate();
   }
 
-  /** Oculta el preloader minimalista estilo Apple */
+  /** Oculta el preloader con fade */
   function hidePreloader() {
     if (hasHidden) return;
     hasHidden = true;
 
-    clearInterval(phraseInterval);
+    // Completar al 100%
+    setProgress(100);
 
     document.body.classList.remove('loading');
     if (mainContent) {
@@ -129,33 +123,38 @@ const PreloaderModule = (() => {
       mainContent.classList.add('is-visible');
     }
 
-    if (preloader) {
-      preloader.classList.add('is-hidden');
-    }
-
-    // Ocultar del DOM tras completarse la animación CSS (0.8s)
+    setTimeout(() => {
+      if (preloader) {
+        preloader.classList.add('is-hidden');
+      }
+    }, 350); // Esperar a que el círculo se complete
+ 
     setTimeout(() => {
       if (preloader) {
         preloader.style.display = 'none';
         preloader.setAttribute('aria-hidden', 'true');
       }
-    }, 800);
+    }, 1000);
   }
 
   function init() {
     document.body.classList.add('loading');
-    rotatePhrases();
+
+    // Simular progreso escalonado para feedback visual
+    setProgress(30);
+    setTimeout(() => setProgress(65), 200);
+    setTimeout(() => setProgress(90), 500);
 
     if (document.readyState === 'complete') {
-      setTimeout(hidePreloader, 600); // Dar un breve momento para percibir el logo
+      setTimeout(hidePreloader, 400);
     } else {
       window.addEventListener('load', () => {
-        setTimeout(hidePreloader, 600);
+        setTimeout(hidePreloader, 300);
       }, { once: true });
     }
 
-    // Fallback de seguridad (2.5 segundos máximo)
-    setTimeout(hidePreloader, 2500);
+    // Fallback de seguridad
+    setTimeout(hidePreloader, 2200);
   }
 
   return { init, hide: hidePreloader };
@@ -267,12 +266,12 @@ const ParticlesModule = (() => {
   const IS_MOBILE_DEVICE = ('ontouchstart' in window) || (window.innerWidth <= 768);
 
   const PARTICLE_CONFIG = {
-    count: IS_MOBILE_DEVICE ? 30 : 100,  // Reducido en móvil para no saturar
-    maxRadius: IS_MOBILE_DEVICE ? 1.6 : 2.5, // Nodos más pequeños en móvil
-    speed: IS_MOBILE_DEVICE ? 0.12 : 0.3, // Más lentos en móvil (más pasivos)
-    connectDist: IS_MOBILE_DEVICE ? 75 : 150,  // Conexiones más cortas en móvil
-    color: '13, 148, 136',  // RGB del color teal
-    opacity: IS_MOBILE_DEVICE ? 0.55 : 0.9, // Más suaves en móvil
+    count: IS_MOBILE_DEVICE ? 0 : 60,   // Cero en móvil (video desactivado, fondo simple)
+    maxRadius: 1.8,
+    speed: IS_MOBILE_DEVICE ? 0.08 : 0.20,
+    connectDist: IS_MOBILE_DEVICE ? 60 : 120,
+    color: '201, 169, 110',  // RGB del champagne dorado
+    opacity: 0.6,
   };
 
 
@@ -320,13 +319,12 @@ const ParticlesModule = (() => {
         const dist = Math.hypot(dx, dy);
 
         if (dist < PARTICLE_CONFIG.connectDist) {
-          // Líneas más notorias (hasta 0.6 de opacidad en vez de 0.2)
-          const alpha = (1 - dist / PARTICLE_CONFIG.connectDist) * 0.6;
+          const alpha = (1 - dist / PARTICLE_CONFIG.connectDist) * 0.25; /* Conexiones más sutiles */
           ctx.beginPath();
           ctx.moveTo(particles[i].x, particles[i].y);
           ctx.lineTo(particles[j].x, particles[j].y);
           ctx.strokeStyle = `rgba(${PARTICLE_CONFIG.color}, ${alpha})`;
-          ctx.lineWidth = 1.0; // Líneas un poco más gruesas
+          ctx.lineWidth = 0.5;
           ctx.stroke();
         }
       }
@@ -866,7 +864,7 @@ const LeadIngestionModule = (() => {
       loaderEl.removeAttribute('hidden');
     }
     // Deshabilitar botones de envío durante la petición
-    document.querySelectorAll('#send-whatsapp, #send-instagram, #send-email').forEach(btn => {
+    document.querySelectorAll('#send-whatsapp, #send-whatsapp-2, #send-instagram, #send-facebook').forEach(btn => {
       btn.disabled = true;
       btn.setAttribute('aria-busy', 'true');
     });
@@ -879,7 +877,7 @@ const LeadIngestionModule = (() => {
     if (loaderEl) {
       loaderEl.setAttribute('hidden', '');
     }
-    document.querySelectorAll('#send-whatsapp, #send-instagram, #send-email').forEach(btn => {
+    document.querySelectorAll('#send-whatsapp, #send-whatsapp-2, #send-instagram, #send-facebook').forEach(btn => {
       btn.disabled = false;
       btn.removeAttribute('aria-busy');
     });
@@ -1063,10 +1061,11 @@ const SendButtonsModule = (() => {
   }
 
   /** Abre WhatsApp con el mensaje pre-llenado */
-  function sendWhatsApp(data) {
+  function sendWhatsApp(data, customNumber) {
     const msg = buildMessage(data);
     const encodedMsg = encodeURIComponent(msg);
-    const url = `https://wa.me/${CONFIG.WA_NUMBER}?text=${encodedMsg}`;
+    const targetNumber = customNumber || CONFIG.WA_NUMBER_1;
+    const url = `https://wa.me/${targetNumber}?text=${encodedMsg}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   }
 
@@ -1074,7 +1073,7 @@ const SendButtonsModule = (() => {
   function sendInstagram(data) {
     const msg = buildMessage(data);
     const encodedMsg = encodeURIComponent(msg);
-    const url = `https://ig.me/m/hummingx.bi?text=${encodedMsg}`;
+    const url = `https://ig.me/m/${CONFIG.IG_USERNAME}?text=${encodedMsg}`;
 
     // Copiamos al portapapeles como respaldo de seguridad en caso de fallas de redirección en algunas versiones de la app
     if (navigator.clipboard && data) {
@@ -1086,6 +1085,20 @@ const SendButtonsModule = (() => {
     }
 
     window.open(url, '_blank', 'noopener,noreferrer');
+  }
+
+  /** Abre Facebook Messenger o la Página Oficial */
+  function sendFacebook(data) {
+    const msg = buildMessage(data);
+
+    if (navigator.clipboard && data) {
+      navigator.clipboard.writeText(msg).then(() => {
+        showToast('✅ Solicitud copiada. ¡Pégala en el chat de Facebook!');
+      }).catch(() => {});
+    }
+
+    // Usar el link de la página oficial provisto por el usuario
+    window.open(CONFIG.FB_PAGE_URL, '_blank', 'noopener,noreferrer');
   }
 
   /** Abre el cliente de correo con el mensaje pre-llenado */
@@ -1162,8 +1175,10 @@ const SendButtonsModule = (() => {
    */
   function sendDirect(channel, formData) {
     switch (channel) {
-      case 'whatsapp': sendWhatsApp(formData); break;
+      case 'whatsapp': sendWhatsApp(formData, CONFIG.WA_NUMBER_1); break;
+      case 'whatsapp2': sendWhatsApp(formData, CONFIG.WA_NUMBER_2); break;
       case 'instagram': sendInstagram(formData); break;
+      case 'facebook': sendFacebook(formData); break;
       case 'email': sendEmail(formData); break;
       default:
         console.warn(`[SendButtons] Canal desconocido: ${channel}`);
@@ -1262,6 +1277,60 @@ function injectSVGs() {
 
 
 /* ================================================================
+   12B. MÓDULO: CURSOR MAGNÉTICO (Solo desktop)
+   El cursor personalizado sigue el ratón con un Lerp suave.
+   Al pasar sobre elementos interactivos, se expande (efecto magneto).
+   ================================================================ */
+const MagneticCursorModule = (() => {
+  const cursor = document.getElementById('magnetic-cursor');
+
+  // Solo desktop con puntero fino (no táctil)
+  const isPointerFine = window.matchMedia('(pointer: fine)').matches;
+  if (!cursor || !isPointerFine) return { init: () => {} };
+
+  let mouseX = -100, mouseY = -100;
+  let cursorX = -100, cursorY = -100;
+  const LERP = 0.12;
+
+  const interactiveSelectors = 'a, button, .btn, .service-item, .attr-card, input, select, textarea, [data-cursor-hover]';
+
+  window.addEventListener('mousemove', e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    cursor.classList.add('is-visible');
+  }, { passive: true });
+
+  document.addEventListener('mouseleave', () => cursor.classList.remove('is-visible'));
+
+  // Detectar hover en elementos interactivos
+  document.addEventListener('mouseover', e => {
+    if (e.target.closest(interactiveSelectors)) {
+      cursor.classList.add('is-hovering');
+    }
+  });
+  document.addEventListener('mouseout', e => {
+    if (e.target.closest(interactiveSelectors)) {
+      cursor.classList.remove('is-hovering');
+    }
+  });
+
+  function renderCursor() {
+    cursorX += (mouseX - cursorX) * LERP;
+    cursorY += (mouseY - cursorY) * LERP;
+    cursor.style.left = `${cursorX}px`;
+    cursor.style.top = `${cursorY}px`;
+    requestAnimationFrame(renderCursor);
+  }
+
+  function init() {
+    renderCursor();
+  }
+
+  return { init };
+})();
+
+
+/* ================================================================
    13. INICIALIZACIÓN GLOBAL
    Arranca todos los módulos en el orden correcto.
    ================================================================ */
@@ -1278,9 +1347,10 @@ function initApp() {
       ScrollRevealModule.init();
       CountersModule.init();
       CardTiltModule.init();
+      MagneticCursorModule.init();
       FormModule.init();
       SendButtonsModule.init();
-      LeadIngestionModule.init();  // FASE 2: Interceptor de conversión
+      LeadIngestionModule.init();
       setFooterYear();
     });
   };

@@ -1,143 +1,172 @@
 /* ================================================================
    HummingX-BI — Sistema de Diseño Principal
-   Versión: 2.0.0 — Apple Dark Mode / Premium Bubble
+   Versión: 3.0.0 — Obsidiana & Champagne
    Descripción: Variables CSS, reset, preloader, navegación y hero.
    Arquitectura: Mobile-first, BEM, Variables CSS nativas.
-   Paradigma: OLED Black · Hairline Borders · Squircles · Physical Materials
+   Paradigma: Warm Black · Champagne Gold · Editorial Serif · Luxury Dark
    ================================================================ */
 
 
 /* ================================================================
    1. VARIABLES DEL SISTEMA DE DISEÑO (Design Tokens)
-   Migración: Naval Blue Neon → OLED Black / Apple-tier
+   Migración: AI teal/purple → Obsidiana & Champagne (Estudio élite)
    ================================================================ */
 :root {
-  /* ── Fondos (OLED Black Scale) ─────────────────────────────────
-     Principio Apple: Los negros puros se funden con los bordes de
-     la pantalla, creando la ilusión de interfaz sin marco.
-     Los grises cálidos (temperatura +2K) evitan el "efecto cueva". */
-  --color-bg-deepest:     #000000;   /* Negro OLED puro — fondo principal */
-  --color-bg-base:        #0A0A0C;   /* Secciones — 96% negro */
-  --color-bg-mid:         #111113;   /* Inputs, selectores */
-  --color-bg-elevated:    #121214;   /* Tarjetas y modales elevados */
-  --color-bg-card:        rgba(20, 20, 22, 0.5);   /* Cristal: muy baja opacidad */
-  --color-bg-card-hover:  rgba(30, 30, 35, 0.6);   /* Hover: apenas más claro */
+  /* ── Fondos (Obsidiana Cálida) ──────────────────────────────────
+     Negro cálido (temperatura +2K vs negro puro) para evitar el
+     "efecto cueva" manteniendo la profundidad de OLED. */
+  --color-bg-deepest: #0C0C0D;
+  /* Obsidiana pura — fondo del body */
+  --color-bg-base: #111112;
+  /* Secciones principales */
+  --color-bg-mid: #161617;
+  /* Inputs, selects */
+  --color-bg-elevated: #1C1C1E;
+  /* Tarjetas y modales */
+  --color-bg-card: rgba(28, 28, 30, 0.6);
+  /* Cristal cálido */
+  --color-bg-card-hover: rgba(36, 36, 38, 0.7);
+  /* Hover sutil */
 
-  /* ── Acentos (Contenidos — sin variantes glow agresivas) ───────
-     Las variantes _glow tienen opacidad máxima 0.06 para Hairline
-     Glow — percibido como sutil aura, no como neón. */
-  --color-teal:           #0D9488;
-  --color-teal-light:     #14B8AA;
-  --color-teal-glow:      rgba(13, 148, 136, 0.06);   /* ↓ de 0.25 → 0.06 */
-  --color-teal-glow-strong: rgba(13, 148, 136, 0.08); /* ↓ de 0.50 → 0.08 */
-  --color-purple:         #581C87;
-  --color-purple-light:   #7C3AED;
-  --color-purple-glow:    rgba(88, 28, 135, 0.05);    /* ↓ de 0.30 → 0.05 */
+  /* ── Acento Champagne (El Giro) ─────────────────────────────────
+     #C9A96E = dorado champagne opaco. No es amarillo, no es IA.
+     Se asocia con: banca privada, consultoría de élite, LVMH, Rolex.
+     Variante clara (#E8C97A) para hover y variante sutil para hairlines. */
+  --color-gold: #C9A96E;
+  --color-gold-light: #E8C97A;
+  --color-gold-dim: #A8885A;
+  --color-gold-glow: rgba(201, 169, 110, 0.08);
+  --color-gold-glow-md: rgba(201, 169, 110, 0.14);
 
-  /* ── Textos ────────────────────────────────────────────────────
-     Jerarquía de luminosidad: Primary 97% → Muted 28%.
-     Sin texto blanco puro (#fff) — el Apple HIG recomienda #F5F5F7. */
-  --color-text-primary:   #F5F5F7;   /* Blanco Apple */
-  --color-text-secondary: #86868B;   /* Gris medio Apple */
-  --color-text-muted:     #48484A;   /* Placeholder / terciario */
-  --color-text-accent:    #0D9488;
+  /* Alias compatibles con referencias anteriores en JS y HTML */
+  --color-teal: var(--color-gold);
+  --color-teal-light: var(--color-gold-light);
+  --color-teal-glow: var(--color-gold-glow);
+  --color-teal-glow-strong: var(--color-gold-glow-md);
+  --color-purple: var(--color-gold-dim);
+  --color-purple-light: var(--color-gold);
+  --color-purple-glow: var(--color-gold-glow);
 
-  /* ── Bordes Hairline ───────────────────────────────────────────
-     Paradigma Apple: en lugar de sombras para separar, bordes de
-     1px translúcidos que actúan como biseles de cristal templado.
-     Nunca más de rgba(255,255,255,0.10). */
-  --color-border:         rgba(255, 255, 255, 0.08);  /* ↑ ligeramente más visible */
-  --color-border-accent:  rgba(13, 148, 136, 0.20);
-  --color-border-hover:   rgba(13, 148, 136, 0.40);   /* ↓ de 0.70 → 0.40 */
+  /* ── Textos (Crema Cálida) ──────────────────────────────────────
+     No blanco frío puro. La leve temperatura cálida connota papel
+     de lujo impreso, editorial high-end. */
+  --color-text-primary: #F0EFEB;
+  /* Crema cálida */
+  --color-text-secondary: #8E8D8A;
+  /* Gris arena */
+  --color-text-muted: #4A4A48;
+  /* Placeholder */
+  --color-text-accent: var(--color-gold);
+
+  /* ── Bordes Hairline (Dorados) ──────────────────────────────────
+     Hairlines dorados ultra-sutiles. En OLED se perciben como
+     biseles de cristal dorado. En pantallas comunes: separadores neutros. */
+  --color-border: rgba(201, 169, 110, 0.10);
+  --color-border-subtle: rgba(255, 255, 255, 0.06);
+  --color-border-accent: rgba(201, 169, 110, 0.22);
+  --color-border-hover: rgba(201, 169, 110, 0.38);
 
   /* --- Tipografía ---
-     FASE 1: Montserrat eliminada — solo Syncopate + Inter se cargan.
-     El stack de fallback usa system-ui para cero impacto en FOUT. */
-  --font-display:   'Syncopate', system-ui, sans-serif;
-  --font-heading:   'Inter', system-ui, sans-serif;
-  --font-body:      'Inter', system-ui, sans-serif;
+     DM Serif Display: serif editorial de lujo para titulares.
+     Usado por: The Atlantic, Vogue Digital, agencias premium europeas.
+     Inter: para cuerpo de texto — neutral, legible, profesional. */
+  --font-display: 'DM Serif Display', 'Georgia', serif;
+  --font-heading: 'DM Serif Display', 'Georgia', serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
   /* Escala tipográfica (base 16px, ratio 1.25) */
-  --text-xs:        0.75rem;    /* 12px */
-  --text-sm:        0.875rem;   /* 14px */
-  --text-base:      1rem;       /* 16px */
-  --text-lg:        1.125rem;   /* 18px */
-  --text-xl:        1.25rem;    /* 20px */
-  --text-2xl:       1.5rem;     /* 24px */
-  --text-3xl:       1.875rem;   /* 30px */
-  --text-4xl:       2.25rem;    /* 36px */
-  --text-5xl:       3rem;       /* 48px */
-  --text-6xl:       3.75rem;    /* 60px */
-  --text-7xl:       4.5rem;     /* 72px */
+  --text-xs: 0.75rem;
+  /* 12px */
+  --text-sm: 0.875rem;
+  /* 14px */
+  --text-base: 1rem;
+  /* 16px */
+  --text-lg: 1.125rem;
+  /* 18px */
+  --text-xl: 1.25rem;
+  /* 20px */
+  --text-2xl: 1.5rem;
+  /* 24px */
+  --text-3xl: 1.875rem;
+  /* 30px */
+  --text-4xl: 2.25rem;
+  /* 36px */
+  --text-5xl: 3rem;
+  /* 48px */
+  --text-6xl: 3.75rem;
+  /* 60px */
+  --text-7xl: 4.5rem;
+  /* 72px */
 
   /* --- Espaciado --- */
-  --space-1:   0.25rem;
-  --space-2:   0.5rem;
-  --space-3:   0.75rem;
-  --space-4:   1rem;
-  --space-5:   1.25rem;
-  --space-6:   1.5rem;
-  --space-8:   2rem;
-  --space-10:  2.5rem;
-  --space-12:  3rem;
-  --space-16:  4rem;
-  --space-20:  5rem;
-  --space-24:  6rem;
-  --space-32:  8rem;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
 
   /* --- Contenedor --- */
-  --container-max:  1280px;
-  --container-pad:  var(--space-6);
+  --container-max: 1280px;
+  --container-pad: var(--space-6);
 
-  /* ── Bordes redondeados (Squircle / Bubble Geometry) ─────────────────
-     Principio: nada debe tener esquinas afiladas.
-     4px → 8px (mínimo absoluto), botones → 9999px (pill), tarjetas → 32px.
-     Los squircles (curvatura continua) son la firma visual de Apple/iOS. */
-  --radius-xs:   8px;     /* Tags, badges, chips pequeños (↑ de 4px) */
-  --radius-sm:   10px;    /* Elementos secundarios */
-  --radius-md:   16px;    /* Inputs, selects, opciones de formulario */
-  --radius-lg:   24px;    /* Modales medianos, secciones */
-  --radius-xl:   32px;    /* Tarjetas .attr-card y .form-glass */
-  --radius-full: 9999px;  /* Botones primarios, pills, badges redondos */
+  /* ── Border Radius (Conservative Luxury) ───────────────────────
+     El lujo usa curvaturas más contenidas que el bubble de consumer tech.
+     Tarjetas: 16px (no 32px). Botones: pill se mantiene. */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
 
-  /* ── Sombras (Paradigma Depth-Only, sin neones) ────────────────
-     Las sombras de lujo son neutrales y profundas, nunca de color.
-     Un solo token de profundidad reemplaza las 6 variables anteriores.
-     La separación visual entre elementos se logra con hairlines, no sombras. */
-  --shadow-depth:       0 10px 40px -10px rgba(0, 0, 0, 0.5);  /* Elevación neutral */
-  --shadow-depth-hover: 0 16px 48px -12px rgba(0, 0, 0, 0.6);  /* Hover: profundidad aumentada */
-  --shadow-inset-top:   inset 0 1px 0 rgba(255, 255, 255, 0.06); /* Bisel superior de cristal */
+  /* ── Sombras (Profundidad Cálida) ───────────────────────────────
+     Sombras con sutil tinte dorado-café — nunca frías (rgb(0,0,0) puro).
+     Esto es lo que hace que las interfaces de lujo se "sientan" diferentes. */
+  --shadow-depth: 0 8px 32px -8px rgba(12, 10, 6, 0.6);
+  --shadow-depth-hover: 0 16px 48px -12px rgba(12, 10, 6, 0.7);
+  --shadow-inset-top: inset 0 1px 0 rgba(201, 169, 110, 0.08);
+  --shadow-gold-glow: 0 0 40px rgba(201, 169, 110, 0.06);
 
-  /* Aliases de compatibilidad (referencias existentes en el JS / HTML) */
-  --shadow-glow-teal:   none;
+  /* Aliases de compatibilidad */
+  --shadow-glow-teal: none;
   --shadow-glow-purple: none;
-  --shadow-card:        var(--shadow-depth);
-  --shadow-card-hover:  var(--shadow-depth-hover);
-  --shadow-btn:         none;  /* Botones sin sombra en estado base */
-  --shadow-btn-hover:   var(--shadow-depth);
+  --shadow-card: var(--shadow-depth);
+  --shadow-card-hover: var(--shadow-depth-hover);
+  --shadow-btn: none;
+  --shadow-btn-hover: var(--shadow-depth);
 
-  /* ── Transiciones (Physical Motion / Apple Easing) ────────────
-     Curva Apple: arranque instantáneo, desaceleracíon suáve al final.
-     Elimina ease-in-out genérico. No hay animaciones infinitas en reposo.
-     cubic-bezier(0.25, 1, 0.5, 1) — la curva Ease Out Cubic de Apple. */
-  --transition-fast:   150ms cubic-bezier(0.25, 1, 0.5, 1);
-  --transition-base:   300ms cubic-bezier(0.25, 1, 0.5, 1);
-  --transition-slow:   500ms cubic-bezier(0.25, 1, 0.5, 1);
-  --transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1); /* Conservado para microinteracciones */
+  /* ── Transiciones (Physical Motion) ────────────────────────────
+     Curva Apple: arranque instantáneo, desaceleración suave al final. */
+  --transition-fast: 150ms cubic-bezier(0.25, 1, 0.5, 1);
+  --transition-base: 300ms cubic-bezier(0.25, 1, 0.5, 1);
+  --transition-slow: 500ms cubic-bezier(0.25, 1, 0.5, 1);
+  --transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* --- Z-index --- */
   --z-preloader: 9999;
-  --z-navbar:    1000;
-  --z-overlay:    800;
-  --z-dropdown:   900;
-  --z-base:         1;
+  --z-cursor: 9998;
+  --z-navbar: 1000;
+  --z-overlay: 800;
+  --z-dropdown: 900;
+  --z-base: 1;
 }
 
 
 /* ================================================================
    2. RESET & BASE STYLES
    ================================================================ */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -164,7 +193,8 @@ body.loading {
   overflow: hidden;
 }
 
-img, svg {
+img,
+svg {
   display: block;
   max-width: 100%;
 }
@@ -174,7 +204,8 @@ a {
   text-decoration: none;
 }
 
-ul, ol {
+ul,
+ol {
   list-style: none;
 }
 
@@ -185,7 +216,9 @@ button {
   font-family: inherit;
 }
 
-input, textarea, select {
+input,
+textarea,
+select {
   font-family: inherit;
 }
 
@@ -204,17 +237,20 @@ input, textarea, select {
 
 /* Scrollbar personalizada */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
+
 ::-webkit-scrollbar-track {
   background: var(--color-bg-deepest);
 }
+
 ::-webkit-scrollbar-thumb {
-  background: var(--color-teal);
+  background: var(--color-gold-dim);
   border-radius: var(--radius-full);
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-teal-light);
+  background: var(--color-gold);
 }
 
 
@@ -230,22 +266,16 @@ input, textarea, select {
   padding-inline: var(--container-pad);
 }
 
-/* Texto en gradiente Teal → Purple */
+/* Texto en acento dorado (sin gradiente — el gradiente teal→purple es firma de IA) */
 .gradient-text {
-  background: linear-gradient(135deg, var(--color-teal-light) 0%, var(--color-purple-light) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  padding-top: 0.15em;
-  margin-top: -0.15em;
-  padding-bottom: 0.1em;
-  margin-bottom: -0.1em;
+  color: var(--color-gold);
+  /* Usar color sólido elegante en lugar de gradiente IA */
   display: inline-block;
 }
 
-/* X de HummingX en color acento */
+/* X de HummingX en acento dorado */
 .accent-x {
-  color: var(--color-teal);
+  color: var(--color-gold);
 }
 
 /* Encabezados de sección */
@@ -258,12 +288,12 @@ input, textarea, select {
   display: inline-block;
   font-family: var(--font-body);
   font-size: var(--text-xs);
-  font-weight: 600;
-  letter-spacing: 0.15em;
+  font-weight: 500;
+  letter-spacing: 0.20em;
   text-transform: uppercase;
-  color: var(--color-teal);
-  background: rgba(13, 148, 136, 0.1);
-  border: 1px solid rgba(13, 148, 136, 0.3);
+  color: var(--color-gold);
+  background: rgba(201, 169, 110, 0.08);
+  border: 1px solid rgba(201, 169, 110, 0.18);
   padding: var(--space-1) var(--space-4);
   border-radius: var(--radius-full);
   margin-bottom: var(--space-6);
@@ -272,11 +302,14 @@ input, textarea, select {
 .section-title {
   font-family: var(--font-heading);
   font-size: clamp(var(--text-3xl), 5vw, var(--text-5xl));
-  font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
+  font-weight: 400;
+  /* DM Serif Display: el peso 400 ya es bold visualmente */
+  line-height: 1.15;
+  letter-spacing: -0.01em;
   color: var(--color-text-primary);
   margin-bottom: var(--space-6);
+  font-style: italic;
+  /* La itálica del serif editorial es su firma distintiva */
 }
 
 .section-subtitle {
@@ -313,9 +346,9 @@ input, textarea, select {
 
   /* ── Physical easing ─────────────────────────────────────────── */
   transition: transform var(--transition-base),
-              background-color var(--transition-base),
-              box-shadow var(--transition-base),
-              border-color var(--transition-base);
+    background-color var(--transition-base),
+    box-shadow var(--transition-base),
+    border-color var(--transition-base);
 
   position: relative;
   overflow: hidden;
@@ -327,13 +360,12 @@ input, textarea, select {
 /* ── Botón primario (Teal sólido, sin gradiente ruidoso) ──────── */
 .btn--primary {
   /* Gradiente muy sutil: añade dimensión sin ser "IA-generado" */
-  background: linear-gradient(
-    160deg,
-    var(--color-teal-light) 0%,
-    var(--color-teal) 100%
-  );
+  background: linear-gradient(160deg,
+      var(--color-teal-light) 0%,
+      var(--color-teal) 100%);
   color: #fff;
-  box-shadow: none; /* Sin sombra en reposo — la forma habla sola */
+  box-shadow: none;
+  /* Sin sombra en reposo — la forma habla sola */
 }
 
 .btn--primary:hover {
@@ -370,8 +402,9 @@ input, textarea, select {
 
 /* ── Botón de navbar ──────────────────────────────────────────── */
 .btn--nav {
-  background: linear-gradient(160deg, var(--color-teal-light) 0%, var(--color-teal) 100%);
-  color: #fff;
+  background: transparent;
+  color: var(--color-gold);
+  border: 1px solid rgba(201, 169, 110, 0.30);
   padding: var(--space-2) var(--space-5);
   font-size: var(--text-sm);
   border-radius: var(--radius-full);
@@ -379,7 +412,9 @@ input, textarea, select {
 }
 
 .btn--nav:hover {
-  box-shadow: var(--shadow-depth);
+  background: var(--color-gold);
+  color: #0C0C0D;
+  border-color: var(--color-gold);
   transform: translateY(-1px);
 }
 
@@ -397,12 +432,10 @@ input, textarea, select {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.10) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.10) 50%,
+      transparent 100%);
   transform: translateX(-100%);
   transition: transform 600ms cubic-bezier(0.25, 1, 0.5, 1);
 }
@@ -417,7 +450,7 @@ input, textarea, select {
    5. VIDEO DE FONDO Y PRELOADER MINIMALISTA — HummingX-BI
    ================================================================ */
 
-/* Contenedor del video de fondo controlado por scroll */
+/* Contenedor del video de fondo */
 #video-container {
   position: fixed;
   inset: 0;
@@ -425,11 +458,39 @@ input, textarea, select {
   width: 100%;
   height: 100vh;
   overflow: hidden;
-  background-color: #050b14;
+  background-color: var(--color-bg-deepest);
   opacity: 0;
   transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
-  pointer-events: none; /* No interfiere con clics */
+  pointer-events: none;
   will-change: opacity;
+}
+
+/* Ocultar video en móvil (iOS Safari no soporta autoplay background confiablemente) */
+@media (max-width: 768px),
+(hover: none) {
+  #video-container {
+    display: none !important;
+  }
+}
+
+/* Gradiente de fondo animado en móvil (reemplazo del video) */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  /* Por defecto (desktop): transparente — el video cubre el fondo */
+  background: transparent;
+  pointer-events: none;
+}
+
+@media (max-width: 768px),
+(hover: none) {
+  .hero::before {
+    background: radial-gradient(ellipse 120% 80% at 50% 0%,
+        rgba(201, 169, 110, 0.06) 0%,
+        rgba(12, 12, 13, 0) 60%);
+  }
 }
 
 #video-container video {
@@ -437,49 +498,48 @@ input, textarea, select {
   height: 100%;
   object-fit: cover;
   display: block;
-  transform: translate3d(0, 0, 0);
+  /* Zoom de 25% para recortar los bordes y ocultar la marca de agua de la IA */
+  transform: translate3d(0, 0, 0) scale(1.25);
   backface-visibility: hidden;
   will-change: transform;
 }
 
-/* Capa de oscurecimiento y gradiente sobre el video */
+/* Gradiente de oscurecimiento sobre el video */
 #video-container::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(5, 11, 20, 0.25) 0%,
-    rgba(5, 11, 20, 0.55) 50%,
-    rgba(5, 11, 20, 0.85) 100%
-  );
+  background: linear-gradient(180deg,
+      rgba(12, 12, 13, 0.30) 0%,
+      rgba(12, 12, 13, 0.60) 50%,
+      rgba(12, 12, 13, 0.88) 100%);
   pointer-events: none;
 }
 
-/* Contenedor principal del preloader: ocupa toda la pantalla */
+/* Preloader: barra de progreso ultra-delgada (estilo Linear/Stripe) */
 .preloader {
   position: fixed;
   inset: 0;
   z-index: var(--z-preloader);
-  background: #050b14;                /* Fondo oscuro profundo */
+  /* Fondo coincide con el color de la página — invisible excepto por la barra */
+  background: var(--color-bg-deepest);
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
-              visibility 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   visibility: visible;
   opacity: 1;
 }
 
-/* Estado: oculto */
 .preloader.is-hidden {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
 }
 
-/* Contenido centrado */
+/* Anillo y Contenedor del Preloader */
 .preloader__content {
   position: relative;
   z-index: 10;
@@ -490,32 +550,66 @@ input, textarea, select {
   width: 100%;
   max-width: 400px;
   padding: var(--space-6);
+  gap: var(--space-6);
 }
 
-/* Contenedor del logotipo del preloader */
-.preloader__logo-container {
-  width: 120px;
-  height: 120px;
+.preloader__ring-wrapper {
+  position: relative;
+  width: 110px;
+  height: 110px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: var(--space-4);
-  /* PURGA: logo-pulsate (2s infinite) — ELIMINADO.
-     El logo entra con fade-in una sola vez. Sin palpitaciones. */
-  animation: preloader-logo-in 0.6s cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+
+.preloader__ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg); /* Iniciar progreso en la parte superior */
+}
+
+.preloader__ring-track {
+  stroke: rgba(255, 255, 255, 0.03);
+}
+
+.preloader__ring-fill {
+  stroke: var(--color-gold);
+  transition: stroke-dashoffset 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+  filter: drop-shadow(0 0 6px rgba(201, 169, 110, 0.25));
 }
 
 .preloader__logo {
-  max-width: 100%;
-  max-height: 100%;
+  width: 50px;
+  height: 50px;
   object-fit: contain;
-  /* PURGA: drop-shadow(0 0 15px rgba(20,184,166,0.3)) — ELIMINADO.
-     El logo habla solo. Sin aureola de neón. */
+  opacity: 0.95;
+  filter: drop-shadow(0 0 15px rgba(201, 169, 110, 0.12));
+  animation: preloader-logo-in 0.8s cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+
+.preloader__brand-title {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--color-text-primary);
+  opacity: 0.75;
+  animation: preloader-title-in 1.2s cubic-bezier(0.25, 1, 0.5, 1) both;
 }
 
 @keyframes preloader-logo-in {
-  from { opacity: 0; transform: scale(0.92); }
-  to   { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* Título de marca */
@@ -541,12 +635,20 @@ input, textarea, select {
   color: var(--color-teal);
   padding: 1px 6px;
   border: 1px solid rgba(13, 148, 136, 0.4);
-  border-radius: var(--radius-xs); /* ↑ de 3px → 8px (squircle) */
+  border-radius: var(--radius-xs);
+  /* ↑ de 3px → 8px (squircle) */
 }
 
 @keyframes title-fade-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Texto de estado */
@@ -592,24 +694,49 @@ input, textarea, select {
 
 /* Se conservan los keyframes para el hover-while-hover (intent-driven) */
 @keyframes flap-top {
-  0%   { transform: rotate(-35deg) scaleX(0.7) scaleY(0.75) skewY(-5deg); }
-  100% { transform: rotate(42deg) scaleX(1.15) scaleY(1.05) skewY(8deg); }
+  0% {
+    transform: rotate(-35deg) scaleX(0.7) scaleY(0.75) skewY(-5deg);
+  }
+
+  100% {
+    transform: rotate(42deg) scaleX(1.15) scaleY(1.05) skewY(8deg);
+  }
 }
 
 @keyframes flap-bottom {
-  0%   { transform: rotate(35deg) scaleX(0.75) scaleY(0.7) skewY(5deg); }
-  100% { transform: rotate(-42deg) scaleX(1.1) scaleY(1.05) skewY(-8deg); }
+  0% {
+    transform: rotate(35deg) scaleX(0.75) scaleY(0.7) skewY(5deg);
+  }
+
+  100% {
+    transform: rotate(-42deg) scaleX(1.1) scaleY(1.05) skewY(-8deg);
+  }
 }
 
 @keyframes body-bob {
-  0%   { transform: translateY(-3px) rotate(-1.5deg); }
-  100% { transform: translateY(3px) rotate(1.5deg); }
+  0% {
+    transform: translateY(-3px) rotate(-1.5deg);
+  }
+
+  100% {
+    transform: translateY(3px) rotate(1.5deg);
+  }
 }
 
 @keyframes landing-flash {
-  0%   { transform: translate(-50%, -50%) scale(0.2); opacity: 0; }
-  10%  { opacity: 1; }
-  100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
+  0% {
+    transform: translate(-50%, -50%) scale(0.2);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(1.6);
+    opacity: 0;
+  }
 }
 
 /* ── Logo icono: hover minimalista ─────────────────────────────── */
@@ -619,7 +746,7 @@ input, textarea, select {
   object-fit: contain;
   flex-shrink: 0;
   transition: transform var(--transition-spring),
-              opacity var(--transition-base);
+    opacity var(--transition-base);
   will-change: transform;
 }
 
@@ -647,7 +774,8 @@ input, textarea, select {
 
 .main-content.is-visible {
   opacity: 1;
-  transform: none; /* Usa 'none' en lugar de 'translateY(0)' para no romper el position: fixed del header interno */
+  transform: none;
+  /* Usa 'none' en lugar de 'translateY(0)' para no romper el position: fixed del header interno */
 }
 
 
@@ -662,19 +790,17 @@ input, textarea, select {
   z-index: var(--z-navbar);
   padding-block: var(--space-4);
   transition: all var(--transition-base);
-  background: rgba(5, 11, 20, 0.45);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: transparent;
+  border-bottom: 1px solid transparent;
 }
 
-/* Navbar con blur al hacer scroll */
+/* Navbar con backdrop al hacer scroll */
 .nav-header.scrolled {
   padding-block: var(--space-3);
-  background: rgba(5, 11, 20, 0.88);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(12, 12, 13, 0.85);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
   border-bottom: 1px solid var(--color-border);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
 }
 
 .nav {
@@ -710,10 +836,10 @@ input, textarea, select {
 .nav__logo-sub {
   font-family: var(--font-body);
   font-size: var(--text-xs);
-  font-weight: 600;
-  color: var(--color-teal);
+  font-weight: 500;
+  color: var(--color-gold);
   padding: 1px 5px;
-  border: 1px solid var(--color-teal);
+  border: 1px solid rgba(201, 169, 110, 0.30);
   border-radius: 3px;
   letter-spacing: 0.15em;
   vertical-align: middle;
@@ -743,7 +869,7 @@ input, textarea, select {
   left: 0;
   width: 0;
   height: 1px;
-  background: var(--color-teal);
+  background: var(--color-gold);
   transition: width var(--transition-base);
 }
 
@@ -787,15 +913,17 @@ input, textarea, select {
 /* Hamburger → X cuando el menú está abierto */
 .nav__hamburger.is-active .hamburger-line:nth-child(1) {
   transform: translateY(6.5px) rotate(45deg);
-  background: var(--color-teal);
+  background: var(--color-gold);
 }
+
 .nav__hamburger.is-active .hamburger-line:nth-child(2) {
   opacity: 0;
   transform: scaleX(0);
 }
+
 .nav__hamburger.is-active .hamburger-line:nth-child(3) {
   transform: translateY(-6.5px) rotate(-45deg);
-  background: var(--color-teal);
+  background: var(--color-gold);
 }
 
 /* Menú móvil */
@@ -804,9 +932,9 @@ input, textarea, select {
   top: 100%;
   left: 0;
   right: 0;
-  background: rgba(7, 14, 26, 0.97);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(12, 12, 13, 0.97);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
   border-bottom: 1px solid var(--color-border);
   transform: translateY(-10px);
   opacity: 0;
@@ -871,7 +999,8 @@ input, textarea, select {
   width: 100%;
   height: 100%;
   z-index: 0;
-  opacity: 1; /* Eliminada la opacidad 0.6 para que brillen con todo su resplandor */
+  opacity: 1;
+  /* Eliminada la opacidad 0.6 para que brillen con todo su resplandor */
 }
 
 /* Rejilla decorativa de fondo */
@@ -903,8 +1032,8 @@ input, textarea, select {
   height: 600px;
   top: -200px;
   right: -200px;
-  /* Opacidad reducida: 0.12 → 0.06 (dentro del cap de glow) */
-  background: radial-gradient(circle, rgba(13, 148, 136, 0.06) 0%, transparent 70%);
+  /* Opacidad reducida: 0.12 → 0.06 (con color dorado champagne cálido) */
+  background: radial-gradient(circle, rgba(201, 169, 110, 0.06) 0%, transparent 70%);
 }
 
 .hero__orb--2 {
@@ -912,8 +1041,8 @@ input, textarea, select {
   height: 500px;
   bottom: -150px;
   left: -150px;
-  /* Opacidad reducida: 0.10 → 0.05 */
-  background: radial-gradient(circle, rgba(88, 28, 135, 0.05) 0%, transparent 70%);
+  /* Opacidad reducida: 0.10 → 0.05 (con dorado dim) */
+  background: radial-gradient(circle, rgba(168, 136, 90, 0.05) 0%, transparent 70%);
 }
 
 /* Contenido del hero */
@@ -928,46 +1057,42 @@ input, textarea, select {
   align-items: center;
 }
 
-/* Eyebrow label */
+/* Eyebrow label — refinado */
 .hero__eyebrow {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
   font-size: var(--text-xs);
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  font-weight: 500;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--color-teal);
-  background: rgba(13, 148, 136, 0.08);
-  border: 1px solid rgba(13, 148, 136, 0.25);
+  color: var(--color-gold);
+  background: rgba(201, 169, 110, 0.06);
+  border: 1px solid rgba(201, 169, 110, 0.15);
   padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-full);
   margin-bottom: var(--space-8);
 }
 
 .hero__eyebrow-dot {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
-  background: var(--color-teal);
-  /* PURGA: dot-blink (2s ease-in-out infinite) — ELIMINADO.
-     Un dot estático es más elegante. Si se desea indicar estado
-     activo, usar una transición de opacidad de 1 ciclo solamente. */
-  opacity: 1;
+  background: var(--color-gold);
+  opacity: 0.8;
 }
 
-/* @keyframes dot-blink — ELIMINADO */
-
-/* Titular principal */
+/* Título principal — DM Serif Display */
 .hero__title {
   font-family: var(--font-display);
   font-size: clamp(var(--text-4xl), 7vw, var(--text-7xl));
-  font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: 0.02em;
+  font-weight: 400;
+  /* DM Serif Display normal ya es impactante */
+  line-height: 1.05;
+  letter-spacing: -0.01em;
   color: var(--color-text-primary);
   margin-bottom: var(--space-8);
-  text-transform: uppercase;
+  /* Sin uppercase: el serif gana cuando tiene mayúsculas naturales */
 }
 
 /* Subtítulo */
@@ -1002,29 +1127,22 @@ input, textarea, select {
   /* Heredar border-radius: 9999px del sistema .btn — sin override */
 }
 
-/* Métricas de confianza — Apple Glass Material
-   blur(32px) saturate(180%) con baja opacidad: apariencia de cristal real */
+/* Métricas de confianza — Champagne Glass */
 .hero__metrics {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
   padding: var(--space-4) var(--space-6);
-
-  /* Material físico: cristal templado */
-  background: rgba(20, 20, 22, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.08); /* Hairline */
-  border-top: 1px solid rgba(255, 255, 255, 0.10); /* Bisel superior */
-  border-radius: var(--radius-xl); /* 32px */
-
-  /* Glass de alta calidad */
-  backdrop-filter: blur(32px) saturate(180%);
-  -webkit-backdrop-filter: blur(32px) saturate(180%);
-
+  background: rgba(28, 28, 30, 0.5);
+  border: 1px solid var(--color-border);
+  border-top: 1px solid rgba(201, 169, 110, 0.12);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
   max-width: fit-content;
   margin-inline: auto;
   gap: var(--space-4);
-  /* PURGA: box-shadow: 0 20px 40px -15px — reemplazado por hairline */
 }
 
 .hero__metric {
@@ -1038,16 +1156,19 @@ input, textarea, select {
 }
 
 .hero__metric-number {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--text-3xl);
-  font-weight: 700;
+  font-weight: 300;
+  /* Peso ligero: números grandes con peso ligero = lujo */
   color: var(--color-text-primary);
   line-height: 1;
+  letter-spacing: -0.02em;
 }
 
 .hero__metric-number span {
-  color: var(--color-teal);
+  color: var(--color-gold);
   font-size: var(--text-xl);
+  font-weight: 400;
 }
 
 .hero__metric-label {
@@ -1058,7 +1179,8 @@ input, textarea, select {
 }
 
 .hero__metric-divider {
-  display: none; /* Ocultar por defecto en móvil para evitar roturas visuales al envolver */
+  display: none;
+  /* Ocultar por defecto en móvil para evitar roturas visuales al envolver */
   width: 1px;
   height: 40px;
   background: var(--color-border);
@@ -1067,7 +1189,8 @@ input, textarea, select {
 
 /* Indicador de scroll */
 .hero__scroll-indicator {
-  display: none; /* Ocultar por defecto en móvil para evitar amontonamiento */
+  display: none;
+  /* Ocultar por defecto en móvil para evitar amontonamiento */
   position: absolute;
   bottom: var(--space-8);
   left: 50%;
@@ -1098,19 +1221,28 @@ input, textarea, select {
 }
 
 .scroll-dot {
-  width: 4px;
-  height: 8px;
-  background: var(--color-teal);
+  width: 3px;
+  height: 6px;
+  background: var(--color-gold);
   border-radius: var(--radius-full);
-  /* Conservado: único indicador de acción (scroll down) permitido.
-     Es intent-driven — le dice al usuario qué hacer. */
   animation: scroll-dot-anim 1.8s cubic-bezier(0.25, 1, 0.5, 1) infinite;
 }
 
 @keyframes scroll-dot-anim {
-  0%   { transform: translateY(0);    opacity: 1; }
-  80%  { transform: translateY(16px); opacity: 0; }
-  100% { transform: translateY(0);    opacity: 0; }
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  80% {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 0;
+  }
 }
 
 
@@ -1146,18 +1278,46 @@ input, textarea, select {
 }
 
 /* Delay escalonado para hijos de un grupo */
-.reveal-up:nth-child(1) { transition-delay: 0ms;   }
-.reveal-up:nth-child(2) { transition-delay: 100ms;  }
-.reveal-up:nth-child(3) { transition-delay: 200ms;  }
-.reveal-up:nth-child(4) { transition-delay: 300ms;  }
-.reveal-up:nth-child(5) { transition-delay: 400ms;  }
+.reveal-up:nth-child(1) {
+  transition-delay: 0ms;
+}
+
+.reveal-up:nth-child(2) {
+  transition-delay: 100ms;
+}
+
+.reveal-up:nth-child(3) {
+  transition-delay: 200ms;
+}
+
+.reveal-up:nth-child(4) {
+  transition-delay: 300ms;
+}
+
+.reveal-up:nth-child(5) {
+  transition-delay: 400ms;
+}
 
 /* Dentro del hero: delay acumulado por clase custom */
-.hero__eyebrow.reveal-up  { transition-delay: 300ms; }
-.hero__title.reveal-up    { transition-delay: 450ms; }
-.hero__subtitle.reveal-up { transition-delay: 600ms; }
-.hero__cta-group.reveal-up{ transition-delay: 750ms; }
-.hero__metrics.reveal-up  { transition-delay: 900ms; }
+.hero__eyebrow.reveal-up {
+  transition-delay: 300ms;
+}
+
+.hero__title.reveal-up {
+  transition-delay: 450ms;
+}
+
+.hero__subtitle.reveal-up {
+  transition-delay: 600ms;
+}
+
+.hero__cta-group.reveal-up {
+  transition-delay: 750ms;
+}
+
+.hero__metrics.reveal-up {
+  transition-delay: 900ms;
+}
 
 
 /* ================================================================
@@ -1226,15 +1386,19 @@ input, textarea, select {
   .hero {
     padding-block: var(--space-24) var(--space-20);
   }
+
   .hero__eyebrow {
     margin-bottom: var(--space-4);
   }
+
   .hero__title {
     margin-bottom: var(--space-4);
   }
+
   .hero__subtitle {
     margin-bottom: var(--space-6);
   }
+
   .hero__cta-group {
     margin-bottom: var(--space-10);
   }
@@ -1242,7 +1406,10 @@ input, textarea, select {
 
 /* Preferencias de movimiento reducido */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -1263,6 +1430,7 @@ input, textarea, select {
    11. MEJORAS HERO EN MÓVIL — Respiración y organización
    ================================================================ */
 @media (max-width: 767px) {
+
   /* Ocultar botón Iniciar Proyecto del navbar en móvil para evitar amontonamiento */
   #nav-cta-btn {
     display: none;
@@ -1272,7 +1440,8 @@ input, textarea, select {
   .hero {
     padding-block: var(--space-20) var(--space-16);
     justify-content: flex-start;
-    padding-top: calc(var(--space-20) + 60px); /* Navbar + espacio */
+    padding-top: calc(var(--space-20) + 60px);
+    /* Navbar + espacio */
   }
 
   .hero__content {
@@ -1356,4 +1525,3 @@ input, textarea, select {
     display: none;
   }
 }
-

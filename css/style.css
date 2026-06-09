@@ -357,20 +357,21 @@ select {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* ── Botón primario (Teal sólido, sin gradiente ruidoso) ──────── */
+/* ── Botón primario (Efecto Burbuja / Glassmorphism) ──────── */
 .btn--primary {
-  /* Gradiente muy sutil: añade dimensión sin ser "IA-generado" */
-  background: linear-gradient(160deg,
-      var(--color-teal-light) 0%,
-      var(--color-teal) 100%);
-  color: #fff;
+  background: rgba(201, 169, 110, 0.1); /* Fondo muy sutil tintado de amarillo/dorado */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--color-gold);
+  border: 1px solid var(--color-gold);
   box-shadow: none;
-  /* Sin sombra en reposo — la forma habla sola */
 }
 
 .btn--primary:hover {
-  /* Solo profundidad neutral — sin explosiones de color neón */
-  box-shadow: var(--shadow-depth);
+  background: rgba(201, 169, 110, 0.2);
+  color: var(--color-gold-light);
+  border-color: var(--color-gold-light);
+  box-shadow: 0 0 20px rgba(201, 169, 110, 0.15);
   transform: translateY(-2px);
 }
 
@@ -434,7 +435,7 @@ select {
   inset: 0;
   background: linear-gradient(90deg,
       transparent 0%,
-      rgba(255, 255, 255, 0.10) 50%,
+      rgba(201, 169, 110, 0.25) 50%,
       transparent 100%);
   transform: translateX(-100%);
   transition: transform 600ms cubic-bezier(0.25, 1, 0.5, 1);

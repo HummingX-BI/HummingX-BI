@@ -31,7 +31,7 @@
   <!-- Favicons optimizados para Google Search -->
   <link rel="icon" type="image/png" href="humming-logo.png" sizes="any" />
   <link rel="apple-touch-icon" href="humming-logo.png" />
-  
+
   <!-- Datos estructurados para que Google asigne el logo oficial a la marca -->
   <script type="application/ld+json">
   {
@@ -275,119 +275,49 @@
           </p>
         </div>
 
-        <!-- Grid de tarjetas Glassmorphism -->
-        <div class="attributes__grid" role="list">
+        <!-- Acordeón Minimalista (Hover/Click Reveal) -->
+        <div class="accordion-minimal" role="tablist">
 
-          <!-- Tarjeta 1: Arquitectura Ágil -->
-          <article class="attr-card reveal-up" role="listitem" tabindex="0" id="attr-card-agil">
-            <div class="attr-card__glow" aria-hidden="true"></div>
-            <div class="attr-card__border-top" aria-hidden="true"></div>
-            <div class="attr-card__icon-wrapper" aria-hidden="true">
-              <svg class="attr-card__icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <!-- Ícono: flechas omnidireccionales -->
-                <circle cx="24" cy="24" r="22" stroke="url(#grad1)" stroke-width="1.5" opacity="0.3" />
-                <path d="M24 8 L24 16 M24 32 L24 40 M8 24 L16 24 M32 24 L40 24" stroke="#0D9488" stroke-width="2"
-                  stroke-linecap="round" />
-                <path d="M13 13 L18 18 M30 30 L35 35 M13 35 L18 30 M30 18 L35 13" stroke="#0D9488" stroke-width="1.5"
-                  stroke-linecap="round" opacity="0.6" />
-                <circle cx="24" cy="24" r="5" fill="none" stroke="#0D9488" stroke-width="2" />
-                <circle cx="24" cy="24" r="2" fill="#0D9488" />
-                <defs>
-                  <linearGradient id="grad1" x1="0" y1="0" x2="48" y2="48">
-                    <stop offset="0%" stop-color="#0D9488" />
-                    <stop offset="100%" stop-color="#581C87" />
-                  </linearGradient>
-                </defs>
-              </svg>
+          <div class="accordion-item reveal-up active" role="tab" tabindex="0">
+            <div class="accordion-item__header">
+              <h3 class="accordion-item__title">Arquitectura Ágil</h3>
+              <span class="accordion-item__icon" aria-hidden="true"></span>
             </div>
-            <div class="attr-card__content">
-              <h3 class="attr-card__title">Arquitectura Ágil</h3>
-              <p class="attr-card__description">
-                Sistemas modulares y cloud-native diseñados para escalar sin fricción.
-              </p>
-              <ul class="attr-card__tags" aria-label="Tecnologías">
-                <li>Microservicios</li>
-                <li>Cloud</li>
-                <li>API-First</li>
-              </ul>
+            <div class="accordion-item__content">
+              <p>Sistemas modulares y cloud-native diseñados para escalar sin fricción. Reducimos tu deuda técnica desde
+                el día cero.</p>
+              <div class="accordion-item__tags">
+                <span>Microservicios</span><span>Cloud</span><span>API-First</span>
+              </div>
             </div>
-          </article>
+          </div>
 
-          <!-- Tarjeta 2: Precisión de Código -->
-          <article class="attr-card attr-card--center reveal-up" role="listitem" tabindex="0" id="attr-card-precision">
-            <div class="attr-card__glow" aria-hidden="true"></div>
-            <div class="attr-card__border-top" aria-hidden="true"></div>
-            <div class="attr-card__icon-wrapper" aria-hidden="true">
-              <svg class="attr-card__icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <!-- Ícono: retícula de precisión / crosshair -->
-                <circle cx="24" cy="24" r="20" stroke="url(#grad2)" stroke-width="1" opacity="0.3" />
-                <circle cx="24" cy="24" r="12" stroke="#0D9488" stroke-width="1.5" opacity="0.6" />
-                <circle cx="24" cy="24" r="4" stroke="#0D9488" stroke-width="2" />
-                <path d="M24 4 L24 12 M24 36 L24 44 M4 24 L12 24 M36 24 L44 24" stroke="white" stroke-width="1.5"
-                  stroke-linecap="round" opacity="0.5" />
-                <!-- Líneas de mira diagonal -->
-                <path d="M 14 14 L 18 18 M 30 30 L 34 34 M 14 34 L 18 30 M 30 18 L 34 14" stroke="#581C87"
-                  stroke-width="1.5" stroke-linecap="round" opacity="0.7" />
-                <defs>
-                  <linearGradient id="grad2" x1="0" y1="0" x2="48" y2="48">
-                    <stop offset="0%" stop-color="#581C87" />
-                    <stop offset="100%" stop-color="#0D9488" />
-                  </linearGradient>
-                </defs>
-              </svg>
+          <div class="accordion-item reveal-up" role="tab" tabindex="0">
+            <div class="accordion-item__header">
+              <h3 class="accordion-item__title">Precisión de Código</h3>
+              <span class="accordion-item__icon" aria-hidden="true"></span>
             </div>
-            <div class="attr-card__content">
-              <h3 class="attr-card__title">Precisión de Código</h3>
-              <p class="attr-card__description">
-                Código limpio y optimizado. Máxima estabilidad y rendimiento en producción.
-              </p>
-              <ul class="attr-card__tags" aria-label="Prácticas">
-                <li>Clean Code</li>
-                <li>CI/CD</li>
-                <li>Testing</li>
-              </ul>
+            <div class="accordion-item__content">
+              <p>Código limpio, testeado y optimizado. Máxima estabilidad y rendimiento en producción bajo cualquier
+                carga.</p>
+              <div class="accordion-item__tags">
+                <span>Clean Code</span><span>CI/CD</span><span>Testing</span>
+              </div>
             </div>
-          </article>
+          </div>
 
-          <!-- Tarjeta 3: Conexión Absoluta -->
-          <article class="attr-card reveal-up" role="listitem" tabindex="0" id="attr-card-conexion">
-            <div class="attr-card__glow" aria-hidden="true"></div>
-            <div class="attr-card__border-top" aria-hidden="true"></div>
-            <div class="attr-card__icon-wrapper" aria-hidden="true">
-              <svg class="attr-card__icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <!-- Ícono: red de nodos / flujo de datos -->
-                <circle cx="24" cy="24" r="4" fill="#0D9488" />
-                <circle cx="8" cy="12" r="3" fill="#581C87" opacity="0.8" />
-                <circle cx="40" cy="12" r="3" fill="#0D9488" opacity="0.8" />
-                <circle cx="8" cy="36" r="3" fill="#0D9488" opacity="0.8" />
-                <circle cx="40" cy="36" r="3" fill="#581C87" opacity="0.8" />
-                <circle cx="24" cy="6" r="2.5" fill="white" opacity="0.5" />
-                <circle cx="24" cy="42" r="2.5" fill="white" opacity="0.5" />
-                <path d="M24 24 L8 12 M24 24 L40 12 M24 24 L8 36 M24 24 L40 36 M24 24 L24 6 M24 24 L24 42"
-                  stroke="url(#grad3)" stroke-width="1.5" opacity="0.6" />
-                <!-- Pulso animado -->
-                <circle class="node-pulse" cx="24" cy="24" r="8" stroke="#0D9488" stroke-width="1" fill="none"
-                  opacity="0.4" />
-                <defs>
-                  <linearGradient id="grad3" x1="0" y1="0" x2="48" y2="48">
-                    <stop offset="0%" stop-color="#0D9488" />
-                    <stop offset="100%" stop-color="#581C87" />
-                  </linearGradient>
-                </defs>
-              </svg>
+          <div class="accordion-item reveal-up" role="tab" tabindex="0">
+            <div class="accordion-item__header">
+              <h3 class="accordion-item__title">Conexión Absoluta</h3>
+              <span class="accordion-item__icon" aria-hidden="true"></span>
             </div>
-            <div class="attr-card__content">
-              <h3 class="attr-card__title">Conexión Absoluta</h3>
-              <p class="attr-card__description">
-                Integraciones robustas y flujos de datos en tiempo real para decisiones inteligentes.
-              </p>
-              <ul class="attr-card__tags" aria-label="Servicios">
-                <li>BI & Analytics</li>
-                <li>Real-time</li>
-                <li>Integraciones</li>
-              </ul>
+            <div class="accordion-item__content">
+              <p>Integraciones robustas y flujos de datos en tiempo real para decisiones inteligentes.</p>
+              <div class="accordion-item__tags">
+                <span>BI & Analytics</span><span>Real-time</span><span>Integraciones</span>
+              </div>
             </div>
-          </article>
+          </div>
 
         </div>
       </div>

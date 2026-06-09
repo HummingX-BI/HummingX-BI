@@ -266,12 +266,12 @@ const ParticlesModule = (() => {
   const IS_MOBILE_DEVICE = ('ontouchstart' in window) || (window.innerWidth <= 768);
 
   const PARTICLE_CONFIG = {
-    count: IS_MOBILE_DEVICE ? 35 : 60,   // Nodos reactivados en móvil
+    count: IS_MOBILE_DEVICE ? 60 : 60,   // Saturación balanceada
     maxRadius: 1.8,
     speed: IS_MOBILE_DEVICE ? 0.08 : 0.20,
-    connectDist: IS_MOBILE_DEVICE ? 60 : 120,
-    color: '201, 169, 110',  // RGB del champagne dorado
-    opacity: 0.6,
+    connectDist: IS_MOBILE_DEVICE ? 80 : 120, // Mayor distancia en móvil para más conexiones
+    color: 'rgba(201, 169, 110, 0.45)',  // --color-gold base
+    maxZ: IS_MOBILE_DEVICE ? 150 : 100, // Mayor Z en móvil da más efecto 3D borroso
   };
 
 
@@ -303,7 +303,7 @@ const ParticlesModule = (() => {
     draw() {
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${PARTICLE_CONFIG.color}, ${this.alpha})`;
+      ctx.fillStyle = PARTICLE_CONFIG.color;
       ctx.fill();
     }
   }
@@ -325,7 +325,7 @@ const ParticlesModule = (() => {
           ctx.beginPath();
           ctx.moveTo(particles[i].x, particles[i].y);
           ctx.lineTo(particles[j].x, particles[j].y);
-          ctx.strokeStyle = `rgba(${PARTICLE_CONFIG.color}, ${alpha})`;
+          ctx.strokeStyle = `rgba(201, 169, 110, ${alpha})`;
           ctx.lineWidth = 0.5;
           ctx.stroke();
         }
@@ -513,54 +513,27 @@ const CountersModule = (() => {
 
 
 /* ================================================================
-   7. MÓDULO: TARJETAS 3D TILT
-   Efecto de inclinación 3D sutil cuando el cursor se mueve
-   sobre las tarjetas de atributos.
+   7. MÓDULO: ACORDEÓN MINIMALISTA (Filosofía)
    ================================================================ */
-const CardTiltModule = (() => {
-  const TILT_MAX = 8; // grados máximos de inclinación
-
-  function applyTilt(card, e) {
-    const rect = card.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const dx = (e.clientX - centerX) / (rect.width / 2);
-    const dy = (e.clientY - centerY) / (rect.height / 2);
-
-    const rotateX = -dy * TILT_MAX;
-    const rotateY = dx * TILT_MAX;
-
-    card.style.transform = `
-      translateY(-8px)
-      rotateX(${rotateX}deg)
-      rotateY(${rotateY}deg)
-    `;
-  }
-
-  function resetTilt(card) {
-    card.style.transform = '';
-    card.style.transition = 'transform 0.5s ease, box-shadow 0.3s ease, border-color 0.3s ease';
-    // Restaurar transición corta después del reset
-    setTimeout(() => {
-      card.style.transition = '';
-    }, 500);
-  }
-
+const AccordionModule = (() => {
   function init() {
-    // Solo aplicar en dispositivos con pointer (no touch-only)
-    if (!window.matchMedia('(hover: hover)').matches) return;
+    const items = document.querySelectorAll('.accordion-item');
+    if (!items.length) return;
 
-    const cards = document.querySelectorAll('.attr-card');
+    items.forEach(item => {
+      // Interacción en desktop (hover)
+      item.addEventListener('mouseenter', () => {
+        items.forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+      });
 
-    cards.forEach(card => {
-      card.addEventListener('mousemove', e => applyTilt(card, e));
-      card.addEventListener('mouseleave', () => resetTilt(card));
-      card.addEventListener('mouseenter', () => {
-        card.style.transition = 'box-shadow 0.3s ease, border-color 0.3s ease';
+      // Interacción en móvil (toque)
+      item.addEventListener('click', () => {
+        items.forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
       });
     });
   }
-
   return { init };
 })();
 
@@ -1326,7 +1299,7 @@ function initApp() {
       ParticlesModule.init();
       ScrollRevealModule.init();
       CountersModule.init();
-      CardTiltModule.init();
+      AccordionModule.init();
       MagneticCursorModule.init();
       FormModule.init();
       SendButtonsModule.init();

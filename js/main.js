@@ -918,62 +918,20 @@ const LeadIngestionModule = (() => {
       return;
     }
 
-    // Mostrar estado de carga
+    // Mostrar estado de carga breve para feedback visual
     showLoader();
 
-    // AbortController para timeout configurable
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), CONFIG.FETCH_TIMEOUT_MS);
-
-    try {
-      const payload = buildLeadPayload(formData, channel);
-
-      // ── Petición POST al endpoint serverless ────────────────────
-      const response = await fetch(CONFIG.LEAD_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // El microservicio Spring Boot puede exigir un token de API:
-          // 'X-API-Key': CONFIG.API_KEY,
-        },
-        body: JSON.stringify(payload),
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        // El servidor respondió con un error HTTP (4xx / 5xx)
-        const errorBody = await response.text().catch(() => 'Sin detalle');
-        throw new Error(`HTTP ${response.status}: ${errorBody}`);
-      }
-
-      // ── 200 OK: Mostrar pantalla de éxito ──────────────────────
+    // Como no hay un backend conectado actualmente, redirigimos directamente
+    // a los canales seleccionados (WhatsApp, Facebook, etc.)
+    setTimeout(() => {
       hideLoader();
+      
+      // Abrir el canal directo elegido (WhatsApp, FB, IG)
+      SendButtonsModule.sendDirect(channel, formData);
+      
+      // Mostrar la pantalla de éxito
       FormModule.showSuccess();
-
-      console.info('[LeadIngestion] ✓ Lead enviado correctamente al endpoint.');
-
-    } catch (error) {
-      clearTimeout(timeoutId);
-      hideLoader();
-
-      const isAbort = error.name === 'AbortError';
-      const msg = isAbort
-        ? 'Tiempo de espera agotado. Abriendo canal directo...'
-        : 'No se pudo conectar al servidor. Abriendo canal directo...';
-
-      console.warn(`[LeadIngestion] ⚠ Fallback activado. Error: ${error.message}`);
-      SendButtonsModule.showToast(msg);
-
-      // ── Fallback: abrir el canal directo elegido ────────────────
-      // Permite que el lead no se pierda aunque el servidor esté caído.
-      setTimeout(() => {
-        SendButtonsModule.sendDirect(channel, formData);
-        // Mostrar éxito de todos modos para no frustrar al usuario
-        FormModule.showSuccess();
-      }, 1200);
-    }
+    }, 800);
   }
 
   function init() {

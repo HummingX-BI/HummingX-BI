@@ -266,7 +266,7 @@ const ParticlesModule = (() => {
   const IS_MOBILE_DEVICE = ('ontouchstart' in window) || (window.innerWidth <= 768);
 
   const PARTICLE_CONFIG = {
-    count: IS_MOBILE_DEVICE ? 0 : 60,   // Cero en móvil (video desactivado, fondo simple)
+    count: IS_MOBILE_DEVICE ? 35 : 60,   // Nodos reactivados en móvil
     maxRadius: 1.8,
     speed: IS_MOBILE_DEVICE ? 0.08 : 0.20,
     connectDist: IS_MOBILE_DEVICE ? 60 : 120,
@@ -278,6 +278,8 @@ const ParticlesModule = (() => {
   class Particle {
     constructor() {
       this.reset();
+      // Asignar una profundidad aleatoria (Z) para el efecto parallax 3D
+      this.z = Math.random() * 0.5 + 0.1;
     }
 
     reset() {
@@ -388,6 +390,26 @@ const ParticlesModule = (() => {
         loop();
       }
     });
+
+    // Efecto parallax 3D en nodos al hacer scroll
+    let lastScrollY = window.scrollY;
+    window.addEventListener('scroll', () => {
+      const currentScrollY = window.scrollY;
+      const deltaY = currentScrollY - lastScrollY;
+      lastScrollY = currentScrollY;
+
+      // Solo calcular si estamos en la parte superior (hero)
+      if (currentScrollY <= H * 1.5) {
+        particles.forEach(p => {
+          // Nodos con mayor profundidad (z) se mueven más rápido
+          p.y -= deltaY * (p.z * 0.8);
+          
+          // Reaparecer en los bordes opuestos si se salen por el scroll
+          if (p.y < 0) p.y += H;
+          if (p.y > H) p.y -= H;
+        });
+      }
+    }, { passive: true });
 
     loop();
   }

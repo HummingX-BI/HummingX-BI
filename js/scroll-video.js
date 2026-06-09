@@ -1,189 +1,106 @@
 /**
  * ================================================================
- * HummingX-BI — Controlador de Video por Scroll (Refactorizado v2.0)
+ * HummingX-BI — Controlador de Video (Refactorizado v3.0)
  * ================================================================
  *
- * FASE 1 — OPTIMIZACIÓN DE PERFORMANCE (LCP / TTI):
- *
- * Patrón: Lazy-load con IntersectionObserver
- * -------------------------------------------------
- * El video NO se carga en el arranque. En su lugar:
- *
- *  1. El HTML usa data-src (no src) + preload="metadata" + poster.
- *  2. Un IntersectionObserver con rootMargin="200px" detecta cuando
- *     el contenedor está a 200px de entrar en el viewport.
- *  3. En ese momento se asigna el src real desde data-src, se llama
- *     video.load() y se inicia el bucle de renderizado Lerp.
- *  4. El observer se desconecta inmediatamente tras la asignación
- *     para no consumir recursos de observación.
- *
- * Esto libera el hilo principal durante la carga inicial y mejora
- * drásticamente los scores de FCP, LCP y TTI en Lighthouse.
- *
- * Patrón: Scroll-Scrubbing con Lerp
- * -------------------------------------------------
- * Vincula el desplazamiento vertical con el currentTime del video
- * usando interpolación lineal en un bucle requestAnimationFrame
- * para un efecto ultra suave (estilo Apple).
+ * OPTIMIZACIÓN DE PERFORMANCE:
+ * Se eliminó el "scroll-scrubbing" (cambiar video.currentTime por scroll)
+ * ya que decodificar deltas de MP4 en tiempo real bloqueaba el hilo
+ * principal y generaba lag ("trabado").
+ * 
+ * Nueva aproximación "Apple-tier":
+ * 1. Autoplay inteligente: El video corre de forma natural y fluida,
+ *    pero se PAUSA automáticamente cuando el Hero sale de pantalla.
+ * 2. Parallax Lerp: En lugar de frotar los frames del video, desplazamos
+ *    físicamente el contenedor (transform: translateY) usando Lerp
+ *    para crear la sensación de profundidad a 60fps constantes.
  * ================================================================
  */
 
 'use strict';
 
 (function initScrollVideo() {
-
-  // ─── Referencias al DOM ───────────────────────────────────────────
   const container = document.getElementById('video-container');
   const video = container ? container.querySelector('video') : null;
 
-  if (!video) {
-    console.warn('[ScrollVideo] No se encontró el elemento <video> en #video-container.');
-    return;
-  }
+  if (!video) return;
 
-  // ─── Estado interno ───────────────────────────────────────────────
-  let targetTime   = 0;
-  let currentTime  = 0;
-  const LERP_FACTOR = 0.05; // Suavizado (menor = más fluido / lento)
-  let videoDuration = 0;
-  let isReady       = false;
-  let rafId         = null;
+  let isVideoLoaded = false;
 
-  // ─── FASE 1A: Verificación de duración robusta ────────────────────
-  /**
-   * Verifica que el video tenga duración cargada y lo marca como listo.
-   * Se llama desde múltiples eventos para garantizar el dato en cualquier
-   * estado de buffering del navegador.
-   */
-  function checkDuration() {
-    if (video.duration && video.duration > 0 && !isReady) {
-      videoDuration = video.duration;
-      isReady = true;
-
-      // Revelar el contenedor con fade-in suave
-      container.style.opacity = '1';
-      console.info(`[ScrollVideo] ✓ Video listo. Duración: ${videoDuration.toFixed(2)}s`);
-
-      // Iniciar el bucle de renderizado
-      startRenderLoop();
-    }
-  }
-
-  // ─── FASE 1B: IntersectionObserver para lazy-load del src ────────
-  /**
-   * Solo cuando el contenedor se acerca al viewport se asigna el src
-   * real del video (desde data-src). Esto evita que el navegador inicie
-   * la descarga durante la carga inicial, mejorando TTI y liberando
-   * el hilo principal para el renderizado crítico.
-   *
-   * rootMargin: "200px" → Dispara 200px antes de entrar al viewport,
-   * dando tiempo suficiente para que el video bufferice el inicio.
-   */
-  const videoObserver = new IntersectionObserver(
-    (entries, observer) => {
+  // ─── FASE 1: Lazy-Load y Autoplay Inteligente ───────────────────
+  const playbackObserver = new IntersectionObserver(
+    (entries) => {
       entries.forEach(entry => {
-        if (!entry.isIntersecting) return;
-
-        const dataSrc = video.getAttribute('data-src');
-
-        if (dataSrc && !video.src) {
-          // Asignar src real — el navegador iniciará la descarga ahora
-          video.src = dataSrc;
-          video.removeAttribute('data-src'); // Limpiar el atributo data-src
-
-          // Suscribir eventos de metadatos ANTES de video.load()
-          video.addEventListener('loadedmetadata', checkDuration, { once: false });
-          video.addEventListener('loadeddata',     checkDuration, { once: false });
-          video.addEventListener('canplay',        checkDuration, { once: false });
-
-          // Iniciar la carga
-          video.load();
-
-          console.info('[ScrollVideo] → src asignado. Iniciando descarga de video.');
+        if (entry.isIntersecting) {
+          // Si es la primera vez, cargar el src real
+          const dataSrc = video.getAttribute('data-src');
+          if (dataSrc) {
+            video.src = dataSrc;
+            video.removeAttribute('data-src');
+            video.load();
+            
+            // Revelar suavemente una vez que los datos carguen
+            video.addEventListener('canplay', () => {
+              if (!isVideoLoaded) {
+                isVideoLoaded = true;
+                container.style.opacity = '1';
+                video.play().catch(e => console.warn('Autoplay evitado por el navegador:', e));
+              }
+            }, { once: true });
+          } else if (isVideoLoaded) {
+            // Ya estaba cargado, solo reanudar
+            video.play().catch(e => {});
+          }
+        } else {
+          // Si salió de pantalla, pausar para ahorrar batería y CPU
+          if (isVideoLoaded) {
+            video.pause();
+          }
         }
-
-        // Desconectar el observer: la tarea de inicialización ya terminó
-        observer.unobserve(entry.target);
-        observer.disconnect();
       });
     },
-    {
-      root: null,        // viewport
-      rootMargin: '200px', // Pre-cargar 200px antes de entrar en pantalla
-      threshold: 0,
-    }
+    { rootMargin: '200px' }
   );
 
-  // Intervalo de seguridad para detectar duración si los eventos
-  // se disparan antes de que los listeners estén registrados
-  const safetyInterval = setInterval(() => {
-    checkDuration();
-    if (isReady) clearInterval(safetyInterval);
-  }, 250);
+  playbackObserver.observe(container);
 
-  // Comenzar a observar el contenedor
-  videoObserver.observe(container);
+  // ─── FASE 2: Efecto Parallax con Lerp (60fps) ────────────────────
+  let scrollY = window.scrollY;
+  let currentTranslateY = 0;
+  const parallaxFactor = 0.4; // Qué tan rápido se mueve el fondo respecto al scroll
+  const lerpFactor = 0.08;
+  let rafId = null;
 
-  // ─── Listener de scroll (pasivo para no bloquear el hilo) ────────
   window.addEventListener('scroll', () => {
-    if (!videoDuration) return;
-
-    const scrollTop  = window.scrollY;
-    const maxScroll  = document.documentElement.scrollHeight - window.innerHeight;
-
-    if (maxScroll <= 0) return;
-
-    // Mapear la fracción del scroll total a la duración del video
-    const scrollFraction = Math.max(0, Math.min(1, scrollTop / maxScroll));
-    targetTime = scrollFraction * videoDuration;
+    scrollY = window.scrollY;
   }, { passive: true });
 
-  // ─── Bucle de renderizado con Lerp ───────────────────────────────
-  /**
-   * Fórmula Lerp: current = current + (target - current) * factor
-   * Produce un suavizado exponencial que nunca llega al objetivo de
-   * forma abrupta, creando el efecto "cinético" característico de Apple.
-   */
-  function renderLoop() {
-    if (isReady) {
-      // Interpolación lineal
-      currentTime += (targetTime - currentTime) * LERP_FACTOR;
-
-      // Clamp para evitar bugs de reproducción en el frame final
-      if (currentTime < 0) currentTime = 0;
-      if (currentTime > videoDuration - 0.02) {
-        currentTime = videoDuration - 0.02;
-      }
-
-      // Solo actualizar si el delta es perceptible (evita escrituras innecesarias)
-      if (Math.abs(video.currentTime - currentTime) > 0.005) {
-        try {
-          video.currentTime = currentTime;
-        } catch (_e) {
-          // Silenciar errores de currentTime en estado HAVE_NOTHING
-        }
+  function renderParallax() {
+    // Si el scroll pasó el primer 100vh, detener el cálculo
+    if (scrollY <= window.innerHeight * 1.5) {
+      const targetTranslateY = scrollY * parallaxFactor;
+      currentTranslateY += (targetTranslateY - currentTranslateY) * lerpFactor;
+      
+      // Aplicar el transform a la etiqueta video dentro del contenedor
+      // Usamos translate3d para forzar aceleración por hardware (GPU)
+      if (Math.abs(targetTranslateY - currentTranslateY) > 0.1) {
+        video.style.transform = `translate3d(0, ${currentTranslateY}px, 0)`;
       }
     }
-
-    rafId = requestAnimationFrame(renderLoop);
+    rafId = requestAnimationFrame(renderParallax);
   }
 
-  function startRenderLoop() {
-    if (rafId) return; // Prevenir múltiples bucles
-    renderLoop();
-  }
+  // Iniciar el render loop de parallax
+  renderParallax();
 
-  // ─── Gestión de visibilidad de pestaña ───────────────────────────
-  // Pausar el bucle cuando la pestaña está en segundo plano para
-  // no consumir recursos de CPU/GPU innecesariamente.
+  // Pausar el cálculo si la pestaña no es visible
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
-      if (rafId) {
-        cancelAnimationFrame(rafId);
-        rafId = null;
-      }
-    } else if (isReady) {
-      startRenderLoop();
+      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+      video.pause();
+    } else {
+      if (!rafId) renderParallax();
+      if (isVideoLoaded && scrollY < window.innerHeight) video.play();
     }
   });
 

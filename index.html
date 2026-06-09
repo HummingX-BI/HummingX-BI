@@ -12,24 +12,38 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description"
-    content="HummingX-BI — Ingeniería de Software de Alta Precisión. Aceleramos la evolución digital de tu negocio con arquitectura escalable y rendimiento absoluto." />
+    content="Desarrollo de software a medida e inteligencia de negocios. Escalamos tu empresa con arquitectura de élite y rendimiento absoluto." />
   <meta name="keywords"
     content="desarrollo de software, inteligencia de negocios, BI, arquitectura escalable, HummingX" />
-  <meta property="og:title" content="HummingX-BI — Ingeniería de Software de Alta Precisión" />
+  <meta property="og:title" content="HummingX-BI — Ingeniería de Software" />
   <meta property="og:description"
-    content="Aceleramos la evolución digital de tu negocio con arquitectura escalable y rendimiento absoluto." />
+    content="Desarrollo de software a medida e inteligencia de negocios. Escalamos tu empresa con arquitectura de élite y rendimiento absoluto." />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="https://hummingxbi.com/humming-logo.png" />
   <!-- Twitter Card Data -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="HummingX-BI — Ingeniería de Software de Alta Precisión" />
+  <meta name="twitter:title" content="HummingX-BI — Ingeniería de Software" />
   <meta name="twitter:description"
-    content="Aceleramos la evolución digital de tu negocio con arquitectura escalable y rendimiento absoluto." />
+    content="Desarrollo de software a medida e inteligencia de negocios. Escalamos tu empresa con arquitectura de élite y rendimiento absoluto." />
   <meta name="twitter:image" content="https://hummingxbi.com/humming-logo.png" />
   <title>HummingX-BI</title>
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="humming-logo.png" />
+  <!-- Favicons optimizados para Google Search -->
+  <link rel="icon" type="image/png" href="humming-logo.png" sizes="any" />
+  <link rel="apple-touch-icon" href="humming-logo.png" />
+  
+  <!-- Datos estructurados para que Google asigne el logo oficial a la marca -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "HummingX-BI",
+    "url": "https://hummingxbi.com",
+    "logo": "https://hummingxbi.com/humming-logo.png",
+    "image": "https://hummingxbi.com/humming-logo.png",
+    "description": "Desarrollo de software a medida e inteligencia de negocios."
+  }
+  </script>
 
   <!--
     FASE 1 — OPTIMIZACIÓN TIPOGRÁFICA (CLS / FCP)
@@ -68,6 +82,9 @@
 </head>
 
 <body>
+
+  <!-- Partículas de fondo globales (burbujas/nodos) -->
+  <canvas class="global__particles" id="particles-canvas" aria-hidden="true"></canvas>
 
   <!-- ============================================================
        PRELOADER VECTORIAL INTERACTIVO — HummingX-BI
@@ -170,9 +187,6 @@
          HERO SECTION
     ======================== -->
     <section class="hero" id="inicio" aria-labelledby="hero-title">
-
-      <!-- Partículas de fondo (canvas manejado por JS) -->
-      <canvas class="hero__particles" id="particles-canvas" aria-hidden="true"></canvas>
 
       <!-- Rejilla de fondo decorativa -->
       <div class="hero__grid-bg" aria-hidden="true"></div>

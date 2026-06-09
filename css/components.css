@@ -229,7 +229,9 @@
    ================================================================ */
 .services {
   padding-block: var(--space-32);
-  background: var(--color-bg-base);
+  background: rgba(17, 17, 18, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid var(--color-border);
   position: relative;
 }
@@ -1181,7 +1183,9 @@
    ================================================================ */
 .footer {
   padding-block: var(--space-16) var(--space-8);
-  background: var(--color-bg-deepest);
+  background: rgba(12, 12, 13, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid var(--color-border);
   position: relative;
   overflow: hidden;

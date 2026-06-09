@@ -992,15 +992,14 @@ select {
   background: transparent;
 }
 
-/* Canvas de partículas */
-.hero__particles {
-  position: absolute;
+/* Canvas de partículas globales */
+.global__particles {
+  position: fixed;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  opacity: 1;
-  /* Eliminada la opacidad 0.6 para que brillen con todo su resplandor */
+  width: 100vw;
+  height: 100vh;
+  z-index: -1; /* Detrás de todo el sitio */
+  pointer-events: none;
 }
 
 /* Rejilla decorativa de fondo */

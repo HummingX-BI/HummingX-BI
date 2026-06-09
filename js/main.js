@@ -398,17 +398,15 @@ const ParticlesModule = (() => {
       const deltaY = currentScrollY - lastScrollY;
       lastScrollY = currentScrollY;
 
-      // Solo calcular si estamos en la parte superior (hero)
-      if (currentScrollY <= H * 1.5) {
-        particles.forEach(p => {
-          // Nodos con mayor profundidad (z) se mueven más rápido
-          p.y -= deltaY * (p.z * 0.8);
-          
-          // Reaparecer en los bordes opuestos si se salen por el scroll
-          if (p.y < 0) p.y += H;
-          if (p.y > H) p.y -= H;
-        });
-      }
+      // Calcular en toda la página para el efecto global
+      particles.forEach(p => {
+        // Nodos con mayor profundidad (z) se mueven más rápido
+        p.y -= deltaY * (p.z * 0.8);
+        
+        // Reaparecer en los bordes opuestos si se salen por el scroll
+        if (p.y < 0) p.y += H;
+        if (p.y > H) p.y -= H;
+      });
     }, { passive: true });
 
     loop();

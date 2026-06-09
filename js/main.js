@@ -605,6 +605,7 @@ const FormModule = (() => {
   const step2Back = document.getElementById('step2-back');
   const step3Back = document.getElementById('step3-back');
   const step4Back = document.getElementById('step4-back');
+  const step3BackAlt = document.getElementById('step3-back-alt');
 
   const businessInput = document.getElementById('business-name');
   const contactName = document.getElementById('contact-name');
@@ -770,6 +771,7 @@ const FormModule = (() => {
     step2Back?.addEventListener('click', () => showStep(1));
     step3Back?.addEventListener('click', () => showStep(2));
     step4Back?.addEventListener('click', () => showStep(3));
+    step3BackAlt?.addEventListener('click', () => showStep(3));
 
     // Iniciar en paso 1
     updateProgress();

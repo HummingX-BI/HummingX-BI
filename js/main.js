@@ -1,13 +1,15 @@
 /**
  * ================================================================
  * HummingX-BI — JavaScript Principal
- * Versión: 1.0.0
- * Descripción: Lógica del preloader, navbar, partículas, formulario
- *              multistep, animaciones de scroll y botones de envío.
+ * Versión: 2.0.0  (Refactorizado — Fase 1-4)
+ * Descripción: Preloader, navbar, partículas, formulario multistep,
+ *              animaciones de scroll y flujo de automatización inteligente.
+ * Migración: Arquitectura modular ES6+ lista para extracción a
+ *            componentes (React / Vue / Svelte) sin refactorizar lógica.
  * ================================================================
  *
  * ÍNDICE:
- *  1. CONFIGURACIÓN (edita aquí tus datos de contacto)
+ *  1. CONFIGURACIÓN (datos de contacto y endpoints)
  *  2. MÓDULO: PRELOADER
  *  3. MÓDULO: NAVBAR (scroll + mobile menu)
  *  4. MÓDULO: PARTÍCULAS (canvas hero)
@@ -15,9 +17,12 @@
  *  6. MÓDULO: CONTADORES ANIMADOS (métricas)
  *  7. MÓDULO: TARJETAS 3D TILT (atributos)
  *  8. MÓDULO: FORMULARIO MULTISTEP
- *  9. MÓDULO: BOTONES DE ENVÍO (WhatsApp, Instagram, Email)
- * 10. MÓDULO: FOOTER (año dinámico)
- * 11. INICIALIZACIÓN
+ *  9. MÓDULO: LEAD INGESTION — Interceptor de conversión (FASE 2)
+ * 10. MÓDULO: BOTONES DE ENVÍO — Fallback directo (WhatsApp/IG/Email)
+ * 11. MÓDULO: FOOTER (año dinámico)
+ * 12. MÓDULO: CSS DINÁMICO (shake animation)
+ * 13. MÓDULO: SVG INJECTOR
+ * 14. INICIALIZACIÓN GLOBAL
  */
 
 'use strict';
@@ -30,22 +35,18 @@
    ================================================================ */
 const CONFIG = {
   /**
-   * WHATSAPP:
-   * Número en formato internacional sin '+' ni espacios.
+   * WHATSAPP: Número en formato internacional sin '+' ni espacios.
    * Ejemplo: '5215551234567' (México, Ciudad de México)
    */
   WA_NUMBER: '5215519802943',
 
   /**
-   * INSTAGRAM:
-   * Nombre de usuario SIN el @
-   * Ejemplo: 'hummingxbi'
+   * INSTAGRAM: Nombre de usuario SIN el @
    */
   IG_USERNAME: 'hummingx.bi',
 
   /**
-   * EMAIL:
-   * Dirección de correo electrónico donde recibirás solicitudes
+   * EMAIL: Dirección de correo electrónico donde recibirás solicitudes
    */
   EMAIL_ADDRESS: 'colibrixbi@gmail.com',
 
@@ -55,10 +56,24 @@ const CONFIG = {
   COMPANY_NAME: 'HummingX-BI',
 
   /**
-   * UMBRAL DEL SCROLL para activar el estilo "scrolled" de la navbar
-   * (en píxeles desde el top de la página).
+   * UMBRAL DEL SCROLL para activar el estilo "scrolled" de la navbar.
    */
   NAVBAR_SCROLL_THRESHOLD: 60,
+
+  /**
+   * ENDPOINT SERVERLESS — Lead Ingestion API
+   * Consume este payload nuestro microservicio en Spring Boot.
+   * El agente perfilador en LangChain (Python) lee el mismo endpoint.
+   * Cambiar a la URL real del entorno de producción:
+   * Ej: 'https://api.hummingxbi.com/api/leads/ingest'
+   */
+  LEAD_ENDPOINT: '/api/leads/ingest',
+
+  /**
+   * TIMEOUT para la llamada fetch (ms).
+   * Si el endpoint tarda más, se activa el fallback de canal directo.
+   */
+  FETCH_TIMEOUT_MS: 8000,
 };
 
 
@@ -764,9 +779,212 @@ const FormModule = (() => {
 
 
 /* ================================================================
-   9. MÓDULO: BOTONES DE ENVÍO
-   Ensambla un mensaje estructurado con los datos del formulario
-   y abre el canal seleccionado (WhatsApp, Instagram, Email).
+   9. MÓDULO: LEAD INGESTION — Interceptor de conversión (FASE 2)
+   ================================================================
+   Patrón: Async fetch + fallback graceful degradation
+
+   Flujo completo:
+     1. Usuario selecciona canal (WA / IG / Email) y hace click
+     2. Se llama event.preventDefault() implícitamente (son <button type="button">)
+     3. Se muestra el loader #form-loader (spinner HummingX)
+     4. buildLeadPayload() empaqueta todos los datos del formulario
+        en un objeto JSON estricto con claves en snake_case
+     5. fetch() POST → CONFIG.LEAD_ENDPOINT con AbortController (timeout)
+     6a. Si 200 OK → FormModule.showSuccess() + ocultar loader
+     6b. Si error de red / timeout / 4xx-5xx:
+         → Ocultar loader + activar el canal directo (WA/IG/Email)
+         → showToast() con mensaje de fallback
+   ================================================================ */
+const LeadIngestionModule = (() => {
+
+  /* ──────────────────────────────────────────────────────────────
+     ESQUEMA JSON ESPERADO POR EL ENDPOINT
+     Endpoint: POST /api/leads/ingest
+     Content-Type: application/json
+
+     Este payload es consumido por:
+       - Microservicio Spring Boot: parsea y persiste en PostgreSQL
+       - Agente perfilador LangChain (Python): enriquece el lead
+         con scoring de intención y genera la propuesta técnica.
+
+     {
+       "source":          string,   // "landing_page" (constante)
+       "submitted_at":    string,   // ISO 8601 UTC timestamp
+       "channel":         string,   // "whatsapp" | "instagram" | "email"
+       "business_name":   string,   // Nombre del negocio del cliente
+       "contact_name":    string,   // Nombre de la persona de contacto
+       "phone":           string,   // Teléfono/WhatsApp (puede ser vacío)
+       "message":         string,   // Descripción adicional (puede ser vacío)
+       "project_goal":    string,   // Enum: plataforma_empresarial | automatizacion_ia
+                                   //       web_medida | bi_analytics | integracion_datos
+                                   //       | transformacion_digital
+       "business_stage":  string,   // Enum: idea | operando | escalar
+       "main_challenge":  string,   // Enum: ventas | automatizar | ux | datos
+       "timeline":        string,   // Enum: urgente | 1mes | 2-3meses | flexible
+       "budget_range":    string,   // Enum: menos_5k | 5k_15k | 15k_50k
+                                   //       | 50k_150k | mas_150k | por_definir
+     }
+  ────────────────────────────────────────────────────────────── */
+
+  // ─── Referencias al DOM del loader ─────────────────────────────
+  const loaderEl = document.getElementById('form-loader');
+
+  /**
+   * Construye el payload JSON tipado con claves en snake_case.
+   * @param {object} formData - Estado del formulario desde FormModule.getState()
+   * @param {string} channel  - Canal seleccionado: 'whatsapp' | 'instagram' | 'email'
+   * @returns {object} Payload listo para JSON.stringify()
+   */
+  function buildLeadPayload(formData, channel) {
+    return {
+      // ── Metadatos de la solicitud ──────────────────────────────
+      source: 'landing_page',                    // string: origen constante
+      submitted_at: new Date().toISOString(),          // string: ISO 8601 UTC
+      channel: channel,                           // string: canal elegido
+
+      // ── Datos de contacto ──────────────────────────────────────
+      business_name: formData.negocio || '',          // string: nombre del negocio
+      contact_name: formData.nombre || '',          // string: persona de contacto
+      phone: formData.telefono || '',          // string: tel/WA (opcional)
+      message: formData.mensaje || '',          // string: nota adicional (opcional)
+
+      // ── Datos del proyecto (tipados con valores enum predefinidos) ──
+      project_goal: formData.objetivo || '',          // string: enum objetivo
+      business_stage: formData.etapa || '',          // string: enum etapa
+      main_challenge: formData.desafio || '',          // string: enum desafío
+      timeline: formData.tiempo || '',          // string: enum tiempo
+      budget_range: formData.presupuesto || '',        // string: enum presupuesto
+    };
+  }
+
+  /**
+   * Muestra el loader de HummingX en el formulario.
+   * Deshabilita los botones de envío para prevenir doble-submit.
+   */
+  function showLoader() {
+    if (loaderEl) {
+      loaderEl.removeAttribute('hidden');
+    }
+    // Deshabilitar botones de envío durante la petición
+    document.querySelectorAll('#send-whatsapp, #send-instagram, #send-email').forEach(btn => {
+      btn.disabled = true;
+      btn.setAttribute('aria-busy', 'true');
+    });
+  }
+
+  /**
+   * Oculta el loader y rehabilita los botones de envío.
+   */
+  function hideLoader() {
+    if (loaderEl) {
+      loaderEl.setAttribute('hidden', '');
+    }
+    document.querySelectorAll('#send-whatsapp, #send-instagram, #send-email').forEach(btn => {
+      btn.disabled = false;
+      btn.removeAttribute('aria-busy');
+    });
+  }
+
+  /**
+   * Función principal asíncrona.
+   * Envía el payload al endpoint serverless y maneja el estado del DOM.
+   *
+   * @param {string} channel - 'whatsapp' | 'instagram' | 'email'
+   */
+  async function ingestLead(channel) {
+    const formData = FormModule.getState();
+
+    // Validación mínima: nombre del negocio requerido
+    if (!formData.negocio) {
+      SendButtonsModule.showToast('Por favor, completa al menos el nombre de tu negocio.');
+      return;
+    }
+
+    // Mostrar estado de carga
+    showLoader();
+
+    // AbortController para timeout configurable
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), CONFIG.FETCH_TIMEOUT_MS);
+
+    try {
+      const payload = buildLeadPayload(formData, channel);
+
+      // ── Petición POST al endpoint serverless ────────────────────
+      const response = await fetch(CONFIG.LEAD_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // El microservicio Spring Boot puede exigir un token de API:
+          // 'X-API-Key': CONFIG.API_KEY,
+        },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        // El servidor respondió con un error HTTP (4xx / 5xx)
+        const errorBody = await response.text().catch(() => 'Sin detalle');
+        throw new Error(`HTTP ${response.status}: ${errorBody}`);
+      }
+
+      // ── 200 OK: Mostrar pantalla de éxito ──────────────────────
+      hideLoader();
+      FormModule.showSuccess();
+
+      console.info('[LeadIngestion] ✓ Lead enviado correctamente al endpoint.');
+
+    } catch (error) {
+      clearTimeout(timeoutId);
+      hideLoader();
+
+      const isAbort = error.name === 'AbortError';
+      const msg = isAbort
+        ? 'Tiempo de espera agotado. Abriendo canal directo...'
+        : 'No se pudo conectar al servidor. Abriendo canal directo...';
+
+      console.warn(`[LeadIngestion] ⚠ Fallback activado. Error: ${error.message}`);
+      SendButtonsModule.showToast(msg);
+
+      // ── Fallback: abrir el canal directo elegido ────────────────
+      // Permite que el lead no se pierda aunque el servidor esté caído.
+      setTimeout(() => {
+        SendButtonsModule.sendDirect(channel, formData);
+        // Mostrar éxito de todos modos para no frustrar al usuario
+        FormModule.showSuccess();
+      }, 1200);
+    }
+  }
+
+  function init() {
+    // Delegar eventos en botones de envío usando el atributo data-channel
+    const sendGroup = document.querySelector('.form__send-buttons');
+    if (!sendGroup) return;
+
+    sendGroup.addEventListener('click', (event) => {
+      const btn = event.target.closest('[data-channel]');
+      if (!btn) return;
+
+      const channel = btn.getAttribute('data-channel');
+      ingestLead(channel);
+    });
+  }
+
+  return { init };
+})();
+
+
+/* ================================================================
+   10. MÓDULO: BOTONES DE ENVÍO — Fallback directo (WA / IG / Email)
+   ================================================================
+   Este módulo actúa como FALLBACK cuando el endpoint serverless no
+   está disponible. LeadIngestionModule lo llama explícitamente en
+   el bloque catch de su función async.
+
+   sendDirect() es la única función pública que necesita el módulo
+   de ingesta. showToast() es un helper compartido.
    ================================================================ */
 const SendButtonsModule = (() => {
   /**
@@ -934,42 +1152,41 @@ const SendButtonsModule = (() => {
     }, 4000);
   }
 
-  function init() {
-    const btnWa = document.getElementById('send-whatsapp');
-    const btnIg = document.getElementById('send-instagram');
-    const btnMail = document.getElementById('send-email');
-
-    function handleSend(channel) {
-      // Capturar estado actual del formulario
-      const data = FormModule.getState();
-
-      // Validación mínima: al menos el nombre del negocio
-      if (!data.negocio) {
-        showToast('Por favor, completa al menos el nombre de tu negocio.');
-        return;
-      }
-
-      switch (channel) {
-        case 'whatsapp': sendWhatsApp(data); break;
-        case 'instagram': sendInstagram(data); break;
-        case 'email': sendEmail(data); break;
-      }
-
-      // Mostrar éxito en el formulario
-      setTimeout(() => FormModule.showSuccess(), 300);
+  /**
+   * Método público de fallback.
+   * Llamado por LeadIngestionModule cuando el endpoint serverless falla.
+   * Redirige al canal directo sin pasar por el servidor.
+   *
+   * @param {string} channel  - 'whatsapp' | 'instagram' | 'email'
+   * @param {object} formData - Estado del formulario desde FormModule.getState()
+   */
+  function sendDirect(channel, formData) {
+    switch (channel) {
+      case 'whatsapp': sendWhatsApp(formData); break;
+      case 'instagram': sendInstagram(formData); break;
+      case 'email': sendEmail(formData); break;
+      default:
+        console.warn(`[SendButtons] Canal desconocido: ${channel}`);
     }
-
-    btnWa?.addEventListener('click', () => handleSend('whatsapp'));
-    btnIg?.addEventListener('click', () => handleSend('instagram'));
-    btnMail?.addEventListener('click', () => handleSend('email'));
   }
 
-  return { init };
+  /**
+   * init() — En v2.0 LeadIngestionModule gestiona la delegación de clicks
+   * usando data-channel. Este módulo ya no registra sus propios listeners.
+   * Se mantiene por compatibilidad con la cadena de inicialización.
+   */
+  function init() {
+    // Intencionalmente vacío en v2.0: LeadIngestionModule gestiona los clicks.
+    // Para migrar a framework: exportar sendDirect() y showToast() como acciones.
+  }
+
+  // API pública: sendDirect y showToast son consumidos por LeadIngestionModule
+  return { init, sendDirect, showToast };
 })();
 
 
 /* ================================================================
-   10. MÓDULO: FOOTER — Año dinámico
+   11. MÓDULO: FOOTER — Año dinámico
    ================================================================ */
 function setFooterYear() {
   const yearEl = document.getElementById('footer-year');
@@ -1063,6 +1280,7 @@ function initApp() {
       CardTiltModule.init();
       FormModule.init();
       SendButtonsModule.init();
+      LeadIngestionModule.init();  // FASE 2: Interceptor de conversión
       setFooterYear();
     });
   };

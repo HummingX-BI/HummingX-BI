@@ -1,23 +1,24 @@
 /* ================================================================
    ColibriX BI — Componentes (Atributos, Servicios, Proceso, Contacto, Footer)
-   Versión: 1.0.0
+   Versión: 2.0.0 — Apple Dark Mode / Premium Bubble
    ================================================================ */
 
 
 /* ================================================================
-   1. SECCIÓN DE ATRIBUTOS — Tarjetas Glassmorphism
+   1. SECCIÓN DE ATRIBUTOS — Tarjetas Glassmorphism (Apple-tier)
    ================================================================ */
 .attributes {
   padding-block: var(--space-24);
   position: relative;
   overflow: hidden;
-  background: rgba(5, 11, 20, 0.65);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  /* Fondo OLED + hairline border para separar sin sombra pesada */
+  background: rgba(10, 10, 12, 0.8);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-/* Fondo de la sección */
+/* Orbe de fondo — opacidad reducida al cap máximo */
 .attributes::before {
   content: '';
   position: absolute;
@@ -26,7 +27,6 @@
   z-index: -1;
 }
 
-/* Orbe de luz en la sección de atributos */
 .attributes::after {
   content: '';
   position: absolute;
@@ -37,7 +37,7 @@
   height: 400px;
   background: radial-gradient(
     ellipse,
-    rgba(88, 28, 135, 0.07) 0%,
+    rgba(88, 28, 135, 0.04) 0%, /* ↓ de 0.07 → 0.04 */
     transparent 60%
   );
   pointer-events: none;
@@ -56,70 +56,66 @@
   gap: var(--space-6);
 }
 
-/* --- TARJETA GLASSMORPHISM --- */
+/* ================================================================
+   TARJETA GLASSMORPHISM — Apple-tier Squircle
+   ================================================================
+   Cambios vs v1:
+   · border-radius: 32px (squircle) — ↑ de 24px
+   · Sin rotateX en hover — purga del efecto 3D artificial
+   · Hover: solo translateY(-4px) + fondo ligeramente más claro
+   · box-shadow en hover: neutral depth solo, sin neones
+   · Glassmorphism: blur(32px) saturate(180%), opacidad 0.5
+   ================================================================ */
 .attr-card {
   position: relative;
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
+
+  /* Material: cristal templado OLED */
+  background: rgba(20, 20, 22, 0.5);
+
+  /* Hairline borders — paradigma Apple */
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.10); /* Bisel superior */
+
+  /* SQUIRCLE — curvatura continua */
+  border-radius: var(--radius-xl); /* 32px */
+
   padding: var(--space-8);
   overflow: hidden;
   cursor: default;
-  /* Efecto 3D suave: perspectiva para el tilt */
-  transform-style: preserve-3d;
+
+  /* Physical easing: solo transform + sombra — sin rotateX */
   transition:
     transform var(--transition-base),
     box-shadow var(--transition-base),
+    background var(--transition-base),
     border-color var(--transition-base);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+
+  /* Apple Glass */
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+
+  /* Sombra inset: bisel de profundidad */
+  box-shadow: var(--shadow-inset-top);
 }
 
-/* Efecto hover: inclinación 3D + glow */
+/* Hover: elevación mínima + fondo ligeramente más claro
+   PURGA: rotateX(2deg) + shadow neones — ELIMINADOS. */
 .attr-card:hover {
-  transform: translateY(-8px) rotateX(2deg);
-  box-shadow: var(--shadow-card-hover);
-  border-color: var(--color-border-accent);
+  transform: translateY(-4px); /* ↓ de -8px → -4px */
+  background: rgba(30, 30, 35, 0.6); /* Apenas más claro */
+  box-shadow: var(--shadow-depth); /* Neutral — sin color */
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
-/* Glow difuso detrás de la tarjeta (hover) */
+/* PURGA: .attr-card__glow — El resplandor de gradiente neón es eliminado.
+   En su lugar: el hairline border top actúa como bisel de cristal. */
 .attr-card__glow {
-  position: absolute;
-  inset: -2px;
-  border-radius: inherit;
-  background: linear-gradient(135deg, var(--color-teal-glow), var(--color-purple-glow));
-  opacity: 0;
-  transition: opacity var(--transition-base);
-  z-index: -1;
-  filter: blur(8px);
+  display: none; /* Componente eliminado */
 }
 
-.attr-card:hover .attr-card__glow {
-  opacity: 1;
-}
-
-/* Borde superior iluminado (el efecto neón sutil) */
+/* Borde superior — eliminado como pseudo, ahora es parte del border-top nativo */
 .attr-card__border-top {
-  position: absolute;
-  top: 0;
-  left: 15%;
-  right: 15%;
-  height: 1.5px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--color-teal) 50%,
-    transparent 100%
-  );
-  border-radius: var(--radius-full);
-  opacity: 0;
-  transition: opacity var(--transition-base), left var(--transition-slow), right var(--transition-slow);
-}
-
-.attr-card:hover .attr-card__border-top {
-  opacity: 1;
-  left: 0;
-  right: 0;
+  display: none; /* El bisel ya está en border-top de .attr-card */
 }
 
 /* Tarjeta central: destacada visualmente */
@@ -328,7 +324,7 @@
   margin-bottom: var(--space-3);
 }
 
-/* Tech stack tags del servicio */
+/* Tech stack tags del servicio — squircle mínimo */
 .service-item__tech {
   display: flex;
   flex-wrap: wrap;
@@ -341,10 +337,10 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-text-muted);
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08); /* Hairline */
   padding: 2px 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-xs); /* 8px — ↑ de 4px */
   transition: all var(--transition-fast);
 }
 
@@ -639,34 +635,43 @@
 }
 
 
-/* --- Formulario con cristal (Glassmorphism) --- */
+/* ================================================================
+   FORMULARIO CON CRISTAL (Glassmorphism) — Apple-tier Material
+   ================================================================
+   Cambios vs v1:
+   · border-radius: 32px (squircle) — ↑ de 24px
+   · blur(32px) saturate(180%) — cristal de alta calidad
+   · background: rgba(20,20,22,0.4) — muy baja opacidad
+   · border-top: bisel de cristal templado (1px rgba(255,255,255,0.10))
+   · box-shadow: solo inset-top, sin sombras externas de color
+   ================================================================ */
 .form-glass {
-  background: rgba(11, 19, 37, 0.7);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
+  /* Material: cristal templado de alta calidad */
+  background: rgba(20, 20, 22, 0.4);
+
+  /* Hairlines: todos los bordes */
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.10); /* Bisel superior */
+
+  /* SQUIRCLE */
+  border-radius: var(--radius-xl); /* 32px */
+
   padding: var(--space-8);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: var(--shadow-card), 0 0 80px rgba(13, 148, 136, 0.05);
+
+  /* Glass de alta calidad */
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+
+  /* Sombra inset para bisel sin sombras externas */
+  box-shadow: var(--shadow-inset-top);
+
   position: relative;
   overflow: hidden;
 }
 
-/* Resplandor en el borde superior del formulario */
+/* Eliminado el ::before con gradiente — el border-top lo reemplaza */
 .form-glass::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 20%;
-  right: 20%;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--color-teal) 50%,
-    transparent 100%
-  );
-  opacity: 0.5;
+  display: none;
 }
 
 /* Barra de progreso */
@@ -761,7 +766,7 @@
   grid-template-columns: repeat(3, 1fr);
 }
 
-/* Opción seleccionable (radio customizado) */
+/* Opción seleccionable (radio customizado) — squircle 16px */
 .form__option {
   position: relative;
   display: flex;
@@ -769,18 +774,21 @@
   align-items: flex-start;
   gap: var(--space-2);
   padding: var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08); /* Hairline */
+  border-radius: var(--radius-md); /* 16px — ↑ de 12px */
+  background: rgba(20, 20, 22, 0.4);
   cursor: pointer;
-  transition: all var(--transition-base);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
 
 .form__option:hover {
-  border-color: rgba(13, 148, 136, 0.4);
-  background: rgba(13, 148, 136, 0.05);
+  border-color: rgba(13, 148, 136, 0.30);
+  background: rgba(30, 30, 35, 0.5);
   transform: translateY(-2px);
 }
 
@@ -1513,4 +1521,283 @@
     text-align: center;
     gap: var(--space-2);
   }
+}
+
+/* ================================================================
+   8. FASE 4 — RESILIENCIA UI/UX: GLASSMORPHISM BLINDADO
+   ================================================================
+   Estrategia de doble capa:
+
+   CAPA 1 — @supports (backdrop-filter):
+     Si el navegador SOPORTA backdrop-filter (Chrome ≥ 76, Safari ≥ 9,
+     Firefox ≥ 103), se aplican los efectos de cristal completos.
+
+   CAPA 2 — Fallback sólido (fuera del @supports):
+     Para navegadores legacy (IE 11, Firefox < 103, WebViews restrictivos
+     como algunos WebViews de Android < 5.1 o apps nativas que usan
+     WKWebView con flags de compositing desactivados), se aplica un color
+     de fondo sólido con alto contraste que preserva la paleta Dark UI
+     y garantiza legibilidad sin romper el layout.
+
+   Los colores de fallback son HEX sólidos derivados de la paleta
+   --color-bg-card / --color-bg-base con opacidad forzada al 100%.
+
+   IMPORTANTE: Las reglas @supports se evalúan en cascade DESPUÉS del
+   fallback. El navegador aplica primero el fallback y lo sobreescribe
+   con el efecto glass si es compatible.
+   ================================================================ */
+
+/* ── Fallback base: fondo sólido OLED para navegadores legacy ──── */
+/* Actualizado: naval blue → OLED Black, contraste AA garantizado */
+
+.form-glass {
+  /* Fallback OLED: negro casi puro, contraste AA */
+  background: #111113;
+  border-color: rgba(255, 255, 255, 0.10);
+}
+
+.attr-card {
+  /* Fallback OLED: versión opaca de --color-bg-elevated */
+  background: #121214;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* .attr-card__glow eliminado — componente purgeado */
+
+.nav-header {
+  /* Fallback: navbar completamente opaca OLED */
+  background: #000000;
+}
+
+.nav-header.scrolled {
+  background: #0A0A0C;
+}
+
+.mobile-menu {
+  background: #0A0A0C;
+}
+
+.attributes,
+.services,
+.process,
+.contact {
+  /* Fallback OLED: secciones con fondo casi puro */
+  background: #0A0A0C;
+}
+
+/* ── CAPA 1: Apple Glass con @supports (navegadores modernos) ─── */
+@supports (backdrop-filter: blur(10px)) {
+
+  /* Formulario: cristal templado Apple-tier */
+  .form-glass {
+    background: rgba(20, 20, 22, 0.4);
+    backdrop-filter: blur(32px) saturate(180%);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+    border-color: rgba(255, 255, 255, 0.08);
+    border-top-color: rgba(255, 255, 255, 0.10);
+  }
+
+  /* Tarjetas: cristal templado Apple-tier */
+  .attr-card {
+    background: rgba(20, 20, 22, 0.5);
+    backdrop-filter: blur(32px) saturate(180%);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+    border-color: rgba(255, 255, 255, 0.08);
+    border-top-color: rgba(255, 255, 255, 0.10);
+  }
+
+  /* Navbar con cristal */
+  .nav-header {
+    background: rgba(0, 0, 0, 0.50);
+    backdrop-filter: blur(32px) saturate(180%);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+  }
+
+  .nav-header.scrolled {
+    background: rgba(10, 10, 12, 0.92);
+    backdrop-filter: blur(32px) saturate(180%);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+  }
+
+  /* Menú móvil */
+  .mobile-menu {
+    background: rgba(10, 10, 12, 0.97);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  /* Secciones con glassmorphism leve de fondo */
+  .attributes,
+  .services,
+  .process,
+  .contact {
+    background: rgba(5, 11, 20, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}
+
+/* ── Verificación de soporte para filter (para el glow) ──────── */
+@supports not (backdrop-filter: blur(10px)) {
+  /*
+   * Legacy / WebView restrictivo:
+   * Asegurar que todos los elementos de cristal tengan suficiente
+   * opacidad para mantener contraste WCAG AA (ratio mínimo 4.5:1
+   * para texto normal, 3:1 para texto grande).
+   */
+  .form-glass {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+  }
+
+  .attr-card {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Deshabilitar el glow de tarjeta que no funciona sin filter */
+  .attr-card__glow {
+    display: none;
+  }
+}
+
+
+/* ================================================================
+   9. FASE 2 — LOADER MINIMALISTA HummingX
+   ================================================================
+   El loader aparece sobre el formulario durante la llamada fetch()
+   al endpoint de ingesta de leads. Bloquea la UI hasta recibir
+   respuesta (200 OK o error → fallback).
+
+   Diseño: spinner circular + texto de estado.
+   Paleta: utiliza --color-teal para coherencia con la identidad.
+   ================================================================ */
+.form__loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-8) 0;
+  animation: step-enter 0.3s ease;
+}
+
+.form__loader[hidden] {
+  display: none;
+}
+
+/* Spinner circular animado */
+.form__loader-spinner {
+  width: 44px;
+  height: 44px;
+  border: 3px solid rgba(13, 148, 136, 0.15);
+  border-top-color: var(--color-teal);
+  border-radius: 50%;
+  animation: loader-spin 0.75s linear infinite;
+  will-change: transform;
+}
+
+@keyframes loader-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Texto de estado del loader */
+.form__loader-text {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  animation: text-pulse 1.5s ease-in-out infinite;
+}
+
+
+/* ================================================================
+   10. FASE 3 — ESTILOS DEL BADGE EDGE NODE (#service-nfc)
+   ================================================================
+   El badge "Edge Node" señaliza visualmente que el servicio NFC/POS
+   opera como nodo de borde en tiempo real, diferenciándolo del
+   resto de ítems de servicio y reforzando el copy técnico.
+   ================================================================ */
+.service-item__edge-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-teal);
+  background: rgba(13, 148, 136, 0.08);
+  border: 1px solid rgba(13, 148, 136, 0.3);
+  padding: 3px var(--space-3);
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-3);
+}
+
+/* Punto pulsante que indica actividad en tiempo real */
+.service-item__edge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-teal);
+  flex-shrink: 0;
+  animation: dot-blink 1.5s ease-in-out infinite;
+  box-shadow: 0 0 6px rgba(13, 148, 136, 0.6);
+}
+
+/* Estilos mejorados para el item NFC en hover */
+#service-nfc:hover .service-item__edge-badge {
+  background: rgba(13, 148, 136, 0.15);
+  border-color: rgba(13, 148, 136, 0.6);
+  box-shadow: 0 0 12px rgba(13, 148, 136, 0.15);
+}
+
+
+/* ================================================================
+   11. FASE 1 — @font-face LOCALES (Estrategia Hybrid)
+   ================================================================
+   Si los archivos WOFF2 residen en /assets/fonts/, estas reglas
+   @font-face los sirven directamente sin CDN, eliminando la latencia
+   de red de Google Fonts para usuarios recurrentes (caché local).
+
+   El stack de fallback asegura que el texto siempre sea legible
+   mientras carga la fuente personalizada (font-display: swap).
+
+   IMPORTANTE: Si los archivos WOFF2 no están en producción aún,
+   estas reglas son no-ops (no causan errores, solo warnings en
+   devtools). La fuente CDN del <head> actúa como red de seguridad.
+   ================================================================ */
+
+/* Syncopate — Fuente de display (títulos hero, navbar) */
+@font-face {
+  font-family: 'Syncopate';
+  src: url('../assets/fonts/syncopate-regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap; /* Evita texto invisible durante la carga */
+}
+
+@font-face {
+  font-family: 'Syncopate';
+  src: url('../assets/fonts/syncopate-bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Inter — Fuente de cuerpo (UI, formulario, texto) */
+@font-face {
+  font-family: 'Inter';
+  src: url('../assets/fonts/inter-regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('../assets/fonts/inter-600.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
 }

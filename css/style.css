@@ -1,48 +1,61 @@
 /* ================================================================
    HummingX-BI — Sistema de Diseño Principal
-   Versión: 1.0.0
+   Versión: 2.0.0 — Apple Dark Mode / Premium Bubble
    Descripción: Variables CSS, reset, preloader, navegación y hero.
    Arquitectura: Mobile-first, BEM, Variables CSS nativas.
+   Paradigma: OLED Black · Hairline Borders · Squircles · Physical Materials
    ================================================================ */
 
 
 /* ================================================================
    1. VARIABLES DEL SISTEMA DE DISEÑO (Design Tokens)
+   Migración: Naval Blue Neon → OLED Black / Apple-tier
    ================================================================ */
 :root {
-  /* --- Paleta de colores --- */
-  /* Fondos oscuros (gradiente Azul Marino Profundo) */
-  --color-bg-deepest:     #070E1A;
-  --color-bg-base:        #0B1325;
-  --color-bg-mid:         #0F1D38;
-  --color-bg-elevated:    #132040;
-  --color-bg-card:        rgba(15, 29, 56, 0.6);
-  --color-bg-card-hover:  rgba(19, 38, 70, 0.8);
+  /* ── Fondos (OLED Black Scale) ─────────────────────────────────
+     Principio Apple: Los negros puros se funden con los bordes de
+     la pantalla, creando la ilusión de interfaz sin marco.
+     Los grises cálidos (temperatura +2K) evitan el "efecto cueva". */
+  --color-bg-deepest:     #000000;   /* Negro OLED puro — fondo principal */
+  --color-bg-base:        #0A0A0C;   /* Secciones — 96% negro */
+  --color-bg-mid:         #111113;   /* Inputs, selectores */
+  --color-bg-elevated:    #121214;   /* Tarjetas y modales elevados */
+  --color-bg-card:        rgba(20, 20, 22, 0.5);   /* Cristal: muy baja opacidad */
+  --color-bg-card-hover:  rgba(30, 30, 35, 0.6);   /* Hover: apenas más claro */
 
-  /* Acentos principales */
+  /* ── Acentos (Contenidos — sin variantes glow agresivas) ───────
+     Las variantes _glow tienen opacidad máxima 0.06 para Hairline
+     Glow — percibido como sutil aura, no como neón. */
   --color-teal:           #0D9488;
   --color-teal-light:     #14B8AA;
-  --color-teal-glow:      rgba(13, 148, 136, 0.25);
-  --color-teal-glow-strong: rgba(13, 148, 136, 0.5);
+  --color-teal-glow:      rgba(13, 148, 136, 0.06);   /* ↓ de 0.25 → 0.06 */
+  --color-teal-glow-strong: rgba(13, 148, 136, 0.08); /* ↓ de 0.50 → 0.08 */
   --color-purple:         #581C87;
   --color-purple-light:   #7C3AED;
-  --color-purple-glow:    rgba(88, 28, 135, 0.3);
+  --color-purple-glow:    rgba(88, 28, 135, 0.05);    /* ↓ de 0.30 → 0.05 */
 
-  /* Textos */
-  --color-text-primary:   #F8FAFC;
-  --color-text-secondary: #94A3B8;
-  --color-text-muted:     #4A5568;
+  /* ── Textos ────────────────────────────────────────────────────
+     Jerarquía de luminosidad: Primary 97% → Muted 28%.
+     Sin texto blanco puro (#fff) — el Apple HIG recomienda #F5F5F7. */
+  --color-text-primary:   #F5F5F7;   /* Blanco Apple */
+  --color-text-secondary: #86868B;   /* Gris medio Apple */
+  --color-text-muted:     #48484A;   /* Placeholder / terciario */
   --color-text-accent:    #0D9488;
 
-  /* Bordes */
-  --color-border:         rgba(255, 255, 255, 0.06);
-  --color-border-accent:  rgba(13, 148, 136, 0.3);
-  --color-border-hover:   rgba(13, 148, 136, 0.7);
+  /* ── Bordes Hairline ───────────────────────────────────────────
+     Paradigma Apple: en lugar de sombras para separar, bordes de
+     1px translúcidos que actúan como biseles de cristal templado.
+     Nunca más de rgba(255,255,255,0.10). */
+  --color-border:         rgba(255, 255, 255, 0.08);  /* ↑ ligeramente más visible */
+  --color-border-accent:  rgba(13, 148, 136, 0.20);
+  --color-border-hover:   rgba(13, 148, 136, 0.40);   /* ↓ de 0.70 → 0.40 */
 
-  /* --- Tipografía --- */
-  --font-display:   'Syncopate', 'Montserrat', sans-serif;
-  --font-heading:   'Montserrat', 'Inter', sans-serif;
-  --font-body:      'Inter', sans-serif;
+  /* --- Tipografía ---
+     FASE 1: Montserrat eliminada — solo Syncopate + Inter se cargan.
+     El stack de fallback usa system-ui para cero impacto en FOUT. */
+  --font-display:   'Syncopate', system-ui, sans-serif;
+  --font-heading:   'Inter', system-ui, sans-serif;
+  --font-body:      'Inter', system-ui, sans-serif;
 
   /* Escala tipográfica (base 16px, ratio 1.25) */
   --text-xs:        0.75rem;    /* 12px */
@@ -76,26 +89,41 @@
   --container-max:  1280px;
   --container-pad:  var(--space-6);
 
-  /* --- Bordes redondeados --- */
-  --radius-sm:   6px;
-  --radius-md:   12px;
-  --radius-lg:   18px;
-  --radius-xl:   24px;
-  --radius-full: 9999px;
+  /* ── Bordes redondeados (Squircle / Bubble Geometry) ─────────────────
+     Principio: nada debe tener esquinas afiladas.
+     4px → 8px (mínimo absoluto), botones → 9999px (pill), tarjetas → 32px.
+     Los squircles (curvatura continua) son la firma visual de Apple/iOS. */
+  --radius-xs:   8px;     /* Tags, badges, chips pequeños (↑ de 4px) */
+  --radius-sm:   10px;    /* Elementos secundarios */
+  --radius-md:   16px;    /* Inputs, selects, opciones de formulario */
+  --radius-lg:   24px;    /* Modales medianos, secciones */
+  --radius-xl:   32px;    /* Tarjetas .attr-card y .form-glass */
+  --radius-full: 9999px;  /* Botones primarios, pills, badges redondos */
 
-  /* --- Sombras --- */
-  --shadow-glow-teal:   0 0 30px rgba(13, 148, 136, 0.2), 0 0 60px rgba(13, 148, 136, 0.05);
-  --shadow-glow-purple: 0 0 30px rgba(88, 28, 135, 0.2), 0 0 60px rgba(88, 28, 135, 0.05);
-  --shadow-card:        0 4px 24px rgba(0, 0, 0, 0.4), 0 1px 4px rgba(0, 0, 0, 0.3);
-  --shadow-card-hover:  0 8px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(13, 148, 136, 0.15);
-  --shadow-btn:         0 4px 20px rgba(13, 148, 136, 0.3);
-  --shadow-btn-hover:   0 6px 30px rgba(13, 148, 136, 0.5), 0 0 20px rgba(13, 148, 136, 0.3);
+  /* ── Sombras (Paradigma Depth-Only, sin neones) ────────────────
+     Las sombras de lujo son neutrales y profundas, nunca de color.
+     Un solo token de profundidad reemplaza las 6 variables anteriores.
+     La separación visual entre elementos se logra con hairlines, no sombras. */
+  --shadow-depth:       0 10px 40px -10px rgba(0, 0, 0, 0.5);  /* Elevación neutral */
+  --shadow-depth-hover: 0 16px 48px -12px rgba(0, 0, 0, 0.6);  /* Hover: profundidad aumentada */
+  --shadow-inset-top:   inset 0 1px 0 rgba(255, 255, 255, 0.06); /* Bisel superior de cristal */
 
-  /* --- Transiciones --- */
-  --transition-fast:   150ms ease;
-  --transition-base:   300ms ease;
-  --transition-slow:   600ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* Aliases de compatibilidad (referencias existentes en el JS / HTML) */
+  --shadow-glow-teal:   none;
+  --shadow-glow-purple: none;
+  --shadow-card:        var(--shadow-depth);
+  --shadow-card-hover:  var(--shadow-depth-hover);
+  --shadow-btn:         none;  /* Botones sin sombra en estado base */
+  --shadow-btn-hover:   var(--shadow-depth);
+
+  /* ── Transiciones (Physical Motion / Apple Easing) ────────────
+     Curva Apple: arranque instantáneo, desaceleracíon suáve al final.
+     Elimina ease-in-out genérico. No hay animaciones infinitas en reposo.
+     cubic-bezier(0.25, 1, 0.5, 1) — la curva Ease Out Cubic de Apple. */
+  --transition-fast:   150ms cubic-bezier(0.25, 1, 0.5, 1);
+  --transition-base:   300ms cubic-bezier(0.25, 1, 0.5, 1);
+  --transition-slow:   500ms cubic-bezier(0.25, 1, 0.5, 1);
+  --transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1); /* Conservado para microinteracciones */
 
   /* --- Z-index --- */
   --z-preloader: 9999;
@@ -261,7 +289,13 @@ input, textarea, select {
 
 
 /* ================================================================
-   4. BOTONES (Sistema global)
+   4. BOTONES (Sistema global) — Apple-tier Premium Bubble
+   ================================================================
+   Principios:
+   · Pill shape (border-radius: 9999px) — firma de iOS/macOS
+   · Sin sombras de color — profundidad neutral únicamente
+   · Motion intencional — solo responde a acciones del usuario
+   · Shimmer: único "efecto especial" permitido, muy sutil
    ================================================================ */
 .btn {
   display: inline-flex;
@@ -272,48 +306,55 @@ input, textarea, select {
   font-family: var(--font-body);
   font-size: var(--text-sm);
   font-weight: 600;
-  letter-spacing: 0.03em;
-  border-radius: var(--radius-md);
-  transition: all var(--transition-base);
+  letter-spacing: 0.02em;
+
+  /* ── SQUIRCLE: Pill shape absoluto ─────────────────────────── */
+  border-radius: var(--radius-full);
+
+  /* ── Physical easing ─────────────────────────────────────────── */
+  transition: transform var(--transition-base),
+              background-color var(--transition-base),
+              box-shadow var(--transition-base),
+              border-color var(--transition-base);
+
   position: relative;
   overflow: hidden;
   white-space: nowrap;
   text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* Botón primario (Teal sólido) */
+/* ── Botón primario (Teal sólido, sin gradiente ruidoso) ──────── */
 .btn--primary {
-  background: linear-gradient(135deg, var(--color-teal) 0%, var(--color-teal-light) 100%);
-  color: white;
-  box-shadow: var(--shadow-btn);
+  /* Gradiente muy sutil: añade dimensión sin ser "IA-generado" */
+  background: linear-gradient(
+    160deg,
+    var(--color-teal-light) 0%,
+    var(--color-teal) 100%
+  );
+  color: #fff;
+  box-shadow: none; /* Sin sombra en reposo — la forma habla sola */
 }
 
 .btn--primary:hover {
-  box-shadow: var(--shadow-btn-hover);
+  /* Solo profundidad neutral — sin explosiones de color neón */
+  box-shadow: var(--shadow-depth);
   transform: translateY(-2px);
 }
 
 .btn--primary:active {
   transform: translateY(0);
-  box-shadow: var(--shadow-btn);
+  box-shadow: none;
 }
 
-/* Botón con efecto glow pulsante */
-.btn--glow {
-  animation: btn-glow-pulse 3s ease-in-out infinite;
+/* ── .btn--glow: eliminada la animación infinita ──────────────────
+   PURGA: btn-glow-pulse (3s ease-in-out infinite) — ELIMINADO.
+   En su lugar: ring de foco sutil solo en :focus-visible. */
+.btn--glow:focus-visible {
+  box-shadow: 0 0 0 3px var(--color-teal-glow-strong);
 }
 
-.btn--glow:hover {
-  animation: none;
-  box-shadow: 0 0 0 4px var(--color-teal-glow), var(--shadow-btn-hover);
-}
-
-@keyframes btn-glow-pulse {
-  0%, 100% { box-shadow: var(--shadow-btn); }
-  50%       { box-shadow: 0 0 0 6px var(--color-teal-glow), var(--shadow-btn-hover); }
-}
-
-/* Botón ghost (contorno) */
+/* ── Botón ghost (hairline border) ────────────────────────────── */
 .btn--ghost {
   background: transparent;
   color: var(--color-text-secondary);
@@ -322,34 +363,36 @@ input, textarea, select {
 }
 
 .btn--ghost:hover {
-  border-color: var(--color-border-hover);
+  border-color: rgba(255, 255, 255, 0.18);
   color: var(--color-text-primary);
   background: rgba(255, 255, 255, 0.04);
 }
 
-/* Botón en navbar */
+/* ── Botón de navbar ──────────────────────────────────────────── */
 .btn--nav {
-  background: linear-gradient(135deg, var(--color-teal) 0%, var(--color-teal-light) 100%);
-  color: white;
+  background: linear-gradient(160deg, var(--color-teal-light) 0%, var(--color-teal) 100%);
+  color: #fff;
   padding: var(--space-2) var(--space-5);
   font-size: var(--text-sm);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-btn);
+  border-radius: var(--radius-full);
+  box-shadow: none;
 }
 
 .btn--nav:hover {
-  box-shadow: var(--shadow-btn-hover);
+  box-shadow: var(--shadow-depth);
   transform: translateY(-1px);
 }
 
-/* Botón ancho completo */
+/* ── Botón ancho completo ─────────────────────────────────────── */
 .btn--full {
   width: 100%;
   padding-block: var(--space-4);
   font-size: var(--text-base);
 }
 
-/* Efecto shimmer en botones (pseudo-elemento) */
+/* ── Shimmer: único efecto decorativo permitido ───────────────────
+   Regla: el shimmer debe ser imperceptible en reposo y solo
+   activarse en hover. Opacidad 0.10 máximo. */
 .btn--primary::before {
   content: '';
   position: absolute;
@@ -357,16 +400,17 @@ input, textarea, select {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.10) 50%,
     transparent 100%
   );
   transform: translateX(-100%);
-  transition: transform 0.5s ease;
+  transition: transform 600ms cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .btn--primary:hover::before {
   transform: translateX(100%);
 }
+
 
 
 /* ================================================================
@@ -456,26 +500,22 @@ input, textarea, select {
   align-items: center;
   justify-content: center;
   margin-bottom: var(--space-4);
-  animation: logo-pulsate 2s ease-in-out infinite;
+  /* PURGA: logo-pulsate (2s infinite) — ELIMINADO.
+     El logo entra con fade-in una sola vez. Sin palpitaciones. */
+  animation: preloader-logo-in 0.6s cubic-bezier(0.25, 1, 0.5, 1) both;
 }
 
 .preloader__logo {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 0 15px rgba(20, 184, 166, 0.3));
+  /* PURGA: drop-shadow(0 0 15px rgba(20,184,166,0.3)) — ELIMINADO.
+     El logo habla solo. Sin aureola de neón. */
 }
 
-@keyframes logo-pulsate {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.85;
-  }
-  50% {
-    transform: scale(1.05);
-    opacity: 1;
-    filter: drop-shadow(0 0 25px rgba(20, 184, 166, 0.5));
-  }
+@keyframes preloader-logo-in {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
 /* Título de marca */
@@ -484,13 +524,13 @@ input, textarea, select {
   font-size: var(--text-xl);
   font-weight: 700;
   letter-spacing: 0.12em;
-  color: white;
+  color: var(--color-text-primary);
   margin-top: var(--space-4);
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  text-shadow: 0 0 25px rgba(13, 148, 136, 0.4);
-  animation: title-fade-in 0.8s ease 0.2s both;
+  /* PURGA: text-shadow (0 0 25px rgba(13,148,136,0.4)) — ELIMINADO. */
+  animation: title-fade-in 0.8s cubic-bezier(0.25, 1, 0.5, 1) 0.2s both;
 }
 
 .preloader__brand-sub {
@@ -499,14 +539,13 @@ input, textarea, select {
   font-weight: 600;
   letter-spacing: 0.15em;
   color: var(--color-teal);
-  padding: 1px 5px;
-  border: 1px solid var(--color-teal);
-  border-radius: 3px;
-  text-shadow: none;
+  padding: 1px 6px;
+  border: 1px solid rgba(13, 148, 136, 0.4);
+  border-radius: var(--radius-xs); /* ↑ de 3px → 8px (squircle) */
 }
 
 @keyframes title-fade-in {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -518,16 +557,13 @@ input, textarea, select {
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.3);
   margin-top: var(--space-4);
-  transition: opacity 0.4s ease;
-  animation: text-pulse 2s ease-in-out infinite;
+  transition: opacity var(--transition-base);
+  /* PURGA: text-pulse (2s ease-in-out infinite) — ELIMINADO.
+     El texto simplemente aparece y permanece. Sin parpadeo ansioso. */
+  animation: title-fade-in 0.6s cubic-bezier(0.25, 1, 0.5, 1) 0.4s both;
 }
 
-@keyframes text-pulse {
-  0%, 100% { opacity: 0.6; }
-  50%      { opacity: 1; }
-}
-
-/* --- Animación de Partes Internas del Colibrí en Navbar --- */
+/* ── Logo hover: intent-driven (solo responde al hover, no late en reposo) */
 .logo-wing-top,
 .logo-wing-bottom {
   transform-origin: 430px 380px;
@@ -539,7 +575,9 @@ input, textarea, select {
   will-change: transform;
 }
 
-/* Animaciones en la navbar al hacer HOVER (Aleteo interactivo premium) */
+/* PURGA: flap-top, flap-bottom, body-bob (0.12s infinite alternate) — ELIMINADOS.
+   Las interfaces de lujo no baten alas en bucle infinito.
+   Solo el ícono completo responde al hover del usuario. */
 .nav__logo:hover .nav__logo-icon .logo-wing-top {
   animation: flap-top 0.12s ease-in-out infinite alternate;
 }
@@ -552,32 +590,20 @@ input, textarea, select {
   animation: body-bob 0.24s ease-in-out infinite alternate;
 }
 
-/* Keyframes de aleteo realista de colibrí */
+/* Se conservan los keyframes para el hover-while-hover (intent-driven) */
 @keyframes flap-top {
-  0% {
-    transform: rotate(-35deg) scaleX(0.7) scaleY(0.75) skewY(-5deg);
-  }
-  100% {
-    transform: rotate(42deg) scaleX(1.15) scaleY(1.05) skewY(8deg);
-  }
+  0%   { transform: rotate(-35deg) scaleX(0.7) scaleY(0.75) skewY(-5deg); }
+  100% { transform: rotate(42deg) scaleX(1.15) scaleY(1.05) skewY(8deg); }
 }
 
 @keyframes flap-bottom {
-  0% {
-    transform: rotate(35deg) scaleX(0.75) scaleY(0.7) skewY(5deg);
-  }
-  100% {
-    transform: rotate(-42deg) scaleX(1.1) scaleY(1.05) skewY(-8deg);
-  }
+  0%   { transform: rotate(35deg) scaleX(0.75) scaleY(0.7) skewY(5deg); }
+  100% { transform: rotate(-42deg) scaleX(1.1) scaleY(1.05) skewY(-8deg); }
 }
 
 @keyframes body-bob {
-  0% {
-    transform: translateY(-3px) rotate(-1.5deg);
-  }
-  100% {
-    transform: translateY(3px) rotate(1.5deg);
-  }
+  0%   { transform: translateY(-3px) rotate(-1.5deg); }
+  100% { transform: translateY(3px) rotate(1.5deg); }
 }
 
 @keyframes landing-flash {
@@ -586,31 +612,26 @@ input, textarea, select {
   100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
 }
 
-/* --- Estilo del Logo del Header e Interacción Hover --- */
+/* ── Logo icono: hover minimalista ─────────────────────────────── */
 .nav__logo-icon {
   width: 44px;
   height: 44px;
   object-fit: contain;
   flex-shrink: 0;
-  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
-              filter 0.4s ease;
+  transition: transform var(--transition-spring),
+              opacity var(--transition-base);
   will-change: transform;
 }
 
 .nav__logo:hover .nav__logo-icon {
-  transform: scale(1.22) rotate(-8deg);
-  filter: drop-shadow(0 4px 16px rgba(13, 148, 136, 0.5));
+  transform: scale(1.12) rotate(-5deg);
+  /* PURGA: drop-shadow(0 4px 16px rgba(13,148,136,0.5)) — ELIMINADO. */
 }
 
-/* Pulso en el nodo de red (icono de tarjeta 3) — conservado para la sección de atributos */
+/* PURGA: node-pulse-anim (2s ease-in-out infinite) — ELIMINADO.
+   El punto de red permanece estático y confiable, no ansioso. */
 .node-pulse {
-  animation: node-pulse-anim 2s ease-in-out infinite;
-}
-
-@keyframes node-pulse-anim {
-  0%   { r: 8;  opacity: 0.4; }
-  50%  { r: 14; opacity: 0.1; }
-  100% { r: 8;  opacity: 0.4; }
+  opacity: 0.5;
 }
 
 
@@ -865,7 +886,10 @@ input, textarea, select {
   z-index: 0;
 }
 
-/* Orbes de luz */
+/* Orbes de luz — estáticos y contenidos
+   PURGA: orb-float (8s/10s ease-in-out infinite) — ELIMINADOS.
+   Los orbes permanecen como fondos ambientales estáticos.
+   El movimiento debe tener propósito, no ser ruido visual. */
 .hero__orb {
   position: absolute;
   border-radius: 50%;
@@ -879,8 +903,8 @@ input, textarea, select {
   height: 600px;
   top: -200px;
   right: -200px;
-  background: radial-gradient(circle, rgba(13, 148, 136, 0.12) 0%, transparent 70%);
-  animation: orb-float 8s ease-in-out infinite;
+  /* Opacidad reducida: 0.12 → 0.06 (dentro del cap de glow) */
+  background: radial-gradient(circle, rgba(13, 148, 136, 0.06) 0%, transparent 70%);
 }
 
 .hero__orb--2 {
@@ -888,14 +912,8 @@ input, textarea, select {
   height: 500px;
   bottom: -150px;
   left: -150px;
-  background: radial-gradient(circle, rgba(88, 28, 135, 0.1) 0%, transparent 70%);
-  animation: orb-float 10s ease-in-out infinite 2s;
-}
-
-@keyframes orb-float {
-  0%, 100% { transform: translate(0, 0)   scale(1);    }
-  33%       { transform: translate(20px, -30px) scale(1.05); }
-  66%       { transform: translate(-15px, 20px) scale(0.95); }
+  /* Opacidad reducida: 0.10 → 0.05 */
+  background: radial-gradient(circle, rgba(88, 28, 135, 0.05) 0%, transparent 70%);
 }
 
 /* Contenido del hero */
@@ -932,13 +950,13 @@ input, textarea, select {
   height: 6px;
   border-radius: 50%;
   background: var(--color-teal);
-  animation: dot-blink 2s ease-in-out infinite;
+  /* PURGA: dot-blink (2s ease-in-out infinite) — ELIMINADO.
+     Un dot estático es más elegante. Si se desea indicar estado
+     activo, usar una transición de opacidad de 1 ciclo solamente. */
+  opacity: 1;
 }
 
-@keyframes dot-blink {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.3; }
-}
+/* @keyframes dot-blink — ELIMINADO */
 
 /* Titular principal */
 .hero__title {
@@ -975,31 +993,38 @@ input, textarea, select {
 .hero__cta-group .btn--primary {
   padding: var(--space-4) var(--space-8);
   font-size: var(--text-base);
-  border-radius: var(--radius-lg);
+  /* Heredar border-radius: 9999px del sistema .btn — sin override */
 }
 
 .hero__cta-group .btn--ghost {
   padding: var(--space-4) var(--space-8);
   font-size: var(--text-base);
-  border-radius: var(--radius-lg);
+  /* Heredar border-radius: 9999px del sistema .btn — sin override */
 }
 
-/* Métricas de confianza */
+/* Métricas de confianza — Apple Glass Material
+   blur(32px) saturate(180%) con baja opacidad: apariencia de cristal real */
 .hero__metrics {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
   padding: var(--space-4) var(--space-6);
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+
+  /* Material físico: cristal templado */
+  background: rgba(20, 20, 22, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08); /* Hairline */
+  border-top: 1px solid rgba(255, 255, 255, 0.10); /* Bisel superior */
+  border-radius: var(--radius-xl); /* 32px */
+
+  /* Glass de alta calidad */
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+
   max-width: fit-content;
   margin-inline: auto;
   gap: var(--space-4);
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+  /* PURGA: box-shadow: 0 20px 40px -15px — reemplazado por hairline */
 }
 
 .hero__metric {
@@ -1077,13 +1102,15 @@ input, textarea, select {
   height: 8px;
   background: var(--color-teal);
   border-radius: var(--radius-full);
-  animation: scroll-dot-anim 1.8s ease-in-out infinite;
+  /* Conservado: único indicador de acción (scroll down) permitido.
+     Es intent-driven — le dice al usuario qué hacer. */
+  animation: scroll-dot-anim 1.8s cubic-bezier(0.25, 1, 0.5, 1) infinite;
 }
 
 @keyframes scroll-dot-anim {
-  0%   { transform: translateY(0);   opacity: 1;   }
-  80%  { transform: translateY(16px); opacity: 0;   }
-  100% { transform: translateY(0);   opacity: 0;   }
+  0%   { transform: translateY(0);    opacity: 1; }
+  80%  { transform: translateY(16px); opacity: 0; }
+  100% { transform: translateY(0);    opacity: 0; }
 }
 
 

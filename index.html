@@ -31,12 +31,59 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="humming-logo.png" />
 
-  <!-- Google Fonts: Syncopate (títulos) + Inter (cuerpo) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!--
+    FASE 1 — OPTIMIZACIÓN TIPOGRÁFICA (CLS / FCP)
+    Se eliminaron las importaciones masivas de Google Fonts CDN.
+    Los archivos WOFF2 deben residir localmente en /assets/fonts/
+    Los <link rel="preload"> garantizan que el navegador descargue las
+    fuentes antes de que el parser encuentre las reglas @font-face en
+    el CSS, previniendo el FOUT (Flash of Unstyled Text) y reduciendo el CLS.
+  -->
+
+  <!-- Preload crítico: Syncopate (display / títulos hero) -->
   <link
-    href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@300;400;600;700;800&display=swap"
-    rel="stylesheet" />
+    rel="preload"
+    as="font"
+    type="font/woff2"
+    href="assets/fonts/syncopate-bold.woff2"
+    crossorigin="anonymous" />
+  <link
+    rel="preload"
+    as="font"
+    type="font/woff2"
+    href="assets/fonts/syncopate-regular.woff2"
+    crossorigin="anonymous" />
+
+  <!-- Preload crítico: Inter (cuerpo — pesos más usados above the fold) -->
+  <link
+    rel="preload"
+    as="font"
+    type="font/woff2"
+    href="assets/fonts/inter-regular.woff2"
+    crossorigin="anonymous" />
+  <link
+    rel="preload"
+    as="font"
+    type="font/woff2"
+    href="assets/fonts/inter-600.woff2"
+    crossorigin="anonymous" />
+
+  <!--
+    Fallback CDN: Se mantiene como recurso secundario con media="print"
+    para que no bloquee el renderizado. onload lo convierte a 'all' una
+    vez descargado. noscript garantiza el comportamiento en bots/crawlers.
+    Cargar solo Syncopate + Inter, sin Montserrat (eliminada).
+  -->
+  <link
+    rel="preload"
+    as="style"
+    href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap"
+    onload="this.onload=null;this.rel='stylesheet'" />
+  <noscript>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" />
+  </noscript>
 
   <!-- Stylesheets -->
   <link rel="stylesheet" href="css/style.css" />
@@ -52,9 +99,26 @@
        dinámico y aterriza exactamente en la esquina superior izquierda,
        fusionándose con el logo de la cabecera.
   ============================================================ -->
-  <!-- VIDEO DE FONDO CONTROLADO POR SCROLL -->
+  <!--
+    FASE 1 — VIDEO HERO OPTIMIZADO (LCP / TTI)
+    - preload="metadata": Solo descarga los metadatos (duración, dimensiones)
+      durante la carga inicial, liberando el hilo principal.
+    - poster="assets/hero-poster.webp": Imagen de reemplazo instantánea
+      que se muestra hasta que IntersectionObserver activa la reproducción.
+    - data-src en lugar de src: La asignación real del src ocurre en JS
+      solo cuando el contenedor entra en el viewport.
+    El controlador de IntersectionObserver vive en js/scroll-video.js.
+  -->
   <div id="video-container" style="opacity: 0;">
-    <video src="assets/hero-bg.mp4" preload="auto" muted playsinline loop></video>
+    <video
+      data-src="assets/hero-bg.mp4"
+      preload="metadata"
+      poster="assets/hero-poster.webp"
+      muted
+      playsinline
+      loop
+      aria-hidden="true">
+    </video>
   </div>
 
   <!-- PRELOADER MINIMALISTA ESTILO APPLE -->
@@ -442,18 +506,43 @@
             </div>
           </div>
 
-          <!-- Servicio 6: Tecnología NFC -->
-          <div class="service-item reveal-left" id="service-nfc">
+          <!--
+            FASE 3 — SEMÁNTICA EDGE-COMPUTING: #service-nfc
+            El copy reenmarca NFC/POS no como "función extra" sino como
+            nodos de borde (edge nodes) que integran hardware de proximidad
+            con la pila de datos en tiempo real de HummingX-BI.
+          -->
+          <div class="service-item reveal-left" id="service-nfc" aria-labelledby="service-nfc-title">
             <div class="service-item__number" aria-hidden="true">06</div>
             <div class="service-item__content">
-              <h3 class="service-item__title">Experiencias de Proximidad con Tecnología NFC</h3>
-              <p class="service-item__desc">Implementamos NFC (Near Field Communication) en ecosistemas de negocio
-                de alto impacto. Menús inteligentes,
-                programas de fidelidad con tarjetas de chip, control de acceso sin contacto, vCards empresariales,
-                activación de experiencias de marca en punto de venta y validación de membresías premium.
-                Un solo toque. Toda la experiencia.</p>
-              <div class="service-item__tech" aria-label="Tecnologías usadas">
-                <span>NFC</span><span>NDEF</span><span>PWA</span><span>Fidelidad</span>
+
+              <!-- Badge de edge-computing para señalización visual premium -->
+              <span class="service-item__edge-badge" aria-label="Nodo de borde activo">
+                <span class="service-item__edge-dot" aria-hidden="true"></span>
+                Edge Node
+              </span>
+
+              <h3 class="service-item__title" id="service-nfc-title">
+                NFC &amp; POS — Nodos de Borde del Ecosistema de Datos
+              </h3>
+              <p class="service-item__desc">
+                Cada terminal NFC y punto de venta es un <strong>nodo de borde activo</strong>:
+                hardware de proximidad que publica eventos en tiempo real a nuestros microservicios
+                vía <strong>protocolo MQTT</strong> y <strong>webhooks directos</strong>.
+                Cada toque, cada transacción y cada validación de membresía se escribe
+                instantáneamente en <strong>PostgreSQL</strong>, alimentando los pipelines ETL
+                que actualizan los <strong>dashboards Power BI</strong> sin latencia perceptible.
+                Sin sincronizaciones manuales. Sin brechas de datos. Un ecosistema digital
+                verdaderamente ininterrumpido.
+              </p>
+
+              <div class="service-item__tech" aria-label="Stack tecnológico del nodo de borde">
+                <span>MQTT</span>
+                <span>Webhooks</span>
+                <span>PostgreSQL</span>
+                <span>Power BI RT</span>
+                <span>NFC/NDEF</span>
+                <span>Edge API</span>
               </div>
             </div>
             <div class="service-item__arrow" aria-hidden="true">
@@ -1010,21 +1099,17 @@
                     rows="3"></textarea>
                 </div>
 
-                <!-- BOTONES DE ENVÍO FINAL -->
-                <!-- ============================================================
-                     CONFIGURACIÓN DE ENVÍO:
-                     Cada botón ensambla el mensaje con los datos del formulario
-                     y lo envía al canal elegido.
-
-                     WhatsApp:  Modifica el número en JS (archivo js/main.js)
-                                Busca la constante: WA_NUMBER = '521XXXXXXXXXX'
-
-                     Instagram: Enlace directo al perfil (DMs no son automatizables vía URL).
-                                Busca la constante: IG_USERNAME = 'TUNOMBREUSUARIO'
-
-                     Email:     Modifica la dirección en JS.
-                                Busca la constante: EMAIL_ADDRESS = 'hola@colibrixbi.com'
-                ============================================================ -->
+                <!--
+                  FASE 2 — INTERCEPCIÓN DE CONVERSIÓN «FRICCIÓN CERO»
+                  Los botones ya NO tienen href mailto:/wa.me — la lógica de
+                  envío está completamente manejada por LeadIngestionModule en
+                  js/main.js. El flujo:
+                    1. El usuario hace click en un canal (WA / IG / Email)
+                    2. Se muestra el loader (#form-loader) bloqueando el UI
+                    3. fetch() POST → /api/leads/ingest (Spring Boot + LangChain)
+                    4. Si 200 OK → se ocultan los pasos y se muestra #form-success
+                    5. Fallback: si el endpoint falla, se abre el canal directo
+                -->
                 <div class="form__btn-row" style="margin-bottom: var(--space-6);">
                   <button class="btn btn--ghost form__back-btn" id="step4-back" type="button"
                     aria-label="Volver al paso 3">
@@ -1036,17 +1121,32 @@
                   </button>
                 </div>
 
+                <!-- Loader minimalista HummingX (oculto por defecto) -->
+                <div
+                  id="form-loader"
+                  class="form__loader"
+                  hidden
+                  aria-live="assertive"
+                  role="status"
+                  aria-label="Enviando tu solicitud...">
+                  <div class="form__loader-spinner" aria-hidden="true"></div>
+                  <span class="form__loader-text">Procesando solicitud...</span>
+                </div>
+
                 <div class="form__send-group" role="group" aria-label="Opciones de envío">
                   <p class="form__send-label">Enviar mi solicitud por:</p>
 
                   <div class="form__send-buttons">
-                    <!-- Botón WhatsApp -->
-                    <button type="button" class="btn btn--send btn--send-wa" id="send-whatsapp"
+                    <!-- Botón WhatsApp: el click dispara LeadIngestionModule -->
+                    <button
+                      type="button"
+                      class="btn btn--send btn--send-wa"
+                      id="send-whatsapp"
+                      data-channel="whatsapp"
                       aria-label="Enviar solicitud por WhatsApp">
                       <div class="btn__send-icon">
                         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                          <path
-                            d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                         </svg>
                       </div>
                       <div class="btn__send-text">
@@ -1055,12 +1155,15 @@
                       </div>
                     </button>
 
-                    <!-- Botón Instagram -->
-                    <button type="button" class="btn btn--send btn--send-ig" id="send-instagram"
+                    <!-- Botón Instagram: el click dispara LeadIngestionModule -->
+                    <button
+                      type="button"
+                      class="btn btn--send btn--send-ig"
+                      id="send-instagram"
+                      data-channel="instagram"
                       aria-label="Enviar solicitud por Instagram">
                       <div class="btn__send-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                          aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                           <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
                           <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" />
                           <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
@@ -1072,12 +1175,15 @@
                       </div>
                     </button>
 
-                    <!-- Botón Email -->
-                    <button type="button" class="btn btn--send btn--send-mail" id="send-email"
+                    <!-- Botón Email: el click dispara LeadIngestionModule -->
+                    <button
+                      type="button"
+                      class="btn btn--send btn--send-mail"
+                      id="send-email"
+                      data-channel="email"
                       aria-label="Enviar solicitud por correo electrónico">
                       <div class="btn__send-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                          aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                           <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
                           <polyline points="22,6 12,13 2,6" />
                         </svg>
@@ -1090,9 +1196,9 @@
                   </div>
                 </div>
 
-                <!-- Botón de regreso -->
-                <button class="btn btn--ghost form__back-btn form__back-btn--small" id="step3-back" type="button"
-                  aria-label="Volver al paso 2">
+                <!-- Botón de regreso (duplicado semántico para accesibilidad) -->
+                <button class="btn btn--ghost form__back-btn form__back-btn--small" id="step3-back-alt" type="button"
+                  aria-label="Volver al paso anterior">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                     aria-hidden="true">
                     <path d="M19 12H5M12 19l-7-7 7-7" />

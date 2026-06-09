@@ -266,12 +266,12 @@ const ParticlesModule = (() => {
   const IS_MOBILE_DEVICE = ('ontouchstart' in window) || (window.innerWidth <= 768);
 
   const PARTICLE_CONFIG = {
-    count: IS_MOBILE_DEVICE ? 60 : 60,   // Saturación balanceada
+    count: IS_MOBILE_DEVICE ? 120 : 60,   // Saturación en móvil sin ruido
     maxRadius: 1.8,
     speed: IS_MOBILE_DEVICE ? 0.08 : 0.20,
-    connectDist: IS_MOBILE_DEVICE ? 80 : 120, // Mayor distancia en móvil para más conexiones
+    connectDist: IS_MOBILE_DEVICE ? 50 : 120, // Distancia corta en móvil para menos líneas (menos ruido visual) pero más nodos
     color: 'rgba(201, 169, 110, 0.45)',  // --color-gold base
-    maxZ: IS_MOBILE_DEVICE ? 150 : 100, // Mayor Z en móvil da más efecto 3D borroso
+    maxZ: IS_MOBILE_DEVICE ? 200 : 100, // Mayor Z en móvil da más efecto 3D borroso y profundidad
   };
 
 
@@ -544,49 +544,39 @@ const AccordionModule = (() => {
    actualiza la barra de progreso y gestiona las opciones.
    ================================================================ */
 const FormModule = (() => {
-  // Estado del formulario
   const state = {
     currentStep: 1,
-    totalSteps: 4,
+    totalSteps: 2,
     data: {
-      objetivo: 'bi_analytics',
-      etapa: 'operando',
-      desafio: 'datos',
-      tiempo: '1mes',
-      presupuesto: '15k_50k',
-      negocio: 'Mi Negocio de Prueba',
-      nombre: 'Cliente Prueba',
-      telefono: '+52 1 55 1980 2943',
-      mensaje: 'Hola, me gustaría recibir más información sobre el servicio de BI & Analytics.',
+      servicios: [],
+      negocio: '',
+      nombre: '',
+      email: '',
+      telefono: '',
+      mensaje: '',
+      presupuesto: '',
     }
   };
 
-  // Referencias al DOM
   const steps = [
     document.getElementById('step-1'),
-    document.getElementById('step-2'),
-    document.getElementById('step-3'),
-    document.getElementById('step-4')
+    document.getElementById('step-2')
   ];
   const progressBar = document.getElementById('form-progress-bar');
   const stepLabel = document.getElementById('current-step-label');
   const formSuccess = document.getElementById('form-success');
+  const summaryTags = document.getElementById('form-summary-tags');
 
   const step1Next = document.getElementById('step1-next');
-  const step2Next = document.getElementById('step2-next');
-  const step3Next = document.getElementById('step3-next');
   const step2Back = document.getElementById('step2-back');
-  const step3Back = document.getElementById('step3-back');
-  const step4Back = document.getElementById('step4-back');
-  const step3BackAlt = document.getElementById('step3-back-alt');
 
   const businessInput = document.getElementById('business-name');
   const contactName = document.getElementById('contact-name');
+  const contactEmail = document.getElementById('contact-email');
   const contactPhone = document.getElementById('contact-phone');
   const contactMsg = document.getElementById('contact-message');
   const budgetSelect = document.getElementById('budget-select');
 
-  /** Actualiza la barra de progreso y el label */
   function updateProgress() {
     const pct = Math.round((state.currentStep / state.totalSteps) * 100);
     if (progressBar) {
@@ -598,7 +588,6 @@ const FormModule = (() => {
     }
   }
 
-  /** Muestra un paso específico y oculta los demás */
   function showStep(stepIndex) {
     steps.forEach((step, i) => {
       if (!step) return;
@@ -613,7 +602,8 @@ const FormModule = (() => {
     state.currentStep = stepIndex;
     updateProgress();
 
-    // Scroll suave hacia el formulario en mobile
+    if (stepIndex === 2) updateSummary();
+
     const form = document.getElementById('smart-form');
     if (form && window.innerWidth < 1024) {
       setTimeout(() => {
@@ -622,35 +612,17 @@ const FormModule = (() => {
     }
   }
 
-  /** Valida el paso 1 antes de avanzar */
-  function validateStep1() {
-    const negocio = businessInput?.value.trim();
-    if (!negocio) {
-      shakeInput(businessInput);
-      businessInput?.focus();
-      return false;
-    }
-    state.data.negocio = negocio;
-    return true;
+  function updateSummary() {
+    if (!summaryTags) return;
+    summaryTags.innerHTML = '';
+    state.data.servicios.forEach(srv => {
+      const tag = document.createElement('span');
+      tag.className = 'summary-tag';
+      tag.textContent = srv;
+      summaryTags.appendChild(tag);
+    });
   }
 
-  /** Valida el paso 2 antes de avanzar */
-  function validateStep2() {
-    return true;
-  }
-
-  /** Valida el paso 3 antes de avanzar */
-  function validateStep3() {
-    const presupuesto = budgetSelect?.value;
-    if (!presupuesto) {
-      shakeInput(budgetSelect);
-      return false;
-    }
-    state.data.presupuesto = presupuesto;
-    return true;
-  }
-
-  /** Animación de "shake" en inputs inválidos */
   function shakeInput(input) {
     if (!input) return;
     input.style.animation = 'none';
@@ -665,101 +637,88 @@ const FormModule = (() => {
     }, 2000);
   }
 
-  /** Registra la selección de una opción radio */
-  function setupOptionGroups() {
-    const allOptions = document.querySelectorAll('.form__option');
+  function validateStep1() {
+    let isValid = true;
+    
+    if (state.data.servicios.length === 0) {
+      const container = document.getElementById('services-options');
+      shakeInput(container);
+      isValid = false;
+    }
+    if (!businessInput?.value.trim()) {
+      shakeInput(businessInput);
+      isValid = false;
+    }
+    if (!contactName?.value.trim()) {
+      shakeInput(contactName);
+      isValid = false;
+    }
 
-    allOptions.forEach(option => {
-      const radio = option.querySelector('.form__radio');
-      if (!radio) return;
+    if (isValid) {
+      state.data.negocio = businessInput.value.trim();
+      state.data.nombre = contactName.value.trim();
+    }
+    return isValid;
+  }
 
-      // Hacer la opción clickeable
-      option.addEventListener('click', () => {
-        // Deseleccionar opciones del mismo grupo (name)
-        const groupName = radio.name;
-        document.querySelectorAll(`input[name="${groupName}"]`).forEach(r => {
-          r.closest('.form__option')?.classList.remove('is-selected');
-        });
-
-        // Seleccionar esta
-        radio.checked = true;
-        option.classList.add('is-selected');
-
-        // Guardar en estado
-        if (groupName === 'objetivo') state.data.objetivo = radio.value;
-        if (groupName === 'etapa') state.data.etapa = radio.value;
-        if (groupName === 'desafio') state.data.desafio = radio.value;
-        if (groupName === 'tiempo') state.data.tiempo = radio.value;
+  function setupCheckboxes() {
+    const checkboxes = document.querySelectorAll('.form__checkbox');
+    checkboxes.forEach(cb => {
+      cb.addEventListener('change', () => {
+        const option = cb.closest('.form__option');
+        if (cb.checked) {
+          option?.classList.add('is-selected');
+          if (!state.data.servicios.includes(cb.value)) {
+            state.data.servicios.push(cb.value);
+          }
+        } else {
+          option?.classList.remove('is-selected');
+          state.data.servicios = state.data.servicios.filter(v => v !== cb.value);
+        }
       });
-
-      // Accesibilidad: keyboard
-      option.addEventListener('keydown', e => {
+      
+      // Accessibility: toggle with Enter/Space
+      const option = cb.closest('.form__option');
+      option?.addEventListener('keydown', e => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          option.click();
+          cb.click();
         }
       });
     });
   }
 
-  /** Captura cambios en inputs de texto */
   function setupInputListeners() {
-    businessInput?.addEventListener('input', e => {
-      state.data.negocio = e.target.value.trim();
-    });
-    contactName?.addEventListener('input', e => {
-      state.data.nombre = e.target.value.trim();
-    });
-    contactPhone?.addEventListener('input', e => {
-      state.data.telefono = e.target.value.trim();
-    });
-    contactMsg?.addEventListener('input', e => {
-      state.data.mensaje = e.target.value.trim();
-    });
-    budgetSelect?.addEventListener('change', e => {
-      state.data.presupuesto = e.target.value;
-    });
+    businessInput?.addEventListener('input', e => { state.data.negocio = e.target.value.trim(); });
+    contactName?.addEventListener('input', e => { state.data.nombre = e.target.value.trim(); });
+    contactEmail?.addEventListener('input', e => { state.data.email = e.target.value.trim(); });
+    contactPhone?.addEventListener('input', e => { state.data.telefono = e.target.value.trim(); });
+    contactMsg?.addEventListener('input', e => { state.data.mensaje = e.target.value.trim(); });
+    budgetSelect?.addEventListener('change', e => { state.data.presupuesto = e.target.value; });
   }
 
   function init() {
-    setupOptionGroups();
+    setupCheckboxes();
     setupInputListeners();
 
-    // Botón: paso 1 → paso 2
     step1Next?.addEventListener('click', () => {
       if (validateStep1()) showStep(2);
     });
 
-    // Botón: paso 2 → paso 3
-    step2Next?.addEventListener('click', () => {
-      showStep(3);
-    });
-
-    // Botón: paso 3 → paso 4
-    step3Next?.addEventListener('click', () => {
-      if (validateStep3()) showStep(4);
-    });
-
-    // Botones de retroceso
     step2Back?.addEventListener('click', () => showStep(1));
-    step3Back?.addEventListener('click', () => showStep(2));
-    step4Back?.addEventListener('click', () => showStep(3));
-    step3BackAlt?.addEventListener('click', () => showStep(3));
 
-    // Iniciar en paso 1
     updateProgress();
   }
 
-  /** Expone el estado del formulario para el módulo de envío */
   function getState() {
-    // Capturar valores actuales del DOM al momento de enviar
+    state.data.negocio = businessInput?.value.trim() || '';
     state.data.nombre = contactName?.value.trim() || '';
+    state.data.email = contactEmail?.value.trim() || '';
     state.data.telefono = contactPhone?.value.trim() || '';
     state.data.mensaje = contactMsg?.value.trim() || '';
     return { ...state.data };
   }
 
-  /** Muestra el estado de éxito */
   function showSuccess() {
     steps.forEach(s => { if (s) s.setAttribute('hidden', ''); });
     if (formSuccess) formSuccess.removeAttribute('hidden');
@@ -772,146 +731,48 @@ const FormModule = (() => {
 
 
 /* ================================================================
-   9. MÓDULO: LEAD INGESTION — Interceptor de conversión (FASE 2)
-   ================================================================
-   Patrón: Async fetch + fallback graceful degradation
-
-   Flujo completo:
-     1. Usuario selecciona canal (WA / IG / Email) y hace click
-     2. Se llama event.preventDefault() implícitamente (son <button type="button">)
-     3. Se muestra el loader #form-loader (spinner HummingX)
-     4. buildLeadPayload() empaqueta todos los datos del formulario
-        en un objeto JSON estricto con claves en snake_case
-     5. fetch() POST → CONFIG.LEAD_ENDPOINT con AbortController (timeout)
-     6a. Si 200 OK → FormModule.showSuccess() + ocultar loader
-     6b. Si error de red / timeout / 4xx-5xx:
-         → Ocultar loader + activar el canal directo (WA/IG/Email)
-         → showToast() con mensaje de fallback
+   9. MÓDULO: LEAD INGESTION
    ================================================================ */
 const LeadIngestionModule = (() => {
-
-  /* ──────────────────────────────────────────────────────────────
-     ESQUEMA JSON ESPERADO POR EL ENDPOINT
-     Endpoint: POST /api/leads/ingest
-     Content-Type: application/json
-
-     Este payload es consumido por:
-       - Microservicio Spring Boot: parsea y persiste en PostgreSQL
-       - Agente perfilador LangChain (Python): enriquece el lead
-         con scoring de intención y genera la propuesta técnica.
-
-     {
-       "source":          string,   // "landing_page" (constante)
-       "submitted_at":    string,   // ISO 8601 UTC timestamp
-       "channel":         string,   // "whatsapp" | "instagram" | "email"
-       "business_name":   string,   // Nombre del negocio del cliente
-       "contact_name":    string,   // Nombre de la persona de contacto
-       "phone":           string,   // Teléfono/WhatsApp (puede ser vacío)
-       "message":         string,   // Descripción adicional (puede ser vacío)
-       "project_goal":    string,   // Enum: plataforma_empresarial | automatizacion_ia
-                                   //       web_medida | bi_analytics | integracion_datos
-                                   //       | transformacion_digital
-       "business_stage":  string,   // Enum: idea | operando | escalar
-       "main_challenge":  string,   // Enum: ventas | automatizar | ux | datos
-       "timeline":        string,   // Enum: urgente | 1mes | 2-3meses | flexible
-       "budget_range":    string,   // Enum: menos_5k | 5k_15k | 15k_50k
-                                   //       | 50k_150k | mas_150k | por_definir
-     }
-  ────────────────────────────────────────────────────────────── */
-
-  // ─── Referencias al DOM del loader ─────────────────────────────
   const loaderEl = document.getElementById('form-loader');
 
-  /**
-   * Construye el payload JSON tipado con claves en snake_case.
-   * @param {object} formData - Estado del formulario desde FormModule.getState()
-   * @param {string} channel  - Canal seleccionado: 'whatsapp' | 'instagram' | 'email'
-   * @returns {object} Payload listo para JSON.stringify()
-   */
-  function buildLeadPayload(formData, channel) {
-    return {
-      // ── Metadatos de la solicitud ──────────────────────────────
-      source: 'landing_page',                    // string: origen constante
-      submitted_at: new Date().toISOString(),          // string: ISO 8601 UTC
-      channel: channel,                           // string: canal elegido
-
-      // ── Datos de contacto ──────────────────────────────────────
-      business_name: formData.negocio || '',          // string: nombre del negocio
-      contact_name: formData.nombre || '',          // string: persona de contacto
-      phone: formData.telefono || '',          // string: tel/WA (opcional)
-      message: formData.mensaje || '',          // string: nota adicional (opcional)
-
-      // ── Datos del proyecto (tipados con valores enum predefinidos) ──
-      project_goal: formData.objetivo || '',          // string: enum objetivo
-      business_stage: formData.etapa || '',          // string: enum etapa
-      main_challenge: formData.desafio || '',          // string: enum desafío
-      timeline: formData.tiempo || '',          // string: enum tiempo
-      budget_range: formData.presupuesto || '',        // string: enum presupuesto
-    };
-  }
-
-  /**
-   * Muestra el loader de HummingX en el formulario.
-   * Deshabilita los botones de envío para prevenir doble-submit.
-   */
   function showLoader() {
-    if (loaderEl) {
-      loaderEl.removeAttribute('hidden');
-    }
-    // Deshabilitar botones de envío durante la petición
-    document.querySelectorAll('#send-whatsapp, #send-whatsapp-2, #send-instagram, #send-facebook').forEach(btn => {
+    if (loaderEl) loaderEl.removeAttribute('hidden');
+    document.querySelectorAll('.btn--send-wa').forEach(btn => {
       btn.disabled = true;
       btn.setAttribute('aria-busy', 'true');
     });
   }
 
-  /**
-   * Oculta el loader y rehabilita los botones de envío.
-   */
   function hideLoader() {
-    if (loaderEl) {
-      loaderEl.setAttribute('hidden', '');
-    }
-    document.querySelectorAll('#send-whatsapp, #send-whatsapp-2, #send-instagram, #send-facebook').forEach(btn => {
+    if (loaderEl) loaderEl.setAttribute('hidden', '');
+    document.querySelectorAll('.btn--send-wa').forEach(btn => {
       btn.disabled = false;
       btn.removeAttribute('aria-busy');
     });
   }
 
-  /**
-   * Función principal asíncrona.
-   * Envía el payload al endpoint serverless y maneja el estado del DOM.
-   *
-   * @param {string} channel - 'whatsapp' | 'instagram' | 'email'
-   */
   async function ingestLead(channel) {
     const formData = FormModule.getState();
 
-    // Validación mínima: nombre del negocio requerido
-    if (!formData.negocio) {
-      SendButtonsModule.showToast('Por favor, completa al menos el nombre de tu negocio.');
+    // Validation
+    if (!formData.email) {
+      SendButtonsModule.showToast('Por favor ingresa un email válido.');
       return;
     }
 
-    // Mostrar estado de carga breve para feedback visual
     showLoader();
 
-    // Como no hay un backend conectado actualmente, redirigimos directamente
-    // a los canales seleccionados (WhatsApp, Facebook, etc.)
+    // Bypass API since this is a static landing page implementation
     setTimeout(() => {
       hideLoader();
-      
-      // Abrir el canal directo elegido (WhatsApp, FB, IG)
       SendButtonsModule.sendDirect(channel, formData);
-      
-      // Mostrar la pantalla de éxito
       FormModule.showSuccess();
     }, 800);
   }
 
   function init() {
-    // Delegar eventos en botones de envío usando el atributo data-channel
-    const sendGroup = document.querySelector('.form__send-buttons');
+    const sendGroup = document.querySelector('.form__send-group');
     if (!sendGroup) return;
 
     sendGroup.addEventListener('click', (event) => {
@@ -928,89 +789,40 @@ const LeadIngestionModule = (() => {
 
 
 /* ================================================================
-   10. MÓDULO: BOTONES DE ENVÍO — Fallback directo (WA / IG / Email)
-   ================================================================
-   Este módulo actúa como FALLBACK cuando el endpoint serverless no
-   está disponible. LeadIngestionModule lo llama explícitamente en
-   el bloque catch de su función async.
-
-   sendDirect() es la única función pública que necesita el módulo
-   de ingesta. showToast() es un helper compartido.
+   10. MÓDULO: BOTONES DE ENVÍO
    ================================================================ */
 const SendButtonsModule = (() => {
-  /**
-   * Traduce los valores internos del formulario a texto legible
-   */
-  const OBJETIVO_LABELS = {
-    plataforma_empresarial: 'Plataforma Empresarial a la Medida (ERP/CRM)',
-    automatizacion_ia: 'Automatización Inteligente con Agentes IA',
-    web_medida: 'Desarrollo de Software a la Medida',
-    bi_analytics: 'Business Intelligence & Analytics',
-    integracion_datos: 'Integración de Sistemas & Arquitectura de Datos',
-    transformacion_digital: 'Transformación Digital Integral',
-    // Legacy compatibility
-    menu_digital: 'Plataforma Empresarial a la Medida',
-    sistema_cobro: 'Sistema de Cobro / POS',
-  };
-
-  const ETAPA_LABELS = {
-    idea: 'Tengo la Idea',
-    operando: 'Ya Opero',
-    escalar: 'Busco Escalar',
-  };
-
-  const DESAFIO_LABELS = {
-    ventas: 'Más Ventas / Atraer clientes',
-    automatizar: 'Automatizar operaciones',
-    ux: 'Mejorar la experiencia (UX)',
-    datos: 'Toma de decisiones con datos',
-  };
-
-  const TIEMPO_LABELS = {
-    urgente: 'Lo antes posible (Urgente)',
-    '1mes': 'En 1 mes',
-    '2-3meses': 'En 2 o 3 meses',
-    flexible: 'Flexible / Aún planeando',
-  };
-
   const PRESUPUESTO_LABELS = {
     menos_5k: 'Menos de $5,000 MXN',
     '5k_15k': '$5,000 — $15,000 MXN',
     '15k_50k': '$15,000 — $50,000 MXN',
     '50k_150k': '$50,000 — $150,000 MXN',
     mas_150k: 'Más de $150,000 MXN',
-    por_definir: 'Por definir / Consultar',
   };
 
-  /** Construye el mensaje de texto plano */
   function buildMessage(data) {
     const lines = [
       `🦅 *Nueva solicitud — ${CONFIG.COMPANY_NAME}*`,
       '',
+      `🎯 *Servicios requeridos:* ${data.servicios && data.servicios.length > 0 ? data.servicios.join(', ') : 'Ninguno seleccionado'}`,
       `📌 *Negocio:* ${data.negocio || 'No especificado'}`,
-      `🎯 *Objetivo:* ${OBJETIVO_LABELS[data.objetivo] || data.objetivo}`,
-      `🌱 *Etapa actual:* ${ETAPA_LABELS[data.etapa] || data.etapa}`,
-      `🚀 *Desafío principal:* ${DESAFIO_LABELS[data.desafio] || data.desafio}`,
-      `⏳ *Tiempos:* ${TIEMPO_LABELS[data.tiempo] || data.tiempo}`,
-      `💰 *Presupuesto:* ${PRESUPUESTO_LABELS[data.presupuesto] || data.presupuesto}`,
+      `💰 *Presupuesto:* ${data.presupuesto ? (PRESUPUESTO_LABELS[data.presupuesto] || data.presupuesto) : 'Por definir'}`,
       '',
       `👤 *Nombre:* ${data.nombre || 'No especificado'}`,
-      `📱 *Teléfono:* ${data.telefono || 'No especificado'}`,
+      `📧 *Email:* ${data.email || 'No especificado'}`,
+      `📱 *WhatsApp:* ${data.telefono || 'No especificado'}`,
     ];
 
     if (data.mensaje) {
-      lines.push('', `💬 *Mensaje adicional:*`, data.mensaje);
+      lines.push('', `💬 *Desafío / Mensaje:*`, data.mensaje);
     }
 
     lines.push('', '---', 'Enviado desde hummingxbi.com');
-
     return lines.join('\n');
   }
 
-  /** Construye el asunto del correo */
   function buildEmailSubject(data) {
-    const obj = OBJETIVO_LABELS[data.objetivo] || 'Proyecto';
-    return `Solicitud de proyecto — ${obj} | ${data.negocio || 'Nuevo cliente'}`;
+    return `Solicitud de proyecto — ${data.negocio || 'Nuevo cliente'}`;
   }
 
   /** Abre WhatsApp con el mensaje pre-llenado */

@@ -50,144 +50,60 @@
 }
 
 /* ================================================================
-   ACORDEÓN TIPOGRÁFICO MINIMALISTA (Filosofía)
+   FILOSOFÍA MINIMALISTA
    ================================================================ */
-.accordion-minimal {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.accordion-item {
-  position: relative;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  cursor: pointer;
-  padding: var(--space-4) 0;
-  transition: border-color var(--transition-base);
-  overflow: hidden;
-}
-
-.accordion-item:hover {
-  border-bottom-color: rgba(201, 169, 110, 0.3);
-}
-
-/* Encabezado del Acordeón */
-.accordion-item__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-/* Título Refinado Minimalista */
-.accordion-item__title {
-  font-family: var(--font-heading);
-  font-size: 1.5rem; /* Tamaño mucho más sutil */
-  font-weight: 300; /* Elegancia máxima */
-  color: var(--color-text-primary);
-  margin: 0;
-  transition: color var(--transition-base), transform var(--transition-base);
-  line-height: 1.2;
-}
-
-.accordion-item:hover .accordion-item__title,
-.accordion-item.active .accordion-item__title {
-  color: var(--color-gold);
-}
-
-/* Ícono Minimalista (+ / -) */
-.accordion-item__icon {
-  position: relative;
-  width: 16px;
-  height: 16px;
-  display: block;
-}
-
-.accordion-item__icon::before,
-.accordion-item__icon::after {
-  content: '';
-  position: absolute;
-  background-color: var(--color-gold-dim);
-  transition: transform var(--transition-base);
-}
-
-/* Línea horizontal */
-.accordion-item__icon::before {
-  top: 50%;
-  left: 0;
-  width: 100%;
-  height: 1px;
-  transform: translateY(-50%);
-}
-
-/* Línea vertical (formando el +) */
-.accordion-item__icon::after {
-  top: 0;
-  left: 50%;
-  width: 1px;
-  height: 100%;
-  transform: translateX(-50%);
-}
-
-/* Al estar activo, la línea vertical rota 90deg para formar un - */
-.accordion-item.active .accordion-item__icon::after {
-  transform: translateX(-50%) rotate(90deg);
-  opacity: 0; /* Se desvanece para dejar solo el - */
+.philosophy-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-12);
+  padding-top: var(--space-8);
 }
 
 @media (min-width: 768px) {
-  .accordion-item__title {
-    font-size: 2rem;
+  .philosophy-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-8);
   }
 }
 
-@media (min-width: 1024px) {
-  .accordion-item__title {
-    font-size: 2.5rem;
-  }
-  .accordion-item {
-    padding: var(--space-6) 0;
-  }
+.philosophy-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  position: relative;
 }
 
-/* Contenido Colapsable */
-.accordion-item__content {
-  max-height: 0;
-  opacity: 0;
-  padding-top: 0;
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  visibility: hidden;
+.philosophy-item::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: 0;
+  width: 40px;
+  height: 1px;
+  background: var(--color-gold);
+  opacity: 0.3;
 }
 
-.accordion-item.active .accordion-item__content {
-  max-height: 300px; /* Suficiente para el texto */
-  opacity: 1;
-  padding-top: var(--space-4);
-  visibility: visible;
+.philosophy-item__num {
+  font-family: var(--font-heading);
+  font-size: clamp(3rem, 5vw, 4.5rem);
+  color: var(--color-gold);
+  opacity: 0.15;
+  line-height: 1;
+  margin-bottom: -1rem;
 }
 
-.accordion-item__content p {
-  font-size: var(--text-base);
+.philosophy-item__title {
+  font-size: var(--text-2xl);
+  font-weight: 300;
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+}
+
+.philosophy-item__desc {
+  font-size: var(--text-sm);
   color: var(--color-text-secondary);
   line-height: 1.6;
-  margin-bottom: var(--space-4);
-  max-width: 700px;
-}
-
-/* Tags minimalistas */
-.accordion-item__tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-4);
-}
-
-.accordion-item__tags span {
-  font-size: var(--text-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--color-gold-dim);
-  border-bottom: 1px solid rgba(201, 169, 110, 0.2);
-  padding-bottom: 2px;
 }
 
 
@@ -769,10 +685,48 @@
 }
 
 /* Ocultar radio nativo */
-.form__radio {
+/* Ocultar radio y checkbox nativos */
+.form__radio,
+.form__checkbox {
   position: absolute;
   opacity: 0;
   pointer-events: none;
+}
+
+/* --- Resumen de Formulario --- */
+.form__summary-box {
+  background: rgba(20, 20, 22, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-bottom: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.form__summary-title {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.form__summary-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.summary-tag {
+  background: rgba(13, 148, 136, 0.15);
+  color: var(--color-teal);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid rgba(13, 148, 136, 0.3);
 }
 
 /* Estado seleccionado */

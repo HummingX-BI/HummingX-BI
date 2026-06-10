@@ -755,12 +755,6 @@ const LeadIngestionModule = (() => {
   async function ingestLead(channel) {
     const formData = FormModule.getState();
 
-    // Validation
-    if (!formData.email) {
-      SendButtonsModule.showToast('Por favor ingresa un email válido.');
-      return;
-    }
-
     showLoader();
 
     // Bypass API since this is a static landing page implementation

@@ -1437,6 +1437,11 @@ select {
     display: none;
   }
 
+  /* Ocultar recuadro "empresa mexicana" en móvil para reducir ruido visual */
+  .hero__eyebrow {
+    display: none !important;
+  }
+
   /* Hero con más espacio para respirar */
   .hero {
     padding-block: var(--space-20) var(--space-16);

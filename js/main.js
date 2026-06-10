@@ -802,19 +802,19 @@ const SendButtonsModule = (() => {
 
   function buildMessage(data) {
     const lines = [
-      `🦅 *Nueva solicitud — ${CONFIG.COMPANY_NAME}*`,
+      `*Nueva solicitud — ${CONFIG.COMPANY_NAME}*`,
       '',
-      `🎯 *Servicios requeridos:* ${data.servicios && data.servicios.length > 0 ? data.servicios.join(', ') : 'Ninguno seleccionado'}`,
-      `📌 *Negocio:* ${data.negocio || 'No especificado'}`,
-      `💰 *Presupuesto:* ${data.presupuesto ? (PRESUPUESTO_LABELS[data.presupuesto] || data.presupuesto) : 'Por definir'}`,
+      `*Servicios requeridos:* ${data.servicios && data.servicios.length > 0 ? data.servicios.join(', ') : 'Ninguno seleccionado'}`,
+      `*Negocio:* ${data.negocio || 'No especificado'}`,
+      `*Presupuesto:* ${data.presupuesto ? (PRESUPUESTO_LABELS[data.presupuesto] || data.presupuesto) : 'Por definir'}`,
       '',
-      `👤 *Nombre:* ${data.nombre || 'No especificado'}`,
-      `📧 *Email:* ${data.email || 'No especificado'}`,
-      `📱 *WhatsApp:* ${data.telefono || 'No especificado'}`,
+      `*Nombre:* ${data.nombre || 'No especificado'}`,
+      `*Email:* ${data.email || 'No especificado'}`,
+      `*WhatsApp:* ${data.telefono || 'No especificado'}`,
     ];
 
     if (data.mensaje) {
-      lines.push('', `💬 *Desafío / Mensaje:*`, data.mensaje);
+      lines.push('', `*Desafío / Mensaje:*`, data.mensaje);
     }
 
     lines.push('', '---', 'Enviado desde hummingxbi.com');
@@ -866,12 +866,10 @@ const SendButtonsModule = (() => {
     window.open(CONFIG.FB_PAGE_URL, '_blank', 'noopener,noreferrer');
   }
 
-  /** Abre el cliente de correo con el mensaje pre-llenado */
   function sendEmail(data) {
     const subject = buildEmailSubject(data);
     const body = buildMessage(data)
-      .replace(/\*/g, '')        // Eliminar formato Markdown del cuerpo
-      .replace(/🦅|📌|🎯|📊|💰|👤|📞|💬/g, ''); // Quitar emojis opcionales en email
+      .replace(/\*/g, '');        // Eliminar formato Markdown del cuerpo
 
     const mailtoUrl = [
       `mailto:${CONFIG.EMAIL_ADDRESS}`,

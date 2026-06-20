@@ -14,21 +14,21 @@
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://hummingxbi.com/" />
   <meta name="description"
-    content="Desarrollo de software a medida en CDMX. Automatizamos operaciones y creamos ecosistemas con IA y Business Intelligence para escalar empresas mexicanas." />
+    content="Firma de tecnología e inteligencia de negocios. Automatizamos operaciones y creamos ecosistemas web, IA y Business Intelligence para aliados estratégicos." />
   <meta name="keywords"
-    content="agencia de desarrollo de software en CDMX, desarrollo de software a medida para PyMEs, servicios de business intelligence en México, automatización de procesos empresariales CDMX, integraciones de software y APIs México, desarrollo de sistemas punto de venta y NFC, empresas de desarrollo de software a la medida, consultoría en automatización con IA CDMX, contratar agencia de desarrollo de software CDMX" />
-  <meta property="og:title" content="HummingX | Software a Medida y Business Intelligence en México" />
+    content="firma de tecnología, inteligencia de negocios, business intelligence méxico, desarrollo de software a medida, consultoría de software CDMX, ecosistemas web, agentes IA, nfc y lealtad, software integral" />
+  <meta property="og:title" content="HummingX BI | Firma de Tecnología e Inteligencia de Negocios" />
   <meta property="og:description"
-    content="Desarrollo de software a medida en CDMX. Automatizamos operaciones y creamos ecosistemas con IA y Business Intelligence para escalar empresas mexicanas." />
+    content="Firma de tecnología e inteligencia de negocios. Automatizamos operaciones y creamos ecosistemas web, IA y Business Intelligence para aliados estratégicos." />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="https://hummingxbi.com/humming-logo.png" />
   <!-- Twitter Card Data -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="HummingX | Software a Medida y Business Intelligence en México" />
+  <meta name="twitter:title" content="HummingX BI | Firma de Tecnología e Inteligencia de Negocios" />
   <meta name="twitter:description"
-    content="Desarrollo de software a medida en CDMX. Automatizamos operaciones y creamos ecosistemas con IA y Business Intelligence para escalar empresas mexicanas." />
+    content="Firma de tecnología e inteligencia de negocios. Automatizamos operaciones y creamos ecosistemas web, IA y Business Intelligence para aliados estratégicos." />
   <meta name="twitter:image" content="https://hummingxbi.com/humming-logo.png" />
-  <title>HummingX-BI | Software a Medida & BI para Empresas — México</title>
+  <title>HummingX BI | Firma de Tecnología e Inteligencia de Negocios</title>
 
   <!-- Favicons optimizados para Google Search -->
   <link rel="icon" type="image/png" href="humming-logo.png" sizes="any" />
@@ -145,21 +145,6 @@
        dinámico y aterriza exactamente en la esquina superior izquierda,
        fusionándose con el logo de la cabecera.
   ============================================================ -->
-  <!--
-    FASE 1 — VIDEO HERO OPTIMIZADO (LCP / TTI)
-    - preload="metadata": Solo descarga los metadatos (duración, dimensiones)
-      durante la carga inicial, liberando el hilo principal.
-    - poster="assets/hero-poster.webp": Imagen de reemplazo instantánea
-      que se muestra hasta que IntersectionObserver activa la reproducción.
-    - data-src en lugar de src: La asignación real del src ocurre en JS
-      solo cuando el contenedor entra en el viewport.
-    El controlador de IntersectionObserver vive en js/scroll-video.js.
-  -->
-  <div id="video-container" style="opacity: 0;">
-    <video data-src="assets/hero-bg.mp4" preload="metadata" poster="assets/hero-poster.webp" muted playsinline loop
-      aria-hidden="true">
-    </video>
-  </div>
 
   <!-- PRELOADER: Anillo de progreso circular SVG + Logo centrado de marca -->
   <div id="preloader" class="preloader" role="status" aria-label="Cargando">
@@ -204,13 +189,15 @@
         <!-- Menú de navegación desktop -->
         <ul class="nav__menu" role="list">
           <li><a href="#inicio" class="nav__link" aria-current="page">Inicio</a></li>
-          <li><a href="#atributos" class="nav__link">Filosofía</a></li>
           <li><a href="#servicios" class="nav__link">Servicios</a></li>
-          <li><a href="#contacto" class="nav__link">Contacto</a></li>
+          <li><a href="#soluciones" class="nav__link">Soluciones</a></li>
+          <li><a href="#metodologia" class="nav__link">Metodología</a></li>
+          <li><a href="#nosotros" class="nav__link">Nosotros</a></li>
+          <li><a href="#faqs" class="nav__link">FAQs</a></li>
         </ul>
 
         <!-- Botón CTA en navbar -->
-        <a href="#contacto" class="btn btn--nav" id="nav-cta-btn">Agenda hoy</a>
+        <a href="#contacto" class="btn btn--nav" id="nav-cta-btn">Agenda una llamada</a>
 
         <!-- Hamburger (mobile) -->
         <button class="nav__hamburger" id="hamburger-btn" aria-label="Abrir menú" aria-expanded="false"
@@ -225,10 +212,12 @@
       <div class="mobile-menu" id="mobile-menu" role="dialog" aria-label="Menú móvil" aria-hidden="true">
         <ul class="mobile-menu__list" role="list">
           <li><a href="#inicio" class="mobile-menu__link" data-close-menu>Inicio</a></li>
-          <li><a href="#atributos" class="mobile-menu__link" data-close-menu>Filosofía</a></li>
           <li><a href="#servicios" class="mobile-menu__link" data-close-menu>Servicios</a></li>
-          <li><a href="#contacto" class="mobile-menu__link" data-close-menu>Contacto</a></li>
-          <li><a href="#contacto" class="btn btn--primary mobile-menu__cta" data-close-menu>Solicitar Diagnóstico</a>
+          <li><a href="#soluciones" class="mobile-menu__link" data-close-menu>Soluciones</a></li>
+          <li><a href="#metodologia" class="mobile-menu__link" data-close-menu>Metodología</a></li>
+          <li><a href="#nosotros" class="mobile-menu__link" data-close-menu>Nosotros</a></li>
+          <li><a href="#faqs" class="mobile-menu__link" data-close-menu>FAQs</a></li>
+          <li><a href="#contacto" class="btn btn--primary mobile-menu__cta" data-close-menu>Agenda una llamada</a>
           </li>
         </ul>
       </div>
@@ -260,68 +249,60 @@
         <div class="hero__eyebrow reveal-up" aria-label="Categoría"
           style="display: inline-flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; justify-content: center;">
           <div
-            style="display: flex; align-items: center; gap: var(--space-2); background: rgba(255,255,255,0.05); padding: 4px 12px; border-radius: 20px;">
-            <span>Empresa mexicana · CDMX 🇲🇽</span>
-          </div>
-          <div style="display: flex; align-items: center; gap: var(--space-2);">
-            <span class="hero__eyebrow-dot" aria-hidden="true"></span>
-            <span>Soluciones de Software & Business Intelligence</span>
+            style="display: flex; align-items: center; gap: var(--space-2); background: rgba(0, 0, 0, 0.05); padding: 4px 12px; border-radius: 20px;">
+            <span style="color: var(--color-text-secondary); font-weight: 500;">Tecnología e Inteligencia de Negocios</span>
           </div>
         </div>
 
         <!-- Titular principal -->
         <h1 class="hero__title reveal-up" id="hero-title">
-          Escalamos tus operaciones con<br />
-          <span class="gradient-text">Software de alta precisión.</span>
+          HummingX BI<br />
+          <span class="gradient-text">Ingeniería de software integral.</span>
         </h1>
 
         <!-- Subtítulo -->
         <p class="hero__subtitle reveal-up">
-          Convertimos cuellos de botella en operaciones automatizadas. Diseñamos ecosistemas a la medida que conectan tu
-          flujo de ventas, hardware físico y datos en tiempo real para escalar sin fricción.
+          Somos tu aliado de crecimiento recíproco. Gracias a nuestro equipo técnico multidisciplinario, que integra ciencia de datos, inteligencia artificial e ingeniería de software, desarrollamos ecosistemas integrales a la medida de tus objetivos operativos y comerciales.
         </p>
 
         <!-- Botones CTA -->
         <div class="hero__cta-wrapper reveal-up"
-          style="display: flex; flex-direction: column; align-items: center; gap: var(--space-3); margin-bottom: var(--space-12);">
+          style="display: flex; flex-direction: column; align-items: center; gap: var(--space-4); margin-bottom: var(--space-12);">
           <div class="hero__cta-group" style="margin-bottom: 0;">
-            <a href="#contacto" class="btn btn--primary btn--glow" id="hero-cta-primary">
-              <span>Inicia tu Diagnóstico</span>
-              <!-- Icono de flecha -->
+            <a href="https://wa.me/5215519802943" target="_blank" rel="noopener" class="btn btn--primary" id="hero-cta-primary">
+              <span>Agenda una llamada</span>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                 aria-hidden="true">
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
             </a>
-            <a href="#atributos" class="btn btn--ghost" id="hero-cta-secondary">
-              <span>Descubre Cómo Escalar</span>
+            <a href="#servicios" class="btn btn--ghost" id="hero-cta-secondary">
+              <span>Conoce nuestros servicios</span>
             </a>
           </div>
           <div class="hero__trust-badge"
-            style="font-size: var(--text-xs); color: var(--color-gold-dim); display: flex; align-items: center; gap: 6px;">
+            style="font-size: var(--text-xs); font-weight: 500; color: var(--color-text-secondary); display: flex; align-items: center; gap: 6px;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="10"></circle>
               <polyline points="12 6 12 12 16 14"></polyline>
             </svg>
-            Propuesta técnica en menos de 24h
+            Diagnóstico inicial sin costo · Respuesta en &lt;24h
           </div>
         </div>
 
-        <!-- Propuesta de valor -->
-        <div class="hero__metrics reveal-up" role="list" aria-label="Propuesta de valor">
-          <div class="hero__metric" role="listitem">
-            <span class="hero__metric-number" aria-label="Soluciones 100% a medida">100<span>%</span></span>
-            <span class="hero__metric-label">A medida</span>
+        <!-- Propuesta de valor / Pills de Contexto -->
+        <div class="hero__context-pills reveal-up" role="list" aria-label="Contexto y Capacidades">
+          <div class="context-pill" role="listitem">
+            <span class="context-pill__label">Alcance</span>
+            <span class="context-pill__value">Polanco, Roma, Doctores, Santa Fe, Naucalpan, Tlalnepantla, Toluca</span>
           </div>
-          <div class="hero__metric-divider" aria-hidden="true"></div>
-          <div class="hero__metric" role="listitem">
-            <span class="hero__metric-number" aria-label="Soporte 24 / 7">24<span>/7</span></span>
-            <span class="hero__metric-label">Soporte activo</span>
+          <div class="context-pill" role="listitem">
+            <span class="context-pill__label">Capacidad técnica</span>
+            <span class="context-pill__value">Equipo multidisciplinario · Capacidad de ejecutar cualquier reto de software</span>
           </div>
-          <div class="hero__metric-divider" aria-hidden="true"></div>
-          <div class="hero__metric" role="listitem">
-            <span class="hero__metric-number" aria-label="Cero compromiso con la mediocridad">&infin;</span>
-            <span class="hero__metric-label">Escalabilidad</span>
+          <div class="context-pill" role="listitem">
+            <span class="context-pill__label">Portafolio</span>
+            <span class="context-pill__value">Agentes IA · Web · NFC/Loyalty · BI · Digital Signage · Custom</span>
           </div>
         </div>
       </div>
@@ -333,251 +314,567 @@
     <!-- =======================
          SECCIÓN DE ATRIBUTOS (Filosofía HummingX)
     ======================== -->
-    <section class="attributes" id="atributos" aria-labelledby="attributes-title">
+    <!-- ========================
+         SECCIÓN DE SERVICIOS (Master-Detail)
+    ======================== -->
+    <section class="services-v2" id="servicios" aria-labelledby="services-title">
       <div class="container">
-        <!-- Encabezado de sección -->
         <div class="section-header reveal-up">
-          <span class="section-tag">Nuestra Filosofía</span>
-          <h2 class="section-title" id="attributes-title">
-            Principios que definen<br /><span class="gradient-text">cada línea de código</span>
+          <span class="section-tag">Servicios</span>
+          <h2 class="section-title" id="services-title">
+            Ecosistemas tecnológicos<br /><span class="gradient-text">de extremo a extremo.</span>
           </h2>
           <p class="section-subtitle">
-            Velocidad, precisión y adaptabilidad sin límites. Así concebimos cada sistema que construimos.
+            Desde la captura del dato hasta la toma de decisiones automatizada.
           </p>
         </div>
 
-        <!-- Filosofía Minimalista -->
-        <div class="philosophy-grid">
-          <div class="philosophy-item reveal-up">
-            <span class="philosophy-item__num">01</span>
-            <h3 class="philosophy-item__title">Arquitectura Ágil</h3>
-            <p class="philosophy-item__desc">Escala sin fricciones. Reducimos la deuda técnica desde el día cero
-              diseñando sistemas que se adaptan al crecimiento de tu empresa.</p>
+        <div class="services-master-detail reveal-up">
+          <div class="services-master">
+            <button class="service-tab active" data-target="srv-integral">Acompañamiento integral</button>
+            <button class="service-tab" data-target="srv-agentes">Agentes IA y Automatización</button>
+            <button class="service-tab" data-target="srv-web">Ecosistemas Web</button>
+            <button class="service-tab" data-target="srv-digital">Digital Signage</button>
+            <button class="service-tab" data-target="srv-nfc">NFC y Sistemas de Lealtad</button>
+            <button class="service-tab" data-target="srv-bi">Business Intelligence</button>
+            <button class="service-tab" data-target="srv-custom">Software a la Medida</button>
           </div>
+          
+          <div class="services-detail">
+            <!-- Acompañamiento integral -->
+            <div class="service-panel active" id="srv-integral">
+              <h3 class="service-panel__title">Acompañamiento integral</h3>
+              <p class="service-panel__desc">Nuestro servicio paraguas. Nos convertimos en tu brazo tecnológico externo para orquestar todas tus necesidades digitales bajo una misma visión estratégica.</p>
+              
+              <h4 class="service-panel__subtitle">Qué incluye:</h4>
+              <ul class="service-panel__list">
+                <li>Auditoría técnica inicial y roadmap estratégico.</li>
+                <li>Desarrollo continuo e iterativo.</li>
+                <li>Soporte dedicado y mantenimiento proactivo.</li>
+              </ul>
+              
+              <h4 class="service-panel__subtitle">Ideal para:</h4>
+              <p class="service-panel__desc">Empresas en crecimiento que buscan centralizar su tecnología sin contratar un equipo in-house completo.</p>
+            </div>
+            
+            <!-- Agentes IA y Automatización -->
+            <div class="service-panel" id="srv-agentes">
+              <h3 class="service-panel__title">Agentes IA y Automatización</h3>
+              <p class="service-panel__desc">Automatizamos tus flujos de trabajo con agentes autónomos que responden, gestionan y ejecutan tareas repetitivas 24/7.</p>
+              <h4 class="service-panel__subtitle">Qué incluye:</h4>
+              <ul class="service-panel__list">
+                <li>Integración con WhatsApp y redes sociales.</li>
+                <li>Procesamiento de lenguaje natural avanzado.</li>
+                <li>Conexión con tu CRM o base de datos.</li>
+              </ul>
+              <h4 class="service-panel__subtitle">Ideal para:</h4>
+              <p class="service-panel__desc">Atención al cliente de alto volumen, agendamiento de citas y soporte técnico de Nivel 1.</p>
+            </div>
 
-          <div class="philosophy-item reveal-up" style="transition-delay: 150ms;">
-            <span class="philosophy-item__num">02</span>
-            <h3 class="philosophy-item__title">Precisión</h3>
-            <p class="philosophy-item__desc">Estabilidad absoluta. Código limpio y pruebas exhaustivas para garantizar
-              operaciones sin interrupciones bajo cualquier volumen de tráfico.</p>
-          </div>
+            <!-- Ecosistemas Web -->
+            <div class="service-panel" id="srv-web">
+              <h3 class="service-panel__title">Ecosistemas Web</h3>
+              <p class="service-panel__desc">Construimos plataformas sólidas y escalables. Ofrecemos paquetes por niveles según la complejidad de tu operación.</p>
+              <h4 class="service-panel__subtitle">Qué incluye:</h4>
+              <ul class="service-panel__list">
+                <li>Diseño UI/UX de alto impacto.</li>
+                <li>Desarrollo frontend optimizado para conversión.</li>
+                <li>Panel de administración CMS o personalizado.</li>
+              </ul>
+              <h4 class="service-panel__subtitle">Ideal para:</h4>
+              <p class="service-panel__desc">Desde portafolios corporativos hasta e-commerces B2B de alta transaccionalidad.</p>
+            </div>
 
-          <div class="philosophy-item reveal-up" style="transition-delay: 300ms;">
-            <span class="philosophy-item__num">03</span>
-            <h3 class="philosophy-item__title">Conexión</h3>
-            <p class="philosophy-item__desc">Tus datos en tiempo real. Integramos todos tus flujos de información en un
-              ecosistema centralizado para decisiones estratégicas inmediatas.</p>
+            <!-- Digital Signage -->
+            <div class="service-panel" id="srv-digital">
+              <h3 class="service-panel__title">Digital Signage</h3>
+              <p class="service-panel__desc">Sistemas de visualización dinámica para espacios físicos. Controla tus menús o publicidad desde un solo panel.</p>
+              <h4 class="service-panel__subtitle">Qué incluye:</h4>
+              <ul class="service-panel__list">
+                <li>Software de gestión en la nube.</li>
+                <li>Sincronización en tiempo real.</li>
+                <li>Analíticas de visualización.</li>
+              </ul>
+              <h4 class="service-panel__subtitle">Ideal para:</h4>
+              <p class="service-panel__desc">Restaurantes, hospitales, corporativos y retail con presencia física múltiple.</p>
+            </div>
+
+            <!-- NFC y Sistemas de Lealtad -->
+            <div class="service-panel" id="srv-nfc">
+              <h3 class="service-panel__title">NFC y Sistemas de Lealtad</h3>
+              <p class="service-panel__desc">Conecta el mundo físico con el digital. Crea experiencias interactivas y programas de lealtad sin fricciones.</p>
+              <h4 class="service-panel__subtitle">Qué incluye:</h4>
+              <ul class="service-panel__list">
+                <li>Tarjetas o stickers NFC programables.</li>
+                <li>Plataforma de seguimiento de puntos/visitas.</li>
+                <li>Notificaciones y recompensas automatizadas.</li>
+              </ul>
+              <h4 class="service-panel__subtitle">Ideal para:</h4>
+              <p class="service-panel__desc">Cafeterías, clínicas de belleza, gimnasios y negocios locales con recurrencia.</p>
+            </div>
+
+            <!-- Business Intelligence -->
+            <div class="service-panel" id="srv-bi">
+              <h3 class="service-panel__title">Business Intelligence</h3>
+              <p class="service-panel__desc">Convierte tus datos en decisiones. Extraemos, limpiamos y visualizamos la información clave de tu negocio.</p>
+              <h4 class="service-panel__subtitle">Qué incluye:</h4>
+              <ul class="service-panel__list">
+                <li>Dashboards interactivos en tiempo real.</li>
+                <li>Integración de múltiples fuentes (ERP, Ventas, Marketing).</li>
+                <li>Reportes automatizados por correo/WhatsApp.</li>
+              </ul>
+              <h4 class="service-panel__subtitle">Ideal para:</h4>
+              <p class="service-panel__desc">Direcciones generales y equipos de finanzas que necesitan visibilidad total de la rentabilidad.</p>
+            </div>
+
+            <!-- Software a la Medida -->
+            <div class="service-panel" id="srv-custom">
+              <h3 class="service-panel__title">Software a la Medida</h3>
+              <p class="service-panel__desc">Si tu operación es única, tu software también debe serlo. Construimos sistemas personalizados desde cero.</p>
+              <h4 class="service-panel__subtitle">Qué incluye:</h4>
+              <ul class="service-panel__list">
+                <li>Levantamiento de requerimientos y arquitectura.</li>
+                <li>Desarrollo iterativo ágil.</li>
+                <li>Despliegue en infraestructura cloud segura.</li>
+              </ul>
+              <h4 class="service-panel__subtitle">Ideal para:</h4>
+              <p class="service-panel__desc">Empresas con procesos operativos complejos no cubiertos por soluciones comerciales (SaaS) genéricas.</p>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
-    <!-- FIN: ATRIBUTOS -->
-
-
-    <!-- ========================
-         SECCIÓN DE SERVICIOS
-    ======================== -->
-    <section class="services" id="servicios" aria-labelledby="services-title">
-      <div class="container">
-        <div class="section-header reveal-up">
-          <span class="section-tag">Lo que construimos</span>
-          <h2 class="section-title" id="services-title">
-            Sistemas que <span class="gradient-text">Evolucionan</span><br />contigo
-          </h2>
-        </div>
-
-        <div class="services__grid">
-
-          <!-- Servicio 1: Sistemas Empresariales & APIs -->
-          <div class="service-item reveal-left" id="service-software">
-            <div class="service-item__number" aria-hidden="true">01</div>
-            <div class="service-item__content">
-              <h3 class="service-item__title">Plataformas Empresariales</h3>
-              <p class="service-item__desc">Unificamos tu operación eliminando tareas manuales y pérdida de información.
-                Arquitectamos sistemas robustos a la medida que centralizan y aceleran tus procesos internos.</p>
-              <div class="service-item__tech" aria-label="Tecnologías usadas">
-                <span>Node.js</span><span>React</span><span>PostgreSQL</span><span>Cloud</span><span>REST/GraphQL</span>
-              </div>
-            </div>
-            <div class="service-item__arrow" aria-hidden="true">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M7 17L17 7M17 7H7M17 7v10" />
-              </svg>
-            </div>
-          </div>
-
-          <!-- Servicio 2: Business Intelligence & Datos -->
-          <div class="service-item reveal-left" id="service-bi">
-            <div class="service-item__number" aria-hidden="true">02</div>
-            <div class="service-item__content">
-              <h3 class="service-item__title">Business Intelligence</h3>
-              <p class="service-item__desc">Visibilidad total de la rentabilidad y el rendimiento comercial de tu
-                negocio. Extraemos y estructuramos tus datos dispersos en tableros en tiempo real para decisiones
-                estratégicas inmediatas.</p>
-              <div class="service-item__tech" aria-label="Tecnologías usadas">
-                <span>Power BI</span><span>Tableau</span><span>ETL</span><span>SQL</span>
-              </div>
-            </div>
-            <div class="service-item__arrow" aria-hidden="true">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M7 17L17 7M17 7H7M17 7v10" />
-              </svg>
-            </div>
-          </div>
-
-          <!-- Servicio 3: Automatización Inteligente (RPA) -->
-          <div class="service-item reveal-left" id="service-ai">
-            <div class="service-item__number" aria-hidden="true">03</div>
-            <div class="service-item__content">
-              <h3 class="service-item__title">Automatización con IA</h3>
-              <p class="service-item__desc">Multiplicamos la capacidad productiva de tu equipo reduciendo horas de
-                trabajo repetitivo. Implementamos agentes lógicos que ejecutan flujos de trabajo complejos de forma
-                autónoma y sin errores.</p>
-              <div class="service-item__tech" aria-label="Tecnologías usadas">
-                <span>LLM Agents</span><span>Python</span><span>RPA</span><span>LangChain</span>
-              </div>
-            </div>
-            <div class="service-item__arrow" aria-hidden="true">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M7 17L17 7M17 7H7M17 7v10" />
-              </svg>
-            </div>
-          </div>
-
-          <!-- Servicio 4: Hardware NFC & POS -->
-          <div class="service-item reveal-left" id="service-nfc" aria-labelledby="service-nfc-title">
-            <div class="service-item__number" aria-hidden="true">04</div>
-            <div class="service-item__content">
-              <!-- Badge de edge-computing para señalización visual premium -->
-              <span class="service-item__edge-badge" aria-label="Nodo de borde activo">
-                <span class="service-item__edge-dot" aria-hidden="true"></span>
-                Edge Node
-              </span>
-              <h3 class="service-item__title" id="service-nfc-title">
-                Ecosistemas de Venta
-              </h3>
-              <p class="service-item__desc">
-                Incrementamos tu conversión con canales de cobro fluidos y conciliación automática. Conectamos tus
-                plataformas digitales con terminales físicas y hardware NFC en una infraestructura sincronizada.
-              </p>
-              <div class="service-item__tech" aria-label="Stack tecnológico del nodo de borde">
-                <span>MQTT</span><span>NFC/NDEF</span><span>Edge API</span><span>Webhooks</span>
-              </div>
-            </div>
-            <div class="service-item__arrow" aria-hidden="true">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M7 17L17 7M17 7H7M17 7v10" />
-              </svg>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Tech Stack -->
-        <div class="services__stack reveal-up"
-          style="margin-top: var(--space-12); padding-top: var(--space-8); border-top: 1px solid rgba(255,255,255,0.05); text-align: center;">
-          <p
-            style="font-size: var(--text-sm); color: var(--color-text-secondary); margin-bottom: var(--space-4); letter-spacing: 0.05em; text-transform: uppercase;">
-            Tecnologías con las que trabajamos</p>
-          <div
-            style="display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-4) var(--space-6); color: var(--color-gold-dim); font-family: var(--font-heading); font-size: 1.25rem;">
-            <span>React</span>
-            <span>Node.js</span>
-            <span>PostgreSQL</span>
-            <span>Python</span>
-            <span>AWS</span>
-            <span>Power BI</span>
-            <span>TypeScript</span>
-            <span>Docker</span>
-          </div>
-        </div>
-
       </div>
     </section>
     <!-- FIN: SERVICIOS -->
 
-
-
-
-
     <!-- ========================
          SECCIÓN DE PROCESO
     ======================== -->
-    <section class="process" id="proceso" aria-labelledby="process-title">
+    <section class="process-v2" id="metodologia">
       <div class="container">
         <div class="section-header reveal-up">
-          <span class="section-tag">Metodología</span>
-          <h2 class="section-title" id="process-title">
-            Del concepto al<br /><span class="gradient-text">sistema en vuelo</span>
+          <span class="section-tag">Cómo Trabajamos</span>
+          <h2 class="section-title">
+            Tu proyecto en producción,<br /><span class="gradient-text">sin demoras.</span>
           </h2>
         </div>
 
-        <div class="process__timeline" role="list">
-          <div class="process__step reveal-up" role="listitem">
-            <div class="process__step-number" aria-hidden="true"
-              style="display:flex; align-items:center; justify-content:center; font-size:1.5rem;">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-              </svg>
+        <div class="process-steps reveal-up">
+          <div class="process-step">
+            <div class="process-step__header">
+              <span class="process-step__num">01</span>
+              <span class="process-step__badge">Sin compromiso</span>
             </div>
-            <div class="process__step-content">
-              <h3>Diagnóstico</h3>
-              <p>Entendemos tus datos y objetivos.</p>
-            </div>
+            <h3 class="process-step__title">Llamada de exploración</h3>
+            <p class="process-step__desc">Entendemos a fondo tu modelo de negocio y tus cuellos de botella actuales.</p>
           </div>
-          <div class="process__connector" aria-hidden="true"></div>
-          <div class="process__step reveal-up" role="listitem">
-            <div class="process__step-number" aria-hidden="true"
-              style="display:flex; align-items:center; justify-content:center; font-size:1.5rem;">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-                <polyline points="2 12 12 17 22 12"></polyline>
-                <polyline points="2 17 12 22 22 17"></polyline>
-              </svg>
+          
+          <div class="process-step">
+            <div class="process-step__header">
+              <span class="process-step__num">02</span>
+              <span class="process-step__badge">Tiered</span>
             </div>
-            <div class="process__step-content">
-              <h3>Arquitectura</h3>
-              <p>Diseñamos la estructura técnica óptima.</p>
-            </div>
+            <h3 class="process-step__title">Propuesta a la medida</h3>
+            <p class="process-step__desc">Te presentamos opciones claras (Silver/Gold/Platinum/Elite) adaptadas a tu presupuesto.</p>
           </div>
-          <div class="process__connector" aria-hidden="true"></div>
-          <div class="process__step reveal-up" role="listitem">
-            <div class="process__step-number" aria-hidden="true"
-              style="display:flex; align-items:center; justify-content:center; font-size:1.5rem;">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="16 18 22 12 16 6"></polyline>
-                <polyline points="8 6 2 12 8 18"></polyline>
-              </svg>
+
+          <div class="process-step">
+            <div class="process-step__header">
+              <span class="process-step__num">03</span>
+              <span class="process-step__badge">Arranque ágil</span>
             </div>
-            <div class="process__step-content">
-              <h3>Construcción</h3>
-              <p>Sprints iterativos con código limpio.</p>
-            </div>
+            <h3 class="process-step__title">Firma y arranque</h3>
+            <p class="process-step__desc">Formalizamos la alianza e iniciamos el desarrollo sin procesos burocráticos lentos.</p>
           </div>
-          <div class="process__connector" aria-hidden="true"></div>
-          <div class="process__step reveal-up" role="listitem">
-            <div class="process__step-number" aria-hidden="true"
-              style="display:flex; align-items:center; justify-content:center; font-size:1.5rem;">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z">
-                </path>
-                <path
-                  d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z">
-                </path>
-                <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path>
-                <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path>
-              </svg>
+
+          <div class="process-step">
+            <div class="process-step__header">
+              <span class="process-step__num">04</span>
+              <span class="process-step__badge">Transparencia</span>
             </div>
-            <div class="process__step-content">
-              <h3>Despliegue</h3>
-              <p>Lanzamos y escalamos sin límites.</p>
+            <h3 class="process-step__title">Sprint por fases</h3>
+            <p class="process-step__desc">Entregas semanales funcionales. Ves tu inversión materializarse desde la semana 1.</p>
+          </div>
+
+          <div class="process-step">
+            <div class="process-step__header">
+              <span class="process-step__num">05</span>
+              <span class="process-step__badge">Co-inversión</span>
             </div>
+            <h3 class="process-step__title">Entrega y continuidad</h3>
+            <p class="process-step__desc">Nos mantenemos como tu aliado a largo plazo, iterando y escalando tu ecosistema.</p>
           </div>
         </div>
       </div>
     </section>
     <!-- FIN: PROCESO -->
+
+    <!-- ========================
+         SECCIÓN DE SOLUCIONES
+    ======================== -->
+    <section class="solutions-v2" id="soluciones">
+      <div class="container">
+        <div class="section-header reveal-up">
+          <span class="section-tag">Portafolio Modular</span>
+          <h2 class="section-title">
+            Componentes listos para<br /><span class="gradient-text">conectar y escalar.</span>
+          </h2>
+        </div>
+
+        <div class="carousel-wrapper reveal-up">
+          <div class="solutions-grid carousel-container" id="solucionesCarousel">
+            <div class="solution-card">
+              <div class="solution-card__icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              </div>
+              <h3 class="solution-card__title">Agentes por WhatsApp</h3>
+              <p class="solution-card__desc">Asistentes autónomos para atención al cliente y ventas.</p>
+            </div>
+            <div class="solution-card">
+              <div class="solution-card__icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
+              </div>
+              <h3 class="solution-card__title">Ecosistema NFC</h3>
+              <p class="solution-card__desc">Tecnología de proximidad para control de accesos y lealtad.</p>
+            </div>
+            <div class="solution-card">
+              <div class="solution-card__icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+              </div>
+              <h3 class="solution-card__title">Digital Signage</h3>
+              <p class="solution-card__desc">Menús y pantallas controladas centralmente en la nube.</p>
+            </div>
+            <div class="solution-card">
+              <div class="solution-card__icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+              </div>
+              <h3 class="solution-card__title">Paneles de Administración</h3>
+              <p class="solution-card__desc">Back-offices seguros para controlar la operación interna.</p>
+            </div>
+            <div class="solution-card">
+              <div class="solution-card__icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+              </div>
+              <h3 class="solution-card__title">Dashboards de BI</h3>
+              <p class="solution-card__desc">Visualización de datos y KPIs en tiempo real.</p>
+            </div>
+            <div class="solution-card">
+              <div class="solution-card__icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+              </div>
+              <h3 class="solution-card__title">Automatización RPA</h3>
+              <p class="solution-card__desc">Bots para ingreso de datos, conciliaciones y tareas manuales.</p>
+            </div>
+            <div class="solution-card">
+              <div class="solution-card__icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+              </div>
+              <h3 class="solution-card__title">Software a la Medida</h3>
+              <p class="solution-card__desc">Soluciones core construidas 100% sobre tus reglas de negocio.</p>
+            </div>
+            <div class="solution-card">
+              <div class="solution-card__icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+              </div>
+              <h3 class="solution-card__title">Integraciones API</h3>
+              <p class="solution-card__desc">Conectamos tus sistemas existentes (ERP, CRM, Facturación).</p>
+            </div>
+          </div>
+          <div class="carousel-controls">
+            <button class="carousel-btn carousel-prev" aria-label="Anterior" data-target="#solucionesCarousel">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <div class="carousel-progress"><div class="carousel-progress-bar"></div></div>
+            <button class="carousel-btn carousel-next" aria-label="Siguiente" data-target="#solucionesCarousel">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div>
+        </div>
+
+        
+      </div>
+    </section>
+    <!-- FIN: SOLUCIONES -->
+
+    <!-- ========================
+         SECCIÓN DE EQUIPO Y PROYECTOS
+    ======================== -->
+    <section class="team-v2" id="equipo">
+      <div class="container">
+        <div class="section-header reveal-up">
+          <span class="section-tag">Equipo Técnico</span>
+          <h2 class="section-title">El equipo detrás de <br/><span class="gradient-text">HummingX BI.</span></h2>
+          <p class="section-subtitle" style="margin-top: 1rem; color: var(--color-text-secondary);">Operamos con un escuadrón multidisciplinario altamente especializado.</p>
+        </div>
+
+        <div class="team-profiles reveal-up">
+          <div class="team-profile">
+            <div class="team-profile__icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></div>
+            <h3 class="team-profile__title">Ciencia de Datos & Automatización con IA</h3>
+            <p class="team-profile__desc">Especialista en automatización inteligente, modelado de procesos y documentación técnica de sistemas (diagramas UML). Dominio de Python, PyTorch y el ecosistema de librerías de ciencia de datos y automatización con IA, además de Power BI y JavaScript para visualización e integración.</p>
+          </div>
+          <div class="team-profile">
+            <div class="team-profile__icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16"/><path d="M4 18V10"/><path d="M8 18V10"/><path d="M12 18V10"/><path d="M16 18V10"/><path d="M20 18V10"/><path d="M2 10l10-7 10 7H2z"/></svg></div>
+            <h3 class="team-profile__title">Automatización de Procesos para Organizaciones Sociales y Financieras</h3>
+            <p class="team-profile__desc">Enfocado en el diseño de soluciones de automatización para organizaciones con operación compleja, incluyendo experiencia en proyectos aplicados al sector social y financiero en Latinoamérica. Trabajo colaborativo con especialistas en investigación aplicada a sistemas inteligentes.</p>
+          </div>
+          <div class="team-profile">
+            <div class="team-profile__icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+            <h3 class="team-profile__title">Ciencia de Datos Aplicada & Desarrollo Full-Stack</h3>
+            <p class="team-profile__desc">Experiencia en ciencia de datos aplicada al sector salud: análisis estadístico descriptivo y bayesiano, probabilidad condicional y visualización interactiva con NumPy y Pandas. En paralelo, desarrollo full-stack de aplicaciones multisector (deportes, educación musical, finanzas personales, gastronomía), con manejo de Python/Flask, Java/Android Studio, y bases de datos relacionales, no relacionales y vectoriales. Experiencia en entornos cloud (Azure, AWS).</p>
+          </div>
+          <div class="team-profile">
+            <div class="team-profile__icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>
+            <h3 class="team-profile__title">Sistemas para Retail & Experiencia del Cliente</h3>
+            <p class="team-profile__desc">Especializado en sistemas de gestión empresarial (inventarios y operación) y en ecosistemas de experiencia física-digital: NFC, fidelización, digital signage y menús dinámicos interactivos.</p>
+          </div>
+        </div>
+
+        <div class="reveal-up" style="text-align: center; margin-bottom: var(--space-12);">
+          <span style="display: inline-block; font-size: var(--text-sm); color: var(--color-text-secondary); background: var(--color-bg-card-hover); border: 1px solid var(--color-border); padding: 8px 16px; border-radius: var(--radius-full); line-height: 1.5; max-width: 900px;">
+            Todo el equipo trabaja bajo el mismo estándar: Git/GitHub y control de versiones, metodologías Scrum, Jira, Postman y Spring Boot — la misma disciplina de ingeniería en cada entregable, sin importar el perfil que lo construya.
+          </span>
+        </div>
+
+        <div class="projects-showcase reveal-up">
+          <h3 class="projects-showcase__heading">Proyectos en los que hemos trabajado</h3>
+        <div class="carousel-wrapper reveal-up">
+          <div class="projects-grid carousel-container" id="proyectosCarousel">
+            <div class="project-card">
+              <span class="project-card__area">Automatización / IA</span>
+              <h4 class="project-card__title">Automatización de procesos para organización de impacto social</h4>
+              <p class="project-card__desc">Diseño e implementación de flujos automatizados con IA para una organización de banca de alimentos en Latinoamérica.</p>
+            </div>
+            <div class="project-card">
+              <span class="project-card__area">Data Science</span>
+              <h4 class="project-card__title">Plataforma de ciencia de datos aplicada a salud</h4>
+              <p class="project-card__desc">Análisis estadístico avanzado (bayesiano, probabilidad condicional) y visualización interactiva de métricas clínicas.</p>
+            </div>
+            <div class="project-card">
+              <span class="project-card__area">Software</span>
+              <h4 class="project-card__title">Sistema de gestión de inventarios</h4>
+              <p class="project-card__desc">Plataforma para control de inventario y operación de una empresa, con base de datos relacional y panel de seguimiento.</p>
+            </div>
+            <div class="project-card">
+              <span class="project-card__area">Hardware-Software / CX</span>
+              <h4 class="project-card__title">Ecosistema NFC, fidelización y digital signage</h4>
+              <p class="project-card__desc">Menús dinámicos, sistema de lealtad por NFC y señalización digital animada para negocio físico.</p>
+            </div>
+            <div class="project-card">
+              <span class="project-card__area">Software</span>
+              <h4 class="project-card__title">Suite de aplicaciones multisector</h4>
+              <p class="project-card__desc">Desarrollo de aplicaciones móviles en distintos verticales (deporte, educación musical, finanzas personales, gastronomía), full-stack end-to-end.</p>
+            </div>
+            <div class="project-card">
+              <span class="project-card__area">IA / Ingeniería</span>
+              <h4 class="project-card__title">Automatización con documentación técnica formal</h4>
+              <p class="project-card__desc">Modelado de procesos con diagramas UML y documentación técnica para sistemas de automatización con IA.</p>
+            </div>
+          </div>
+          <div class="carousel-controls">
+            <button class="carousel-btn carousel-prev" aria-label="Anterior" data-target="#proyectosCarousel">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <div class="carousel-progress"><div class="carousel-progress-bar"></div></div>
+            <button class="carousel-btn carousel-next" aria-label="Siguiente" data-target="#proyectosCarousel">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div>
+        </div>
+        </div>
+      </div>
+    </section>
+    <!-- FIN: EQUIPO -->
+
+    <!-- ========================
+         SECCIÓN DE FILOSOFÍA
+    ======================== -->
+    <section class="philosophy-v2" id="nosotros">
+      <div class="container">
+        <div class="section-header reveal-up">
+          <span class="section-tag">Nuestros Principios</span>
+          <h2 class="section-title">
+            Por qué confiar<br /><span class="gradient-text">en HummingX.</span>
+          </h2>
+        </div>
+
+        <div class="principles-list reveal-up">
+          <div class="principle-item">
+            <span class="principle-item__num">01</span>
+            <div class="principle-item__content">
+              <h3 class="principle-item__title">Crecimiento recíproco</h3>
+              <p class="principle-item__desc">Buscamos ser tu co-inversor estratégico tecnológico, no un proveedor más. Si tú escalas, nosotros escalamos.</p>
+            </div>
+          </div>
+          
+          <div class="principle-item">
+            <span class="principle-item__num">02</span>
+            <div class="principle-item__content">
+              <h3 class="principle-item__title">Capacidad multidisciplinaria</h3>
+              <p class="principle-item__desc">Respaldados por un equipo especialista. Integramos ciencia de datos, arquitectura de sistemas y automatización para resolver de forma end-to-end cualquier reto de software.</p>
+            </div>
+          </div>
+
+          <div class="principle-item">
+            <span class="principle-item__num">03</span>
+            <div class="principle-item__content">
+              <h3 class="principle-item__title">Pragmatismo sobre teoría</h3>
+              <p class="principle-item__desc">No construimos features innecesarios. Implementamos tecnología que resuelve problemas de negocio directamente.</p>
+            </div>
+          </div>
+
+          <div class="principle-item">
+            <span class="principle-item__num">04</span>
+            <div class="principle-item__content">
+              <h3 class="principle-item__title">Tiered por diseño</h3>
+              <p class="principle-item__desc">Modelos de inversión adaptables. Obtienes exactamente el alcance que necesitas, optimizando tu presupuesto de manera eficiente.</p>
+            </div>
+          </div>
+
+          <div class="principle-item">
+            <span class="principle-item__num">05</span>
+            <div class="principle-item__content">
+              <h3 class="principle-item__title">Autonomía del cliente</h3>
+              <p class="principle-item__desc">No secuestramos tu operación. Entregamos la propiedad intelectual, el código y te capacitamos para mantener el control de tu negocio.</p>
+            </div>
+          </div>
+        </div>
+        <div class="philosophy-cards reveal-up">
+          <div class="philosophy-card">
+            <h4 class="philosophy-card__title">Ejecución Comprobada</h4>
+            <p class="philosophy-card__desc">Capacidad técnica enfocada en resolver problemas complejos de negocio con resultados medibles y código robusto.</p>
+          </div>
+          <div class="philosophy-card">
+            <h4 class="philosophy-card__title">Impacto Territorial</h4>
+            <p class="philosophy-card__desc">Operación sólida y despliegue ágil en toda la CDMX y el Estado de México.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- FIN: FILOSOFÍA -->
+
+    <!-- ========================
+         SECCIÓN DE EXPERIENCIA (MARQUEE)
+    ======================== -->
+    <section class="experience-marquee">
+      <div class="marquee-container">
+        <div class="marquee-track">
+          <!-- Se usan placeholders neutrales hasta que se tengan logos reales -->
+          <div class="marquee-item">Tech Partner</div>
+          <div class="marquee-item">Institution</div>
+          <div class="marquee-item">Enterprise Cloud</div>
+          <div class="marquee-item">Global Logistics</div>
+          <div class="marquee-item">Fintech Innovation</div>
+          <div class="marquee-item">Retail Group</div>
+          <!-- Duplicado para ilusión infinita -->
+          <div class="marquee-item">Tech Partner</div>
+          <div class="marquee-item">Institution</div>
+          <div class="marquee-item">Enterprise Cloud</div>
+          <div class="marquee-item">Global Logistics</div>
+          <div class="marquee-item">Fintech Innovation</div>
+          <div class="marquee-item">Retail Group</div>
+        </div>
+      </div>
+    </section>
+    <!-- FIN: EXPERIENCIA -->
+
+    <!-- ========================
+         SECCIÓN DE FAQs
+    ======================== -->
+    <section class="faq-v2" id="faq">
+      <div class="container">
+        <div class="section-header reveal-up">
+          <span class="section-tag">Dudas Frecuentes</span>
+          <h2 class="section-title">Respuestas a <br/><span class="gradient-text">tus preguntas.</span></h2>
+        </div>
+        
+        <div class="faq-list reveal-up">
+          <div class="faq-item">
+            <button class="faq-item__header" aria-expanded="false">
+              <span class="faq-item__title">¿Qué hace exactamente HummingX BI?</span>
+              <span class="faq-item__icon">+</span>
+            </button>
+            <div class="faq-item__content">
+              <div class="faq-item__body">
+                <p>Somos una firma de tecnología e inteligencia de negocios. Desarrollamos soluciones de software a medida, ecosistemas web interactivos y automatizamos operaciones mediante agentes de Inteligencia Artificial para acelerar tu crecimiento.</p>
+              </div>
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-item__header" aria-expanded="false">
+              <span class="faq-item__title">¿Necesito conocimientos técnicos?</span>
+              <span class="faq-item__icon">+</span>
+            </button>
+            <div class="faq-item__content">
+              <div class="faq-item__body">
+                <p>No, nosotros nos encargamos de toda la complejidad técnica. Te entregamos soluciones "llave en mano" con paneles de administración intuitivos para que puedas operar desde el primer día sin necesidad de saber programar.</p>
+              </div>
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-item__header" aria-expanded="false">
+              <span class="faq-item__title">¿Qué tipo de empresas atienden?</span>
+              <span class="faq-item__icon">+</span>
+            </button>
+            <div class="faq-item__content">
+              <div class="faq-item__body">
+                <p>Atendemos desde empresas medianas en proceso de expansión hasta corporativos que necesitan optimizar áreas específicas. Tenemos experiencia con micronegocios, cadenas de retail, y clínicas u hospitales.</p>
+              </div>
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-item__header" aria-expanded="false">
+              <span class="faq-item__title">¿Solo dan consultoría o también implementan?</span>
+              <span class="faq-item__icon">+</span>
+            </button>
+            <div class="faq-item__content">
+              <div class="faq-item__body">
+                <p>Hacemos ambas. Nuestro valor radica en analizar tu operación, diseñar una estrategia de negocio, y posteriormente, construir e implementar todo el software necesario con nuestro propio talento técnico.</p>
+              </div>
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-item__header" aria-expanded="false">
+              <span class="faq-item__title">¿Cómo funciona el modelo de inversión "tiered"?</span>
+              <span class="faq-item__icon">+</span>
+            </button>
+            <div class="faq-item__content">
+              <div class="faq-item__body">
+                <p>No creemos en cotizaciones inflexibles. Diseñamos paquetes modulares (ej. Silver, Gold, Platinum) para que decidas con qué alcance quieres arrancar, permitiéndote escalar progresivamente según tu presupuesto.</p>
+              </div>
+            </div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-item__header" aria-expanded="false">
+              <span class="faq-item__title">¿Pueden integrarse con mis sistemas actuales (ERP, CRM)?</span>
+              <span class="faq-item__icon">+</span>
+            </button>
+            <div class="faq-item__content">
+              <div class="faq-item__body">
+                <p>Absolutamente. Contamos con experiencia creando puentes (APIs) para conectar nuestras soluciones modernas con tus sistemas heredados (ERP, Facturación, CRMs), garantizando un flujo de datos centralizado.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- FIN: FAQs -->
+
+    <!-- ========================
+         CTA FINAL
+    ======================== -->
+    <section class="final-cta">
+      <div class="container reveal-up">
+        <div class="final-cta__content form-glass">
+          <span class="section-tag section-tag--center" style="margin: 0 auto 16px;">Empecemos hoy</span>
+          <h2 class="final-cta__title">Evoluciona tu negocio<br/><span class="gradient-text">con tecnología.</span></h2>
+          <div class="final-cta__actions">
+            <a href="#contacto" class="btn btn--primary">Agenda una llamada</a>
+          </div>
+          <p class="final-cta__microcopy">Diagnóstico inicial sin costo · Respuesta en &lt;24h</p>
+        </div>
+      </div>
+    </section>
+    <!-- FIN: CTA FINAL -->
 
 
     <!-- ============================================================
@@ -925,59 +1222,61 @@
     <footer class="footer" role="contentinfo">
       <div class="container">
         <div class="footer__layout">
-          <!-- Logo y tagline -->
+          <!-- Columna 1: Marca + Tagline + Redes -->
           <div class="footer__brand">
             <span class="footer__logo">HUMMING<span class="accent-x">X</span>-<span
                 class="footer__logo-sub">BI</span></span>
-            <p class="footer__tagline">Ingeniería de Software de Alta Precisión.</p>
+            <p class="footer__tagline">Consultoría AI-Native. Ingeniería de Software de Alta Precisión.</p>
+            <div class="footer__socials" style="display: flex; gap: var(--space-4); margin-top: var(--space-4); font-size: var(--text-sm); font-weight: 500;">
+              <a href="https://wa.me/5215519802943" target="_blank" rel="noopener">WhatsApp</a>
+              <a href="https://www.instagram.com/hummingx.bi" target="_blank" rel="noopener">Instagram</a>
+              <a href="https://www.facebook.com/profile.php?id=61590401354021" target="_blank" rel="noopener">Facebook</a>
+            </div>
           </div>
 
-          <!-- Links rápidos -->
-          <nav class="footer__nav" aria-label="Navegación footer">
-            <h4 class="footer__nav-title">Navegación</h4>
-            <ul role="list">
-              <li><a href="#inicio">Inicio</a></li>
-              <li><a href="#atributos">Filosofía</a></li>
-              <li><a href="#servicios">Servicios</a></li>
-              <li><a href="#contacto">Contacto</a></li>
-            </ul>
-          </nav>
-
-          <!-- Servicios -->
+          <!-- Columna 2: Servicios -->
           <nav class="footer__nav" aria-label="Servicios footer">
             <h4 class="footer__nav-title">Servicios</h4>
             <ul role="list">
               <li><a href="#servicios">Software a Medida</a></li>
               <li><a href="#servicios">Business Intelligence</a></li>
+              <li><a href="#servicios">Automatización IA</a></li>
               <li><a href="#servicios">E-commerce & Plataformas</a></li>
-              <li><a href="#servicios">APIs & Integraciones</a></li>
-              <li><a href="#service-nfc">Tecnología NFC</a></li>
             </ul>
           </nav>
 
-          <!-- Contacto -->
+          <!-- Columna 3: Explora -->
+          <nav class="footer__nav" aria-label="Explora footer">
+            <h4 class="footer__nav-title">Explora</h4>
+            <ul role="list">
+              <li><a href="#inicio">Inicio</a></li>
+              <li><a href="#soluciones">Soluciones</a></li>
+              <li><a href="#metodologia">Metodología</a></li>
+              <li><a href="#nosotros">Nosotros</a></li>
+              <li><a href="#faqs">FAQs</a></li>
+            </ul>
+          </nav>
+
+          <!-- Columna 4: Empresa + Contacto -->
           <div class="footer__contact">
-            <h4 class="footer__nav-title">Contacto</h4>
+            <h4 class="footer__nav-title">Empresa</h4>
             <a href="mailto:colibrixbi@gmail.com" class="footer__contact-link">colibrixbi@gmail.com</a>
-            <p
-              style="font-size: 0.75rem; color: var(--color-text-secondary); margin-bottom: var(--space-3); line-height: 1.4;">
-              <br>Lun a Vie 9AM – 7PM (CDMX)
+            <p style="font-size: var(--text-sm); color: var(--color-text-secondary); margin-top: var(--space-2);">
+              Lun a Vie 9AM – 7PM (CDMX)
             </p>
-            <a href="https://wa.me/5215519802943" class="footer__contact-link" target="_blank" rel="noopener">WhatsApp
-            </a>
-            <a href="https://wa.me/525568905795" class="footer__contact-link" target="_blank" rel="noopener">WhatsApp
-            </a>
-            <a href="https://www.instagram.com/hummingx.bi" class="footer__contact-link" target="_blank"
-              rel="noopener">Instagram</a>
-            <a href="https://www.facebook.com/profile.php?id=61590401354021" class="footer__contact-link"
-              target="_blank" rel="noopener">Facebook</a>
+            <div style="margin-top: var(--space-4);">
+              <a href="#contacto" class="btn btn--primary">Agenda una llamada</a>
+            </div>
           </div>
         </div>
 
         <!-- Bottom bar -->
-        <div class="footer__bottom">
-          <p>&copy; 2026 HummingX-BI · Ingeniería de Software. Todos los derechos reservados.</p>
-          <p class="footer__craft">Empresa Mexicana 🇲🇽</p>
+        <div class="footer__bottom" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-4);">
+          <p>&copy; 2026 HummingX-BI. Todos los derechos reservados.</p>
+          <div class="footer__bottom-links" style="display: flex; gap: var(--space-6); font-size: var(--text-sm); font-weight: 500;">
+            <a href="aviso-de-privacidad.html">Aviso de Privacidad</a>
+            <a href="terminos-y-condiciones.html">Términos y Condiciones</a>
+          </div>
         </div>
       </div>
     </footer>
@@ -992,8 +1291,7 @@
        de vuelo del colibrí (preloader).
   ======================= -->
   <!-- Lógica principal de la app -->
-  <!-- Controlador de video por scroll -->
-  <script src="js/scroll-video.js"></script>
+
   <!-- Lógica principal de la app -->
   <script src="js/main.js"></script>
 </body>

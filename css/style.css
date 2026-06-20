@@ -12,92 +12,62 @@
    Migración: AI teal/purple → Obsidiana & Champagne (Estudio élite)
    ================================================================ */
 :root {
-  /* ── Fondos (Obsidiana Cálida) ──────────────────────────────────
-     Negro cálido (temperatura +2K vs negro puro) para evitar el
-     "efecto cueva" manteniendo la profundidad de OLED. */
-  --color-bg-deepest: #0C0C0D;
-  /* Obsidiana pura — fondo del body */
-  --color-bg-base: #111112;
-  /* Secciones principales */
-  --color-bg-mid: #161617;
-  /* Inputs, selects */
-  --color-bg-elevated: #1C1C1E;
-  /* Tarjetas y modales */
-  --color-bg-card: rgba(28, 28, 30, 0.6);
-  /* Cristal cálido */
-  --color-bg-card-hover: rgba(36, 36, 38, 0.7);
-  /* Hover sutil */
+  /* ── Fondos (Consultoría Premium Clara) ───────────────────────── */
+  --color-bg-deepest: #F3F4F6;
+  --color-bg-base: #FAFAF9; /* Crema casi puro */
+  --color-bg-mid: #FFFFFF;
+  --color-bg-elevated: #FFFFFF;
+  --color-bg-card: #FFFFFF;
+  --color-bg-card-hover: #F9FAFB;
 
-  /* ── Acento Champagne (El Giro) ─────────────────────────────────
-     #C9A96E = dorado champagne opaco. No es amarillo, no es IA.
-     Se asocia con: banca privada, consultoría de élite, LVMH, Rolex.
-     Variante clara (#E8C97A) para hover y variante sutil para hairlines. */
-  --color-gold: #C9A96E;
-  --color-gold-light: #E8C97A;
-  --color-gold-dim: #A8885A;
-  --color-gold-glow: rgba(201, 169, 110, 0.08);
-  --color-gold-glow-md: rgba(201, 169, 110, 0.14);
+  /* ── Acentos (HummingX BI) ──────────────────────────────────── */
+  --color-gold: #00E5A0; /* Acento primario - Verde HummingX */
+  --color-gold-light: #33EAB3;
+  --color-gold-dim: #00B37E;
+  --color-gold-glow: rgba(0, 229, 160, 0.08);
+  --color-gold-glow-md: rgba(0, 229, 160, 0.14);
 
-  /* Alias compatibles con referencias anteriores en JS y HTML */
+  --color-blue: #0066FF; /* Acento secundario - Azul HummingX */
+  
+  /* Alias compatibles */
   --color-teal: var(--color-gold);
   --color-teal-light: var(--color-gold-light);
   --color-teal-glow: var(--color-gold-glow);
   --color-teal-glow-strong: var(--color-gold-glow-md);
-  --color-purple: var(--color-gold-dim);
-  --color-purple-light: var(--color-gold);
-  --color-purple-glow: var(--color-gold-glow);
+  --color-purple: var(--color-blue);
+  --color-purple-light: #3385FF;
+  --color-purple-glow: rgba(0, 102, 255, 0.08);
 
-  /* ── Textos (Crema Cálida) ──────────────────────────────────────
-     No blanco frío puro. La leve temperatura cálida connota papel
-     de lujo impreso, editorial high-end. */
-  --color-text-primary: #F0EFEB;
-  /* Crema cálida */
-  --color-text-secondary: #8E8D8A;
-  /* Gris arena */
-  --color-text-muted: #4A4A48;
-  /* Placeholder */
-  --color-text-accent: var(--color-gold);
+  /* ── Textos ─────────────────────────────────────────────────── */
+  --color-text-primary: #111827; /* Casi negro */
+  --color-text-secondary: #6B7280; /* Gris medio */
+  --color-text-muted: #9CA3AF; /* Placeholder */
+  --color-text-accent: var(--color-blue);
 
-  /* ── Bordes Hairline (Dorados) ──────────────────────────────────
-     Hairlines dorados ultra-sutiles. En OLED se perciben como
-     biseles de cristal dorado. En pantallas comunes: separadores neutros. */
-  --color-border: rgba(201, 169, 110, 0.10);
-  --color-border-subtle: rgba(255, 255, 255, 0.06);
-  --color-border-accent: rgba(201, 169, 110, 0.22);
-  --color-border-hover: rgba(201, 169, 110, 0.38);
+  /* ── Bordes ─────────────────────────────────────────────────── */
+  --color-border: #E5E7EB; /* Gris muy claro */
+  --color-border-subtle: #F3F4F6;
+  --color-border-accent: rgba(0, 229, 160, 0.3);
+  --color-border-hover: rgba(0, 229, 160, 0.5);
 
-  /* --- Tipografía ---
-     DM Serif Display: serif editorial de lujo para titulares.
-     Usado por: The Atlantic, Vogue Digital, agencias premium europeas.
-     Inter: para cuerpo de texto — neutral, legible, profesional. */
-  --font-display: 'DM Serif Display', 'Georgia', serif;
-  --font-heading: 'DM Serif Display', 'Georgia', serif;
-  --font-body: 'Inter', system-ui, sans-serif;
+  /* --- Tipografía --- */
+  --font-display: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-heading: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-body: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
-  /* Escala tipográfica (base 16px, ratio 1.25) */
+  /* Escala tipográfica */
   --text-xs: 0.75rem;
-  /* 12px */
   --text-sm: 0.875rem;
-  /* 14px */
   --text-base: 1rem;
-  /* 16px */
   --text-lg: 1.125rem;
-  /* 18px */
   --text-xl: 1.25rem;
-  /* 20px */
   --text-2xl: 1.5rem;
-  /* 24px */
   --text-3xl: 1.875rem;
-  /* 30px */
   --text-4xl: 2.25rem;
-  /* 36px */
   --text-5xl: 3rem;
-  /* 48px */
   --text-6xl: 3.75rem;
-  /* 60px */
   --text-7xl: 4.5rem;
-  /* 72px */
 
   /* --- Espaciado --- */
   --space-1: 0.25rem;
@@ -118,23 +88,19 @@
   --container-max: 1280px;
   --container-pad: var(--space-6);
 
-  /* ── Border Radius (Conservative Luxury) ───────────────────────
-     El lujo usa curvaturas más contenidas que el bubble de consumer tech.
-     Tarjetas: 16px (no 32px). Botones: pill se mantiene. */
-  --radius-xs: 6px;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-  --radius-full: 9999px;
+  /* ── Border Radius ─────────────────────────────────────────── */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px; /* Tarjetas */
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px; /* Pills/Botones */
 
-  /* ── Sombras (Profundidad Cálida) ───────────────────────────────
-     Sombras con sutil tinte dorado-café — nunca frías (rgb(0,0,0) puro).
-     Esto es lo que hace que las interfaces de lujo se "sientan" diferentes. */
-  --shadow-depth: 0 8px 32px -8px rgba(12, 10, 6, 0.6);
-  --shadow-depth-hover: 0 16px 48px -12px rgba(12, 10, 6, 0.7);
-  --shadow-inset-top: inset 0 1px 0 rgba(201, 169, 110, 0.08);
-  --shadow-gold-glow: 0 0 40px rgba(201, 169, 110, 0.06);
+  /* ── Sombras (Sutiles) ─────────────────────────────────────── */
+  --shadow-depth: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-depth-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+  --shadow-inset-top: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --shadow-gold-glow: 0 0 20px rgba(0, 229, 160, 0.15);
 
   /* Aliases de compatibilidad */
   --shadow-glow-teal: none;
@@ -144,8 +110,7 @@
   --shadow-btn: none;
   --shadow-btn-hover: var(--shadow-depth);
 
-  /* ── Transiciones (Physical Motion) ────────────────────────────
-     Curva Apple: arranque instantáneo, desaceleración suave al final. */
+  /* ── Transiciones ──────────────────────────────────────────── */
   --transition-fast: 150ms cubic-bezier(0.25, 1, 0.5, 1);
   --transition-base: 300ms cubic-bezier(0.25, 1, 0.5, 1);
   --transition-slow: 500ms cubic-bezier(0.25, 1, 0.5, 1);
@@ -302,14 +267,11 @@ select {
 .section-title {
   font-family: var(--font-heading);
   font-size: clamp(var(--text-3xl), 5vw, var(--text-5xl));
-  font-weight: 400;
-  /* DM Serif Display: el peso 400 ya es bold visualmente */
+  font-weight: 700;
   line-height: 1.15;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   color: var(--color-text-primary);
   margin-bottom: var(--space-6);
-  font-style: italic;
-  /* La itálica del serif editorial es su firma distintiva */
 }
 
 .section-subtitle {
@@ -357,27 +319,25 @@ select {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* ── Botón primario (Efecto Burbuja / Glassmorphism) ──────── */
+/* ── Botón primario (Sólido Premium) ──────── */
 .btn--primary {
-  background: rgba(201, 169, 110, 0.1); /* Fondo muy sutil tintado de amarillo/dorado */
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: var(--color-gold);
-  border: 1px solid var(--color-gold);
-  box-shadow: none;
+  background: var(--color-text-primary);
+  color: var(--color-bg-base);
+  border: 1px solid var(--color-text-primary);
+  box-shadow: var(--shadow-depth);
 }
 
 .btn--primary:hover {
-  background: rgba(201, 169, 110, 0.2);
-  color: var(--color-gold-light);
-  border-color: var(--color-gold-light);
-  box-shadow: 0 0 20px rgba(201, 169, 110, 0.15);
+  background: var(--color-gold);
+  color: var(--color-bg-base);
+  border-color: var(--color-gold);
+  box-shadow: var(--shadow-depth-hover);
   transform: translateY(-2px);
 }
 
 .btn--primary:active {
   transform: translateY(0);
-  box-shadow: none;
+  box-shadow: var(--shadow-depth);
 }
 
 /* ── .btn--glow: eliminada la animación infinita ──────────────────
@@ -390,33 +350,34 @@ select {
 /* ── Botón ghost (hairline border) ────────────────────────────── */
 .btn--ghost {
   background: transparent;
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
   border: 1px solid var(--color-border);
   padding: var(--space-3) var(--space-5);
 }
 
 .btn--ghost:hover {
-  border-color: rgba(255, 255, 255, 0.18);
+  border-color: var(--color-text-secondary);
   color: var(--color-text-primary);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--color-bg-elevated);
 }
 
 /* ── Botón de navbar ──────────────────────────────────────────── */
 .btn--nav {
-  background: transparent;
-  color: var(--color-gold);
-  border: 1px solid rgba(201, 169, 110, 0.30);
+  background: var(--color-text-primary);
+  color: var(--color-bg-base);
+  border: 1px solid var(--color-text-primary);
   padding: var(--space-2) var(--space-5);
   font-size: var(--text-sm);
   border-radius: var(--radius-full);
-  box-shadow: none;
+  box-shadow: var(--shadow-depth);
 }
 
 .btn--nav:hover {
   background: var(--color-gold);
-  color: #0C0C0D;
+  color: var(--color-bg-base);
   border-color: var(--color-gold);
   transform: translateY(-1px);
+  box-shadow: var(--shadow-depth-hover);
 }
 
 /* ── Botón ancho completo ─────────────────────────────────────── */
@@ -489,7 +450,7 @@ select {
 (hover: none) {
   .hero::before {
     background: radial-gradient(ellipse 120% 80% at 50% 0%,
-        rgba(15, 25, 40, 0.4) 0%,
+        rgba(255, 255, 255, 0.5) 0%,
         rgba(12, 12, 13, 0) 60%);
   }
 }
@@ -512,9 +473,9 @@ select {
   position: absolute;
   inset: 0;
   background: linear-gradient(180deg,
-      rgba(12, 12, 13, 0.30) 0%,
-      rgba(12, 12, 13, 0.60) 50%,
-      rgba(12, 12, 13, 0.88) 100%);
+      rgba(255, 255, 255, 0.5) 0%,
+      rgba(255, 255, 255, 0.5) 50%,
+      rgba(255, 255, 255, 0.5) 100%);
   pointer-events: none;
 }
 
@@ -573,7 +534,7 @@ select {
 }
 
 .preloader__ring-track {
-  stroke: rgba(255, 255, 255, 0.03);
+  stroke: var(--color-border);
 }
 
 .preloader__ring-fill {
@@ -659,7 +620,7 @@ select {
   font-weight: 500;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--color-text-muted);
   margin-top: var(--space-4);
   transition: opacity var(--transition-base);
   /* PURGA: text-pulse (2s ease-in-out infinite) — ELIMINADO.
@@ -799,9 +760,9 @@ select {
 /* Navbar con backdrop al hacer scroll */
 .nav-header.scrolled {
   padding-block: var(--space-3);
-  background: rgba(12, 12, 13, 0.85);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -841,7 +802,7 @@ select {
   font-weight: 500;
   color: var(--color-gold);
   padding: 1px 5px;
-  border: 1px solid rgba(201, 169, 110, 0.30);
+  border: 1px solid var(--color-border-accent);
   border-radius: 3px;
   letter-spacing: 0.15em;
   vertical-align: middle;
@@ -900,7 +861,7 @@ select {
 }
 
 .nav__hamburger:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-bg-card-hover);
 }
 
 .hamburger-line {
@@ -934,7 +895,7 @@ select {
   top: 100%;
   left: 0;
   right: 0;
-  background: rgba(12, 12, 13, 0.97);
+  background: rgba(255, 255, 255, 0.97);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   border-bottom: 1px solid var(--color-border);
@@ -968,7 +929,7 @@ select {
 }
 
 .mobile-menu__link:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--color-bg-card-hover);
   color: var(--color-text-primary);
   padding-left: var(--space-5);
 }
@@ -1034,7 +995,7 @@ select {
   top: -200px;
   right: -200px;
   /* Glow azul marino elegante */
-  background: radial-gradient(circle, rgba(15, 25, 40, 0.4) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.5) 0%, transparent 70%);
 }
 
 .hero__orb--2 {
@@ -1128,64 +1089,45 @@ select {
   /* Heredar border-radius: 9999px del sistema .btn — sin override */
 }
 
-/* Métricas de confianza — Champagne Glass */
-.hero__metrics {
+/* Context Pills - Franja de Contexto */
+.hero__context-pills {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   flex-wrap: wrap;
-  padding: var(--space-4) var(--space-6);
-  background: rgba(28, 28, 30, 0.5);
+  padding: var(--space-6) var(--space-8);
+  background: var(--color-bg-elevated);
   border: 1px solid var(--color-border);
-  border-top: 1px solid rgba(201, 169, 110, 0.12);
   border-radius: var(--radius-lg);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
-  max-width: fit-content;
+  box-shadow: var(--shadow-depth);
+  max-width: 960px;
   margin-inline: auto;
-  gap: var(--space-4);
+  gap: var(--space-8);
 }
 
-.hero__metric {
+.context-pill {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  flex: 1 1 90px;
-  min-width: 160px;
-  text-align: center;
+  align-items: flex-start;
+  gap: var(--space-2);
+  flex: 1 1 200px;
+  min-width: 200px;
+  text-align: left;
 }
 
-.hero__metric-number {
-  font-family: var(--font-body);
-  font-size: var(--text-3xl);
-  font-weight: 300;
-  /* Peso ligero: números grandes con peso ligero = lujo */
-  color: var(--color-text-primary);
-  line-height: 1;
-  letter-spacing: -0.02em;
-}
-
-.hero__metric-number span {
-  color: var(--color-gold);
-  font-size: var(--text-xl);
-  font-weight: 400;
-}
-
-.hero__metric-label {
+.context-pill__label {
   font-size: var(--text-xs);
   color: var(--color-text-muted);
   letter-spacing: 0.05em;
   text-transform: uppercase;
+  font-weight: 600;
 }
 
-.hero__metric-divider {
-  display: none;
-  /* Ocultar por defecto en móvil para evitar roturas visuales al envolver */
-  width: 1px;
-  height: 40px;
-  background: var(--color-border);
-  flex-shrink: 0;
+.context-pill__value {
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+  line-height: 1.5;
+  font-weight: 500;
 }
 
 /* Indicador de scroll */
@@ -1213,7 +1155,7 @@ select {
 .scroll-dot-wrapper {
   width: 24px;
   height: 38px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   display: flex;
   align-items: flex-start;
@@ -1316,7 +1258,7 @@ select {
   transition-delay: 750ms;
 }
 
-.hero__metrics.reveal-up {
+.hero__context-pills.reveal-up {
   transition-delay: 900ms;
 }
 
@@ -1354,17 +1296,13 @@ select {
     display: none;
   }
 
-  .hero__metrics {
-    gap: var(--space-10);
-    padding: var(--space-5) var(--space-8);
+  .hero__context-pills {
+    gap: var(--space-12);
+    padding: var(--space-8);
   }
 
-  .hero__metric {
-    flex: none;
-  }
-
-  .hero__metric-divider {
-    display: block;
+  .context-pill {
+    flex: 1;
   }
 }
 
@@ -1506,40 +1444,121 @@ select {
     font-size: var(--text-base);
   }
 
-  /* Métricas: flex column en móvil, más compactas */
-  .hero__metrics {
+  /* Pills de contexto: flex column en móvil */
+  .hero__context-pills {
     flex-direction: column;
-    gap: var(--space-4);
-    padding: var(--space-4) var(--space-6);
+    gap: var(--space-6);
+    padding: var(--space-6);
     width: 100%;
-    max-width: 280px;
+    max-width: 320px;
   }
 
-  .hero__metric {
-    flex-direction: row;
-    justify-content: space-between;
+  .context-pill {
+    flex-direction: column;
     align-items: center;
-    min-width: unset;
-    flex: none;
+    text-align: center;
     width: 100%;
+    min-width: unset;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-4);
   }
 
-  .hero__metric-number {
-    font-size: var(--text-xl);
-    line-height: 1;
+  .context-pill:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
   }
 
-  .hero__metric-number span {
+  .context-pill__label {
+    font-size: var(--text-xs);
+  }
+
+  .context-pill__value {
     font-size: var(--text-sm);
   }
+}
 
-  .hero__metric-label {
-    font-size: var(--text-xs);
-    letter-spacing: 0.03em;
+/* ================================================================
+   PÁGINAS LEGALES
+   ================================================================ */
+.legal-page {
+  padding-top: var(--space-32);
+  padding-bottom: var(--space-20);
+  max-width: 720px;
+  margin: 0 auto;
+  color: var(--color-text-primary);
+  background: var(--color-bg-elevated);
+}
+
+.legal-page h1 {
+  font-family: var(--font-display);
+  font-size: var(--text-4xl);
+  margin-bottom: var(--space-4);
+  color: var(--color-gold);
+}
+
+.legal-page .legal-date {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-12);
+  display: block;
+}
+
+.legal-page h2 {
+  font-family: var(--font-heading);
+  font-size: var(--text-2xl);
+  margin-top: var(--space-10);
+  margin-bottom: var(--space-4);
+  color: var(--color-text-primary);
+}
+
+.legal-page p {
+  font-size: var(--text-base);
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-4);
+}
+
+.legal-page ul {
+  margin-bottom: var(--space-6);
+  padding-left: var(--space-6);
+}
+
+.legal-page li {
+  font-size: var(--text-base);
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-2);
+}
+
+.legal-page strong {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+
+/* ================================================================
+   AJUSTES DE ANIMACIÓN PARA MÓVILES (Performance y Experiencia)
+   ================================================================ */
+@media (max-width: 768px) {
+  .reveal-up {
+    transform: translateY(20px);
+    transition-duration: 0.5s;
   }
+  .reveal-left {
+    transform: translateX(-20px);
+    transition-duration: 0.5s;
+  }
+  .reveal-right {
+    transform: translateX(20px);
+    transition-duration: 0.5s;
+  }
+}
 
-  /* Ocultar divisores verticales en móvil */
-  .hero__metric-divider {
-    display: none;
+/* Reducir motion si el usuario lo prefiere */
+@media (prefers-reduced-motion: reduce) {
+  .reveal-up, .reveal-left, .reveal-right {
+    transition: none;
+    transform: none;
+    opacity: 1;
   }
 }

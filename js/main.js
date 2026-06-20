@@ -488,7 +488,7 @@ const CountersModule = (() => {
   }
 
   function init() {
-    const counterEls = document.querySelectorAll('[data-target]');
+    const counterEls = document.querySelectorAll('[data-count]');
 
     if (!counterEls.length) return;
 
@@ -496,7 +496,7 @@ const CountersModule = (() => {
       (entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
-            const target = parseInt(entry.target.dataset.target, 10);
+            const target = parseInt(entry.target.dataset.count, 10);
             animateCounter(entry.target, target);
             observer.unobserve(entry.target);
           }
@@ -513,24 +513,26 @@ const CountersModule = (() => {
 
 
 /* ================================================================
-   7. MÓDULO: ACORDEÓN MINIMALISTA (Filosofía)
+   7. MÓDULO: FAQs (Acordeón)
    ================================================================ */
-const AccordionModule = (() => {
+const FaqAccordionModule = (() => {
   function init() {
-    const items = document.querySelectorAll('.accordion-item');
-    if (!items.length) return;
+    const faqHeaders = document.querySelectorAll('.faq-item__header');
+    if (!faqHeaders.length) return;
 
-    items.forEach(item => {
-      // Interacción en desktop (hover)
-      item.addEventListener('mouseenter', () => {
-        items.forEach(i => i.classList.remove('active'));
-        item.classList.add('active');
-      });
+    faqHeaders.forEach(header => {
+      header.addEventListener('click', () => {
+        const isExpanded = header.getAttribute('aria-expanded') === 'true';
+        
+        // Cerrar todos los demás (comportamiento de acordeón único)
+        faqHeaders.forEach(h => {
+          h.setAttribute('aria-expanded', 'false');
+        });
 
-      // Interacción en móvil (toque)
-      item.addEventListener('click', () => {
-        items.forEach(i => i.classList.remove('active'));
-        item.classList.add('active');
+        // Si no estaba abierto, abrirlo
+        if (!isExpanded) {
+          header.setAttribute('aria-expanded', 'true');
+        }
       });
     });
   }
@@ -1088,7 +1090,112 @@ const MagneticCursorModule = (() => {
 
 
 /* ================================================================
-   13. INICIALIZACIÓN GLOBAL
+   13. MÓDULO: SERVICIOS MASTER-DETAIL
+   ================================================================ */
+const ServicesMasterDetailModule = (() => {
+  function init() {
+    const tabs = document.querySelectorAll('.service-tab');
+    const panels = document.querySelectorAll('.service-panel');
+
+    if (!tabs.length || !panels.length) return;
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        // Remover active de todos los tabs y paneles
+        tabs.forEach(t => t.classList.remove('active'));
+        panels.forEach(p => p.classList.remove('active'));
+
+        // Agregar active al tab clickeado
+        tab.classList.add('active');
+
+        // Buscar el panel correspondiente y activarlo
+        const targetId = tab.getAttribute('data-target');
+        const targetPanel = document.getElementById(targetId);
+        
+        if (targetPanel) {
+          targetPanel.classList.add('active');
+        }
+      });
+    });
+  }
+
+  return { init };
+})();
+
+
+/* ================================================================
+   15. MÓDULO: CARRUSEL PREMIUM (Scroll-Snap con Progress Bar)
+   ================================================================ */
+const CarouselModule = (() => {
+  function init() {
+    const wrappers = document.querySelectorAll('.carousel-wrapper');
+    if (!wrappers.length) return;
+
+    wrappers.forEach(wrapper => {
+      const container = wrapper.querySelector('.carousel-container');
+      const prevBtn = wrapper.querySelector('.carousel-prev');
+      const nextBtn = wrapper.querySelector('.carousel-next');
+      const progressBar = wrapper.querySelector('.carousel-progress-bar');
+      if (!container || !prevBtn || !nextBtn || !progressBar) return;
+
+      const updateProgress = () => {
+        const scrollLeft = container.scrollLeft;
+        const scrollWidth = container.scrollWidth - container.clientWidth;
+        const progress = scrollWidth > 0 ? (scrollLeft / scrollWidth) * 100 : 0;
+        // La barra mínima es del 20%
+        progressBar.style.width = Math.max(20, progress) + '%';
+      };
+
+      container.addEventListener('scroll', updateProgress, { passive: true });
+      // Init bar
+      setTimeout(updateProgress, 100);
+
+      const scrollAmount = 320; // Aproximadamente el ancho de un card + gap
+
+      prevBtn.addEventListener('click', () => {
+        container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+      });
+
+      nextBtn.addEventListener('click', () => {
+        container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      });
+    });
+  }
+  return { init };
+})();
+
+/* ================================================================
+   16. MÓDULO: STEPPER HORIZONTAL (Proceso)
+   ================================================================ */
+const ProcessStepperModule = (() => {
+  function init() {
+    const steps = document.querySelectorAll('.process-step');
+    if (!steps.length) return;
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '-20% 0px -40% 0px', // Activa un poco antes de que llegue a la mitad
+      threshold: 0.5
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-active');
+        } else {
+          // Opcional: si queremos que se apaguen al salir de la vista
+          // entry.target.classList.remove('is-active');
+        }
+      });
+    }, observerOptions);
+
+    steps.forEach(step => observer.observe(step));
+  }
+  return { init };
+})();
+
+/* ================================================================
+   17. INICIALIZACIÓN GLOBAL
    Arranca todos los módulos en el orden correcto.
    ================================================================ */
 function initApp() {
@@ -1103,7 +1210,10 @@ function initApp() {
       ParticlesModule.init();
       ScrollRevealModule.init();
       CountersModule.init();
-      AccordionModule.init();
+      FaqAccordionModule.init();
+      ServicesMasterDetailModule.init();
+      CarouselModule.init();
+      ProcessStepperModule.init();
       MagneticCursorModule.init();
       FormModule.init();
       SendButtonsModule.init();

@@ -1208,12 +1208,9 @@ function initApp() {
     injectSVGs().then(() => {
       NavbarModule.init();
       ParticlesModule.init();
-      ScrollRevealModule.init();
       CountersModule.init();
       FaqAccordionModule.init();
       ServicesMasterDetailModule.init();
-      CarouselModule.init();
-      ProcessStepperModule.init();
       MagneticCursorModule.init();
       FormModule.init();
       SendButtonsModule.init();

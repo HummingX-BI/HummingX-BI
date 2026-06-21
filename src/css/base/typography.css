@@ -1,0 +1,54 @@
+/* ================================================================
+   TIPOGRAFÍA — @font-face locales + helpers de texto
+   ================================================================
+   Si los archivos WOFF2 residen en /assets/fonts/, estas reglas
+   @font-face los sirven directamente sin CDN. Si no están en
+   producción aún, son no-ops (solo warnings en devtools). La fuente
+   CDN del <head> actúa como red de seguridad.
+   ================================================================ */
+
+/* Syncopate — Fuente de display (títulos hero, navbar) */
+@font-face {
+  font-family: 'Syncopate';
+  src: url('../assets/fonts/syncopate-regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap; /* Evita texto invisible durante la carga */
+}
+
+@font-face {
+  font-family: 'Syncopate';
+  src: url('../assets/fonts/syncopate-bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Inter — Fuente de cuerpo (UI, formulario, texto) */
+@font-face {
+  font-family: 'Inter';
+  src: url('../assets/fonts/inter-regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('../assets/fonts/inter-600.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Texto en acento dorado (sin gradiente — el gradiente teal→purple es firma de IA) */
+.gradient-text {
+  color: var(--color-gold);
+  /* Usar color sólido elegante en lugar de gradiente IA */
+  display: inline-block;
+}
+
+/* X de HummingX en acento dorado */
+.accent-x {
+  color: var(--color-gold);
+}

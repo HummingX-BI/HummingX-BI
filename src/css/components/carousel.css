@@ -1,0 +1,110 @@
+/* ================================================================
+   CARRUSEL (Soluciones y Proyectos)
+   ================================================================ */
+.carousel-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.carousel-container {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  gap: var(--space-6);
+  padding-bottom: var(--space-4); /* Para evitar corte de sombra */
+  /* Ocultar scrollbar */
+  scrollbar-width: none;
+}
+.carousel-container::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel-container .solution-card {
+  min-width: 280px;
+  flex: 0 0 300px;
+  scroll-snap-align: start;
+}
+
+.carousel-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-6);
+  margin-top: var(--space-6);
+}
+
+.carousel-btn {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.carousel-btn:hover {
+  background: var(--color-bg-card-hover);
+  border-color: var(--color-text-secondary);
+}
+
+.carousel-progress {
+  width: 100px;
+  height: 2px;
+  background: var(--color-border);
+  position: relative;
+  border-radius: 2px;
+}
+
+.carousel-progress-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 20%; /* Controlado por JS */
+  background: var(--color-teal);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* ================================================================
+   CAROUSEL - Barra de progreso mejorada
+   ================================================================ */
+.carousel-progress {
+  flex: 1;
+  max-width: 120px;
+  height: 2px;
+  background: var(--color-border);
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+}
+
+.carousel-progress-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 8%;
+  background: var(--color-gold);
+  border-radius: 2px;
+  transition: width 0.25s ease;
+}
+
+.carousel-btn {
+  transition: opacity var(--transition-fast), background var(--transition-fast), transform var(--transition-fast);
+}
+
+.carousel-btn:hover {
+  transform: scale(1.08);
+}
+
+.carousel-btn:active {
+  transform: scale(0.95);
+}

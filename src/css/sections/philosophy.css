@@ -1,0 +1,74 @@
+/* ================================================================
+   FILOSOFÍA (Principios)
+   ================================================================ */
+.philosophy-v2 {
+  padding: var(--space-20) 0;
+  background: var(--color-bg-elevated);
+}
+
+.principles-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  margin-top: var(--space-12);
+  max-width: 800px;
+  margin-inline: auto;
+}
+
+.principle-item {
+  display: flex;
+  gap: var(--space-6);
+  padding: var(--space-6);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  align-items: flex-start;
+}
+
+@media (max-width: 576px) {
+  .principle-item {
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+}
+
+.principle-item__num {
+  font-size: var(--text-3xl);
+  font-weight: 300;
+  color: var(--color-text-muted);
+  font-family: var(--font-heading);
+  line-height: 1;
+  min-width: 60px;
+}
+
+.principle-item__content {
+  flex: 1;
+}
+
+.principle-item__title {
+  font-size: var(--text-lg);
+  margin-bottom: var(--space-2);
+  color: var(--color-text-primary);
+}
+
+.principle-item__desc {
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.philosophy-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  margin-top: var(--space-12);
+  max-width: 800px;
+  margin-inline: auto;
+}
+
+@media (min-width: 768px) {
+  .philosophy-cards {
+    grid-template-columns: 1fr 1fr;
+  }
+}

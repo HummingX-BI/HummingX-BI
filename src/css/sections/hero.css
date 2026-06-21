@@ -1,0 +1,363 @@
+/* ================================================================
+   HERO SECTION
+   ================================================================ */
+.hero {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding-block: var(--space-32) var(--space-32);
+  background: transparent;
+}
+
+/* Gradiente de fondo animado en móvil (reemplazo del video) */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  /* Por defecto (desktop): transparente — el video cubre el fondo */
+  background: transparent;
+  pointer-events: none;
+}
+
+@media (max-width: 768px),
+(hover: none) {
+  .hero::before {
+    background: radial-gradient(ellipse 120% 80% at 50% 0%,
+        rgba(255, 255, 255, 0.5) 0%,
+        rgba(12, 12, 13, 0) 60%);
+  }
+}
+
+/* Contenido del hero */
+.hero__content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  max-width: 900px;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Eyebrow label — refinado */
+.hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  background: rgba(201, 169, 110, 0.06);
+  border: 1px solid rgba(201, 169, 110, 0.15);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-8);
+}
+
+.hero__eyebrow-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-gold);
+  opacity: 0.8;
+}
+
+/* Título principal — DM Serif Display */
+.hero__title {
+  font-family: var(--font-display);
+  font-size: clamp(var(--text-4xl), 7vw, var(--text-7xl));
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-8);
+}
+
+/* Brand line: heavier, commands attention */
+.hero__brand {
+  font-weight: 700;
+  font-size: 1em;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+  display: block;
+}
+
+/* Tagline line: accent color, slightly lighter weight for clear hierarchy */
+.hero__tagline-line {
+  font-weight: 400;
+  font-size: 0.78em;
+  letter-spacing: -0.005em;
+  opacity: 0.92;
+  display: block;
+  margin-top: 0.1em;
+}
+
+/* Subtítulo */
+.hero__subtitle {
+  font-size: clamp(var(--text-base), 2vw, var(--text-xl));
+  color: var(--color-text-secondary);
+  max-width: 680px;
+  margin-inline: auto;
+  margin-bottom: var(--space-10);
+  line-height: 1.7;
+}
+
+/* Grupo de CTAs */
+.hero__cta-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-16);
+}
+
+.hero__cta-group .btn--primary {
+  padding: var(--space-4) var(--space-8);
+  font-size: var(--text-base);
+  /* Heredar border-radius: 9999px del sistema .btn — sin override */
+}
+
+.hero__cta-group .btn--ghost {
+  padding: var(--space-4) var(--space-8);
+  font-size: var(--text-base);
+  /* Heredar border-radius: 9999px del sistema .btn — sin override */
+}
+
+/* Context Pills - Franja de Contexto */
+.hero__context-pills {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: var(--space-6) var(--space-8);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-depth);
+  max-width: 960px;
+  margin-inline: auto;
+  gap: var(--space-8);
+}
+
+.context-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  flex: 1 1 200px;
+  min-width: 200px;
+  text-align: left;
+}
+
+.context-pill__label {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.context-pill__value {
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+/* Indicador de scroll */
+.hero__scroll-indicator {
+  display: none;
+  /* Ocultar por defecto en móvil para evitar amontonamiento */
+  position: absolute;
+  bottom: var(--space-8);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.scroll-text {
+  font-size: var(--text-xs);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.scroll-dot-wrapper {
+  width: 24px;
+  height: 38px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 6px;
+}
+
+.scroll-dot {
+  width: 3px;
+  height: 6px;
+  background: var(--color-gold);
+  border-radius: var(--radius-full);
+  animation: scroll-dot-anim 1.8s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+}
+
+@keyframes scroll-dot-anim {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  80% {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+}
+
+
+/* ── Responsive: tablet ≥ 768px ───────────────────────────────── */
+@media (min-width: 768px) {
+  .hero__context-pills {
+    gap: var(--space-12);
+    padding: var(--space-8);
+  }
+
+  .context-pill {
+    flex: 1;
+  }
+}
+
+/* Responsive para pantallas de baja altura (evita amontonamientos en laptops) */
+@media (max-height: 750px) {
+  .hero {
+    padding-block: var(--space-24) var(--space-20);
+  }
+
+  .hero__eyebrow {
+    margin-bottom: var(--space-4);
+  }
+
+  .hero__title {
+    margin-bottom: var(--space-4);
+  }
+
+  .hero__subtitle {
+    margin-bottom: var(--space-6);
+  }
+
+  .hero__cta-group {
+    margin-bottom: var(--space-10);
+  }
+}
+
+/* ================================================================
+   MEJORAS HERO EN MÓVIL — Respiración y organización
+   ================================================================ */
+@media (max-width: 767px) {
+
+  /* Ocultar recuadro "empresa mexicana" en móvil para reducir ruido visual */
+  .hero__eyebrow {
+    display: none !important;
+  }
+
+  /* Hero con más espacio para respirar */
+  .hero {
+    padding-block: var(--space-20) var(--space-16);
+    justify-content: flex-start;
+    padding-top: calc(var(--space-20) + 60px);
+    /* Navbar + espacio */
+  }
+
+  .hero__content {
+    padding-inline: var(--space-2);
+  }
+
+  /* Eyebrow más compacto */
+  .hero__eyebrow {
+    font-size: 10px;
+    padding: var(--space-1) var(--space-3);
+    margin-bottom: var(--space-6);
+    text-align: center;
+  }
+
+  /* Título adaptado */
+  .hero__title {
+    font-size: clamp(var(--text-3xl), 9vw, var(--text-5xl));
+    margin-bottom: var(--space-5);
+    line-height: 1.1;
+  }
+
+  /* Subtítulo más legible */
+  .hero__subtitle {
+    font-size: var(--text-sm);
+    line-height: 1.7;
+    margin-bottom: var(--space-8);
+    padding-inline: var(--space-2);
+  }
+
+  /* Botones CTA apilados */
+  .hero__cta-group {
+    flex-direction: column;
+    gap: var(--space-4);
+    margin-bottom: var(--space-12);
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .hero__cta-group .btn--primary,
+  .hero__cta-group .btn--ghost {
+    width: 100%;
+    justify-content: center;
+    padding: var(--space-4) var(--space-6);
+    font-size: var(--text-base);
+  }
+
+  /* Pills de contexto: flex column en móvil */
+  .hero__context-pills {
+    flex-direction: column;
+    gap: var(--space-6);
+    padding: var(--space-6);
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .context-pill {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    min-width: unset;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-4);
+  }
+
+  .context-pill:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .context-pill__label {
+    font-size: var(--text-xs);
+  }
+
+  .context-pill__value {
+    font-size: var(--text-sm);
+  }
+}

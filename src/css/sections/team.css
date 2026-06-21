@@ -1,0 +1,43 @@
+/* ================================================================
+   EQUIPO
+   ================================================================ */
+.team-v2 {
+  padding: var(--space-20) 0;
+  background: var(--color-bg-base);
+}
+
+.team-profiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-6);
+  margin: var(--space-12) 0;
+}
+
+/* ── Mobile: grid de equipo en una columna ────────────────────── */
+@media (max-width: 767px) {
+  .team-profiles {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+}
+
+/* --- Proyectos Grid --- */
+.projects-showcase {
+  margin-top: var(--space-16);
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-12);
+}
+
+.projects-showcase__heading {
+  font-size: var(--text-2xl);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  margin-bottom: var(--space-8);
+  text-align: center;
+}
+
+.projects-grid {
+  display: flex;
+  gap: var(--space-6);
+  /* Scroll-snap settings */
+}

@@ -1,0 +1,325 @@
+/* ================================================================
+   VIDEO DE FONDO
+   ================================================================ */
+
+/* Contenedor del video de fondo */
+#video-container {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--color-bg-deepest);
+  opacity: 0;
+  transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  will-change: opacity;
+}
+
+/* Ocultar video en móvil (iOS Safari no soporta autoplay background confiablemente) */
+@media (max-width: 768px),
+(hover: none) {
+  #video-container {
+    display: none !important;
+  }
+}
+
+#video-container video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  /* Zoom de 25% para recortar los bordes y ocultar la marca de agua de la IA */
+  transform: translate3d(0, 0, 0) scale(1.25);
+  backface-visibility: hidden;
+  will-change: transform;
+  opacity: 0.4;
+}
+
+/* Gradiente de oscurecimiento sobre el video */
+#video-container::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+      rgba(255, 255, 255, 0.5) 0%,
+      rgba(255, 255, 255, 0.5) 50%,
+      rgba(255, 255, 255, 0.5) 100%);
+  pointer-events: none;
+}
+
+
+/* ================================================================
+   PRELOADER MINIMALISTA
+   ================================================================ */
+
+/* Preloader: barra de progreso ultra-delgada (estilo Linear/Stripe) */
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-preloader);
+  /* Fondo coincide con el color de la página — invisible excepto por la barra */
+  background: var(--color-bg-deepest);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  visibility: visible;
+  opacity: 1;
+}
+
+.preloader.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Anillo y Contenedor del Preloader */
+.preloader__content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 400px;
+  padding: var(--space-6);
+  gap: var(--space-6);
+}
+
+.preloader__ring-wrapper {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preloader__ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg); /* Iniciar progreso en la parte superior */
+}
+
+.preloader__ring-track {
+  stroke: var(--color-border);
+}
+
+.preloader__ring-fill {
+  stroke: var(--color-gold);
+  transition: stroke-dashoffset 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+  filter: drop-shadow(0 0 6px rgba(201, 169, 110, 0.25));
+}
+
+.preloader__logo {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  opacity: 0.95;
+  filter: drop-shadow(0 0 15px rgba(201, 169, 110, 0.12));
+  animation: preloader-logo-in 0.8s cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+
+.preloader__brand-title {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--color-text-primary);
+  opacity: 0.75;
+  animation: preloader-title-in 1.2s cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+
+@keyframes preloader-logo-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Título de marca */
+.preloader__brand-title {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--color-text-primary);
+  margin-top: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  /* PURGA: text-shadow (0 0 25px rgba(13,148,136,0.4)) — ELIMINADO. */
+  animation: title-fade-in 0.8s cubic-bezier(0.25, 1, 0.5, 1) 0.2s both;
+}
+
+.preloader__brand-sub {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: var(--color-teal);
+  padding: 1px 6px;
+  border: 1px solid rgba(13, 148, 136, 0.4);
+  border-radius: var(--radius-xs);
+  /* ↑ de 3px → 8px (squircle) */
+}
+
+@keyframes title-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Texto de estado */
+.preloader__status-text {
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-top: var(--space-4);
+  transition: opacity var(--transition-base);
+  /* PURGA: text-pulse (2s ease-in-out infinite) — ELIMINADO.
+     El texto simplemente aparece y permanece. Sin parpadeo ansioso. */
+  animation: title-fade-in 0.6s cubic-bezier(0.25, 1, 0.5, 1) 0.4s both;
+}
+
+
+/* ================================================================
+   PARTÍCULAS, REJILLA Y ORBES DE FONDO
+   ================================================================ */
+
+/* Canvas de partículas globales */
+.global__particles {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1; /* Detrás de todo el sitio */
+  pointer-events: none;
+}
+
+/* Rejilla decorativa de fondo */
+.hero__grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(13, 148, 136, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(13, 148, 136, 0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%);
+  z-index: 0;
+}
+
+/* Orbes de luz — estáticos y contenidos
+   PURGA: orb-float (8s/10s ease-in-out infinite) — ELIMINADOS.
+   Los orbes permanecen como fondos ambientales estáticos.
+   El movimiento debe tener propósito, no ser ruido visual. */
+.hero__orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hero__orb--1 {
+  width: 600px;
+  height: 600px;
+  top: -200px;
+  right: -200px;
+  /* Glow azul marino elegante */
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.5) 0%, transparent 70%);
+}
+
+.hero__orb--2 {
+  width: 500px;
+  height: 500px;
+  bottom: -150px;
+  left: -150px;
+  /* Opacidad reducida: 0.10 → 0.05 (con dorado dim) */
+  background: radial-gradient(circle, rgba(168, 136, 90, 0.05) 0%, transparent 70%);
+}
+
+
+/* ================================================================
+   BURBUJAS AMBIENTALES DE ALTO RENDIMIENTO (Estilo iOS)
+   ================================================================ */
+.ambient-bubbles {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.05;
+  will-change: transform;
+}
+
+.bubble--1 {
+  width: 320px;
+  height: 320px;
+  background: var(--color-gold);
+  top: -10%;
+  left: -5%;
+  animation: floatBubbleOne 25s infinite alternate ease-in-out;
+}
+
+.bubble--2 {
+  width: 420px;
+  height: 420px;
+  background: var(--color-gold-dim);
+  bottom: 5%;
+  right: -5%;
+  animation: floatBubbleTwo 30s infinite alternate ease-in-out;
+}
+
+.bubble--3 {
+  width: 280px;
+  height: 280px;
+  background: var(--color-gold-light);
+  top: 35%;
+  left: 55%;
+  animation: floatBubbleThree 22s infinite alternate ease-in-out;
+}
+
+@keyframes floatBubbleOne {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  100% { transform: translate3d(60px, 40px, 0) scale(1.1); }
+}
+
+@keyframes floatBubbleTwo {
+  0% { transform: translate3d(0, 0, 0) scale(1.15); }
+  100% { transform: translate3d(-80px, -50px, 0) scale(0.9); }
+}
+
+@keyframes floatBubbleThree {
+  0% { transform: translate3d(0, 0, 0) scale(0.9); }
+  100% { transform: translate3d(-40px, 60px, 0) scale(1.1); }
+}

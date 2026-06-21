@@ -1,0 +1,21 @@
+/* ================================================================
+   SOLUCIONES (Grid)
+   ================================================================ */
+.solutions-v2 {
+  padding: var(--space-20) 0;
+  background: var(--color-bg);
+}
+
+.solutions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-6);
+  margin-top: var(--space-12);
+}
+
+/* Redefinir .solutions-grid para que sea un carrusel
+   (override del grid anterior — debe permanecer DESPUÉS para ganar la cascada) */
+.solutions-grid {
+  display: flex; /* Override grid */
+  flex-wrap: nowrap;
+}

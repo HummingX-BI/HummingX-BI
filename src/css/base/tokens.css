@@ -1,0 +1,140 @@
+/* ================================================================
+   VARIABLES DEL SISTEMA DE DISEÑO (Design Tokens)
+   ================================================================ */
+:root {
+  /* ── Fondos (Consultoría Premium Clara) ───────────────────────── */
+  --color-bg-deepest: #F3F4F6;
+  --color-bg-base: #FAFAF9; /* Crema casi puro */
+  --color-bg-mid: #FFFFFF;
+  --color-bg-elevated: #FFFFFF;
+  --color-bg-card: #FFFFFF;
+  --color-bg-card-hover: #F9FAFB;
+
+  /* ── Acentos (HummingX BI) ──────────────────────────────────── */
+  --color-gold: #00E5A0; /* Acento primario - Verde HummingX */
+  --color-gold-light: #33EAB3;
+  --color-gold-dim: #00B37E;
+  --color-gold-glow: rgba(0, 229, 160, 0.08);
+  --color-gold-glow-md: rgba(0, 229, 160, 0.14);
+
+  --color-blue: #0066FF; /* Acento secundario - Azul HummingX */
+
+  /* Alias compatibles */
+  --color-teal: var(--color-gold);
+  --color-teal-light: var(--color-gold-light);
+  --color-teal-glow: var(--color-gold-glow);
+  --color-teal-glow-strong: var(--color-gold-glow-md);
+  --color-purple: var(--color-blue);
+  --color-purple-light: #3385FF;
+  --color-purple-glow: rgba(0, 102, 255, 0.08);
+
+  /* ── Textos ─────────────────────────────────────────────────── */
+  --color-text-primary: #111827; /* Casi negro */
+  --color-text-secondary: #6B7280; /* Gris medio */
+  --color-text-muted: #9CA3AF; /* Placeholder */
+  --color-text-accent: var(--color-blue);
+
+  /* ── Bordes ─────────────────────────────────────────────────── */
+  --color-border: #E5E7EB; /* Gris muy claro */
+  --color-border-subtle: #F3F4F6;
+  --color-border-accent: rgba(0, 229, 160, 0.3);
+  --color-border-hover: rgba(0, 229, 160, 0.5);
+
+  /* --- Tipografía --- */
+  --font-display: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-heading: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-body: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Escala tipográfica */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+  --text-7xl: 4.5rem;
+
+  /* --- Espaciado --- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+
+  /* --- Contenedor --- */
+  --container-max: 1280px;
+  --container-pad: var(--space-6);
+
+  /* ── Border Radius ─────────────────────────────────────────── */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px; /* Tarjetas */
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px; /* Pills/Botones */
+
+  /* ── Sombras (Sutiles) ─────────────────────────────────────── */
+  --shadow-depth: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-depth-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+  --shadow-inset-top: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --shadow-gold-glow: 0 0 20px rgba(0, 229, 160, 0.15);
+
+  /* Aliases de compatibilidad */
+  --shadow-glow-teal: none;
+  --shadow-glow-purple: none;
+  --shadow-card: var(--shadow-depth);
+  --shadow-card-hover: var(--shadow-depth-hover);
+  --shadow-btn: none;
+  --shadow-btn-hover: var(--shadow-depth);
+
+  /* ── Transiciones ──────────────────────────────────────────── */
+  --transition-fast: 150ms cubic-bezier(0.25, 1, 0.5, 1);
+  --transition-base: 300ms cubic-bezier(0.25, 1, 0.5, 1);
+  --transition-slow: 500ms cubic-bezier(0.25, 1, 0.5, 1);
+  --transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* --- Z-index --- */
+  --z-preloader: 9999;
+  --z-cursor: 9998;
+  --z-navbar: 1000;
+  --z-overlay: 800;
+  --z-dropdown: 900;
+  --z-base: 1;
+}
+
+/* Token de transición usado por el acordeón FAQ */
+:root {
+  --transition-normal: 350ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* ── Overrides responsive del padding de contenedor ───────────── */
+@media (min-width: 768px) {
+  :root {
+    --container-pad: var(--space-8);
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --container-pad: var(--space-10);
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --container-pad: var(--space-12);
+  }
+}

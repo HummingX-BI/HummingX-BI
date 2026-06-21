@@ -1,0 +1,691 @@
+/* ================================================================
+   FORMULARIO CON CRISTAL (Glassmorphism) — Apple-tier Material
+   ================================================================ */
+.form-glass {
+  /* Material: cristal templado de alta calidad */
+  background: rgba(255, 255, 255, 0.6);
+
+  /* Hairlines: todos los bordes */
+  border: 1px solid var(--color-border);
+  border-top: 1px solid var(--color-border); /* Bisel superior */
+
+  /* SQUIRCLE */
+  border-radius: var(--radius-xl); /* 32px */
+
+  padding: var(--space-8);
+
+  /* Glass de alta calidad */
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+
+  /* Sombra inset para bisel sin sombras externas */
+  box-shadow: var(--shadow-inset-top);
+
+  position: relative;
+  overflow: hidden;
+}
+
+/* Eliminado el ::before con gradiente — el border-top lo reemplaza */
+.form-glass::before {
+  display: none;
+}
+
+/* Barra de progreso */
+.form__progress {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+  position: relative;
+}
+
+.form__progress-track {
+  flex: 1;
+  height: 3px;
+  background: var(--color-bg-card-hover);
+  border-radius: var(--radius-full);
+  position: relative;
+}
+
+.form__progress-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-teal) 0%, var(--color-purple-light) 100%);
+  border-radius: var(--radius-full);
+  box-shadow: 0 0 10px rgba(13, 148, 136, 0.4);
+  transition: width var(--transition-slow);
+  z-index: 1;
+}
+
+.form__steps-indicator {
+  flex-shrink: 0;
+}
+
+#current-step-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+/* Paso del formulario */
+.form__step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  animation: step-enter 0.4s ease;
+}
+
+.form__step[hidden] {
+  display: none;
+}
+
+@keyframes step-enter {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Título del paso */
+.form__step-title {
+  font-family: var(--font-heading);
+  font-size: clamp(var(--text-xl), 3vw, var(--text-2xl));
+  font-weight: 800;
+  color: var(--color-text-primary);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.form__step-subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  margin-top: -var(--space-2);
+}
+
+/* Grid de opciones */
+.form__options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.form__options-grid--col3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* Opción seleccionable (radio customizado) — squircle 16px */
+.form__option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border); /* Hairline */
+  border-radius: var(--radius-md); /* 16px — ↑ de 12px */
+  background: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.form__option:hover {
+  border-color: rgba(13, 148, 136, 0.30);
+  background: rgba(30, 30, 35, 0.5);
+  transform: translateY(-2px);
+}
+
+/* Ocultar radio nativo */
+/* Ocultar radio y checkbox nativos */
+.form__radio,
+.form__checkbox {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* --- Resumen de Formulario --- */
+.form__summary-box {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-bottom: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.form__summary-title {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.form__summary-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.summary-tag {
+  background: rgba(13, 148, 136, 0.15);
+  color: var(--color-teal);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid rgba(13, 148, 136, 0.3);
+}
+
+/* Estado seleccionado */
+.form__option.is-selected {
+  border-color: var(--color-teal);
+  background: rgba(13, 148, 136, 0.1);
+  box-shadow: 0 0 0 1px rgba(13, 148, 136, 0.4), var(--shadow-glow-teal);
+}
+
+/* Indicador de selección (checkmark superior derecho) */
+.form__option.is-selected::after {
+  content: '✓';
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--color-teal);
+  font-weight: 700;
+}
+
+/* Ícono de la opción */
+.form__option-icon {
+  width: 32px;
+  height: 32px;
+  color: var(--color-text-muted);
+  transition: color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.form__option-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.form__option:hover .form__option-icon,
+.form__option.is-selected .form__option-icon {
+  color: var(--color-teal);
+}
+
+/* Label y descripción de la opción */
+.form__option-label {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1.2;
+}
+
+.form__option-desc {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+
+/* Responsive para opciones col3 en mobile */
+@media (max-width: 480px) {
+  .form__options-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form__options-grid--col3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Campos de input --- */
+.form__field-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.form__label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.02em;
+}
+
+.form__optional {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-weight: 400;
+  margin-left: var(--space-1);
+}
+
+.form__input {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+  background: var(--color-bg-card-hover);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.form__input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.form__input:focus {
+  border-color: var(--color-teal);
+  background: rgba(13, 148, 136, 0.04);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+}
+
+.form__select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234A5568' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: var(--space-10);
+  cursor: pointer;
+}
+
+.form__select option {
+  background: var(--color-bg-mid);
+  color: var(--color-text-primary);
+}
+
+.form__textarea {
+  resize: vertical;
+  min-height: 90px;
+  line-height: 1.6;
+}
+
+/* --- Botones de navegación del formulario --- */
+.form__next-btn {
+  margin-top: var(--space-2);
+}
+
+.form__btn-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.form__btn-row .btn--primary {
+  flex: 1;
+}
+
+.form__back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  padding: var(--space-3) var(--space-4);
+}
+
+.form__back-btn--small {
+  font-size: var(--text-xs);
+  padding: var(--space-2) var(--space-3);
+  margin-top: var(--space-2);
+  color: var(--color-text-muted);
+}
+
+.form__back-btn--small:hover {
+  color: var(--color-text-secondary);
+}
+
+/* --- Etiqueta de canal de envío --- */
+.form__send-label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.02em;
+  margin-bottom: var(--space-2);
+}
+
+/* --- Botones grandes de envío --- */
+.form__send-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Botón de envío base */
+.btn--send {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-card-hover);
+  text-align: left;
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn--send::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.btn--send:hover {
+  transform: translateY(-2px);
+}
+
+/* Ícono del botón de envío */
+.btn__send-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all var(--transition-base);
+}
+
+.btn__send-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* Texto del botón de envío */
+.btn__send-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.btn__send-name {
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  transition: color var(--transition-fast);
+}
+
+.btn__send-desc {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  letter-spacing: 0.02em;
+}
+
+/* Botón WhatsApp */
+.btn--send-wa {
+  border-color: rgba(37, 211, 102, 0.2);
+}
+
+.btn--send-wa .btn__send-icon {
+  background: rgba(37, 211, 102, 0.1);
+  color: #25D366;
+  border: 1px solid rgba(37, 211, 102, 0.25);
+}
+
+.btn--send-wa:hover {
+  border-color: rgba(37, 211, 102, 0.5);
+  background: rgba(37, 211, 102, 0.03);
+  box-shadow: 0 4px 20px rgba(37, 211, 102, 0.1);
+}
+
+.btn--send-wa:hover .btn__send-icon {
+  background: rgba(37, 211, 102, 0.2);
+  box-shadow: 0 0 15px rgba(37, 211, 102, 0.2);
+}
+
+/* Botón Instagram */
+.btn--send-ig {
+  border-color: rgba(193, 53, 132, 0.2);
+}
+
+.btn--send-ig .btn__send-icon {
+  background: rgba(193, 53, 132, 0.1);
+  color: #E1306C;
+  border: 1px solid rgba(193, 53, 132, 0.25);
+}
+
+.btn--send-ig:hover {
+  border-color: rgba(193, 53, 132, 0.5);
+  background: rgba(193, 53, 132, 0.03);
+  box-shadow: 0 4px 20px rgba(193, 53, 132, 0.1);
+}
+
+.btn--send-ig:hover .btn__send-icon {
+  background: rgba(193, 53, 132, 0.2);
+  box-shadow: 0 0 15px rgba(193, 53, 132, 0.2);
+}
+
+/* Botón Facebook */
+.btn--send-fb {
+  border-color: rgba(24, 119, 242, 0.2);
+}
+
+.btn--send-fb .btn__send-icon {
+  background: rgba(24, 119, 242, 0.1);
+  color: #1877F2;
+  border: 1px solid rgba(24, 119, 242, 0.25);
+}
+
+.btn--send-fb:hover {
+  border-color: rgba(24, 119, 242, 0.5);
+  background: rgba(24, 119, 242, 0.03);
+  box-shadow: 0 4px 20px rgba(24, 119, 242, 0.1);
+}
+
+.btn--send-fb:hover .btn__send-icon {
+  background: rgba(24, 119, 242, 0.2);
+  box-shadow: 0 0 15px rgba(24, 119, 242, 0.2);
+}
+
+/* Botón Email */
+.btn--send-mail {
+  border-color: rgba(13, 148, 136, 0.2);
+}
+
+.btn--send-mail .btn__send-icon {
+  background: rgba(13, 148, 136, 0.1);
+  color: var(--color-teal);
+  border: 1px solid rgba(13, 148, 136, 0.25);
+}
+
+.btn--send-mail:hover {
+  border-color: rgba(13, 148, 136, 0.5);
+  background: rgba(13, 148, 136, 0.03);
+  box-shadow: 0 4px 20px rgba(13, 148, 136, 0.1);
+}
+
+.btn--send-mail:hover .btn__send-icon {
+  background: rgba(13, 148, 136, 0.2);
+  box-shadow: 0 0 15px rgba(13, 148, 136, 0.2);
+}
+
+/* --- Estado de éxito del formulario --- */
+.form__success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-4);
+  padding: var(--space-8);
+  animation: step-enter 0.5s ease;
+}
+
+.form__success[hidden] {
+  display: none;
+}
+
+.form__success-icon {
+  width: 80px;
+  height: 80px;
+  filter: drop-shadow(0 0 20px rgba(13, 148, 136, 0.4));
+  animation: success-icon-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes success-icon-in {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+.form__success-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.form__success-text {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  max-width: 300px;
+}
+
+
+/* ── Responsive: botones de envío en fila ≥ 640px ─────────────── */
+@media (min-width: 640px) {
+  .form__send-buttons {
+    flex-direction: row;
+  }
+
+  .btn--send {
+    flex: 1;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: var(--space-5);
+  }
+}
+
+/* ── Responsive móvil < 768px ─────────────────────────────────── */
+@media (max-width: 767px) {
+  /* Formulario: 2 columnas en móvil, 1 columna para grid normal */
+  .form__options-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+  }
+
+  .form__options-grid--col3 {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+  }
+
+  .form__option {
+    padding: var(--space-3) var(--space-3);
+    flex-direction: column;
+    gap: var(--space-2);
+    align-items: flex-start;
+  }
+
+  .form-glass {
+    padding: var(--space-8) var(--space-6);
+  }
+
+  .form__step-title {
+    font-size: var(--text-2xl);
+    line-height: 1.35;
+    margin-bottom: var(--space-3);
+  }
+
+  /* Botones de envío en columna */
+  .form__send-buttons {
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .btn--send {
+    padding: var(--space-4) var(--space-5);
+    gap: var(--space-4);
+  }
+}
+
+
+/* ================================================================
+   GLASSMORPHISM BLINDADO (formulario) — fallback + @supports
+   ================================================================ */
+.form-glass {
+  /* Fallback OLED: negro casi puro, contraste AA */
+  background: var(--color-bg-card-hover);
+  border-color: var(--color-border);
+}
+
+@supports (backdrop-filter: blur(10px)) {
+  /* Formulario: cristal templado Apple-tier */
+  .form-glass {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(32px) saturate(180%);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+    border-color: var(--color-border);
+    border-top-color: var(--color-border);
+  }
+}
+
+@supports not (backdrop-filter: blur(10px)) {
+  .form-glass {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
+  }
+}
+
+
+/* ================================================================
+   LOADER MINIMALISTA HummingX (durante el fetch del formulario)
+   ================================================================ */
+.form__loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  padding: var(--space-8) 0;
+  animation: step-enter 0.3s ease;
+}
+
+.form__loader[hidden] {
+  display: none;
+}
+
+/* Spinner circular animado */
+.form__loader-spinner {
+  width: 44px;
+  height: 44px;
+  border: 3px solid rgba(13, 148, 136, 0.15);
+  border-top-color: var(--color-teal);
+  border-radius: 50%;
+  animation: loader-spin 0.75s linear infinite;
+  will-change: transform;
+}
+
+@keyframes loader-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Texto de estado del loader */
+.form__loader-text {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  animation: text-pulse 1.5s ease-in-out infinite;
+}

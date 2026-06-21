@@ -1,0 +1,205 @@
+/* ================================================================
+   UTILIDADES GLOBALES
+   ================================================================ */
+
+/* Contenedor centrado responsive */
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-pad);
+}
+
+/* Encabezados de sección */
+.section-header {
+  text-align: center;
+  margin-bottom: var(--space-16);
+}
+
+.section-tag {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: 0.6875rem; /* 11px — fixed, crisper than var */
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  background: rgba(0, 229, 160, 0.07);
+  border: 1px solid rgba(0, 229, 160, 0.22);
+  padding: 4px 14px;
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-6);
+  /* Eyebrow label system: always legible at any scale */
+}
+
+.section-title {
+  font-family: var(--font-heading);
+  font-size: clamp(var(--text-3xl), 5vw, var(--text-5xl));
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-6);
+}
+
+.section-subtitle {
+  font-size: var(--text-lg);
+  color: var(--color-text-secondary);
+  max-width: 600px;
+  margin-inline: auto;
+  line-height: 1.7;
+}
+
+/* ================================================================
+   CONTENIDO PRINCIPAL (Oculto mientras carga)
+   ================================================================ */
+.main-content {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.7s ease 0.1s, transform 0.7s ease 0.1s;
+}
+
+.main-content.is-visible {
+  opacity: 1;
+  transform: none;
+  /* Usa 'none' en lugar de 'translateY(0)' para no romper el position: fixed del header interno */
+}
+
+/* ================================================================
+   ANIMACIONES DE REVEAL (Scroll-triggered)
+   ================================================================ */
+
+/* Estado inicial: elementos ocultos */
+.reveal-up {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-40px);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal-right {
+  opacity: 0;
+  transform: translateX(40px);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Estado visible: después del IntersectionObserver */
+.reveal-up.is-visible,
+.reveal-left.is-visible,
+.reveal-right.is-visible {
+  opacity: 1;
+  transform: translate(0);
+}
+
+/* Delay escalonado para hijos de un grupo */
+.reveal-up:nth-child(1) {
+  transition-delay: 0ms;
+}
+
+.reveal-up:nth-child(2) {
+  transition-delay: 100ms;
+}
+
+.reveal-up:nth-child(3) {
+  transition-delay: 200ms;
+}
+
+.reveal-up:nth-child(4) {
+  transition-delay: 300ms;
+}
+
+.reveal-up:nth-child(5) {
+  transition-delay: 400ms;
+}
+
+/* Dentro del hero: delay acumulado por clase custom */
+.hero__eyebrow.reveal-up {
+  transition-delay: 300ms;
+}
+
+.hero__title.reveal-up {
+  transition-delay: 450ms;
+}
+
+.hero__subtitle.reveal-up {
+  transition-delay: 600ms;
+}
+
+.hero__cta-group.reveal-up {
+  transition-delay: 750ms;
+}
+
+.hero__context-pills.reveal-up {
+  transition-delay: 900ms;
+}
+
+/* Preferencias de movimiento reducido (global) */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .bird-wing-top,
+  .bird-wing-bottom,
+  .btn--glow,
+  .hero__orb--1,
+  .hero__orb--2,
+  .preloader__bar {
+    animation: none !important;
+  }
+}
+
+/* Encabezados de sección más compactos en móvil */
+@media (max-width: 767px) {
+  .section-header {
+    margin-bottom: var(--space-12);
+  }
+
+  .section-title {
+    font-size: clamp(var(--text-2xl), 7vw, var(--text-3xl));
+    line-height: 1.2;
+    margin-bottom: var(--space-3);
+  }
+
+  .section-subtitle {
+    font-size: var(--text-base);
+    line-height: 1.65;
+  }
+}
+
+/* ================================================================
+   AJUSTES DE ANIMACIÓN PARA MÓVILES (Performance y Experiencia)
+   ================================================================ */
+@media (max-width: 768px) {
+  .reveal-up {
+    transform: translateY(20px);
+    transition-duration: 0.5s;
+  }
+  .reveal-left {
+    transform: translateX(-20px);
+    transition-duration: 0.5s;
+  }
+  .reveal-right {
+    transform: translateX(20px);
+    transition-duration: 0.5s;
+  }
+}
+
+/* Reducir motion si el usuario lo prefiere */
+@media (prefers-reduced-motion: reduce) {
+  .reveal-up, .reveal-left, .reveal-right {
+    transition: none;
+    transform: none;
+    opacity: 1;
+  }
+}

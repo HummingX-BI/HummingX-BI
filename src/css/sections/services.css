@@ -1,0 +1,183 @@
+/* ================================================================
+   SERVICIOS (Master-Detail)
+   ================================================================ */
+.services-v2 {
+  padding: var(--space-20) 0;
+  background: var(--color-bg);
+}
+
+.services-master-detail {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  margin-top: var(--space-12);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-depth);
+}
+
+@media (min-width: 768px) {
+  .services-master-detail {
+    grid-template-columns: 320px 1fr;
+  }
+}
+
+.services-master {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--color-border);
+  background: rgba(0,0,0,0.01);
+}
+
+@media (min-width: 768px) {
+  .services-master {
+    border-bottom: none;
+    border-right: 1px solid var(--color-border);
+  }
+}
+
+.service-tab {
+  text-align: left;
+  padding: var(--space-5) var(--space-6);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  font-family: var(--font-heading);
+  font-size: var(--text-base);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.service-tab:last-child {
+  border-bottom: none;
+}
+
+.service-tab:hover {
+  background: rgba(0,0,0,0.03);
+  color: var(--color-text-primary);
+}
+
+.service-tab.active {
+  background: var(--color-bg);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.service-tab.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--color-primary);
+}
+
+.services-detail {
+  padding: var(--space-8);
+  background: var(--color-bg);
+}
+
+@media (min-width: 768px) {
+  .services-detail {
+    padding: var(--space-10);
+  }
+}
+
+.service-panel {
+  display: none;
+  animation: fadeIn 0.4s ease forwards;
+}
+
+.service-panel.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.service-panel__title {
+  font-size: var(--text-2xl);
+  margin-bottom: var(--space-4);
+  color: var(--color-text-primary);
+}
+
+.service-panel__desc {
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--space-6);
+}
+
+.service-panel__subtitle {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+.service-panel__list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--space-6) 0;
+}
+
+.service-panel__list li {
+  position: relative;
+  padding-left: var(--space-6);
+  margin-bottom: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.service-panel__list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--color-primary);
+  font-weight: bold;
+}
+
+
+/* == Services mobile: horizontal scroll tab bar == */
+@media (max-width: 767px) {
+  .services-master-detail {
+    grid-template-columns: 1fr !important;
+  }
+  .services-master {
+    border-right: none !important;
+    border-bottom: 1px solid var(--color-border);
+    flex-direction: row !important;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .services-master::-webkit-scrollbar { display: none; }
+  .service-tab {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    padding: 12px 14px !important;
+    font-size: 0.8125rem !important;
+    border-bottom: 2px solid transparent;
+    border-right: none;
+    min-height: 48px;
+  }
+  .service-tab.active {
+    border-bottom: 2px solid var(--color-gold) !important;
+    background: transparent !important;
+  }
+  .service-tab.active::before { display: none !important; }
+  .services-detail {
+    padding: 20px 16px !important;
+  }
+}

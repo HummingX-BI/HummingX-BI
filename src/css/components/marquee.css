@@ -1,0 +1,101 @@
+/* ================================================================
+   MARQUEE — Tira de logos (experiencia)
+   ================================================================ */
+.marquee-container {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  /* Efecto de difuminado a los lados */
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 30s linear infinite;
+  gap: var(--space-12);
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(calc(-50% - (var(--space-12) / 2))); }
+}
+
+.marquee-item {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0 var(--space-6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.6;
+  transition: opacity var(--transition-fast);
+  white-space: nowrap;
+}
+
+.marquee-item:hover {
+  opacity: 1;
+  color: var(--color-text-secondary);
+}
+
+
+/* ================================================================
+   MARQUEE — Tira horizontal infinita (BEM)
+   ================================================================ */
+.marquee {
+  overflow: hidden;
+  position: relative;
+  padding: 14px 0;
+  background: var(--color-bg-elevated);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  -webkit-mask-image: linear-gradient(to right, transparent 0, black 80px, black calc(100% - 80px), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, black 80px, black calc(100% - 80px), transparent 100%);
+}
+
+.marquee__track {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: max-content;
+  animation: marquee-scroll 28s linear infinite;
+  will-change: transform;
+}
+
+.marquee__item {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  transition: color var(--transition-fast);
+}
+
+.marquee:hover .marquee__item {
+  color: var(--color-text-primary);
+}
+
+.marquee__sep {
+  color: var(--color-gold);
+  font-size: 0.5rem;
+  line-height: 1;
+}
+
+@keyframes marquee-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee__track { animation: none; }
+}

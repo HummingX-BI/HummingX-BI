@@ -1,0 +1,371 @@
+/* ================================================================
+   LOGO — micro-interacciones (hover intent-driven)
+   ================================================================ */
+.logo-wing-top,
+.logo-wing-bottom {
+  transform-origin: 430px 380px;
+  will-change: transform;
+}
+
+.logo-body {
+  transform-origin: 570px 550px;
+  will-change: transform;
+}
+
+/* PURGA: flap-top, flap-bottom, body-bob (0.12s infinite alternate) — ELIMINADOS.
+   Las interfaces de lujo no baten alas en bucle infinito.
+   Solo el ícono completo responde al hover del usuario. */
+.nav__logo:hover .nav__logo-icon .logo-wing-top {
+  animation: flap-top 0.12s ease-in-out infinite alternate;
+}
+
+.nav__logo:hover .nav__logo-icon .logo-wing-bottom {
+  animation: flap-bottom 0.12s ease-in-out infinite alternate;
+}
+
+.nav__logo:hover .nav__logo-icon .logo-body {
+  animation: body-bob 0.24s ease-in-out infinite alternate;
+}
+
+/* Se conservan los keyframes para el hover-while-hover (intent-driven) */
+@keyframes flap-top {
+  0% {
+    transform: rotate(-35deg) scaleX(0.7) scaleY(0.75) skewY(-5deg);
+  }
+
+  100% {
+    transform: rotate(42deg) scaleX(1.15) scaleY(1.05) skewY(8deg);
+  }
+}
+
+@keyframes flap-bottom {
+  0% {
+    transform: rotate(35deg) scaleX(0.75) scaleY(0.7) skewY(5deg);
+  }
+
+  100% {
+    transform: rotate(-42deg) scaleX(1.1) scaleY(1.05) skewY(-8deg);
+  }
+}
+
+@keyframes body-bob {
+  0% {
+    transform: translateY(-3px) rotate(-1.5deg);
+  }
+
+  100% {
+    transform: translateY(3px) rotate(1.5deg);
+  }
+}
+
+@keyframes landing-flash {
+  0% {
+    transform: translate(-50%, -50%) scale(0.2);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(1.6);
+    opacity: 0;
+  }
+}
+
+/* ── Logo icono: hover minimalista ─────────────────────────────── */
+.nav__logo-icon {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  flex-shrink: 0;
+  transition: transform var(--transition-spring),
+    opacity var(--transition-base);
+  will-change: transform;
+}
+
+.nav__logo:hover .nav__logo-icon {
+  transform: scale(1.12) rotate(-5deg);
+  /* PURGA: drop-shadow(0 4px 16px rgba(13,148,136,0.5)) — ELIMINADO. */
+}
+
+/* PURGA: node-pulse-anim (2s ease-in-out infinite) — ELIMINADO.
+   El punto de red permanece estático y confiable, no ansioso. */
+.node-pulse {
+  opacity: 0.5;
+}
+
+
+/* ================================================================
+   NAVEGACIÓN
+   ================================================================ */
+.nav-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-navbar);
+  padding-block: var(--space-4);
+  transition: all var(--transition-base);
+  background: transparent;
+  border-bottom: 1px solid transparent;
+}
+
+/* Navbar con backdrop al hacer scroll */
+.nav-header.scrolled {
+  padding-block: var(--space-3);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+}
+
+/* Logo */
+.nav__logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.nav__logo-icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+.nav__logo-text {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--color-text-primary);
+  line-height: 1;
+}
+
+.nav__logo-sub {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--color-gold);
+  padding: 1px 5px;
+  border: 1px solid var(--color-border-accent);
+  border-radius: 3px;
+  letter-spacing: 0.15em;
+  vertical-align: middle;
+  margin-left: 2px;
+}
+
+/* Menú desktop */
+.nav__menu {
+  display: none;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.nav__link {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.03em;
+  position: relative;
+  transition: color var(--transition-fast);
+}
+
+.nav__link::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--color-gold);
+  transition: width var(--transition-base);
+}
+
+.nav__link:hover {
+  color: var(--color-text-primary);
+}
+
+.nav__link:hover::after,
+.nav__link[aria-current="page"]::after {
+  width: 100%;
+}
+
+.nav__link[aria-current="page"] {
+  color: var(--color-text-primary);
+}
+
+/* Hamburger (móvil) */
+.nav__hamburger {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.nav__hamburger:hover {
+  background: var(--color-bg-card-hover);
+}
+
+.hamburger-line {
+  display: block;
+  width: 22px;
+  height: 1.5px;
+  background: var(--color-text-secondary);
+  border-radius: var(--radius-full);
+  transition: all var(--transition-base);
+}
+
+/* Hamburger → X cuando el menú está abierto */
+.nav__hamburger.is-active .hamburger-line:nth-child(1) {
+  transform: translateY(6.5px) rotate(45deg);
+  background: var(--color-gold);
+}
+
+.nav__hamburger.is-active .hamburger-line:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.nav__hamburger.is-active .hamburger-line:nth-child(3) {
+  transform: translateY(-6.5px) rotate(-45deg);
+  background: var(--color-gold);
+}
+
+/* Menú móvil */
+.mobile-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid var(--color-border);
+  transform: translateY(-10px);
+  opacity: 0;
+  pointer-events: none;
+  transition: all var(--transition-base);
+  padding: var(--space-6);
+}
+
+.mobile-menu.is-open {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mobile-menu__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.mobile-menu__link {
+  display: block;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-base);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.mobile-menu__link:hover {
+  background: var(--color-bg-card-hover);
+  color: var(--color-text-primary);
+  padding-left: var(--space-5);
+}
+
+.mobile-menu__cta {
+  margin-top: var(--space-4);
+  text-align: center;
+}
+
+
+/* ── Responsive navbar: tablet ≥ 768px ────────────────────────── */
+@media (min-width: 768px) {
+  .nav {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    width: 100%;
+  }
+
+  #nav-cta-btn {
+    justify-self: end;
+  }
+
+  .nav__menu {
+    display: flex;
+  }
+
+  .nav__hamburger {
+    display: none;
+  }
+
+  .mobile-menu {
+    display: none;
+  }
+}
+
+/* ── Responsive navbar: móvil < 768px ─────────────────────────── */
+@media (max-width: 767px) {
+  /* Ocultar botón Iniciar Proyecto del navbar en móvil para evitar amontonamiento */
+  #nav-cta-btn {
+    display: none;
+  }
+}
+
+
+/* ================================================================
+   GLASSMORPHISM BLINDADO (navbar) — fallback + @supports
+   ================================================================ */
+
+/* Fallback sólido para navegadores legacy (sin backdrop-filter) */
+.nav-header {
+  /* Fallback: navbar completamente opaca OLED */
+  background: var(--color-bg-base);
+}
+
+.nav-header.scrolled {
+  background: var(--color-bg-elevated);
+}
+
+.mobile-menu {
+  background: var(--color-bg-elevated);
+}
+
+@supports (backdrop-filter: blur(10px)) {
+  /* Navbar con cristal */
+  .nav-header {
+    background: rgba(255, 255, 255, 0.70);
+    backdrop-filter: blur(32px) saturate(180%);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+  }
+
+  .nav-header.scrolled {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(32px) saturate(180%);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+  }
+
+  /* Menú móvil */
+  .mobile-menu {
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+}

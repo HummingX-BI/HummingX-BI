@@ -1,0 +1,4 @@
+/* main.css — punto de entrada de estilos.
+   SOLO @import en orden de cascada. */
+@import './style.css';
+@import './components.css';

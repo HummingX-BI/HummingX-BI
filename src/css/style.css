@@ -1,0 +1,1583 @@
+/* ================================================================
+   HummingX-BI — Sistema de Diseño Principal
+   Versión: 3.0.0 — Obsidiana & Champagne
+   Descripción: Variables CSS, reset, preloader, navegación y hero.
+   Arquitectura: Mobile-first, BEM, Variables CSS nativas.
+   Paradigma: Warm Black · Champagne Gold · Editorial Serif · Luxury Dark
+   ================================================================ */
+
+
+/* ================================================================
+   1. VARIABLES DEL SISTEMA DE DISEÑO (Design Tokens)
+   Migración: AI teal/purple → Obsidiana & Champagne (Estudio élite)
+   ================================================================ */
+:root {
+  /* ── Fondos (Consultoría Premium Clara) ───────────────────────── */
+  --color-bg-deepest: #F3F4F6;
+  --color-bg-base: #FAFAF9; /* Crema casi puro */
+  --color-bg-mid: #FFFFFF;
+  --color-bg-elevated: #FFFFFF;
+  --color-bg-card: #FFFFFF;
+  --color-bg-card-hover: #F9FAFB;
+
+  /* ── Acentos (HummingX BI) ──────────────────────────────────── */
+  --color-gold: #00E5A0; /* Acento primario - Verde HummingX */
+  --color-gold-light: #33EAB3;
+  --color-gold-dim: #00B37E;
+  --color-gold-glow: rgba(0, 229, 160, 0.08);
+  --color-gold-glow-md: rgba(0, 229, 160, 0.14);
+
+  --color-blue: #0066FF; /* Acento secundario - Azul HummingX */
+  
+  /* Alias compatibles */
+  --color-teal: var(--color-gold);
+  --color-teal-light: var(--color-gold-light);
+  --color-teal-glow: var(--color-gold-glow);
+  --color-teal-glow-strong: var(--color-gold-glow-md);
+  --color-purple: var(--color-blue);
+  --color-purple-light: #3385FF;
+  --color-purple-glow: rgba(0, 102, 255, 0.08);
+
+  /* ── Textos ─────────────────────────────────────────────────── */
+  --color-text-primary: #111827; /* Casi negro */
+  --color-text-secondary: #6B7280; /* Gris medio */
+  --color-text-muted: #9CA3AF; /* Placeholder */
+  --color-text-accent: var(--color-blue);
+
+  /* ── Bordes ─────────────────────────────────────────────────── */
+  --color-border: #E5E7EB; /* Gris muy claro */
+  --color-border-subtle: #F3F4F6;
+  --color-border-accent: rgba(0, 229, 160, 0.3);
+  --color-border-hover: rgba(0, 229, 160, 0.5);
+
+  /* --- Tipografía --- */
+  --font-display: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-heading: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-body: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Escala tipográfica */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+  --text-7xl: 4.5rem;
+
+  /* --- Espaciado --- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+
+  /* --- Contenedor --- */
+  --container-max: 1280px;
+  --container-pad: var(--space-6);
+
+  /* ── Border Radius ─────────────────────────────────────────── */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px; /* Tarjetas */
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px; /* Pills/Botones */
+
+  /* ── Sombras (Sutiles) ─────────────────────────────────────── */
+  --shadow-depth: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-depth-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+  --shadow-inset-top: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --shadow-gold-glow: 0 0 20px rgba(0, 229, 160, 0.15);
+
+  /* Aliases de compatibilidad */
+  --shadow-glow-teal: none;
+  --shadow-glow-purple: none;
+  --shadow-card: var(--shadow-depth);
+  --shadow-card-hover: var(--shadow-depth-hover);
+  --shadow-btn: none;
+  --shadow-btn-hover: var(--shadow-depth);
+
+  /* ── Transiciones ──────────────────────────────────────────── */
+  --transition-fast: 150ms cubic-bezier(0.25, 1, 0.5, 1);
+  --transition-base: 300ms cubic-bezier(0.25, 1, 0.5, 1);
+  --transition-slow: 500ms cubic-bezier(0.25, 1, 0.5, 1);
+  --transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* --- Z-index --- */
+  --z-preloader: 9999;
+  --z-cursor: 9998;
+  --z-navbar: 1000;
+  --z-overlay: 800;
+  --z-dropdown: 900;
+  --z-base: 1;
+}
+
+
+/* ================================================================
+   2. RESET & BASE STYLES
+   ================================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ocultar scroll-bar cuando el preloader está activo */
+body.loading {
+  overflow: hidden;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+/* Focus visible accesible */
+:focus-visible {
+  outline: 2px solid var(--color-teal);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Selección de texto */
+::selection {
+  background: var(--color-teal-glow);
+  color: var(--color-text-primary);
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-deepest);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-gold-dim);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold);
+}
+
+
+/* ================================================================
+   3. UTILIDADES GLOBALES
+   ================================================================ */
+
+/* Contenedor centrado responsive */
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-pad);
+}
+
+/* Texto en acento dorado (sin gradiente — el gradiente teal→purple es firma de IA) */
+.gradient-text {
+  color: var(--color-gold);
+  /* Usar color sólido elegante en lugar de gradiente IA */
+  display: inline-block;
+}
+
+/* X de HummingX en acento dorado */
+.accent-x {
+  color: var(--color-gold);
+}
+
+/* Encabezados de sección */
+.section-header {
+  text-align: center;
+  margin-bottom: var(--space-16);
+}
+
+.section-tag {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: 0.6875rem; /* 11px — fixed, crisper than var */
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  background: rgba(0, 229, 160, 0.07);
+  border: 1px solid rgba(0, 229, 160, 0.22);
+  padding: 4px 14px;
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-6);
+  /* Eyebrow label system: always legible at any scale */
+}
+
+.section-title {
+  font-family: var(--font-heading);
+  font-size: clamp(var(--text-3xl), 5vw, var(--text-5xl));
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-6);
+}
+
+.section-subtitle {
+  font-size: var(--text-lg);
+  color: var(--color-text-secondary);
+  max-width: 600px;
+  margin-inline: auto;
+  line-height: 1.7;
+}
+
+
+/* ================================================================
+   4. BOTONES (Sistema global) — Apple-tier Premium Bubble
+   ================================================================
+   Principios:
+   · Pill shape (border-radius: 9999px) — firma de iOS/macOS
+   · Sin sombras de color — profundidad neutral únicamente
+   · Motion intencional — solo responde a acciones del usuario
+   · Shimmer: único "efecto especial" permitido, muy sutil
+   ================================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-6);
+  min-height: 48px; /* Touch target fix */
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+
+  /* ── SQUIRCLE: Pill shape absoluto ─────────────────────────── */
+  border-radius: var(--radius-full);
+
+  /* ── Physical easing ─────────────────────────────────────────── */
+  transition: transform var(--transition-base),
+    background-color var(--transition-base),
+    box-shadow var(--transition-base),
+    border-color var(--transition-base);
+
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Botón primario (Sólido Premium) ──────── */
+.btn--primary {
+  background: var(--color-text-primary);
+  color: var(--color-bg-base);
+  border: 1px solid var(--color-text-primary);
+  box-shadow: var(--shadow-depth);
+}
+
+.btn--primary:hover {
+  background: var(--color-gold);
+  color: var(--color-bg-base);
+  border-color: var(--color-gold);
+  box-shadow: var(--shadow-depth-hover);
+  transform: translateY(-2px);
+}
+
+.btn--primary:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-depth);
+}
+
+/* ── .btn--glow: eliminada la animación infinita ──────────────────
+   PURGA: btn-glow-pulse (3s ease-in-out infinite) — ELIMINADO.
+   En su lugar: ring de foco sutil solo en :focus-visible. */
+.btn--glow:focus-visible {
+  box-shadow: 0 0 0 3px var(--color-teal-glow-strong);
+}
+
+/* ── Botón ghost (hairline border) ────────────────────────────── */
+.btn--ghost {
+  background: transparent;
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  padding: var(--space-3) var(--space-5);
+}
+
+.btn--ghost:hover {
+  border-color: var(--color-text-secondary);
+  color: var(--color-text-primary);
+  background: var(--color-bg-elevated);
+}
+
+/* ── Botón de navbar ──────────────────────────────────────────── */
+.btn--nav {
+  background: var(--color-text-primary);
+  color: var(--color-bg-base);
+  border: 1px solid var(--color-text-primary);
+  padding: var(--space-2) var(--space-5);
+  font-size: var(--text-sm);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-depth);
+}
+
+.btn--nav:hover {
+  background: var(--color-gold);
+  color: var(--color-bg-base);
+  border-color: var(--color-gold);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-depth-hover);
+}
+
+/* ── Botón ancho completo ─────────────────────────────────────── */
+.btn--full {
+  width: 100%;
+  padding-block: var(--space-4);
+  font-size: var(--text-base);
+}
+
+/* ── Shimmer: único efecto decorativo permitido ───────────────────
+   Regla: el shimmer debe ser imperceptible en reposo y solo
+   activarse en hover. Opacidad 0.10 máximo. */
+.btn--primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(201, 169, 110, 0.25) 50%,
+      transparent 100%);
+  transform: translateX(-100%);
+  transition: transform 600ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.btn--primary:hover::before {
+  transform: translateX(100%);
+}
+
+
+
+/* ================================================================
+   5. VIDEO DE FONDO Y PRELOADER MINIMALISTA — HummingX-BI
+   ================================================================ */
+
+/* Contenedor del video de fondo */
+#video-container {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--color-bg-deepest);
+  opacity: 0;
+  transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  will-change: opacity;
+}
+
+/* Ocultar video en móvil (iOS Safari no soporta autoplay background confiablemente) */
+@media (max-width: 768px),
+(hover: none) {
+  #video-container {
+    display: none !important;
+  }
+}
+
+/* Gradiente de fondo animado en móvil (reemplazo del video) */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  /* Por defecto (desktop): transparente — el video cubre el fondo */
+  background: transparent;
+  pointer-events: none;
+}
+
+@media (max-width: 768px),
+(hover: none) {
+  .hero::before {
+    background: radial-gradient(ellipse 120% 80% at 50% 0%,
+        rgba(255, 255, 255, 0.5) 0%,
+        rgba(12, 12, 13, 0) 60%);
+  }
+}
+
+#video-container video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  /* Zoom de 25% para recortar los bordes y ocultar la marca de agua de la IA */
+  transform: translate3d(0, 0, 0) scale(1.25);
+  backface-visibility: hidden;
+  will-change: transform;
+  opacity: 0.4;
+}
+
+/* Gradiente de oscurecimiento sobre el video */
+#video-container::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+      rgba(255, 255, 255, 0.5) 0%,
+      rgba(255, 255, 255, 0.5) 50%,
+      rgba(255, 255, 255, 0.5) 100%);
+  pointer-events: none;
+}
+
+/* Preloader: barra de progreso ultra-delgada (estilo Linear/Stripe) */
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-preloader);
+  /* Fondo coincide con el color de la página — invisible excepto por la barra */
+  background: var(--color-bg-deepest);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  visibility: visible;
+  opacity: 1;
+}
+
+.preloader.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Anillo y Contenedor del Preloader */
+.preloader__content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 400px;
+  padding: var(--space-6);
+  gap: var(--space-6);
+}
+
+.preloader__ring-wrapper {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preloader__ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg); /* Iniciar progreso en la parte superior */
+}
+
+.preloader__ring-track {
+  stroke: var(--color-border);
+}
+
+.preloader__ring-fill {
+  stroke: var(--color-gold);
+  transition: stroke-dashoffset 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+  filter: drop-shadow(0 0 6px rgba(201, 169, 110, 0.25));
+}
+
+.preloader__logo {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  opacity: 0.95;
+  filter: drop-shadow(0 0 15px rgba(201, 169, 110, 0.12));
+  animation: preloader-logo-in 0.8s cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+
+.preloader__brand-title {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--color-text-primary);
+  opacity: 0.75;
+  animation: preloader-title-in 1.2s cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+
+@keyframes preloader-logo-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Título de marca */
+.preloader__brand-title {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--color-text-primary);
+  margin-top: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  /* PURGA: text-shadow (0 0 25px rgba(13,148,136,0.4)) — ELIMINADO. */
+  animation: title-fade-in 0.8s cubic-bezier(0.25, 1, 0.5, 1) 0.2s both;
+}
+
+.preloader__brand-sub {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: var(--color-teal);
+  padding: 1px 6px;
+  border: 1px solid rgba(13, 148, 136, 0.4);
+  border-radius: var(--radius-xs);
+  /* ↑ de 3px → 8px (squircle) */
+}
+
+@keyframes title-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Texto de estado */
+.preloader__status-text {
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-top: var(--space-4);
+  transition: opacity var(--transition-base);
+  /* PURGA: text-pulse (2s ease-in-out infinite) — ELIMINADO.
+     El texto simplemente aparece y permanece. Sin parpadeo ansioso. */
+  animation: title-fade-in 0.6s cubic-bezier(0.25, 1, 0.5, 1) 0.4s both;
+}
+
+/* ── Logo hover: intent-driven (solo responde al hover, no late en reposo) */
+.logo-wing-top,
+.logo-wing-bottom {
+  transform-origin: 430px 380px;
+  will-change: transform;
+}
+
+.logo-body {
+  transform-origin: 570px 550px;
+  will-change: transform;
+}
+
+/* PURGA: flap-top, flap-bottom, body-bob (0.12s infinite alternate) — ELIMINADOS.
+   Las interfaces de lujo no baten alas en bucle infinito.
+   Solo el ícono completo responde al hover del usuario. */
+.nav__logo:hover .nav__logo-icon .logo-wing-top {
+  animation: flap-top 0.12s ease-in-out infinite alternate;
+}
+
+.nav__logo:hover .nav__logo-icon .logo-wing-bottom {
+  animation: flap-bottom 0.12s ease-in-out infinite alternate;
+}
+
+.nav__logo:hover .nav__logo-icon .logo-body {
+  animation: body-bob 0.24s ease-in-out infinite alternate;
+}
+
+/* Se conservan los keyframes para el hover-while-hover (intent-driven) */
+@keyframes flap-top {
+  0% {
+    transform: rotate(-35deg) scaleX(0.7) scaleY(0.75) skewY(-5deg);
+  }
+
+  100% {
+    transform: rotate(42deg) scaleX(1.15) scaleY(1.05) skewY(8deg);
+  }
+}
+
+@keyframes flap-bottom {
+  0% {
+    transform: rotate(35deg) scaleX(0.75) scaleY(0.7) skewY(5deg);
+  }
+
+  100% {
+    transform: rotate(-42deg) scaleX(1.1) scaleY(1.05) skewY(-8deg);
+  }
+}
+
+@keyframes body-bob {
+  0% {
+    transform: translateY(-3px) rotate(-1.5deg);
+  }
+
+  100% {
+    transform: translateY(3px) rotate(1.5deg);
+  }
+}
+
+@keyframes landing-flash {
+  0% {
+    transform: translate(-50%, -50%) scale(0.2);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(1.6);
+    opacity: 0;
+  }
+}
+
+/* ── Logo icono: hover minimalista ─────────────────────────────── */
+.nav__logo-icon {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  flex-shrink: 0;
+  transition: transform var(--transition-spring),
+    opacity var(--transition-base);
+  will-change: transform;
+}
+
+.nav__logo:hover .nav__logo-icon {
+  transform: scale(1.12) rotate(-5deg);
+  /* PURGA: drop-shadow(0 4px 16px rgba(13,148,136,0.5)) — ELIMINADO. */
+}
+
+/* PURGA: node-pulse-anim (2s ease-in-out infinite) — ELIMINADO.
+   El punto de red permanece estático y confiable, no ansioso. */
+.node-pulse {
+  opacity: 0.5;
+}
+
+
+
+/* ================================================================
+   6. CONTENIDO PRINCIPAL (Oculto mientras carga)
+   ================================================================ */
+.main-content {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.7s ease 0.1s, transform 0.7s ease 0.1s;
+}
+
+.main-content.is-visible {
+  opacity: 1;
+  transform: none;
+  /* Usa 'none' en lugar de 'translateY(0)' para no romper el position: fixed del header interno */
+}
+
+
+/* ================================================================
+   7. NAVEGACIÓN
+   ================================================================ */
+.nav-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-navbar);
+  padding-block: var(--space-4);
+  transition: all var(--transition-base);
+  background: transparent;
+  border-bottom: 1px solid transparent;
+}
+
+/* Navbar con backdrop al hacer scroll */
+.nav-header.scrolled {
+  padding-block: var(--space-3);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+}
+
+/* Logo */
+.nav__logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.nav__logo-icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+.nav__logo-text {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--color-text-primary);
+  line-height: 1;
+}
+
+.nav__logo-sub {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--color-gold);
+  padding: 1px 5px;
+  border: 1px solid var(--color-border-accent);
+  border-radius: 3px;
+  letter-spacing: 0.15em;
+  vertical-align: middle;
+  margin-left: 2px;
+}
+
+/* Menú desktop */
+.nav__menu {
+  display: none;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.nav__link {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.03em;
+  position: relative;
+  transition: color var(--transition-fast);
+}
+
+.nav__link::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--color-gold);
+  transition: width var(--transition-base);
+}
+
+.nav__link:hover {
+  color: var(--color-text-primary);
+}
+
+.nav__link:hover::after,
+.nav__link[aria-current="page"]::after {
+  width: 100%;
+}
+
+.nav__link[aria-current="page"] {
+  color: var(--color-text-primary);
+}
+
+/* Hamburger (móvil) */
+.nav__hamburger {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.nav__hamburger:hover {
+  background: var(--color-bg-card-hover);
+}
+
+.hamburger-line {
+  display: block;
+  width: 22px;
+  height: 1.5px;
+  background: var(--color-text-secondary);
+  border-radius: var(--radius-full);
+  transition: all var(--transition-base);
+}
+
+/* Hamburger → X cuando el menú está abierto */
+.nav__hamburger.is-active .hamburger-line:nth-child(1) {
+  transform: translateY(6.5px) rotate(45deg);
+  background: var(--color-gold);
+}
+
+.nav__hamburger.is-active .hamburger-line:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.nav__hamburger.is-active .hamburger-line:nth-child(3) {
+  transform: translateY(-6.5px) rotate(-45deg);
+  background: var(--color-gold);
+}
+
+/* Menú móvil */
+.mobile-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid var(--color-border);
+  transform: translateY(-10px);
+  opacity: 0;
+  pointer-events: none;
+  transition: all var(--transition-base);
+  padding: var(--space-6);
+}
+
+.mobile-menu.is-open {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mobile-menu__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.mobile-menu__link {
+  display: block;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-base);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.mobile-menu__link:hover {
+  background: var(--color-bg-card-hover);
+  color: var(--color-text-primary);
+  padding-left: var(--space-5);
+}
+
+.mobile-menu__cta {
+  margin-top: var(--space-4);
+  text-align: center;
+}
+
+
+/* ================================================================
+   8. HERO SECTION
+   ================================================================ */
+.hero {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding-block: var(--space-32) var(--space-32);
+  background: transparent;
+}
+
+/* Canvas de partículas globales */
+.global__particles {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1; /* Detrás de todo el sitio */
+  pointer-events: none;
+}
+
+/* Rejilla decorativa de fondo */
+.hero__grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(13, 148, 136, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(13, 148, 136, 0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%);
+  z-index: 0;
+}
+
+/* Orbes de luz — estáticos y contenidos
+   PURGA: orb-float (8s/10s ease-in-out infinite) — ELIMINADOS.
+   Los orbes permanecen como fondos ambientales estáticos.
+   El movimiento debe tener propósito, no ser ruido visual. */
+.hero__orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hero__orb--1 {
+  width: 600px;
+  height: 600px;
+  top: -200px;
+  right: -200px;
+  /* Glow azul marino elegante */
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.5) 0%, transparent 70%);
+}
+
+.hero__orb--2 {
+  width: 500px;
+  height: 500px;
+  bottom: -150px;
+  left: -150px;
+  /* Opacidad reducida: 0.10 → 0.05 (con dorado dim) */
+  background: radial-gradient(circle, rgba(168, 136, 90, 0.05) 0%, transparent 70%);
+}
+
+/* Contenido del hero */
+.hero__content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  max-width: 900px;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Eyebrow label — refinado */
+.hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  background: rgba(201, 169, 110, 0.06);
+  border: 1px solid rgba(201, 169, 110, 0.15);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-8);
+}
+
+.hero__eyebrow-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-gold);
+  opacity: 0.8;
+}
+
+/* Título principal — DM Serif Display */
+.hero__title {
+  font-family: var(--font-display);
+  font-size: clamp(var(--text-4xl), 7vw, var(--text-7xl));
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-8);
+}
+
+/* Brand line: heavier, commands attention */
+.hero__brand {
+  font-weight: 700;
+  font-size: 1em;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+  display: block;
+}
+
+/* Tagline line: accent color, slightly lighter weight for clear hierarchy */
+.hero__tagline-line {
+  font-weight: 400;
+  font-size: 0.78em;
+  letter-spacing: -0.005em;
+  opacity: 0.92;
+  display: block;
+  margin-top: 0.1em;
+}
+
+/* Subtítulo */
+.hero__subtitle {
+  font-size: clamp(var(--text-base), 2vw, var(--text-xl));
+  color: var(--color-text-secondary);
+  max-width: 680px;
+  margin-inline: auto;
+  margin-bottom: var(--space-10);
+  line-height: 1.7;
+}
+
+/* Grupo de CTAs */
+.hero__cta-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-16);
+}
+
+.hero__cta-group .btn--primary {
+  padding: var(--space-4) var(--space-8);
+  font-size: var(--text-base);
+  /* Heredar border-radius: 9999px del sistema .btn — sin override */
+}
+
+.hero__cta-group .btn--ghost {
+  padding: var(--space-4) var(--space-8);
+  font-size: var(--text-base);
+  /* Heredar border-radius: 9999px del sistema .btn — sin override */
+}
+
+/* Context Pills - Franja de Contexto */
+.hero__context-pills {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: var(--space-6) var(--space-8);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-depth);
+  max-width: 960px;
+  margin-inline: auto;
+  gap: var(--space-8);
+}
+
+.context-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  flex: 1 1 200px;
+  min-width: 200px;
+  text-align: left;
+}
+
+.context-pill__label {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.context-pill__value {
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+/* Indicador de scroll */
+.hero__scroll-indicator {
+  display: none;
+  /* Ocultar por defecto en móvil para evitar amontonamiento */
+  position: absolute;
+  bottom: var(--space-8);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.scroll-text {
+  font-size: var(--text-xs);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.scroll-dot-wrapper {
+  width: 24px;
+  height: 38px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 6px;
+}
+
+.scroll-dot {
+  width: 3px;
+  height: 6px;
+  background: var(--color-gold);
+  border-radius: var(--radius-full);
+  animation: scroll-dot-anim 1.8s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+}
+
+@keyframes scroll-dot-anim {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  80% {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+}
+
+
+/* ================================================================
+   9. ANIMACIONES DE REVEAL (Scroll-triggered)
+   ================================================================ */
+
+/* Estado inicial: elementos ocultos */
+.reveal-up {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-40px);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal-right {
+  opacity: 0;
+  transform: translateX(40px);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Estado visible: después del IntersectionObserver */
+.reveal-up.is-visible,
+.reveal-left.is-visible,
+.reveal-right.is-visible {
+  opacity: 1;
+  transform: translate(0);
+}
+
+/* Delay escalonado para hijos de un grupo */
+.reveal-up:nth-child(1) {
+  transition-delay: 0ms;
+}
+
+.reveal-up:nth-child(2) {
+  transition-delay: 100ms;
+}
+
+.reveal-up:nth-child(3) {
+  transition-delay: 200ms;
+}
+
+.reveal-up:nth-child(4) {
+  transition-delay: 300ms;
+}
+
+.reveal-up:nth-child(5) {
+  transition-delay: 400ms;
+}
+
+/* Dentro del hero: delay acumulado por clase custom */
+.hero__eyebrow.reveal-up {
+  transition-delay: 300ms;
+}
+
+.hero__title.reveal-up {
+  transition-delay: 450ms;
+}
+
+.hero__subtitle.reveal-up {
+  transition-delay: 600ms;
+}
+
+.hero__cta-group.reveal-up {
+  transition-delay: 750ms;
+}
+
+.hero__context-pills.reveal-up {
+  transition-delay: 900ms;
+}
+
+
+/* ================================================================
+   10. RESPONSIVE — BREAKPOINTS
+   ================================================================ */
+
+/* Tablet: ≥ 768px */
+@media (min-width: 768px) {
+  :root {
+    --container-pad: var(--space-8);
+  }
+
+  .nav {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    width: 100%;
+  }
+
+  #nav-cta-btn {
+    justify-self: end;
+  }
+
+  .nav__menu {
+    display: flex;
+  }
+
+  .nav__hamburger {
+    display: none;
+  }
+
+  .mobile-menu {
+    display: none;
+  }
+
+  .hero__context-pills {
+    gap: var(--space-12);
+    padding: var(--space-8);
+  }
+
+  .context-pill {
+    flex: 1;
+  }
+}
+
+/* Desktop: ≥ 1024px */
+@media (min-width: 1024px) {
+  :root {
+    --container-pad: var(--space-10);
+  }
+}
+
+/* Large Desktop: ≥ 1280px */
+@media (min-width: 1280px) {
+  :root {
+    --container-pad: var(--space-12);
+  }
+}
+
+/* Responsive para pantallas de baja altura (evita amontonamientos en laptops) */
+@media (max-height: 750px) {
+  .hero {
+    padding-block: var(--space-24) var(--space-20);
+  }
+
+  .hero__eyebrow {
+    margin-bottom: var(--space-4);
+  }
+
+  .hero__title {
+    margin-bottom: var(--space-4);
+  }
+
+  .hero__subtitle {
+    margin-bottom: var(--space-6);
+  }
+
+  .hero__cta-group {
+    margin-bottom: var(--space-10);
+  }
+}
+
+/* Preferencias de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .bird-wing-top,
+  .bird-wing-bottom,
+  .btn--glow,
+  .hero__orb--1,
+  .hero__orb--2,
+  .preloader__bar {
+    animation: none !important;
+  }
+}
+
+
+/* ================================================================
+   11. MEJORAS HERO EN MÓVIL — Respiración y organización
+   ================================================================ */
+@media (max-width: 767px) {
+
+  /* Ocultar botón Iniciar Proyecto del navbar en móvil para evitar amontonamiento */
+  #nav-cta-btn {
+    display: none;
+  }
+
+  /* Ocultar recuadro "empresa mexicana" en móvil para reducir ruido visual */
+  .hero__eyebrow {
+    display: none !important;
+  }
+
+  /* Hero con más espacio para respirar */
+  .hero {
+    padding-block: var(--space-20) var(--space-16);
+    justify-content: flex-start;
+    padding-top: calc(var(--space-20) + 60px);
+    /* Navbar + espacio */
+  }
+
+  .hero__content {
+    padding-inline: var(--space-2);
+  }
+
+  /* Eyebrow más compacto */
+  .hero__eyebrow {
+    font-size: 10px;
+    padding: var(--space-1) var(--space-3);
+    margin-bottom: var(--space-6);
+    text-align: center;
+  }
+
+  /* Título adaptado */
+  .hero__title {
+    font-size: clamp(var(--text-3xl), 9vw, var(--text-5xl));
+    margin-bottom: var(--space-5);
+    line-height: 1.1;
+  }
+
+  /* Subtítulo más legible */
+  .hero__subtitle {
+    font-size: var(--text-sm);
+    line-height: 1.7;
+    margin-bottom: var(--space-8);
+    padding-inline: var(--space-2);
+  }
+
+  /* Botones CTA apilados */
+  .hero__cta-group {
+    flex-direction: column;
+    gap: var(--space-4);
+    margin-bottom: var(--space-12);
+    width: 100%;
+    max-width: 320px;
+  }
+
+  /* Efecto burbuja para botones primarios en móvil */
+  .btn--primary {
+    background: transparent !important;
+    border: 1px solid var(--color-gold) !important;
+    color: var(--color-gold) !important;
+    box-shadow: 0 0 15px rgba(201, 169, 110, 0.2), inset 0 0 15px rgba(201, 169, 110, 0.15) !important;
+  }
+  
+  .btn--primary:active {
+    box-shadow: 0 0 25px rgba(201, 169, 110, 0.3), inset 0 0 20px rgba(201, 169, 110, 0.2) !important;
+  }
+
+  .hero__cta-group .btn--primary,
+  .hero__cta-group .btn--ghost {
+    width: 100%;
+    justify-content: center;
+    padding: var(--space-4) var(--space-6);
+    font-size: var(--text-base);
+  }
+
+  /* Pills de contexto: flex column en móvil */
+  .hero__context-pills {
+    flex-direction: column;
+    gap: var(--space-6);
+    padding: var(--space-6);
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .context-pill {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    min-width: unset;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-4);
+  }
+
+  .context-pill:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .context-pill__label {
+    font-size: var(--text-xs);
+  }
+
+  .context-pill__value {
+    font-size: var(--text-sm);
+  }
+}
+
+/* ================================================================
+   PÁGINAS LEGALES
+   ================================================================ */
+.legal-page {
+  padding-top: var(--space-32);
+  padding-bottom: var(--space-20);
+  max-width: 720px;
+  margin: 0 auto;
+  color: var(--color-text-primary);
+  background: var(--color-bg-elevated);
+}
+
+.legal-page h1 {
+  font-family: var(--font-display);
+  font-size: var(--text-4xl);
+  margin-bottom: var(--space-4);
+  color: var(--color-gold);
+}
+
+.legal-page .legal-date {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-12);
+  display: block;
+}
+
+.legal-page h2 {
+  font-family: var(--font-heading);
+  font-size: var(--text-2xl);
+  margin-top: var(--space-10);
+  margin-bottom: var(--space-4);
+  color: var(--color-text-primary);
+}
+
+.legal-page p {
+  font-size: var(--text-base);
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-4);
+}
+
+.legal-page ul {
+  margin-bottom: var(--space-6);
+  padding-left: var(--space-6);
+}
+
+.legal-page li {
+  font-size: var(--text-base);
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-2);
+}
+
+.legal-page strong {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+
+/* ================================================================
+   AJUSTES DE ANIMACIÓN PARA MÓVILES (Performance y Experiencia)
+   ================================================================ */
+@media (max-width: 768px) {
+  .reveal-up {
+    transform: translateY(20px);
+    transition-duration: 0.5s;
+  }
+  .reveal-left {
+    transform: translateX(-20px);
+    transition-duration: 0.5s;
+  }
+  .reveal-right {
+    transform: translateX(20px);
+    transition-duration: 0.5s;
+  }
+}
+
+/* Reducir motion si el usuario lo prefiere */
+@media (prefers-reduced-motion: reduce) {
+  .reveal-up, .reveal-left, .reveal-right {
+    transition: none;
+    transform: none;
+    opacity: 1;
+  }
+}

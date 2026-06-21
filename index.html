@@ -31,8 +31,8 @@
   <title>HummingX BI | Firma de Tecnología e Inteligencia de Negocios</title>
 
   <!-- Favicons optimizados para Google Search -->
-  <link rel="icon" type="image/png" href="humming-logo.png" sizes="any" />
-  <link rel="apple-touch-icon" href="humming-logo.png" />
+  <link rel="icon" type="image/png" href="/humming-logo.png" sizes="any" />
+  <link rel="apple-touch-icon" href="/humming-logo.png" />
 
   <!-- Datos estructurados JSON-LD SEO -->
   <script type="application/ld+json">
@@ -107,14 +107,14 @@
   <link rel="preconnect" href="https://wa.me" />
 
   <!-- Preload crítico: DM Serif Display (titulares, serif editorial de lujo) -->
-  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/dm-serif-display-regular.woff2"
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/dm-serif-display-regular.woff2"
     crossorigin="anonymous" />
-  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/dm-serif-display-italic.woff2"
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/dm-serif-display-italic.woff2"
     crossorigin="anonymous" />
 
   <!-- Preload crítico: Inter (cuerpo — pesos más usados above the fold) -->
-  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-regular.woff2" crossorigin="anonymous" />
-  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/inter-600.woff2" crossorigin="anonymous" />
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter-regular.woff2" crossorigin="anonymous" />
+  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter-600.woff2" crossorigin="anonymous" />
 
   <!--
     Fallback CDN: no bloquea el renderizado (media="print" + onload).
@@ -129,8 +129,7 @@
   </noscript>
 
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="/src/css/main.css" />
 </head>
 
 <body>
@@ -157,7 +156,7 @@
             stroke="var(--color-gold)" stroke-width="1.5" stroke-dasharray="289" stroke-dashoffset="289"
             stroke-linecap="round"></circle>
         </svg>
-        <img src="humming-logo.png" class="preloader__logo" alt="HummingX-BI Logo" />
+        <img src="/humming-logo.png" class="preloader__logo" alt="HummingX-BI Logo" />
       </div>
       <div class="preloader__brand-title">HUMMING<span class="accent-x">X</span> — BI</div>
     </div>
@@ -181,7 +180,7 @@
         <a href="#inicio" class="nav__logo" aria-label="HummingX - BI - Inicio">
           <!-- Logo SVG oficial -->
           <!-- Logo SVG oficial (Inyectado dinámicamente) -->
-          <div data-inject-svg data-src="logo.svg" class="nav__logo-icon" aria-hidden="true"></div>
+          <div data-inject-svg data-src="/logo.svg" class="nav__logo-icon" aria-hidden="true"></div>
           <span class="nav__logo-text">HUMMING<span class="accent-x">X</span>-<span
               class="nav__logo-sub">BI</span></span>
         </a>
@@ -1468,11 +1467,9 @@
        de vuelo del colibrí (preloader).
   ======================= -->
   <!-- Lógica principal de la app -->
-
-  <!-- Lógica principal de la app -->
-  <script src="js/main.js"></script>
+  <script type="module" src="/src/js/main.js"></script>
   <!-- Capa de animaciones y motion -->
-  <script src="js/animations.js"></script>
+  <script type="module" src="/src/js/animations.js"></script>
 </body>
 
 </html>

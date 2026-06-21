@@ -215,34 +215,29 @@
         <div class="bubble bubble--3"></div>
       </div>
 
-      <div class="hero__content container">
-        <!-- Eyebrow tag -->
-        <div class="hero__eyebrow reveal-up" aria-label="Categoría"
-          style="display: inline-flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; justify-content: center;">
-          <div
-            style="display: flex; align-items: center; gap: var(--space-2); background: rgba(0, 0, 0, 0.05); padding: 4px 12px; border-radius: 20px;">
-            <span style="color: var(--color-text-secondary); font-weight: 500;">Tecnología e Inteligencia de
-              Negocios</span>
-          </div>
-        </div>
+      <div class="hero__inner container">
 
-        <!-- Titular principal -->
-        <h1 class="hero__title reveal-up" id="hero-title">
-          <span class="hero__brand">HummingX BI</span><br />
-          <span class="gradient-text hero__tagline-line">Ingeniería de software integral.</span>
-        </h1>
+        <!-- Columna A: copy -->
+        <div class="hero__copy">
+          <!-- Eyebrow con puntito -->
+          <span class="hero__eyebrow reveal-up">
+            <span class="hero__eyebrow-dot" aria-hidden="true"></span>
+            Tecnología e Inteligencia de Negocios
+          </span>
 
-        <!-- Subtítulo -->
-        <p class="hero__subtitle reveal-up">
-          Somos tu aliado de crecimiento recíproco. Gracias a nuestro equipo técnico multidisciplinario, que integra
-          ciencia de datos, inteligencia artificial e ingeniería de software, desarrollamos ecosistemas integrales a la
-          medida de tus objetivos operativos y comerciales.
-        </p>
+          <!-- Titular principal -->
+          <h1 class="hero__title reveal-up" id="hero-title">
+            Software inteligente,<br /><span class="gradient-text">hecho a la medida.</span>
+          </h1>
 
-        <!-- Botones CTA -->
-        <div class="hero__cta-wrapper reveal-up"
-          style="display: flex; flex-direction: column; align-items: center; gap: var(--space-4); margin-bottom: var(--space-12);">
-          <div class="hero__cta-group" style="margin-bottom: 0;">
+          <!-- Subtítulo -->
+          <p class="hero__subtitle reveal-up">
+            Ecosistemas digitales completos —IA, web, BI y automatización— que
+            transforman cómo opera y crece tu empresa.
+          </p>
+
+          <!-- Botones CTA -->
+          <div class="hero__actions reveal-up">
             <a href="https://wa.me/5215519802943" target="_blank" rel="noopener" class="btn btn--primary"
               id="hero-cta-primary">
               <span>Agenda una llamada</span>
@@ -252,35 +247,43 @@
               </svg>
             </a>
             <a href="#servicios" class="btn btn--ghost" id="hero-cta-secondary">
-              <span>Conoce nuestros servicios</span>
+              <span>Conoce los servicios</span>
             </a>
           </div>
-          <div class="hero__trust-badge"
-            style="font-size: var(--text-xs); font-weight: 500; color: var(--color-text-secondary); display: flex; align-items: center; gap: 6px;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+          <!-- Trust badge -->
+          <p class="hero__trust reveal-up">
+            <svg class="hero__trust-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" aria-hidden="true">
               <circle cx="12" cy="12" r="10"></circle>
               <polyline points="12 6 12 12 16 14"></polyline>
             </svg>
             Diagnóstico inicial sin costo · Respuesta en &lt;24h
+          </p>
+
+          <!-- Franja de capacidades -->
+          <ul class="hero__capabilities reveal-up" aria-label="Capacidades">
+            <li>Agentes IA</li>
+            <li>Business Intelligence</li>
+            <li>Web &amp; NFC</li>
+            <li>Digital Signage</li>
+            <li>Software a la medida</li>
+          </ul>
+        </div>
+
+        <!-- Columna B: dashboard del producto -->
+        <div class="hero__visual reveal-up">
+          <div class="hero__dashboard">
+            <div class="hero__dashboard-bar" aria-hidden="true">
+              <span class="hero__dashboard-dot"></span>
+              <span class="hero__dashboard-dot"></span>
+              <span class="hero__dashboard-dot"></span>
+            </div>
+            <img class="hero__dashboard-img" src="/assets/mockup-dashboard.png"
+              alt="Panel de inteligencia de negocios de HummingX BI" width="1024" height="1024" loading="eager" />
           </div>
         </div>
 
-        <!-- Propuesta de valor / Pills de Contexto -->
-        <div class="hero__context-pills reveal-up" role="list" aria-label="Contexto y Capacidades">
-          <div class="context-pill" role="listitem">
-            <span class="context-pill__label">Alcance</span>
-            <span class="context-pill__value">Polanco, Roma, Doctores, Santa Fe, Naucalpan, Tlalnepantla, Toluca</span>
-          </div>
-          <div class="context-pill" role="listitem">
-            <span class="context-pill__label">Capacidad técnica</span>
-            <span class="context-pill__value">Equipo multidisciplinario · Capacidad de ejecutar cualquier reto de
-              software</span>
-          </div>
-          <div class="context-pill" role="listitem">
-            <span class="context-pill__label">Portafolio</span>
-            <span class="context-pill__value">Agentes IA · Web · NFC/Loyalty · BI · Digital Signage · Custom</span>
-          </div>
-        </div>
       </div>
 
     </section>

@@ -10,7 +10,7 @@ export const HeroEntranceModule = (() => {
   function init() {
     if (REDUCED_MOTION) {
       // Skip animation — make everything immediately visible
-      document.querySelectorAll('.hero__eyebrow, .hero__title, .hero__subtitle, .hero__cta-wrapper, .hero__context-pills')
+      document.querySelectorAll('.hero__eyebrow, .hero__title, .hero__subtitle, .hero__actions, .hero__capabilities, .hero__visual')
         .forEach(el => el.style.opacity = '1');
       return;
     }
@@ -19,8 +19,9 @@ export const HeroEntranceModule = (() => {
       { selector: '.hero__eyebrow',       delay: 100 },
       { selector: '.hero__title',          delay: 260 },
       { selector: '.hero__subtitle',       delay: 440 },
-      { selector: '.hero__cta-wrapper',    delay: 580 },
-      { selector: '.hero__context-pills',  delay: 700 },
+      { selector: '.hero__actions',        delay: 580 },
+      { selector: '.hero__capabilities',   delay: 700 },
+      { selector: '.hero__visual',         delay: 320 },
     ];
 
     // Set initial state (CSS should also handle this, but JS ensures consistency)

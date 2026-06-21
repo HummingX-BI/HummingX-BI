@@ -92,41 +92,11 @@
   ]
   </script>
 
-  <!--
-    FASE 1 — OPTIMIZACIÓN TIPOGRÁFICA (CLS / FCP)
-    Se eliminaron las importaciones masivas de Google Fonts CDN.
-    Los archivos WOFF2 deben residir localmente en /assets/fonts/
-    Los <link rel="preload"> garantizan que el navegador descargue las
-    fuentes antes de que el parser encuentre las reglas @font-face en
-    el CSS, previniendo el FOUT (Flash of Unstyled Text) y reduciendo el CLS.
-  -->
+  <!-- Fuentes auto-hospedadas vía @fontsource (importadas en src/css/main.css
+       y empaquetadas por Vite). No requiere preloads ni CDN. -->
 
-  <!-- Preconnect hints para dominios externos -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Preconnect a WhatsApp (CTA directo del formulario) -->
   <link rel="preconnect" href="https://wa.me" />
-
-  <!-- Preload crítico: DM Serif Display (titulares, serif editorial de lujo) -->
-  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/dm-serif-display-regular.woff2"
-    crossorigin="anonymous" />
-  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/dm-serif-display-italic.woff2"
-    crossorigin="anonymous" />
-
-  <!-- Preload crítico: Inter (cuerpo — pesos más usados above the fold) -->
-  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter-regular.woff2" crossorigin="anonymous" />
-  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter-600.woff2" crossorigin="anonymous" />
-
-  <!--
-    Fallback CDN: no bloquea el renderizado (media="print" + onload).
-    Carga DM Serif Display + Inter en sus pesos necesarios.
-  -->
-  <link rel="preload" as="style"
-    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap"
-    onload="this.onload=null;this.rel='stylesheet'" />
-  <noscript>
-    <link rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap" />
-  </noscript>
 
   <!-- Stylesheets -->
   <link rel="stylesheet" href="/src/css/main.css" />
@@ -175,7 +145,8 @@
           <li><a href="index.html#soluciones" class="nav__link">Soluciones</a></li>
           <li><a href="index.html#metodologia" class="nav__link">Metodología</a></li>
           <li><a href="index.html#nosotros" class="nav__link">Nosotros</a></li>
-          <li><a href="index.html#faqs" class="nav__link">FAQs</a></li>
+          <li><a href="index.html#equipo" class="nav__link">Equipo</a></li>
+          <li><a href="index.html#faq" class="nav__link">FAQs</a></li>
         </ul>
 
         <!-- Botón CTA en navbar -->
@@ -198,7 +169,8 @@
           <li><a href="index.html#soluciones" class="mobile-menu__link" data-close-menu>Soluciones</a></li>
           <li><a href="index.html#metodologia" class="mobile-menu__link" data-close-menu>Metodología</a></li>
           <li><a href="index.html#nosotros" class="mobile-menu__link" data-close-menu>Nosotros</a></li>
-          <li><a href="index.html#faqs" class="mobile-menu__link" data-close-menu>FAQs</a></li>
+          <li><a href="index.html#equipo" class="mobile-menu__link" data-close-menu>Equipo</a></li>
+          <li><a href="index.html#faq" class="mobile-menu__link" data-close-menu>FAQs</a></li>
           <li><a href="index.html#contacto" class="btn btn--primary mobile-menu__cta" data-close-menu>Agenda una llamada</a>
           </li>
         </ul>
@@ -264,7 +236,7 @@
       <p>Para la interpretación, cumplimiento y ejecución de los presentes Términos y Condiciones, así como para la resolución de cualquier controversia que pudiera derivarse del uso del Sitio, las partes se someten a las leyes vigentes de los Estados Unidos Mexicanos y a los tribunales competentes en la Ciudad de México (CDMX), renunciando a cualquier otro fuero que pudiera corresponderles en razón de su domicilio presente o futuro.</p>
 
       <h2>11. Contacto</h2>
-      <p>Para cualquier duda, comentario o notificación legal respecto a estos Términos y Condiciones, por favor envíe un correo electrónico a <strong>contacto@hummingx.com</strong>.</p>
+      <p>Para cualquier duda, comentario o notificación legal respecto a estos Términos y Condiciones, por favor envíe un correo electrónico a <strong>contacto@hummingxbi.com</strong>.</p>
     </main>
     <!-- FIN: CONTENIDO LEGAL -->
 
@@ -303,7 +275,8 @@
               <li><a href="index.html#soluciones">Soluciones</a></li>
               <li><a href="index.html#metodologia">Metodología</a></li>
               <li><a href="index.html#nosotros">Nosotros</a></li>
-              <li><a href="index.html#faqs">FAQs</a></li>
+              <li><a href="index.html#equipo">Equipo</a></li>
+              <li><a href="index.html#faq">FAQs</a></li>
             </ul>
           </nav>
 

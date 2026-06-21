@@ -92,41 +92,11 @@
   ]
   </script>
 
-  <!--
-    FASE 1 — OPTIMIZACIÓN TIPOGRÁFICA (CLS / FCP)
-    Se eliminaron las importaciones masivas de Google Fonts CDN.
-    Los archivos WOFF2 deben residir localmente en /assets/fonts/
-    Los <link rel="preload"> garantizan que el navegador descargue las
-    fuentes antes de que el parser encuentre las reglas @font-face en
-    el CSS, previniendo el FOUT (Flash of Unstyled Text) y reduciendo el CLS.
-  -->
+  <!-- Fuentes auto-hospedadas vía @fontsource (importadas en src/css/main.css
+       y empaquetadas por Vite). No requiere preloads ni CDN. -->
 
-  <!-- Preconnect hints para dominios externos -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Preconnect a WhatsApp (CTA directo del formulario) -->
   <link rel="preconnect" href="https://wa.me" />
-
-  <!-- Preload crítico: DM Serif Display (titulares, serif editorial de lujo) -->
-  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/dm-serif-display-regular.woff2"
-    crossorigin="anonymous" />
-  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/dm-serif-display-italic.woff2"
-    crossorigin="anonymous" />
-
-  <!-- Preload crítico: Inter (cuerpo — pesos más usados above the fold) -->
-  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter-regular.woff2" crossorigin="anonymous" />
-  <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/inter-600.woff2" crossorigin="anonymous" />
-
-  <!--
-    Fallback CDN: no bloquea el renderizado (media="print" + onload).
-    Carga DM Serif Display + Inter en sus pesos necesarios.
-  -->
-  <link rel="preload" as="style"
-    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap"
-    onload="this.onload=null;this.rel='stylesheet'" />
-  <noscript>
-    <link rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap" />
-  </noscript>
 
   <!-- Stylesheets -->
   <link rel="stylesheet" href="/src/css/main.css" />
@@ -175,7 +145,8 @@
           <li><a href="index.html#soluciones" class="nav__link">Soluciones</a></li>
           <li><a href="index.html#metodologia" class="nav__link">Metodología</a></li>
           <li><a href="index.html#nosotros" class="nav__link">Nosotros</a></li>
-          <li><a href="index.html#faqs" class="nav__link">FAQs</a></li>
+          <li><a href="index.html#equipo" class="nav__link">Equipo</a></li>
+          <li><a href="index.html#faq" class="nav__link">FAQs</a></li>
         </ul>
 
         <!-- Botón CTA en navbar -->
@@ -198,7 +169,8 @@
           <li><a href="index.html#soluciones" class="mobile-menu__link" data-close-menu>Soluciones</a></li>
           <li><a href="index.html#metodologia" class="mobile-menu__link" data-close-menu>Metodología</a></li>
           <li><a href="index.html#nosotros" class="mobile-menu__link" data-close-menu>Nosotros</a></li>
-          <li><a href="index.html#faqs" class="mobile-menu__link" data-close-menu>FAQs</a></li>
+          <li><a href="index.html#equipo" class="mobile-menu__link" data-close-menu>Equipo</a></li>
+          <li><a href="index.html#faq" class="mobile-menu__link" data-close-menu>FAQs</a></li>
           <li><a href="index.html#contacto" class="btn btn--primary mobile-menu__cta" data-close-menu>Agenda una llamada</a>
           </li>
         </ul>
@@ -244,14 +216,14 @@
       </ul>
 
       <h2>Mecanismo para Negativa de Finalidades Secundarias (Opt-out)</h2>
-      <p>Si usted no desea que sus datos personales sean tratados para las Finalidades Secundarias, puede manifestar su negativa desde este momento enviando un correo a <strong>contacto@hummingx.com</strong>. La negativa para el uso de sus datos personales para estas finalidades secundarias no será motivo para que le neguemos los servicios principales que solicita o contrata con nosotros.</p>
+      <p>Si usted no desea que sus datos personales sean tratados para las Finalidades Secundarias, puede manifestar su negativa desde este momento enviando un correo a <strong>contacto@hummingxbi.com</strong>. La negativa para el uso de sus datos personales para estas finalidades secundarias no será motivo para que le neguemos los servicios principales que solicita o contrata con nosotros.</p>
 
       <h2>Transferencias de Datos a Terceros</h2>
       <p>Sus datos personales no serán vendidos ni transferidos a terceros con fines de comercialización. Únicamente realizamos transferencias de información a proveedores tecnológicos de estricta confianza (ej. plataformas de hosting, sistemas de CRM, WhatsApp Business/Meta y herramientas de analítica web) que operan bajo rigurosas políticas de privacidad, de manera exclusiva para poder brindarle nuestros servicios, administrar nuestra plataforma técnica o atender su comunicación, tal como lo exige el desarrollo de nuestra operación comercial.</p>
 
       <h2>Derechos ARCO (Acceso, Rectificación, Cancelación u Oposición)</h2>
       <p>Usted tiene derecho a conocer qué datos personales tenemos de usted, para qué los utilizamos y las condiciones del uso que les damos (Acceso). Es su derecho solicitar la corrección de su información en caso de estar desactualizada, ser inexacta o incompleta (Rectificación); que la eliminemos de nuestros registros o bases de datos (Cancelación); así como oponerse al uso de sus datos para fines específicos (Oposición).</p>
-      <p>Para el ejercicio de cualquiera de los derechos ARCO, usted deberá presentar la solicitud respectiva a través del correo electrónico <strong>contacto@hummingx.com</strong>. La solicitud deberá incluir su nombre completo, documento de identificación oficial y la descripción clara de los datos sobre los que busca ejercer algún derecho. Le daremos respuesta oficial en un plazo no mayor a 20 días hábiles.</p>
+      <p>Para el ejercicio de cualquiera de los derechos ARCO, usted deberá presentar la solicitud respectiva a través del correo electrónico <strong>contacto@hummingxbi.com</strong>. La solicitud deberá incluir su nombre completo, documento de identificación oficial y la descripción clara de los datos sobre los que busca ejercer algún derecho. Le daremos respuesta oficial en un plazo no mayor a 20 días hábiles.</p>
 
       <h2>Uso de Cookies y Tecnologías de Rastreo</h2>
       <p>Le informamos que en nuestro sitio web (hummingxbi.com) utilizamos cookies y analíticas web básicas estrictamente necesarias para el correcto funcionamiento del sitio, la medición del tráfico técnico y el rendimiento del servidor. No utilizamos tecnologías invasivas para monitorear su comportamiento de navegación cruzada ni perfilar a los usuarios con fines publicitarios de terceros.</p>
@@ -296,7 +268,8 @@
               <li><a href="index.html#soluciones">Soluciones</a></li>
               <li><a href="index.html#metodologia">Metodología</a></li>
               <li><a href="index.html#nosotros">Nosotros</a></li>
-              <li><a href="index.html#faqs">FAQs</a></li>
+              <li><a href="index.html#equipo">Equipo</a></li>
+              <li><a href="index.html#faq">FAQs</a></li>
             </ul>
           </nav>
 

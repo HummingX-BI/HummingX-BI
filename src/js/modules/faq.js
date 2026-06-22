@@ -25,14 +25,18 @@ export const FaqSmoothModule = (() => {
     faqHeaders.forEach(header => {
       header.addEventListener('click', () => {
         const faqItem = header.closest('.faq-item');
-        const isExpanding = header.getAttribute('aria-expanded') !== 'true';
+        // Estado real ANTES de cerrar los demás (aria-expanded no es la fuente de verdad)
+        const isExpanding = !faqItem.classList.contains('is-open');
         // Close all siblings
         faqHeaders.forEach(h => {
           h.closest('.faq-item')?.classList.remove('is-open');
+          h.setAttribute('aria-expanded', 'false');
         });
         if (isExpanding) {
           faqItem?.classList.add('is-open');
         }
+        // a11y: refleja el estado (sin basar la lógica en este atributo)
+        header.setAttribute('aria-expanded', String(isExpanding));
       });
     });
   }

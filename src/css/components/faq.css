@@ -22,8 +22,12 @@
   transition: all var(--transition-fast);
 }
 
-.faq-item:hover {
-  border-color: rgba(0,0,0,0.1);
+.faq-item:not(.is-open):hover {
+  border-color: var(--color-border-hover);
+}
+
+.faq-item:not(.is-open) .faq-item__header:hover .faq-item__title {
+  color: var(--color-gold-dim);
 }
 
 .faq-item__header {
@@ -45,8 +49,8 @@
 .faq-item__icon {
   font-size: var(--text-xl);
   font-weight: 300;
-  color: var(--color-primary);
-  transition: transform var(--transition-fast);
+  color: var(--color-gold);
+  transition: transform var(--transition-base);
   width: 24px;
   height: 24px;
   display: flex;
@@ -54,8 +58,15 @@
   justify-content: center;
 }
 
-.faq-item__header[aria-expanded="true"] .faq-item__icon {
+.faq-item.is-open .faq-item__icon {
   transform: rotate(45deg);
+  color: var(--color-gold-dim);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faq-item__icon {
+    transition: none;
+  }
 }
 
 .faq-item__content {
@@ -64,7 +75,7 @@
   transition: grid-template-rows var(--transition-normal);
 }
 
-.faq-item__header[aria-expanded="true"] + .faq-item__content {
+.faq-item.is-open .faq-item__content {
   grid-template-rows: 1fr;
 }
 
@@ -82,6 +93,11 @@
 
 /* ── Estado abierto ───────────────────────────────────────────── */
 .faq-item.is-open {
-  border-color: rgba(0, 229, 160, 0.25);
-  box-shadow: 0 4px 16px rgba(0, 229, 160, 0.06);
+  border-color: var(--color-border-accent);
+  background: var(--color-gold-glow);
+  box-shadow: var(--shadow-gold-glow);
+}
+
+.faq-item.is-open .faq-item__title {
+  color: var(--color-gold-dim);
 }

@@ -20,6 +20,14 @@
   --color-blue: #0066FF; /* Acento secundario - Azul HummingX */
   --color-blue-glow-md: rgba(0, 102, 255, 0.10); /* Tinte azul suave (íconos pares) */
 
+  /* ── Colores de marcas sociales (íconos de contacto) ─────────── */
+  --color-wa: #25D366;                       /* WhatsApp */
+  --color-wa-soft: rgba(37, 211, 102, 0.10);
+  --color-fb: #1877F2;                       /* Facebook */
+  --color-fb-soft: rgba(24, 119, 242, 0.10);
+  --color-ig: #C13584;                       /* Instagram */
+  --color-ig-soft: rgba(193, 53, 132, 0.10);
+
   /* Alias compatibles */
   --color-teal: var(--color-gold);
   --color-teal-light: var(--color-gold-light);

@@ -215,10 +215,13 @@
   transition: color var(--transition-fast);
 }
 
-.footer__socials a:hover,
 .footer__bottom-links a:hover,
 .footer__nav a:hover,
 .footer__contact-link:hover {
+  color: var(--color-gold-dim);
+}
+
+.footer__socials a:hover {
   color: var(--color-gold);
 }
 

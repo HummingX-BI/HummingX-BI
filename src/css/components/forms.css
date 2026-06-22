@@ -295,9 +295,9 @@
 }
 
 .form__input:focus {
-  border-color: var(--color-teal);
-  background: rgba(13, 148, 136, 0.04);
-  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+  border-color: var(--color-gold);
+  background: var(--color-gold-glow);
+  box-shadow: 0 0 0 3px var(--color-gold-glow-md);
 }
 
 .form__select {

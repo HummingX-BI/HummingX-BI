@@ -98,9 +98,21 @@
 }
 
 .team-profile__icon {
-  font-size: 2rem;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-gold-glow-md);
+  border-radius: var(--radius-md);
   margin-bottom: var(--space-4);
-  color: var(--color-gold);
+  color: var(--color-gold-dim);
+}
+
+/* Variedad: perfiles pares con tinte azul */
+.team-profile:nth-child(even) .team-profile__icon {
+  background: var(--color-blue-glow-md);
+  color: var(--color-blue);
 }
 
 .team-profile__title {

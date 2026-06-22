@@ -16,7 +16,7 @@ import { setFooterYear } from './utils/dom.js';
 /* ── Módulos base (DOM listo + SVGs inyectados) ──────────────── */
 import { PreloaderModule } from './modules/preloader.js';
 import { NavbarModule } from './modules/navbar.js';
-import { ParticlesModule } from './modules/particles.js';
+// import { ParticlesModule } from './modules/particles.js';
 import { ServicesMasterDetailModule } from './modules/servicesTabs.js';
 import { MagneticCursorModule } from './modules/magneticCursor.js';
 import { FormModule } from './modules/form.js';
@@ -46,7 +46,7 @@ function initApp() {
     // Inyectar SVGs dinámicamente antes de arrancar módulos que interactúan con ellos
     injectSVGs().then(() => {
       NavbarModule.init();
-      ParticlesModule.init();
+      // ParticlesModule.init();
       ServicesMasterDetailModule.init();
       MagneticCursorModule.init();
       FormModule.init();

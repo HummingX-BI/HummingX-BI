@@ -12,7 +12,7 @@ export const CardHoverModule = (() => {
     if (REDUCED_MOTION) return;
 
     const cards = document.querySelectorAll(
-      '.team-profile, .project-card, .solution-card, .process-step, .philosophy-card'
+      '.team-profile, .project-card, .solution-card, .process-step, .value-card'
     );
 
     cards.forEach(card => {

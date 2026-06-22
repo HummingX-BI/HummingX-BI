@@ -18,6 +18,7 @@
   --color-gold-glow-md: rgba(0, 229, 160, 0.14);
 
   --color-blue: #0066FF; /* Acento secundario - Azul HummingX */
+  --color-blue-glow-md: rgba(0, 102, 255, 0.10); /* Tinte azul suave (íconos pares) */
 
   /* Alias compatibles */
   --color-teal: var(--color-gold);

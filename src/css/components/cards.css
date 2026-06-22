@@ -24,10 +24,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0,0,0,0.03);
+  background: var(--color-gold-glow-md);
   border-radius: var(--radius-md);
   margin-bottom: var(--space-4);
-  color: var(--color-text-primary);
+  color: var(--color-gold-dim);
+}
+
+/* Variedad: las tarjetas pares usan tinte azul */
+.solution-card:nth-child(even) .solution-card__icon {
+  background: var(--color-blue-glow-md);
+  color: var(--color-blue);
 }
 
 .solution-card__title {

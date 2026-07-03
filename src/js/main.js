@@ -24,7 +24,7 @@ import { SendButtonsModule } from './modules/sendButtons.js';
 import { LeadIngestionModule } from './modules/leadIngestion.js';
 
 /* ── Módulos de animación / motion ────────────────────────────── */
-import { HeroEntranceModule } from './modules/heroEntrance.js';
+import { initHeroAnimation } from './modules/heroEntrance-v2.js';
 import { FaqSmoothModule } from './modules/faq.js';
 import { MarqueeModule } from './modules/marquee.js';
 import { EnhancedCarouselModule } from './modules/carousel.js';
@@ -58,7 +58,7 @@ function initApp() {
     // Capa de animaciones (antes en animations.js)
     // Hero entrance dispara tras el timeout del preloader (~1s)
     const PRELOADER_DURATION = 1000;
-    setTimeout(() => HeroEntranceModule.init(), PRELOADER_DURATION);
+    setTimeout(() => initHeroAnimation(), PRELOADER_DURATION);
 
     FaqSmoothModule.init();
     MarqueeModule.init();

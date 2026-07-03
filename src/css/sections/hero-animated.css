@@ -1,0 +1,262 @@
+/* ================================================================
+   HERO ANIMATED BANNER — Partículas + Logo flotante + Textura real
+   Extraído del banner IA, adaptado al sistema de diseño HummingX-BI.
+   ================================================================ */
+
+/* ── Contenedor principal con textura de fondo ────────────────── */
+.hero-banner {
+  position: relative;
+  width: 100%;
+  height: 75vh;
+  min-height: 650px;
+  background-color: var(--color-bg-light, #F9FAFB);
+  background-image: url('/assets/bg-textura.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  font-family: var(--font-body);
+  border-bottom: 1px solid var(--color-border);
+  box-sizing: border-box;
+}
+
+/* ── Canvas para partículas (sin cubos, transparente) ─────────── */
+.hero-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Acentos geométricos de esquina ───────────────────────────── */
+.corner-accent {
+  position: absolute;
+  width: 20rem;
+  height: 20rem;
+  pointer-events: none;
+  z-index: 5;
+  transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.corner-top-right {
+  top: 0;
+  right: 0;
+}
+
+.corner-bottom-left {
+  bottom: 0;
+  left: 0;
+}
+
+.corner-svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Panel de contenido central ───────────────────────────────── */
+.hero-brand-panel {
+  position: relative;
+  z-index: 10;
+  max-width: 32rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0 var(--space-6, 1.5rem);
+  box-sizing: border-box;
+}
+
+/* ── Logo (img) con efecto flotante ───────────────────────────── */
+.logo-container {
+  position: relative;
+  width: 15rem;
+  height: 15rem;
+  margin-bottom: var(--space-6, 1.5rem);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: transform;
+}
+
+.hero-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 25px rgba(0, 193, 207, 0.25));
+  transition: transform 0.2s ease-out;
+}
+
+/* ── Tipografía del banner ────────────────────────────────────── */
+.typography-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.brand-title {
+  font-size: 3.5rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.1;
+  font-family: var(--font-body);
+}
+
+.gradient-accent-text {
+  background: linear-gradient(to right, #00C1CF, var(--color-blue), #5D3FD3);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.brand-tagline {
+  margin-top: var(--space-3, 0.75rem);
+  font-family: var(--font-mono, monospace);
+  font-size: var(--text-sm, 0.85rem);
+  letter-spacing: 0.45em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  font-weight: 700;
+  padding-left: 0.45em;
+}
+
+/* ── Botones CTA del banner ───────────────────────────────────── */
+.cta-actions {
+  display: flex;
+  gap: var(--space-4, 1rem);
+  margin-top: var(--space-8, 2rem);
+}
+
+.btn-brand {
+  padding: var(--space-3, 0.75rem) var(--space-6, 1.75rem);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  transition: all var(--transition-base);
+}
+
+.btn-gradient {
+  color: #FFFFFF;
+  background: linear-gradient(to right, #00C1CF, var(--color-blue));
+  box-shadow: 0 4px 15px rgba(0, 193, 207, 0.2);
+}
+
+.btn-gradient:hover {
+  background: linear-gradient(to right, var(--color-blue), #5D3FD3);
+  box-shadow: 0 4px 20px rgba(93, 63, 211, 0.3);
+  transform: translateY(-2px);
+}
+
+.btn-outline {
+  color: var(--color-text-primary);
+  background-color: #FFFFFF;
+  border: 1px solid var(--color-border);
+}
+
+.btn-outline:hover {
+  background-color: var(--color-bg-card-hover);
+  transform: translateY(-2px);
+}
+
+/* ── Efecto de destello de luz ────────────────────────────────── */
+.light-burst-fx {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.1);
+  width: 600px;
+  height: 600px;
+  border-radius: 500px;
+  background: radial-gradient(circle, #FFFFFF 0%, rgba(207, 250, 254, 0.8) 40%, transparent 70%);
+  filter: blur(30px);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 25;
+  opacity: 0;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── Estados de animación (reveal timeline) ───────────────────── */
+.hero-banner .animate-hidden {
+  opacity: 0;
+  transform: scale(0.8) translateY(20px);
+}
+
+.hero-banner .animate-visible {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── Responsive: móvil ────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .hero-banner {
+    height: auto;
+    min-height: 100svh;
+    padding-block: calc(var(--space-16, 4rem) + 60px) var(--space-16, 4rem);
+  }
+
+  .logo-container {
+    width: 10rem;
+    height: 10rem;
+  }
+
+  .brand-title {
+    font-size: 2.25rem;
+    letter-spacing: 0.08em;
+  }
+
+  .corner-accent {
+    width: 10rem;
+    height: 10rem;
+  }
+
+  .cta-actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .btn-brand {
+    text-align: center;
+  }
+}
+
+/* ── prefers-reduced-motion ───────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .hero-banner .animate-hidden {
+    opacity: 1;
+    transform: none;
+  }
+
+  .hero-canvas {
+    display: none;
+  }
+
+  .light-burst-fx {
+    display: none;
+  }
+
+  .corner-accent {
+    transition: none;
+  }
+
+  .hero-logo {
+    transition: none;
+  }
+}

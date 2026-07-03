@@ -195,96 +195,74 @@
 
 
     <!-- ========================
-         HERO SECTION
+         HERO SECTION — Banner Animado con Partículas
     ======================== -->
-    <section class="hero" id="inicio" aria-labelledby="hero-title">
+    <header class="hero-banner" id="hero-banner-root">
+      <!-- Canvas para partículas y red (sin cubos, fondo via CSS) -->
+      <canvas id="hero-canvas" class="hero-canvas"></canvas>
 
-      <!-- Rejilla de fondo decorativa -->
-      <div class="hero__grid-bg" aria-hidden="true"></div>
-
-      <!-- Orbes de luz de fondo -->
-      <div class="hero__orb hero__orb--1" aria-hidden="true"></div>
-      <div class="hero__orb hero__orb--2" aria-hidden="true"></div>
-
-      <!-- Burbujas ambientales flotantes (Efecto premium estilo iOS) -->
-      <div class="ambient-bubbles" aria-hidden="true">
-        <div class="bubble bubble--1"></div>
-        <div class="bubble bubble--2"></div>
-        <div class="bubble bubble--3"></div>
+      <!-- Acento esquina superior derecha (gradiente teal) -->
+      <div class="corner-accent corner-top-right animate-hidden" id="tr-corner-accent">
+        <svg viewBox="0 0 300 300" class="corner-svg" aria-hidden="true">
+          <defs>
+            <linearGradient id="trGrad" x1="100%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#00C1CF" stop-opacity="0.45" />
+              <stop offset="50%" stop-color="#0066CC" stop-opacity="0.25" />
+              <stop offset="100%" stop-color="#00C1CF" stop-opacity="0" />
+            </linearGradient>
+          </defs>
+          <polygon points="300,0 120,0 300,180" fill="url(#trGrad)" />
+          <line x1="300" y1="5" x2="130" y2="5" stroke="#00C1CF" stroke-width="1.5" stroke-dasharray="4 4" />
+          <line x1="295" y1="0" x2="295" y2="170" stroke="#00C1CF" stroke-width="1.5" stroke-dasharray="4 4" />
+          <circle cx="130" cy="5" r="3" fill="#00C1CF" />
+          <circle cx="295" cy="170" r="3" fill="#00C1CF" />
+        </svg>
       </div>
 
-      <div class="hero__inner container">
+      <!-- Acento esquina inferior izquierda (gradiente púrpura) -->
+      <div class="corner-accent corner-bottom-left animate-hidden" id="bl-corner-accent">
+        <svg viewBox="0 0 300 300" class="corner-svg" aria-hidden="true">
+          <defs>
+            <linearGradient id="blGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#5D3FD3" stop-opacity="0.4" />
+              <stop offset="60%" stop-color="#0066CC" stop-opacity="0.15" />
+              <stop offset="100%" stop-color="#5D3FD3" stop-opacity="0" />
+            </linearGradient>
+          </defs>
+          <polygon points="0,300 0,120 180,300" fill="url(#blGrad)" />
+          <line x1="5" y1="300" x2="5" y2="130" stroke="#5D3FD3" stroke-width="1.5" stroke-dasharray="4 4" />
+          <line x1="0" y1="295" x2="170" y2="295" stroke="#5D3FD3" stroke-width="1.5" stroke-dasharray="4 4" />
+          <circle cx="5" cy="130" r="3" fill="#5D3FD3" />
+          <circle cx="170" cy="295" r="3" fill="#5D3FD3" />
+        </svg>
+      </div>
 
-        <!-- Columna A: copy -->
-        <div class="hero__copy">
-          <!-- Eyebrow con puntito -->
-          <span class="hero__eyebrow reveal-up">
-            <span class="hero__eyebrow-dot" aria-hidden="true"></span>
-            Tecnología e Inteligencia de Negocios
-          </span>
+      <!-- Panel central de marca -->
+      <div class="hero-brand-panel" id="hero-brand-panel">
+        <!-- Logo real del proyecto (sin SVG inline) -->
+        <div class="logo-container animate-hidden" id="logo-container">
+          <img src="/logo.svg" alt="HummingX BI Logo" class="hero-logo" id="hummingbird-logo">
+        </div>
 
-          <!-- Titular principal -->
-          <h1 class="hero__title reveal-up" id="hero-title">
-            Software inteligente,<br /><span class="gradient-text">hecho a la medida.</span>
+        <!-- Tipografía y CTAs -->
+        <div class="typography-container animate-hidden" id="typography-container">
+          <h1 class="brand-title" id="hero-title">
+            HUMMING<span class="gradient-accent-text">X</span>BI
           </h1>
+          <p class="brand-tagline">FIRMA DE SOFTWARE</p>
 
-          <!-- Subtítulo -->
-          <p class="hero__subtitle reveal-up">
-            Ecosistemas digitales completos —IA, web, BI y automatización— que
-            transforman cómo opera y crece tu empresa.
-          </p>
-
-          <!-- Botones CTA -->
-          <div class="hero__actions reveal-up">
-            <a href="https://wa.me/5215519802943" target="_blank" rel="noopener" class="btn btn--primary"
-              id="hero-cta-primary">
-              <span>Agenda una llamada</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                aria-hidden="true">
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-            </a>
-            <a href="#servicios" class="btn btn--ghost" id="hero-cta-secondary">
-              <span>Conoce los servicios</span>
-            </a>
-          </div>
-
-          <!-- Trust badge -->
-          <p class="hero__trust reveal-up">
-            <svg class="hero__trust-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" aria-hidden="true">
-              <circle cx="12" cy="12" r="10"></circle>
-              <polyline points="12 6 12 12 16 14"></polyline>
-            </svg>
-            Diagnóstico inicial sin costo · Respuesta en &lt;24h
-          </p>
-
-          <!-- Franja de capacidades -->
-          <ul class="hero__capabilities reveal-up" aria-label="Capacidades">
-            <li>Agentes IA</li>
-            <li>Business Intelligence</li>
-            <li>Web &amp; NFC</li>
-            <li>Digital Signage</li>
-            <li>Software a la medida</li>
-          </ul>
-        </div>
-
-        <!-- Columna B: dashboard del producto -->
-        <div class="hero__visual reveal-up">
-          <div class="hero__dashboard">
-            <div class="hero__dashboard-bar" aria-hidden="true">
-              <span class="hero__dashboard-dot"></span>
-              <span class="hero__dashboard-dot"></span>
-              <span class="hero__dashboard-dot"></span>
-            </div>
-            <img class="hero__dashboard-img" src="/assets/mockup-dashboard.png"
-              alt="Panel de inteligencia de negocios de HummingX BI" width="1024" height="1024" loading="eager" />
+          <div class="cta-actions">
+            <a href="https://wa.me/5215519802943" target="_blank" rel="noopener" class="btn-brand btn-gradient" id="hero-cta-primary">Explorar BI</a>
+            <a href="#servicios" class="btn-brand btn-outline" id="hero-cta-secondary">Ver Servicios</a>
           </div>
         </div>
-
       </div>
 
-    </section>
+      <!-- Efecto de destello de luz -->
+      <div class="light-burst-fx" id="light-burst-fx" aria-hidden="true"></div>
+    </header>
+    <!-- Ancla invisible para navegación #inicio -->
+    <div id="inicio" aria-hidden="true"></div>
     <!-- FIN: HERO SECTION -->
 
 

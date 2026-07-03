@@ -29,6 +29,7 @@
 
 /* ── Sections ─────────────────────────────────────────────────── */
 @import './sections/hero.css';
+@import './sections/hero-animated.css';
 @import './sections/services.css';
 @import './sections/process.css';
 @import './sections/solutions.css';

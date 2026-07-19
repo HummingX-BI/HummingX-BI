@@ -9,8 +9,8 @@ export const CONFIG = {
   /**
    * WHATSAPP: Números en formato internacional sin '+' ni espacios.
    */
-  WA_NUMBER_1: '5215519802943',
-  WA_NUMBER_2: '525568905795',
+  WA_NUMBER_1: '525575084267',
+  WA_NUMBER_2: '525575084267',
 
   /**
    * INSTAGRAM: Nombre de usuario SIN el @

@@ -1,1452 +1,1447 @@
 <!DOCTYPE html>
-<html lang="es">
 
-<head>
-  <!-- ============================================================
-       HummingX-BI — Landing Page
-       Versión: 1.0.0
-       Autor: HummingX-BI Engineering Team
-       Descripción: Landing page de alta gama para agencia de
-                    software e inteligencia de negocios.
-  ============================================================ -->
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="robots" content="index, follow" />
-  <link rel="canonical" href="https://hummingxbi.com/" />
-  <meta name="description"
-    content="Firma de tecnología e inteligencia de negocios. Automatizamos operaciones y creamos ecosistemas web, IA y Business Intelligence para aliados estratégicos." />
-  <meta name="keywords"
-    content="firma de tecnología, inteligencia de negocios, business intelligence méxico, desarrollo de software a medida, consultoría de software CDMX, ecosistemas web, agentes IA, nfc y lealtad, software integral" />
-  <meta property="og:title" content="HummingX BI | Firma de Tecnología e Inteligencia de Negocios" />
-  <meta property="og:description"
-    content="Firma de tecnología e inteligencia de negocios. Automatizamos operaciones y creamos ecosistemas web, IA y Business Intelligence para aliados estratégicos." />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://hummingxbi.com/og-image.png" />
-  <!-- Twitter Card Data -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="HummingX BI | Firma de Tecnología e Inteligencia de Negocios" />
-  <meta name="twitter:description"
-    content="Firma de tecnología e inteligencia de negocios. Automatizamos operaciones y creamos ecosistemas web, IA y Business Intelligence para aliados estratégicos." />
-  <meta name="twitter:image" content="https://hummingxbi.com/og-image.png" />
-  <title>HummingX BI | Firma de Tecnología e Inteligencia de Negocios</title>
-
-  <!-- Favicons optimizados para Google Search -->
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-
-  <!-- Datos estructurados JSON-LD SEO -->
-  <script type="application/ld+json">
-  [
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "HummingX-BI",
-      "url": "https://hummingxbi.com",
-      "logo": "https://hummingxbi.com/apple-touch-icon.png",
-      "image": "https://hummingxbi.com/og-image.png",
-      "email": "contacto@hummingxbi.com",
-      "description": "Desarrollo de software empresarial a medida y Business Intelligence para PyMEs en México.",
-      "areaServed": "MX",
-      "sameAs": [
-        "https://www.facebook.com/profile.php?id=61590401354021",
-        "https://www.instagram.com/",
-        "https://wa.me/"
-      ]
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "Service",
-      "name": "Plataformas Empresariales",
-      "description": "Sistema ERP a medida y software empresarial para centralizar la operación de tu negocio."
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "Service",
-      "name": "Business Intelligence",
-      "description": "Dashboard BI en tiempo real para pequeña empresa que convierte datos en ventajas competitivas."
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "Service",
-      "name": "Desarrollo Cloud & API",
-      "description": "Arquitectura backend escalable e integraciones sin fisuras."
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "Service",
-      "name": "Automatización RPA",
-      "description": "Automatización con IA para empresas en CDMX y todo México, elimina tareas manuales."
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "Service",
-      "name": "E-commerce & Portales B2B",
-      "description": "Experiencias de compra y gestión a medida de alto rendimiento."
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "Service",
-      "name": "Consultoría Tech & IA",
-      "description": "Auditorías de arquitectura, machine learning y roadmap tecnológico."
+<html class="scroll-smooth" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HummingX BI | Firma de Consultoría e Ingeniería de Software</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+    @layer base {
+      html, body {
+        margin: 0;
+        padding: 0;
+      }
     }
-  ]
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0b0b0e; }
+    ::-webkit-scrollbar-thumb { background: #00C4CC; border-radius: 9999px; }
+
+    /* Minimalist Loading Screen */
+    #page-loader {
+      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.7s ease;
+    }
+    #page-loader.loaded {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    /* Hero Sequenced Reveal:
+       1. Fondo negro base
+       2. Luz rosa
+       3. Luz azul
+       4. Logo
+       5. Badge
+       6. Nombre
+       7. Slogan
+       8. Descripción
+       9. Navbar y scroll indicator */
+    .hero-glow-pink {
+      opacity: 0;
+      transform: scale(0.85);
+      transition: opacity 1.3s cubic-bezier(0.16, 1, 0.3, 1), transform 1.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .hero-glow-blue {
+      opacity: 0;
+      transform: scale(0.85);
+      transition: opacity 1.3s cubic-bezier(0.16, 1, 0.3, 1), transform 1.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .hero-item-logo {
+      opacity: 0;
+      transform: scale(0.82) translateY(24px);
+      transition: opacity 1.1s cubic-bezier(0.16, 1, 0.3, 1), transform 1.1s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .hero-item-badge {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .hero-item-title {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .hero-item-slogan {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .hero-item-nav {
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    /* Animated Hamburger Button to X */
+    #luxury-hamburger-btn.is-open {
+      background-color: rgba(11, 11, 14, 0.95);
+      border-color: rgba(0, 196, 204, 0.6);
+      box-shadow: 0 0 25px rgba(0, 196, 204, 0.4);
+    }
+    #luxury-hamburger-btn.is-open .hamburger-line:nth-child(1) {
+      transform: translateY(8px) rotate(45deg);
+      background-color: #00C4CC;
+    }
+    #luxury-hamburger-btn.is-open .hamburger-line:nth-child(2) {
+      opacity: 0;
+      transform: scaleX(0);
+    }
+    #luxury-hamburger-btn.is-open .hamburger-line:nth-child(3) {
+      transform: translateY(-8px) rotate(-45deg);
+      background-color: #00C4CC;
+    }
+    .hero-item-scroll {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Estado activo de la secuencia del hero */
+    .hero-active .hero-glow-pink {
+      opacity: 1;
+      transform: scale(1);
+      transition-delay: 200ms;
+    }
+    .hero-active .hero-glow-blue {
+      opacity: 1;
+      transform: scale(1);
+      transition-delay: 500ms;
+    }
+    .hero-active .hero-item-logo {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      transition-delay: 850ms;
+    }
+    .hero-active .hero-item-badge {
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: 1150ms;
+    }
+    .hero-active .hero-item-title {
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: 1350ms;
+    }
+    .hero-active .hero-item-slogan {
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: 1550ms;
+    }
+    .hero-active.hero-item-nav, .hero-active .hero-item-nav {
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: 1750ms;
+    }
+    .hero-active .hero-item-scroll {
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: 1950ms;
+    }
+
+    /* Scroll Reveal para las demás secciones */
+    .reveal-on-scroll {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: opacity, transform;
+    }
+    .reveal-on-scroll.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "dark-bg": "#0b0b0e",
+            "dark-card": "#121216",
+            "midnight-purple": "#110e1a",
+            "royal-blue": "#0A58A3",
+            "vibrant-purple": "#4B1D6F",
+            "cyan-glow": "#00C4CC",
+            "hx-cyan": "#00E5FF",
+            "primary": "#00696e",
+            "primary-container": "#00c4cc",
+            "on-primary-container": "#003b3e",
+            "surface-saas": "#F4F6F9",
+            "surface": "#FCF8FC",
+            "pure-white": "#FFFFFF",
+            "on-surface": "#1A1A24",
+            "on-surface-variant": "#575768",
+            "border-subtle": "rgba(10, 88, 163, 0.12)",
+          },
+          fontFamily: {
+            sans: ["Plus Jakarta Sans", "sans-serif"],
+            display: ["Plus Jakarta Sans", "sans-serif"],
+            editorial: ["Cinzel", "serif"],
+            body: ["Inter", "sans-serif"],
+            mono: ["Space Grotesk", "monospace"]
+          }
+        }
+      }
+    };
   </script>
-
-  <!-- Fuentes auto-hospedadas vía @fontsource (importadas en src/css/main.css
-       y empaquetadas por Vite). No requiere preloads ni CDN. -->
-
-  <!-- Preconnect a WhatsApp (CTA directo del formulario) -->
-  <link rel="preconnect" href="https://wa.me" />
-
-  <!-- Stylesheets -->
-  <link rel="stylesheet" href="/src/css/main.css" />
 </head>
+<body class="bg-[#0b0b0e] font-body text-on-surface antialiased selection:bg-cyan-glow selection:text-black overflow-x-hidden">
 
-<body>
+<!-- =========================================================================
+     0. MINIMALIST LUXURY PAGE LOADER
+     ========================================================================= -->
+<div id="page-loader" class="fixed inset-0 z-[9999] bg-[#0b0b0e] flex flex-col items-center justify-center overflow-hidden">
+  <!-- Subtle ambient corner lights in loader -->
+  <div class="absolute -top-24 -right-24 w-[500px] h-[500px] bg-[#00C4CC]/25 blur-[130px] rounded-full pointer-events-none"></div>
+  <div class="absolute -bottom-24 -left-24 w-[500px] h-[500px] bg-[#4B1D6F]/30 blur-[130px] rounded-full pointer-events-none"></div>
+  <div class="relative w-36 h-36 flex items-center justify-center">
+    <!-- Spinning delicate glowing ring -->
+    <div class="absolute inset-0 rounded-full border-[2px] border-white/5 border-t-cyan-glow border-r-cyan-glow/60 animate-spin"></div>
+    <!-- Ambient pulse behind logo -->
+    <div class="absolute inset-4 bg-cyan-glow/20 rounded-full blur-2xl animate-pulse"></div>
+    <!-- Centered Logo -->
+    <img src="./src/Logo HummingX BI png.png" alt="HummingX BI" class="w-16 h-16 sm:w-20 sm:h-20 object-contain relative z-10 filter drop-shadow-[0_0_20px_rgba(0,196,204,0.7)] animate-pulse" />
+  </div>
+</div>
 
-  <!-- ============================================================
-       PRELOADER VECTORIAL INTERACTIVO — HummingX-BI
-       Un colibrí vectorizado vuela en el centro y aletea rápidamente.
-       Al terminar la carga, el colibrí realiza una transición de vuelo
-       dinámico y aterriza exactamente en la esquina superior izquierda,
-       fusionándose con el logo de la cabecera.
-  ============================================================ -->
+<!-- =========================================================================
+     RESPALDO: NAVBAR EXTENDIDO ANTERIOR (Guardado intacto por si se desea restaurar)
+     ========================================================================= -->
+<!--
+<header class="hero-item-nav fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-4 sm:px-8 lg:px-12 pt-4">
+<div class="max-w-7xl mx-auto backdrop-blur-xl bg-[#0b0b0e]/85 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] rounded-2xl px-5 sm:px-7 py-3.5 flex items-center justify-between gap-6">
+<a class="flex items-center gap-3.5 group shrink-0" href="#inicio">
+<div class="relative w-9 h-9 flex items-center justify-center">
+<img alt="HummingX Colibrí" class="w-full h-full object-contain transition-transform group-hover:scale-105" src="./src/Logo HummingX BI png.png"/>
+</div>
+<div class="flex flex-col">
+<span class="font-display font-extrabold text-base sm:text-lg text-pure-white tracking-tight leading-none">
+            HummingX <span class="bg-gradient-to-r from-cyan-glow to-hx-cyan bg-clip-text text-transparent">BI</span>
+</span>
+<span class="font-editorial text-[9px] uppercase tracking-[0.2em] text-white/50 mt-1">Firma de Software</span>
+</div>
+</a>
+<nav class="hidden xl:flex items-center justify-center gap-6 2xl:gap-8 flex-1">
+<a class="text-sm font-medium text-cyan-glow transition-colors hover:text-hx-cyan whitespace-nowrap" href="#inicio">Inicio</a>
+<a class="text-sm font-medium text-white/75 transition-colors hover:text-cyan-glow whitespace-nowrap" href="#servicios">Servicios</a>
+<a class="text-sm font-medium text-white/75 transition-colors hover:text-cyan-glow whitespace-nowrap" href="#soluciones">Soluciones</a>
+<a class="text-sm font-medium text-white/75 transition-colors hover:text-cyan-glow whitespace-nowrap" href="#metodologia">Metodología</a>
+<a class="text-sm font-medium text-white/75 transition-colors hover:text-cyan-glow whitespace-nowrap" href="#valores">Valores</a>
+<a class="text-sm font-medium text-white/75 transition-colors hover:text-cyan-glow whitespace-nowrap" href="afiliate.html">Afíliate</a>
+<a class="text-sm font-medium text-white/75 transition-colors hover:text-cyan-glow whitespace-nowrap" href="#dudas-frecuentes">Preguntas Frecuentes</a>
+</nav>
+<div class="flex items-center gap-3 shrink-0">
+<a class="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-white/80 hover:text-pure-white px-3.5 py-2 rounded-xl hover:bg-white/5 transition-all cursor-pointer whitespace-nowrap" href="portal-clientes.html">
+<span class="material-symbols-outlined text-[16px] text-cyan-glow">shield_person</span>
+<span>Portal Clientes</span>
+</a>
+<a class="relative group overflow-hidden rounded-xl p-[1px] font-semibold text-xs uppercase tracking-wider shrink-0" href="#contacto">
+<span class="absolute inset-0 bg-gradient-to-r from-cyan-glow via-royal-blue to-cyan-glow bg-[length:200%_auto] opacity-70 group-hover:opacity-100 transition-opacity"></span>
+<span class="relative block px-4 sm:px-5 py-2 rounded-[11px] bg-[#0b0b0e] transition-all group-hover:bg-opacity-80 text-pure-white flex items-center gap-2 whitespace-nowrap">
+<span>Contacto</span>
+<span class="material-symbols-outlined text-[15px] text-cyan-glow group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+</span>
+</a>
+</div>
+</div>
+</header>
+-->
 
-  <!-- PRELOADER: Anillo de progreso circular SVG + Logo centrado de marca -->
-  <div id="preloader" class="preloader" role="status" aria-label="Cargando">
-    <div class="preloader__content">
-      <div class="preloader__ring-wrapper">
-        <svg class="preloader__ring" viewBox="0 0 100 100" aria-hidden="true">
-          <circle class="preloader__ring-track" cx="50" cy="50" r="46" fill="none" stroke="rgba(255, 255, 255, 0.03)"
-            stroke-width="1.5"></circle>
-          <circle class="preloader__ring-fill" id="preloader-ring-fill" cx="50" cy="50" r="46" fill="none"
-            stroke="var(--color-gold)" stroke-width="1.5" stroke-dasharray="289" stroke-dashoffset="289"
-            stroke-linecap="round"></circle>
-        </svg>
-        <img src="/logo.svg" class="preloader__logo" alt="HummingX BI" />
+<!-- =========================================================================
+     1. FLOATING ANIMATED HAMBURGER BUTTON (Esquina superior izquierda, sin obstrucción)
+     ========================================================================= -->
+<button id="luxury-hamburger-btn" onclick="toggleLuxuryMenu()" aria-label="Abrir Menú" class="hero-item-nav fixed top-6 left-6 sm:top-8 sm:left-10 z-[120] w-12 h-12 rounded-2xl bg-[#0b0b0e]/70 hover:bg-[#0b0b0e]/95 backdrop-blur-xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.45)] flex flex-col items-center justify-center gap-1.5 cursor-pointer group transition-all duration-300 hover:scale-105 hover:border-cyan-glow/60">
+  <span class="hamburger-line w-6 h-[2px] bg-white rounded-full transition-all duration-300 group-hover:bg-cyan-glow origin-center"></span>
+  <span class="hamburger-line w-6 h-[2px] bg-white/90 rounded-full transition-all duration-300 group-hover:bg-cyan-glow origin-center"></span>
+  <span class="hamburger-line w-6 h-[2px] bg-white/80 rounded-full transition-all duration-300 group-hover:bg-cyan-glow origin-center"></span>
+</button>
+
+<!-- =========================================================================
+       2. FULLSCREEN 100vh IMMERSIVE HERO (Elementos elevados, centrados y refinados)
+       ========================================================================= -->
+<section class="relative w-full min-h-screen flex items-center justify-center overflow-hidden bg-[#0b0b0e]" id="inicio">
+<!-- Ambient Lighting Effects (Luz rosa y Luz azul enriquecida en esquina superior derecha) -->
+<div class="absolute inset-0 z-0 pointer-events-none">
+<!-- Subtle gradient backdrop -->
+<div class="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(10,88,163,0.18),rgba(11,11,14,0))]"></div>
+<!-- Luz rosa / violeta bottom-left -->
+<div class="hero-glow-pink absolute -bottom-24 -left-24 w-[650px] h-[650px] bg-[#4B1D6F]/35 blur-[150px] rounded-full pointer-events-none"></div>
+<!-- Luz azul / cyan top-right más potente y nítida -->
+<div class="hero-glow-blue absolute -top-16 -right-16 w-[700px] h-[700px] bg-[#00C4CC]/30 blur-[140px] rounded-full pointer-events-none"></div>
+<div class="hero-glow-blue absolute top-0 right-0 w-[500px] h-[500px] bg-[#0A58A3]/45 blur-[110px] rounded-full pointer-events-none"></div>
+<!-- Very subtle grid texture -->
+<div class="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]"></div>
+</div>
+
+<!-- Centered Editorial Composition (Subido hacia arriba, 100% centrado, proporciones enriquecidas) -->
+<div class="relative z-10 w-full max-w-5xl mx-auto px-6 text-center flex flex-col items-center justify-center pt-4 sm:pt-6 pb-24 sm:pb-32 -translate-y-2 sm:-translate-y-3">
+  
+  <!-- Bloque agrupado arriba: Logo + Nombre + Consultoría e Ingeniería de Software (100% centrado) -->
+  <div class="flex flex-col items-center text-center w-full">
+    
+    <!-- 1. Logo Symbol Spotlight (Colibrí centrado, elevado y más imponente) -->
+    <div class="hero-item-logo relative mb-4 mx-auto flex items-center justify-center">
+      <div class="absolute -inset-10 bg-cyan-glow/20 blur-3xl rounded-full opacity-90 transition-opacity"></div>
+      <div class="relative w-44 h-44 sm:w-56 sm:h-56 md:w-64 md:h-64 flex items-center justify-center transition-transform hover:scale-105 duration-300">
+        <img alt="HummingX BI Logo" class="w-full h-full object-contain filter drop-shadow-[0_10px_35px_rgba(0,196,204,0.5)]" src="./src/Logo HummingX BI png.png"/>
       </div>
-      <div class="preloader__brand-title">HUMMING<span class="accent-x">X</span> — BI</div>
+    </div>
+
+    <!-- 2. Nombre en tipografía imponente y más grande (centrado) -->
+    <h1 class="hero-item-title font-display font-extrabold text-4xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight text-pure-white leading-none mb-3 sm:mb-4 text-center">
+      HummingX <span class="bg-gradient-to-r from-cyan-glow via-hx-cyan to-white bg-clip-text text-transparent">BI</span>
+    </h1>
+
+    <!-- 3. Consultoría e Ingeniería de Software (Sin óvalo de fondo, centrado y más legible) -->
+    <div class="hero-item-badge text-center w-full flex justify-center">
+      <p class="font-editorial text-xs sm:text-base md:text-lg tracking-widest sm:tracking-[0.3em] uppercase text-white/85 font-medium text-center px-4">
+        Consultoría e Ingeniería de Software
+      </p>
+    </div>
+
+  </div>
+
+  <!-- 4. Más abajo: Slogan con 'Software' en azul/cyan subrayado, un poco más grande y con mayor separación -->
+  <p class="hero-item-slogan font-display text-lg sm:text-xl md:text-2xl text-white/85 font-normal tracking-wide max-w-xl mx-auto text-center leading-relaxed mt-10 sm:mt-14 md:mt-16">
+    Evoluciona tu negocio con <span class="relative inline-block font-semibold bg-gradient-to-r from-cyan-glow to-hx-cyan bg-clip-text text-transparent">Software<span class="absolute left-0 -bottom-1 sm:-bottom-1.5 w-full h-[2.5px] bg-gradient-to-r from-cyan-glow to-hx-cyan rounded-full shadow-[0_0_10px_rgba(0,196,204,0.6)]"></span></span>.
+  </p>
+
+</div>
+
+<!-- 5. Subtle Scroll Down Indicator (Exact Mathematical Horizontal Center) -->
+<a class="hero-item-scroll absolute bottom-8 inset-x-0 mx-auto w-fit z-10 flex flex-col items-center justify-center gap-2 text-white/40 hover:text-cyan-glow transition-colors group" href="#servicios" onclick="navigateToSection('#servicios', event)">
+  <span class="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.25em]">Desliza para explorar</span>
+  <span class="material-symbols-outlined text-[22px] text-cyan-glow animate-bounce">keyboard_arrow_down</span>
+</a>
+</section>
+<!-- =========================================================================
+       3. SERVICIOS DE INGENIERÍA: Problem → Solución → Resultado (Spacious 2x2)
+       ========================================================================= -->
+<section class="w-full pt-10 sm:pt-14 pb-24 sm:pb-28 px-6 lg:px-12 bg-surface-saas scroll-mt-0" id="servicios">
+<div class="max-w-7xl mx-auto flex flex-col gap-10 sm:gap-12">
+  <!-- Encabezado de Apartado: HummingX BI (Posicionado más arriba) -->
+  <div class="reveal-on-scroll flex items-center gap-3.5 pb-4 border-b border-slate-200/80">
+    <div class="relative w-8 h-8 flex items-center justify-center shrink-0">
+      <img alt="HummingX Colibrí" class="w-full h-full object-contain" src="./src/Logo HummingX BI png.png"/>
+    </div>
+    <div class="flex flex-col">
+      <span class="font-display font-extrabold text-base text-on-surface tracking-tight leading-none">
+        HummingX <span class="bg-gradient-to-r from-royal-blue to-cyan-glow bg-clip-text text-transparent">BI</span>
+      </span>
+      <span class="font-editorial text-[9px] uppercase tracking-[0.25em] text-on-surface-variant/70 mt-1">Firma de Software</span>
     </div>
   </div>
 
-  <!-- Cursor magnético (solo desktop) -->
-  <div id="magnetic-cursor" aria-hidden="true"></div>
-
-
-  <!-- ============================================================
-       PÁGINA PRINCIPAL (oculta mientras carga el preloader)
-  ============================================================ -->
-  <div id="main-content" class="main-content" aria-hidden="true">
-
-    <!-- ========================
-         NAVEGACIÓN
-    ======================== -->
-    <header class="nav-header" id="navbar" role="banner">
-      <nav class="nav container" aria-label="Navegación principal">
-        <!-- Logo en la navbar -->
-        <a href="#inicio" class="nav__logo" aria-label="HummingX - BI - Inicio">
-          <!-- Logo SVG oficial -->
-          <!-- Logo SVG oficial (Inyectado dinámicamente) -->
-          <div data-inject-svg data-src="/logo.svg" class="nav__logo-icon" aria-hidden="true"></div>
-          <span class="nav__logo-text">HUMMING<span class="accent-x">X</span>-<span
-              class="nav__logo-sub">BI</span></span>
-        </a>
-
-        <!-- Menú de navegación desktop -->
-        <ul class="nav__menu" role="list">
-          <li><a href="#inicio" class="nav__link" aria-current="page">Inicio</a></li>
-          <li><a href="#servicios" class="nav__link">Servicios</a></li>
-          <li><a href="#soluciones" class="nav__link">Soluciones</a></li>
-          <li><a href="#metodologia" class="nav__link">Metodología</a></li>
-          <li><a href="#valores" class="nav__link">Valores</a></li>
-          <li><a href="#equipo" class="nav__link">Equipo</a></li>
-          <li><a href="#faq" class="nav__link">FAQs</a></li>
-        </ul>
-
-        <!-- Botón CTA en navbar -->
-        <a href="#contacto" class="btn btn--nav" id="nav-cta-btn">Agenda una llamada</a>
-
-        <!-- Hamburger (mobile) -->
-        <button class="nav__hamburger" id="hamburger-btn" aria-label="Abrir menú" aria-expanded="false"
-          aria-controls="mobile-menu">
-          <span class="hamburger-line"></span>
-          <span class="hamburger-line"></span>
-          <span class="hamburger-line"></span>
-        </button>
-      </nav>
-
-      <!-- Menú móvil -->
-      <div class="mobile-menu" id="mobile-menu" role="dialog" aria-label="Menú móvil" aria-hidden="true">
-        <ul class="mobile-menu__list" role="list">
-          <li><a href="#inicio" class="mobile-menu__link" data-close-menu>Inicio</a></li>
-          <li><a href="#servicios" class="mobile-menu__link" data-close-menu>Servicios</a></li>
-          <li><a href="#soluciones" class="mobile-menu__link" data-close-menu>Soluciones</a></li>
-          <li><a href="#metodologia" class="mobile-menu__link" data-close-menu>Metodología</a></li>
-          <li><a href="#valores" class="mobile-menu__link" data-close-menu>Valores</a></li>
-          <li><a href="#equipo" class="mobile-menu__link" data-close-menu>Equipo</a></li>
-          <li><a href="#faq" class="mobile-menu__link" data-close-menu>FAQs</a></li>
-          <li><a href="#contacto" class="btn btn--primary mobile-menu__cta" data-close-menu>Agenda una llamada</a>
-          </li>
-        </ul>
-      </div>
-    </header>
-    <!-- FIN: NAVEGACIÓN -->
-
-
-    <!-- ========================
-         HERO SECTION — Banner Animado con Partículas
-    ======================== -->
-    <header class="hero-banner" id="hero-banner-root">
-      <!-- Canvas para partículas y red (sin cubos, fondo via CSS) -->
-      <canvas id="hero-canvas" class="hero-canvas"></canvas>
-
-      <!-- Acento esquina superior derecha (gradiente teal) -->
-      <div class="corner-accent corner-top-right animate-hidden" id="tr-corner-accent">
-        <svg viewBox="0 0 300 300" class="corner-svg" aria-hidden="true">
-          <defs>
-            <linearGradient id="trGrad" x1="100%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stop-color="#00C1CF" stop-opacity="0.45" />
-              <stop offset="50%" stop-color="#0066CC" stop-opacity="0.25" />
-              <stop offset="100%" stop-color="#00C1CF" stop-opacity="0" />
-            </linearGradient>
-          </defs>
-          <polygon points="300,0 120,0 300,180" fill="url(#trGrad)" />
-          <line x1="300" y1="5" x2="130" y2="5" stroke="#00C1CF" stroke-width="1.5" stroke-dasharray="4 4" />
-          <line x1="295" y1="0" x2="295" y2="170" stroke="#00C1CF" stroke-width="1.5" stroke-dasharray="4 4" />
-          <circle cx="130" cy="5" r="3" fill="#00C1CF" />
-          <circle cx="295" cy="170" r="3" fill="#00C1CF" />
-        </svg>
-      </div>
-
-      <!-- Acento esquina inferior izquierda (gradiente púrpura) -->
-      <div class="corner-accent corner-bottom-left animate-hidden" id="bl-corner-accent">
-        <svg viewBox="0 0 300 300" class="corner-svg" aria-hidden="true">
-          <defs>
-            <linearGradient id="blGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#5D3FD3" stop-opacity="0.4" />
-              <stop offset="60%" stop-color="#0066CC" stop-opacity="0.15" />
-              <stop offset="100%" stop-color="#5D3FD3" stop-opacity="0" />
-            </linearGradient>
-          </defs>
-          <polygon points="0,300 0,120 180,300" fill="url(#blGrad)" />
-          <line x1="5" y1="300" x2="5" y2="130" stroke="#5D3FD3" stroke-width="1.5" stroke-dasharray="4 4" />
-          <line x1="0" y1="295" x2="170" y2="295" stroke="#5D3FD3" stroke-width="1.5" stroke-dasharray="4 4" />
-          <circle cx="5" cy="130" r="3" fill="#5D3FD3" />
-          <circle cx="170" cy="295" r="3" fill="#5D3FD3" />
-        </svg>
-      </div>
-
-      <!-- Panel central de marca -->
-      <div class="hero-brand-panel" id="hero-brand-panel">
-        <!-- Logo real del proyecto (sin SVG inline) -->
-        <div class="logo-container animate-hidden" id="logo-container">
-          <img src="/logo.svg" alt="HummingX BI Logo" class="hero-logo" id="hummingbird-logo">
-        </div>
-
-        <!-- Tipografía y CTAs -->
-        <div class="typography-container animate-hidden" id="typography-container">
-          <h1 class="brand-title" id="hero-title">
-            HUMMING<span class="gradient-accent-text">X</span>BI
-          </h1>
-          <p class="brand-tagline">FIRMA DE SOFTWARE</p>
-
-          <div class="cta-actions">
-            <a href="https://wa.me/525575084267" target="_blank" rel="noopener" class="btn-brand btn-gradient" id="hero-cta-primary">Explorar BI</a>
-            <a href="#servicios" class="btn-brand btn-outline" id="hero-cta-secondary">Ver Servicios</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Efecto de destello de luz -->
-      <div class="light-burst-fx" id="light-burst-fx" aria-hidden="true"></div>
-    </header>
-    <!-- Ancla invisible para navegación #inicio -->
-    <div id="inicio" aria-hidden="true"></div>
-    <!-- FIN: HERO SECTION -->
-
-
-    <!-- =======================
-         SECCIÓN DE ATRIBUTOS (Filosofía HummingX)
-    ======================== -->
-    <!-- ========================
-         MARQUEE — Tech Capabilities Strip
-    ======================== -->
-    <div class="marquee" aria-hidden="true" role="presentation">
-      <div class="marquee__track">
-        <span class="marquee__item">Agentes IA</span>
-        <span class="marquee__sep">•</span>
-        <span class="marquee__item">Business Intelligence</span>
-        <span class="marquee__sep">•</span>
-        <span class="marquee__item">Software a la Medida</span>
-        <span class="marquee__sep">•</span>
-        <span class="marquee__item">Digital Signage</span>
-        <span class="marquee__sep">•</span>
-        <span class="marquee__item">Ecosistemas Web</span>
-        <span class="marquee__sep">•</span>
-        <span class="marquee__item">NFC & Lealtad</span>
-        <span class="marquee__sep">•</span>
-        <span class="marquee__item">Automatización RPA</span>
-        <span class="marquee__sep">•</span>
-        <span class="marquee__item">Integraciones API</span>
-        <span class="marquee__sep">•</span>
-        <span class="marquee__item">Cloud & DevOps</span>
-        <span class="marquee__sep">•</span>
-        <span class="marquee__item">Data Science</span>
-        <span class="marquee__sep">•</span>
-      </div>
+<!-- Section Header with Crisp Breathability -->
+<div class="max-w-2xl reveal-on-scroll">
+<span class="inline-flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-widest text-royal-blue mb-3">
+<span class="w-2 h-2 rounded-full bg-cyan-glow"></span>
+          Especialización Tecnológica
+        </span>
+<h2 class="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-on-surface tracking-tight">
+          Servicios de Consultoría e Ingeniería
+        </h2>
+<p class="font-body text-base sm:text-lg text-on-surface-variant mt-4 leading-relaxed">
+          Cada intervención aplica una metodología de precisión quirúrgica para transformar desafíos complejos en valor comercial cuantificable.
+        </p>
+</div>
+<!-- 2x2 Spacious Cards Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<!-- Service 1: Software & Web Apps -->
+<div class="reveal-on-scroll group relative bg-pure-white rounded-3xl p-8 sm:p-10 shadow-sm hover:shadow-xl border border-border-subtle hover:border-cyan-glow/40 transition-all flex flex-col justify-between">
+<div class="flex flex-col gap-5">
+<div class="flex items-center justify-between">
+<div class="w-14 h-14 rounded-2xl bg-royal-blue/10 text-royal-blue flex items-center justify-center group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[32px]">code_blocks</span>
+</div>
+<span class="font-mono text-xs font-bold uppercase tracking-widest text-on-surface-variant/60">SRV • 01</span>
+</div>
+<div>
+<h3 class="font-display text-2xl font-bold text-on-surface group-hover:text-royal-blue transition-colors">
+                Desarrollo de Software &amp; Aplicaciones Web
+              </h3>
+<p class="font-body text-sm sm:text-base text-on-surface-variant mt-2 leading-relaxed">
+                Arquitectura de microservicios, portales web empresariales y plataformas en la nube preparadas para soportar altos volúmenes transaccionales con absoluta estabilidad.
+              </p>
+</div>
+</div>
+<!-- Structured Triad: Problema / Solución / Resultado -->
+<div class="mt-8 pt-6 border-t border-slate-100 flex flex-col gap-3.5">
+<div class="flex items-start gap-3 bg-red-50/70 p-3 rounded-xl">
+<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-red-200 text-red-700 uppercase tracking-wider shrink-0">Problema</span>
+<p class="text-xs text-on-surface leading-relaxed">Sistemas legados rígidos, herramientas dispersas y tareas manuales que asfixian el crecimiento de la operación.</p>
+</div>
+<div class="flex items-start gap-3 bg-sky-50/70 p-3 rounded-xl">
+<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-royal-blue/20 text-royal-blue uppercase tracking-wider shrink-0">Solución</span>
+<p class="text-xs text-on-surface leading-relaxed">Plataformas nativas en la nube, modulares y seguras, construidas exactamente según tus reglas operativas.</p>
+</div>
+<div class="flex items-start gap-3 bg-emerald-50/70 p-3 rounded-xl">
+<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-200 text-emerald-800 uppercase tracking-wider shrink-0">Resultado</span>
+<p class="text-xs font-semibold text-emerald-900 leading-relaxed">Centralización total de procesos y capacidad irrestricta de escalabilidad sin deuda técnica.</p>
+</div>
+</div>
+</div>
+<!-- Service 2: BI & Data Analytics -->
+<div class="reveal-on-scroll group relative bg-pure-white rounded-3xl p-8 sm:p-10 shadow-sm hover:shadow-xl border border-border-subtle hover:border-cyan-glow/40 transition-all flex flex-col justify-between">
+<div class="flex flex-col gap-5">
+<div class="flex items-center justify-between">
+<div class="w-14 h-14 rounded-2xl bg-cyan-glow/15 text-primary flex items-center justify-center group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[32px]">query_stats</span>
+</div>
+<span class="font-mono text-xs font-bold uppercase tracking-widest text-on-surface-variant/60">SRV • 02</span>
+</div>
+<div>
+<h3 class="font-display text-2xl font-bold text-on-surface group-hover:text-primary transition-colors">
+                Inteligencia de Negocios (BI) &amp; Analítica de Datos
+              </h3>
+<p class="font-body text-sm sm:text-base text-on-surface-variant mt-2 leading-relaxed">
+                Transformamos silos de datos desestructurados en un centro analítico unificado donde directores leen la realidad comercial en tiempo real.
+              </p>
+</div>
+</div>
+<div class="mt-8 pt-6 border-t border-slate-100 flex flex-col gap-3.5">
+<div class="flex items-start gap-3 bg-red-50/70 p-3 rounded-xl">
+<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-red-200 text-red-700 uppercase tracking-wider shrink-0">Problema</span>
+<p class="text-xs text-on-surface leading-relaxed">Decisiones estratégicas a ciegas o basadas en hojas de cálculo desincronizadas y reportes lentos.</p>
+</div>
+<div class="flex items-start gap-3 bg-cyan-50/70 p-3 rounded-xl">
+<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-cyan-glow/30 text-primary font-bold uppercase tracking-wider shrink-0">Solución</span>
+<p class="text-xs text-on-surface leading-relaxed">Modelado de datos OLAP, pipelines ETL automáticos y tableros ejecutivos interactivos conectados a tus fuentes.</p>
+</div>
+<div class="flex items-start gap-3 bg-emerald-50/70 p-3 rounded-xl">
+<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-200 text-emerald-800 uppercase tracking-wider shrink-0">Resultado</span>
+<p class="text-xs font-semibold text-emerald-900 leading-relaxed">Control transparente de márgenes, reducción del 80% en tiempo de reporteo y decisiones predictivas.</p>
+</div>
+</div>
+</div>
+<!-- Service 3: Process Automation -->
+<div class="reveal-on-scroll group relative bg-pure-white rounded-3xl p-8 sm:p-10 shadow-sm hover:shadow-xl border border-border-subtle hover:border-vibrant-purple/40 transition-all flex flex-col justify-between">
+<div class="flex flex-col gap-5">
+<div class="flex items-center justify-between">
+<div class="w-14 h-14 rounded-2xl bg-vibrant-purple/10 text-vibrant-purple flex items-center justify-center group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[32px]">hub</span>
+</div>
+<span class="font-mono text-xs font-bold uppercase tracking-widest text-on-surface-variant/60">SRV • 03</span>
+</div>
+<div>
+<h3 class="font-display text-2xl font-bold text-on-surface group-hover:text-vibrant-purple transition-colors">
+                Automatización de Procesos &amp; Conectividad
+              </h3>
+<p class="font-body text-sm sm:text-base text-on-surface-variant mt-2 leading-relaxed">
+                Orquestación integral y comunicación sin fisuras entre tu ERP, CRM, facturación, pasarelas de pago y logística a través de micro-APIs seguras.
+              </p>
+</div>
+</div>
+<div class="mt-8 pt-6 border-t border-slate-100 flex flex-col gap-3.5">
+<div class="flex items-start gap-3 bg-red-50/70 p-3 rounded-xl">
+<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-red-200 text-red-700 uppercase tracking-wider shrink-0">Problema</span>
+<p class="text-xs text-on-surface leading-relaxed">Capturas duplicadas, errores de dedo humanos y cientos de horas operativas perdidas en validaciones manuales.</p>
+</div>
+<div class="flex items-start gap-3 bg-purple-50/70 p-3 rounded-xl">
+<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-vibrant-purple/20 text-vibrant-purple uppercase tracking-wider shrink-0">Solución</span>
+<p class="text-xs text-on-surface leading-relaxed">Integración robusta de sistemas heterogéneos y sincronización instantánea basada en eventos.</p>
+</div>
+<div class="flex items-start gap-3 bg-emerald-50/70 p-3 rounded-xl">
+<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-200 text-emerald-800 uppercase tracking-wider shrink-0">Resultado</span>
+<p class="text-xs font-semibold text-emerald-900 leading-relaxed">Disminución de hasta un 65% en costos operativos y erradicación de discrepancias contables.</p>
+</div>
+</div>
+</div>
+<!-- Service 4: Mobile Apps & UX -->
+<div class="reveal-on-scroll group relative bg-pure-white rounded-3xl p-8 sm:p-10 shadow-sm hover:shadow-xl border border-border-subtle hover:border-royal-blue/40 transition-all flex flex-col justify-between">
+<div class="flex flex-col gap-5">
+<div class="flex items-center justify-between">
+<div class="w-14 h-14 rounded-2xl bg-royal-blue/15 text-royal-blue flex items-center justify-center group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[32px]">devices</span>
+</div>
+<span class="font-mono text-xs font-bold uppercase tracking-widest text-on-surface-variant/60">SRV • 04</span>
+</div>
+<div>
+<h3 class="font-display text-2xl font-bold text-on-surface group-hover:text-royal-blue transition-colors">
+                Aplicaciones Móviles &amp; Experiencias de Usuario
+              </h3>
+<p class="font-body text-sm sm:text-base text-on-surface-variant mt-2 leading-relaxed">
+                Herramientas operativas de campo, aplicaciones de autoservicio B2B y software corporativo multiplataforma con capacidades completas offline.
+              </p>
+</div>
+</div>
+<div class="mt-8 pt-6 border-t border-slate-100 flex flex-col gap-3.5">
+<div class="flex items-start gap-3 bg-red-50/70 p-3 rounded-xl">
+<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-red-200 text-red-700 uppercase tracking-wider shrink-0">Problema</span>
+<p class="text-xs text-on-surface leading-relaxed">Personal en campo sin conectividad ni acceso directo a herramientas centrales de control y validación.</p>
+</div>
+<div class="flex items-start gap-3 bg-blue-50/70 p-3 rounded-xl">
+<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-royal-blue/20 text-royal-blue uppercase tracking-wider shrink-0">Solución</span>
+<p class="text-xs text-on-surface leading-relaxed">Aplicaciones nativas e híbridas de alta fluidez con sincronización bidireccional automática.</p>
+</div>
+<div class="flex items-start gap-3 bg-emerald-50/70 p-3 rounded-xl">
+<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-200 text-emerald-800 uppercase tracking-wider shrink-0">Resultado</span>
+<p class="text-xs font-semibold text-emerald-900 leading-relaxed">Adopción inmediata por usuarios y aceleración en tiempos de respuesta de servicio de campo.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- =========================================================================
+       4. SOLUCIONES EMPRESARIALES: Airy 3-Column Bento Layout
+       ========================================================================= -->
+<section class="w-full pt-10 sm:pt-14 pb-24 sm:pb-28 px-6 lg:px-12 bg-white scroll-mt-0" id="soluciones">
+<div class="max-w-7xl mx-auto flex flex-col gap-10 sm:gap-12">
+  <!-- Encabezado de Apartado: HummingX BI (Posicionado más arriba) -->
+  <div class="reveal-on-scroll flex items-center gap-3.5 pb-4 border-b border-slate-200/80">
+    <div class="relative w-8 h-8 flex items-center justify-center shrink-0">
+      <img alt="HummingX Colibrí" class="w-full h-full object-contain" src="./src/Logo HummingX BI png.png"/>
     </div>
-    <!-- FIN: MARQUEE -->
+    <div class="flex flex-col">
+      <span class="font-display font-extrabold text-base text-on-surface tracking-tight leading-none">
+        HummingX <span class="bg-gradient-to-r from-royal-blue to-cyan-glow bg-clip-text text-transparent">BI</span>
+      </span>
+      <span class="font-editorial text-[9px] uppercase tracking-[0.25em] text-on-surface-variant/70 mt-1">Firma de Software</span>
+    </div>
+  </div>
 
-    <!-- ========================
-         SECCIÓN DE SERVICIOS (Master-Detail)
-    ======================== -->
-    <section class="services-v2" id="servicios" aria-labelledby="services-title">
-      <div class="container">
-        <div class="section-header reveal-up">
-          <span class="section-tag">Servicios</span>
-          <h2 class="section-title" id="services-title">
-            Ecosistemas tecnológicos<br /><span class="gradient-text">de extremo a extremo.</span>
-          </h2>
-          <p class="section-subtitle">
-            Desde la captura del dato hasta la toma de decisiones automatizada.
-          </p>
-        </div>
-
-        <div class="services-master-detail reveal-up">
-          <div class="services-master">
-            <button class="service-tab active" data-target="srv-integral">Acompañamiento integral</button>
-            <button class="service-tab" data-target="srv-agentes">Agentes IA y Automatización</button>
-            <button class="service-tab" data-target="srv-web">Ecosistemas Web</button>
-            <button class="service-tab" data-target="srv-digital">Digital Signage</button>
-            <button class="service-tab" data-target="srv-nfc">NFC y Sistemas de Lealtad</button>
-            <button class="service-tab" data-target="srv-bi">Business Intelligence</button>
-            <button class="service-tab" data-target="srv-custom">Software a la Medida</button>
-          </div>
-
-          <div class="services-detail">
-            <!-- Acompañamiento integral -->
-            <div class="service-panel active" id="srv-integral">
-              <h3 class="service-panel__title">Acompañamiento integral</h3>
-              <p class="service-panel__desc">Nuestro servicio paraguas. Nos convertimos en tu brazo tecnológico externo
-                para orquestar todas tus necesidades digitales bajo una misma visión estratégica.</p>
-
-              <h4 class="service-panel__subtitle">Qué incluye:</h4>
-              <ul class="service-panel__list">
-                <li>Auditoría técnica inicial y roadmap estratégico.</li>
-                <li>Desarrollo continuo e iterativo.</li>
-                <li>Soporte dedicado y mantenimiento proactivo.</li>
-              </ul>
-
-              <div class="service-panel__ideal">
-                <h4 class="service-panel__subtitle">Ideal para:</h4>
-                <p class="service-panel__desc">Empresas en crecimiento que buscan centralizar su tecnología sin
-                  contratar
-                  un equipo in-house completo.</p>
-              </div>
-            </div>
-
-            <!-- Agentes IA y Automatización -->
-            <div class="service-panel" id="srv-agentes">
-              <h3 class="service-panel__title">Agentes IA y Automatización</h3>
-              <p class="service-panel__desc">Automatizamos tus flujos de trabajo con agentes autónomos que responden,
-                gestionan y ejecutan tareas repetitivas 24/7.</p>
-              <h4 class="service-panel__subtitle">Qué incluye:</h4>
-              <ul class="service-panel__list">
-                <li>Integración con WhatsApp y redes sociales.</li>
-                <li>Procesamiento de lenguaje natural avanzado.</li>
-                <li>Conexión con tu CRM o base de datos.</li>
-              </ul>
-              <div class="service-panel__ideal">
-                <h4 class="service-panel__subtitle">Ideal para:</h4>
-                <p class="service-panel__desc">Atención al cliente de alto volumen, agendamiento de citas y soporte
-                  técnico de Nivel 1.</p>
-              </div>
-            </div>
-
-            <!-- Ecosistemas Web -->
-            <div class="service-panel" id="srv-web">
-              <h3 class="service-panel__title">Ecosistemas Web</h3>
-              <p class="service-panel__desc">Construimos plataformas sólidas y escalables. Ofrecemos paquetes por
-                niveles según la complejidad de tu operación.</p>
-              <h4 class="service-panel__subtitle">Qué incluye:</h4>
-              <ul class="service-panel__list">
-                <li>Diseño UI/UX de alto impacto.</li>
-                <li>Desarrollo frontend optimizado para conversión.</li>
-                <li>Panel de administración CMS o personalizado.</li>
-              </ul>
-              <div class="service-panel__ideal">
-                <h4 class="service-panel__subtitle">Ideal para:</h4>
-                <p class="service-panel__desc">Desde portafolios corporativos hasta e-commerces B2B de alta
-                  transaccionalidad.</p>
-              </div>
-            </div>
-
-            <!-- Digital Signage -->
-            <div class="service-panel" id="srv-digital">
-              <h3 class="service-panel__title">Digital Signage</h3>
-              <p class="service-panel__desc">Sistemas de visualización dinámica para espacios físicos. Controla tus
-                menús o publicidad desde un solo panel.</p>
-              <h4 class="service-panel__subtitle">Qué incluye:</h4>
-              <ul class="service-panel__list">
-                <li>Software de gestión en la nube.</li>
-                <li>Sincronización en tiempo real.</li>
-                <li>Analíticas de visualización.</li>
-              </ul>
-              <div class="service-panel__ideal">
-                <h4 class="service-panel__subtitle">Ideal para:</h4>
-                <p class="service-panel__desc">Restaurantes, hospitales, corporativos y retail con presencia física
-                  múltiple.</p>
-              </div>
-            </div>
-
-            <!-- NFC y Sistemas de Lealtad -->
-            <div class="service-panel" id="srv-nfc">
-              <h3 class="service-panel__title">NFC y Sistemas de Lealtad</h3>
-              <p class="service-panel__desc">Conecta el mundo físico con el digital. Crea experiencias interactivas y
-                programas de lealtad sin fricciones.</p>
-              <h4 class="service-panel__subtitle">Qué incluye:</h4>
-              <ul class="service-panel__list">
-                <li>Tarjetas o stickers NFC programables.</li>
-                <li>Plataforma de seguimiento de puntos/visitas.</li>
-                <li>Notificaciones y recompensas automatizadas.</li>
-              </ul>
-              <div class="service-panel__ideal">
-                <h4 class="service-panel__subtitle">Ideal para:</h4>
-                <p class="service-panel__desc">Cafeterías, clínicas de belleza, gimnasios y negocios locales con
-                  recurrencia.</p>
-              </div>
-            </div>
-
-            <!-- Business Intelligence -->
-            <div class="service-panel" id="srv-bi">
-              <h3 class="service-panel__title">Business Intelligence</h3>
-              <p class="service-panel__desc">Convierte tus datos en decisiones. Extraemos, limpiamos y visualizamos la
-                información clave de tu negocio.</p>
-              <h4 class="service-panel__subtitle">Qué incluye:</h4>
-              <ul class="service-panel__list">
-                <li>Dashboards interactivos en tiempo real.</li>
-                <li>Integración de múltiples fuentes (ERP, Ventas, Marketing).</li>
-                <li>Reportes automatizados por correo/WhatsApp.</li>
-              </ul>
-              <div class="service-panel__ideal">
-                <h4 class="service-panel__subtitle">Ideal para:</h4>
-                <p class="service-panel__desc">Direcciones generales y equipos de finanzas que necesitan visibilidad
-                  total
-                  de la rentabilidad.</p>
-              </div>
-            </div>
-
-            <!-- Software a la Medida -->
-            <div class="service-panel" id="srv-custom">
-              <h3 class="service-panel__title">Software a la Medida</h3>
-              <p class="service-panel__desc">Si tu operación es única, tu software también debe serlo. Construimos
-                sistemas personalizados desde cero.</p>
-              <h4 class="service-panel__subtitle">Qué incluye:</h4>
-              <ul class="service-panel__list">
-                <li>Levantamiento de requerimientos y arquitectura.</li>
-                <li>Desarrollo iterativo ágil.</li>
-                <li>Despliegue en infraestructura cloud segura.</li>
-              </ul>
-              <div class="service-panel__ideal">
-                <h4 class="service-panel__subtitle">Ideal para:</h4>
-                <p class="service-panel__desc">Empresas con procesos operativos complejos no cubiertos por soluciones
-                  comerciales (SaaS) genéricas.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    <!-- FIN: SERVICIOS -->
-
-    <!-- ========================
-         SECCIÓN DE PROCESO
-    ======================== -->
-    <section class="process-v2" id="metodologia">
-      <div class="container">
-        <div class="section-header reveal-up">
-          <span class="section-tag">Cómo Trabajamos</span>
-          <h2 class="section-title">
-            Tu proyecto en producción,<br /><span class="gradient-text">sin demoras.</span>
-          </h2>
-        </div>
-
-        <div class="process-steps reveal-up">
-          <div class="process-step">
-            <div class="process-step__header">
-              <span class="process-step__num">01</span>
-              <span class="process-step__badge">Sin compromiso</span>
-            </div>
-            <h3 class="process-step__title">Llamada de exploración</h3>
-            <p class="process-step__desc">Entendemos a fondo tu modelo de negocio y tus cuellos de botella actuales.</p>
-          </div>
-
-          <div class="process-step">
-            <div class="process-step__header">
-              <span class="process-step__num">02</span>
-              <span class="process-step__badge">Tiered</span>
-            </div>
-            <h3 class="process-step__title">Propuesta a la medida</h3>
-            <p class="process-step__desc">Te presentamos opciones claras (Silver/Gold/Platinum/Elite) adaptadas a tu
-              presupuesto.</p>
-          </div>
-
-          <div class="process-step">
-            <div class="process-step__header">
-              <span class="process-step__num">03</span>
-              <span class="process-step__badge">Arranque ágil</span>
-            </div>
-            <h3 class="process-step__title">Firma y arranque</h3>
-            <p class="process-step__desc">Formalizamos la alianza e iniciamos el desarrollo sin procesos burocráticos
-              lentos.</p>
-          </div>
-
-          <div class="process-step">
-            <div class="process-step__header">
-              <span class="process-step__num">04</span>
-              <span class="process-step__badge">Transparencia</span>
-            </div>
-            <h3 class="process-step__title">Sprint por fases</h3>
-            <p class="process-step__desc">Entregas semanales funcionales. Ves tu inversión materializarse desde la
-              semana 1.</p>
-          </div>
-
-          <div class="process-step">
-            <div class="process-step__header">
-              <span class="process-step__num">05</span>
-              <span class="process-step__badge">Co-inversión</span>
-            </div>
-            <h3 class="process-step__title">Entrega y continuidad</h3>
-            <p class="process-step__desc">Nos mantenemos como tu aliado a largo plazo, iterando y escalando tu
-              ecosistema.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-    <!-- FIN: PROCESO -->
-
-    <!-- ========================
-         SECCIÓN DE SOLUCIONES
-    ======================== -->
-    <section class="solutions-v2" id="soluciones">
-      <div class="container">
-        <div class="section-header reveal-up">
-          <span class="section-tag">Portafolio Modular</span>
-          <h2 class="section-title">
-            Componentes listos para<br /><span class="gradient-text">conectar y escalar.</span>
-          </h2>
-        </div>
-
-        <div class="carousel-wrapper reveal-up">
-          <div class="solutions-grid carousel-container" id="solucionesCarousel">
-            <div class="solution-card">
-              <div class="solution-card__icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                </svg>
-              </div>
-              <h3 class="solution-card__title">Agentes por WhatsApp</h3>
-              <p class="solution-card__desc">Asistentes autónomos para atención al cliente y ventas.</p>
-            </div>
-            <div class="solution-card">
-              <div class="solution-card__icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
-                  <rect x="9" y="9" width="6" height="6"></rect>
-                  <line x1="9" y1="1" x2="9" y2="4"></line>
-                  <line x1="15" y1="1" x2="15" y2="4"></line>
-                  <line x1="9" y1="20" x2="9" y2="23"></line>
-                  <line x1="15" y1="20" x2="15" y2="23"></line>
-                  <line x1="20" y1="9" x2="23" y2="9"></line>
-                  <line x1="20" y1="14" x2="23" y2="14"></line>
-                  <line x1="1" y1="9" x2="4" y2="9"></line>
-                  <line x1="1" y1="14" x2="4" y2="14"></line>
-                </svg>
-              </div>
-              <h3 class="solution-card__title">Ecosistema NFC</h3>
-              <p class="solution-card__desc">Tecnología de proximidad para control de accesos y lealtad.</p>
-            </div>
-            <div class="solution-card">
-              <div class="solution-card__icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                  <line x1="8" y1="21" x2="16" y2="21"></line>
-                  <line x1="12" y1="17" x2="12" y2="21"></line>
-                </svg>
-              </div>
-              <h3 class="solution-card__title">Digital Signage</h3>
-              <p class="solution-card__desc">Menús y pantallas controladas centralmente en la nube.</p>
-            </div>
-            <div class="solution-card">
-              <div class="solution-card__icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                </svg>
-              </div>
-              <h3 class="solution-card__title">Paneles de Administración</h3>
-              <p class="solution-card__desc">Back-offices seguros para controlar la operación interna.</p>
-            </div>
-            <div class="solution-card">
-              <div class="solution-card__icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="18" y1="20" x2="18" y2="10"></line>
-                  <line x1="12" y1="20" x2="12" y2="4"></line>
-                  <line x1="6" y1="20" x2="6" y2="14"></line>
-                </svg>
-              </div>
-              <h3 class="solution-card__title">Dashboards de BI</h3>
-              <p class="solution-card__desc">Visualización de datos y KPIs en tiempo real.</p>
-            </div>
-            <div class="solution-card">
-              <div class="solution-card__icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="3"></circle>
-                  <path
-                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
-                  </path>
-                </svg>
-              </div>
-              <h3 class="solution-card__title">Automatización RPA</h3>
-              <p class="solution-card__desc">Bots para ingreso de datos, conciliaciones y tareas manuales.</p>
-            </div>
-            <div class="solution-card">
-              <div class="solution-card__icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="16 18 22 12 16 6"></polyline>
-                  <polyline points="8 6 2 12 8 18"></polyline>
-                </svg>
-              </div>
-              <h3 class="solution-card__title">Software a la Medida</h3>
-              <p class="solution-card__desc">Soluciones core construidas 100% sobre tus reglas de negocio.</p>
-            </div>
-            <div class="solution-card">
-              <div class="solution-card__icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="18" cy="5" r="3"></circle>
-                  <circle cx="6" cy="12" r="3"></circle>
-                  <circle cx="18" cy="19" r="3"></circle>
-                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-                </svg>
-              </div>
-              <h3 class="solution-card__title">Integraciones API</h3>
-              <p class="solution-card__desc">Conectamos tus sistemas existentes (ERP, CRM, Facturación).</p>
-            </div>
-          </div>
-          <div class="carousel-controls">
-            <button class="carousel-btn carousel-prev" aria-label="Anterior" data-target="#solucionesCarousel">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M15 18l-6-6 6-6" />
-              </svg>
-            </button>
-            <div class="carousel-progress">
-              <div class="carousel-progress-bar"></div>
-            </div>
-            <button class="carousel-btn carousel-next" aria-label="Siguiente" data-target="#solucionesCarousel">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 18l6-6-6-6" />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-
-      </div>
-    </section>
-    <!-- FIN: SOLUCIONES -->
-
-    <!-- ========================
-         SECCIÓN DE EQUIPO Y PROYECTOS
-    ======================== -->
-    <section class="team-v2" id="equipo">
-      <div class="container">
-        <div class="section-header reveal-up">
-          <span class="section-tag">Equipo Técnico</span>
-          <h2 class="section-title">El equipo detrás de <br /><span class="gradient-text">HummingX BI.</span></h2>
-          <p class="section-subtitle" style="margin-top: 1rem; color: var(--color-text-secondary);">Operamos con un
-            escuadrón multidisciplinario altamente especializado.</p>
-        </div>
-
-        <div class="team-profiles reveal-up">
-          <div class="team-profile">
-            <div class="team-profile__icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-              </svg></div>
-            <h3 class="team-profile__name"
-              style="font-size: 1.25rem; font-weight: 600; color: var(--color-white); margin-bottom: 0.25rem;">Jesús
-              Curiel</h3>
-            <h4 class="team-profile__title"
-              style="font-size: 0.875rem; color: var(--color-gold); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">
-              Ciencia de Datos Aplicada & Desarrollo Full-Stack</h4>
-            <p class="team-profile__desc">Experiencia en ciencia de datos aplicada al sector salud: análisis estadístico
-              descriptivo y bayesiano, probabilidad condicional y visualización interactiva con NumPy y Pandas. En
-              paralelo, desarrollo full-stack de aplicaciones multisector (deportes, educación musical, finanzas
-              personales, gastronomía), con manejo de Python/Flask, Java/Android Studio, y bases de datos relacionales,
-              no relacionales y vectoriales. </p>
-          </div>
-          <div class="team-profile">
-            <div class="team-profile__icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4 22h16" />
-                <path d="M4 18V10" />
-                <path d="M8 18V10" />
-                <path d="M12 18V10" />
-                <path d="M16 18V10" />
-                <path d="M20 18V10" />
-                <path d="M2 10l10-7 10 7H2z" />
-              </svg></div>
-            <h3 class="team-profile__name"
-              style="font-size: 1.25rem; font-weight: 600; color: var(--color-white); margin-bottom: 0.25rem;">Pablo
-              Rodríguez</h3>
-            <h4 class="team-profile__title"
-              style="font-size: 0.875rem; color: var(--color-gold); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">
-              Automatización de Procesos para Organizaciones Sociales y Financieras</h4>
-            <p class="team-profile__desc">Enfocado en el diseño de soluciones de automatización para organizaciones con
-              operación compleja, incluyendo experiencia en proyectos aplicados al sector social y financiero en
-              Latinoamérica. Trabajo colaborativo con especialistas en investigación aplicada a sistemas inteligentes.
-              Experiencia en entornos cloud (Azure, AWS).
-            </p>
-          </div>
-          <div class="team-profile">
-            <div class="team-profile__icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="4" y="4" width="16" height="16" rx="2" ry="2" />
-                <rect x="9" y="9" width="6" height="6" />
-                <line x1="9" y1="1" x2="9" y2="4" />
-                <line x1="15" y1="1" x2="15" y2="4" />
-                <line x1="9" y1="20" x2="9" y2="23" />
-                <line x1="15" y1="20" x2="15" y2="23" />
-                <line x1="20" y1="9" x2="23" y2="9" />
-                <line x1="20" y1="14" x2="23" y2="14" />
-                <line x1="1" y1="9" x2="4" y2="9" />
-                <line x1="1" y1="14" x2="4" y2="14" />
-              </svg></div>
-            <h3 class="team-profile__name"
-              style="font-size: 1.25rem; font-weight: 600; color: var(--color-white); margin-bottom: 0.25rem;">Jesús
-              Cruz</h3>
-            <h4 class="team-profile__title"
-              style="font-size: 0.875rem; color: var(--color-gold); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">
-              Ciencia de Datos & Automatización con IA</h4>
-            <p class="team-profile__desc">Especialista en automatización inteligente, modelado de procesos y
-              documentación técnica de sistemas (diagramas UML). Dominio de Python, PyTorch y el ecosistema de librerías
-              de ciencia de datos y automatización con IA, además de Power BI y JavaScript para visualización e
-              integración.</p>
-          </div>
-          <div class="team-profile">
-            <div class="team-profile__icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-                <line x1="3" y1="6" x2="21" y2="6" />
-                <path d="M16 10a4 4 0 0 1-8 0" />
-              </svg></div>
-            <h3 class="team-profile__name"
-              style="font-size: 1.25rem; font-weight: 600; color: var(--color-white); margin-bottom: 0.25rem;">Dante
-              Vazquez</h3>
-            <h4 class="team-profile__title"
-              style="font-size: 0.875rem; color: var(--color-gold); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">
-              Sistemas para Retail & Experiencia del Cliente</h4>
-            <p class="team-profile__desc">Especializado en sistemas de gestión empresarial (inventarios y operación) y
-              en ecosistemas de experiencia física-digital: NFC, fidelización, digital signage y menús dinámicos
-              interactivos.</p>
-          </div>
-        </div>
-
-        <div class="reveal-up" style="text-align: center; margin-bottom: var(--space-12);">
-          <span
-            style="display: inline-block; font-size: var(--text-sm); color: var(--color-text-secondary); background: var(--color-bg-card-hover); border: 1px solid var(--color-border); padding: 8px 16px; border-radius: var(--radius-full); line-height: 1.5; max-width: 900px;">
-            Todo el equipo trabaja bajo el mismo estándar: Git/GitHub y control de versiones, metodologías Scrum, Jira,
-            Postman y Spring Boot — la misma disciplina de ingeniería en cada entregable, sin importar el perfil que lo
-            construya.
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div class="max-w-3xl reveal-on-scroll">
+<span class="inline-flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-widest text-royal-blue mb-3">
+<span class="w-2 h-2 rounded-full bg-cyan-glow"></span>
+            Enfoque de Negocio
           </span>
-        </div>
-
-        <div class="projects-showcase reveal-up">
-          <h3 class="projects-showcase__heading">Proyectos en los que hemos trabajado</h3>
-          <div class="carousel-wrapper reveal-up">
-            <div class="projects-grid carousel-container" id="proyectosCarousel">
-              <div class="project-card">
-                <span class="project-card__area">Automatización / IA</span>
-                <h4 class="project-card__title">Automatización de procesos para organización de impacto social</h4>
-                <p class="project-card__desc">Diseño e implementación de flujos automatizados con IA para una
-                  organización de banca de alimentos en Latinoamérica.</p>
-              </div>
-              <div class="project-card">
-                <span class="project-card__area">Data Science</span>
-                <h4 class="project-card__title">Plataforma de ciencia de datos aplicada a salud</h4>
-                <p class="project-card__desc">Análisis estadístico avanzado (bayesiano, probabilidad condicional) y
-                  visualización interactiva de métricas clínicas.</p>
-              </div>
-              <div class="project-card">
-                <span class="project-card__area">Software</span>
-                <h4 class="project-card__title">Sistema de gestión de inventarios</h4>
-                <p class="project-card__desc">Plataforma para control de inventario y operación de una empresa, con base
-                  de datos relacional y panel de seguimiento.</p>
-              </div>
-              <div class="project-card">
-                <span class="project-card__area">Hardware-Software / CX</span>
-                <h4 class="project-card__title">Ecosistema NFC, fidelización y digital signage</h4>
-                <p class="project-card__desc">Menús dinámicos, sistema de lealtad por NFC y señalización digital animada
-                  para negocio físico.</p>
-              </div>
-              <div class="project-card">
-                <span class="project-card__area">Software</span>
-                <h4 class="project-card__title">Suite de aplicaciones multisector</h4>
-                <p class="project-card__desc">Desarrollo de aplicaciones móviles en distintos verticales (deporte,
-                  educación musical, finanzas personales, gastronomía), full-stack end-to-end.</p>
-              </div>
-              <div class="project-card">
-                <span class="project-card__area">IA / Ingeniería</span>
-                <h4 class="project-card__title">Automatización con documentación técnica formal</h4>
-                <p class="project-card__desc">Modelado de procesos con diagramas UML y documentación técnica para
-                  sistemas de automatización con IA.</p>
-              </div>
-            </div>
-            <div class="carousel-controls">
-              <button class="carousel-btn carousel-prev" aria-label="Anterior" data-target="#proyectosCarousel">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M15 18l-6-6 6-6" />
-                </svg>
-              </button>
-              <div class="carousel-progress">
-                <div class="carousel-progress-bar"></div>
-              </div>
-              <button class="carousel-btn carousel-next" aria-label="Siguiente" data-target="#proyectosCarousel">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M9 18l6-6-6-6" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    <!-- FIN: EQUIPO -->
-
-    <!-- ========================
-         SECCIÓN DE FILOSOFÍA
-    ======================== -->
-    <section class="philosophy-v2" id="valores">
-      <div class="container">
-        <div class="section-header reveal-up">
-          <span class="section-tag">Nuestros valores</span>
-          <h2 class="section-title">
-            Lo que nos <span class="gradient-text">mueve.</span>
+<h2 class="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-on-surface tracking-tight">
+            Soluciones para Prioridades Críticas
           </h2>
-          <p class="section-subtitle">Cuatro principios. Léelos dos veces.</p>
-        </div>
-
-        <div class="values-grid reveal-up">
-          <article class="value-card">
-            <div class="value-card__icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-              </svg>
-            </div>
-            <h3 class="value-card__title">Velocidad</h3>
-            <p class="value-card__desc">Mantenemos tu negocio en movimiento: iteramos y entregamos a un ritmo que pocos
-              sostienen.</p>
-          </article>
-
-          <article class="value-card">
-            <div class="value-card__icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="12" cy="12" r="10"></circle>
-                <circle cx="12" cy="12" r="6"></circle>
-                <circle cx="12" cy="12" r="2"></circle>
-              </svg>
-            </div>
-            <h3 class="value-card__title">Precisión</h3>
-            <p class="value-card__desc">Llegamos exacto a lo que tu negocio necesita. Suspendemos el ruido para
-              enfocarnos en lo que mueve la aguja.</p>
-          </article>
-
-          <article class="value-card">
-            <div class="value-card__icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <polyline points="5 9 2 12 5 15"></polyline>
-                <polyline points="9 5 12 2 15 5"></polyline>
-                <polyline points="15 19 12 22 9 19"></polyline>
-                <polyline points="19 9 22 12 19 15"></polyline>
-                <line x1="2" y1="12" x2="22" y2="12"></line>
-                <line x1="12" y1="2" x2="12" y2="22"></line>
-              </svg>
-            </div>
-            <h3 class="value-card__title">Adaptabilidad</h3>
-            <p class="value-card__desc">Avanzamos en cualquier dirección que tu proyecto pida, incluso cuando toca
-              replantear el rumbo a medio vuelo.</p>
-          </article>
-
-          <article class="value-card">
-            <div class="value-card__icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M7 20h10"></path>
-                <path d="M10 20c5.5-2.5.8-6.4 3-10"></path>
-                <path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z">
-                </path>
-                <path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"></path>
-              </svg>
-            </div>
-            <h3 class="value-card__title">Crecimiento recíproco</h3>
-            <p class="value-card__desc">No construimos para ti, construimos contigo. Cuando tu negocio florece,
-              nosotros también.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-    <!-- FIN: FILOSOFÍA -->
-
-    <!-- ========================
-         SECCIÓN DE EXPERIENCIA (MARQUEE)
-    ======================== -->
-    <section class="experience-marquee">
-      <div class="marquee-container">
-        <div class="marquee-track">
-          <!-- Se usan placeholders neutrales hasta que se tengan logos reales -->
-          <div class="marquee-item">Tech Partner</div>
-          <div class="marquee-item">Institution</div>
-          <div class="marquee-item">Enterprise Cloud</div>
-          <div class="marquee-item">Global Logistics</div>
-          <div class="marquee-item">Fintech Innovation</div>
-          <div class="marquee-item">Retail Group</div>
-          <!-- Duplicado para ilusión infinita -->
-          <div class="marquee-item">Tech Partner</div>
-          <div class="marquee-item">Institution</div>
-          <div class="marquee-item">Enterprise Cloud</div>
-          <div class="marquee-item">Global Logistics</div>
-          <div class="marquee-item">Fintech Innovation</div>
-          <div class="marquee-item">Retail Group</div>
-        </div>
-      </div>
-    </section>
-    <!-- FIN: EXPERIENCIA -->
-
-    <!-- ========================
-         SECCIÓN DE FAQs
-    ======================== -->
-    <section class="faq-v2" id="faq">
-      <div class="container">
-        <div class="section-header reveal-up">
-          <span class="section-tag">Dudas Frecuentes</span>
-          <h2 class="section-title">Respuestas a <br /><span class="gradient-text">tus preguntas.</span></h2>
-        </div>
-
-        <div class="faq-list reveal-up">
-          <div class="faq-item">
-            <button class="faq-item__header" aria-expanded="false">
-              <span class="faq-item__title">¿Qué hace exactamente HummingX BI?</span>
-              <span class="faq-item__icon">+</span>
-            </button>
-            <div class="faq-item__content">
-              <div class="faq-item__body">
-                <p>Somos una firma de tecnología e inteligencia de negocios. Desarrollamos soluciones de software a
-                  medida, ecosistemas web interactivos y automatizamos operaciones mediante agentes de Inteligencia
-                  Artificial para acelerar tu crecimiento.</p>
-              </div>
-            </div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-item__header" aria-expanded="false">
-              <span class="faq-item__title">¿Necesito conocimientos técnicos?</span>
-              <span class="faq-item__icon">+</span>
-            </button>
-            <div class="faq-item__content">
-              <div class="faq-item__body">
-                <p>No, nosotros nos encargamos de toda la complejidad técnica. Te entregamos soluciones "llave en mano"
-                  con paneles de administración intuitivos para que puedas operar desde el primer día sin necesidad de
-                  saber programar.</p>
-              </div>
-            </div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-item__header" aria-expanded="false">
-              <span class="faq-item__title">¿Qué tipo de empresas atienden?</span>
-              <span class="faq-item__icon">+</span>
-            </button>
-            <div class="faq-item__content">
-              <div class="faq-item__body">
-                <p>Atendemos desde empresas medianas en proceso de expansión hasta corporativos que necesitan optimizar
-                  áreas específicas. Tenemos experiencia con micronegocios, cadenas de retail, y clínicas u hospitales.
-                </p>
-              </div>
-            </div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-item__header" aria-expanded="false">
-              <span class="faq-item__title">¿Solo dan consultoría o también implementan?</span>
-              <span class="faq-item__icon">+</span>
-            </button>
-            <div class="faq-item__content">
-              <div class="faq-item__body">
-                <p>Hacemos ambas. Nuestro valor radica en analizar tu operación, diseñar una estrategia de negocio, y
-                  posteriormente, construir e implementar todo el software necesario con nuestro propio talento técnico.
-                </p>
-              </div>
-            </div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-item__header" aria-expanded="false">
-              <span class="faq-item__title">¿Cómo funciona el modelo de inversión "tiered"?</span>
-              <span class="faq-item__icon">+</span>
-            </button>
-            <div class="faq-item__content">
-              <div class="faq-item__body">
-                <p>No creemos en cotizaciones inflexibles. Diseñamos paquetes modulares (ej. Silver, Gold, Platinum)
-                  para que decidas con qué alcance quieres arrancar, permitiéndote escalar progresivamente según tu
-                  presupuesto.</p>
-              </div>
-            </div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-item__header" aria-expanded="false">
-              <span class="faq-item__title">¿Pueden integrarse con mis sistemas actuales (ERP, CRM)?</span>
-              <span class="faq-item__icon">+</span>
-            </button>
-            <div class="faq-item__content">
-              <div class="faq-item__body">
-                <p>Absolutamente. Contamos con experiencia creando puentes (APIs) para conectar nuestras soluciones
-                  modernas con tus sistemas heredados (ERP, Facturación, CRMs), garantizando un flujo de datos
-                  centralizado.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-    <!-- FIN: FAQs -->
-
-    <!-- ========================
-         CTA FINAL
-    ======================== -->
-    <section class="final-cta">
-      <div class="container reveal-up">
-        <div class="final-cta__content form-glass">
-          <span class="section-tag section-tag--center" style="margin: 0 auto 16px;">Empecemos hoy</span>
-          <h2 class="final-cta__title">Evoluciona tu negocio<br /><span class="gradient-text">con tecnología.</span>
-          </h2>
-          <div class="final-cta__actions">
-            <a href="#contacto" class="btn btn--primary">Agenda una llamada</a>
-          </div>
-          <p class="final-cta__microcopy">Diagnóstico inicial sin costo · Respuesta en &lt;24h</p>
-        </div>
-      </div>
-    </section>
-    <!-- FIN: CTA FINAL -->
-
-
-    <!-- ============================================================
-         SECCIÓN DE CONVERSIÓN — Formulario Inteligente por Pasos
-    ============================================================ -->
-    <section class="contact" id="contacto" aria-labelledby="contact-title">
-      <div class="container">
-        <div class="contact__layout">
-
-          <!-- Columna izquierda: info -->
-          <div class="contact__info reveal-left">
-            <span class="section-tag">Empieza Hoy</span>
-            <h2 class="section-title" id="contact-title">
-              Construyamos<br />
-              <span class="gradient-text">tu Sistema.</span>
-            </h2>
-            <p class="contact__info-text">
-              Cuéntanos qué quieres evolucionar y recibe una propuesta técnica
-              en menos de 24 horas.
+<p class="font-body text-base sm:text-lg text-on-surface-variant mt-4 leading-relaxed">
+            No desarrollamos por inercia; construimos tecnología modular con métricas comprobables que resuelven los dolores de la operación diaria.
+          </p>
+</div>
+</div>
+<!-- 3 Columns Clean Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Solución 1 -->
+<div class="reveal-on-scroll bg-surface-saas rounded-3xl p-8 flex flex-col justify-between border border-slate-100 hover:border-royal-blue/30 transition-all hover:shadow-lg">
+<div class="flex flex-col gap-4">
+<div class="w-12 h-12 rounded-2xl bg-royal-blue text-pure-white flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-[26px]">draw</span>
+</div>
+<h3 class="font-display text-xl font-bold text-on-surface">Digitalización Operativa</h3>
+<p class="font-body text-sm text-on-surface-variant leading-relaxed">
+              Elimina archivadores, planillas desactualizadas y dependencias personales con flujos de trabajo centralizados, trazables y auditables con control de acceso granular.
             </p>
-
-            <!-- Datos de contacto directo -->
-            <div class="contact__direct" aria-label="Contacto directo">
-              <!-- ================================================
-                   CONFIGURACIÓN: Reemplaza los datos de contacto aquí
-                   ================================================ -->
-              <!-- WhatsApp: reemplaza el número en el href (formato internacional sin +) -->
-              <!-- Instagram -->
-              <a href="https://www.instagram.com/hummingx.bi?igsh=MmU1aGtlM2Y5aXBu" class="contact__direct-item"
-                id="direct-instagram" target="_blank" rel="noopener noreferrer" aria-label="Contactar por Instagram">
-                <div class="contact__direct-icon contact__direct-icon--ig">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-                    <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" />
-                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-                  </svg>
-                </div>
-                <div>
-                  <span class="contact__direct-label">Instagram</span>
-                  <span class="contact__direct-value">@hummingx.bi</span>
-                </div>
-              </a>
-
-              <!-- Facebook -->
-              <a href="https://www.facebook.com/profile.php?id=61590401354021" class="contact__direct-item"
-                id="direct-facebook" target="_blank" rel="noopener noreferrer" aria-label="Contactar por Facebook">
-                <div class="contact__direct-icon contact__direct-icon--fb">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-                  </svg>
-                </div>
-                <div>
-                  <span class="contact__direct-label">Facebook</span>
-                  <span class="contact__direct-value">HummingX BI</span>
-                </div>
-              </a>
-
-              <!-- WhatsApp 1 -->
-              <a href="https://wa.me/525575084267" class="contact__direct-item" id="direct-whatsapp" target="_blank"
-                rel="noopener noreferrer" aria-label="Contactar por WhatsApp">
-                <div class="contact__direct-icon contact__direct-icon--wa">
-                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <path
-                      d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                  </svg>
-                </div>
-                <div>
-                  <span class="contact__direct-label">WhatsApp </span>
-                  <span class="contact__direct-value">+52 55 7508 4267</span>
-                </div>
-              </a>
-
-            
-            </div>
-          </div>
-
-          <!-- Columna derecha: Formulario por pasos -->
-          <div class="contact__form-wrapper reveal-right">
-            <div class="form-glass" id="smart-form" role="form" aria-label="Formulario inteligente de contacto">
-
-              <!-- Indicador de progreso -->
-              <div class="form__progress" aria-label="Progreso del formulario">
-                <div class="form__progress-track">
-                  <div class="form__progress-bar" id="form-progress-bar" role="progressbar" aria-valuenow="50"
-                    aria-valuemin="0" aria-valuemax="100" style="width: 50%"></div>
-                </div>
-                <div class="form__steps-indicator" aria-live="polite">
-                  <span id="current-step-label">Paso 1 de 2</span>
-                </div>
-              </div>
-
-              <!-- ========================
-                   PASO 1: Calificación Rápida
-              ======================== -->
-              <div class="form__step form__step--active" id="step-1" role="group" aria-labelledby="step1-title">
-                <h3 class="form__step-title" id="step1-title">
-                  ¿Qué necesitas<br /><span class="gradient-text">evolucionar hoy?</span>
-                </h3>
-                <p class="form__step-subtitle">Selecciona los servicios de interés (Puedes elegir varios)</p>
-
-                <div class="form__options-grid form__options-grid--col2" role="group" aria-labelledby="step1-title"
-                  id="services-options">
-                  <label class="form__option form__option--checkbox" tabindex="0">
-                    <input type="checkbox" name="servicios" value="Plataforma a Medida" class="form__checkbox" />
-                    <div class="form__option-icon">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="16 18 22 12 16 6"></polyline>
-                        <polyline points="8 6 2 12 8 18"></polyline>
-                      </svg>
-                    </div>
-                    <span class="form__option-label">Plataforma a Medida</span>
-                  </label>
-                  <label class="form__option form__option--checkbox" tabindex="0">
-                    <input type="checkbox" name="servicios" value="BI & Datos" class="form__checkbox" />
-                    <div class="form__option-icon">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="20" x2="18" y2="10"></line>
-                        <line x1="12" y1="20" x2="12" y2="4"></line>
-                        <line x1="6" y1="20" x2="6" y2="14"></line>
-                      </svg>
-                    </div>
-                    <span class="form__option-label">BI &amp; Datos</span>
-                  </label>
-                  <label class="form__option form__option--checkbox" tabindex="0">
-                    <input type="checkbox" name="servicios" value="Automatización IA" class="form__checkbox" />
-                    <div class="form__option-icon">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
-                        <rect x="9" y="9" width="6" height="6"></rect>
-                        <line x1="9" y1="1" x2="9" y2="4"></line>
-                        <line x1="15" y1="1" x2="15" y2="4"></line>
-                        <line x1="9" y1="20" x2="9" y2="23"></line>
-                        <line x1="15" y1="20" x2="15" y2="23"></line>
-                        <line x1="20" y1="9" x2="23" y2="9"></line>
-                        <line x1="20" y1="14" x2="23" y2="14"></line>
-                        <line x1="1" y1="9" x2="4" y2="9"></line>
-                        <line x1="1" y1="14" x2="4" y2="14"></line>
-                      </svg>
-                    </div>
-                    <span class="form__option-label">Automatización IA</span>
-                  </label>
-                  <label class="form__option form__option--checkbox" tabindex="0">
-                    <input type="checkbox" name="servicios" value="Hardware & NFC" class="form__checkbox" />
-                    <div class="form__option-icon">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
-                        <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
-                        <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
-                        <line x1="12" y1="20" x2="12" y2="20"></line>
-                      </svg>
-                    </div>
-                    <span class="form__option-label">Hardware &amp; NFC</span>
-                  </label>
-                  <label class="form__option form__option--checkbox" tabindex="0">
-                    <input type="checkbox" name="servicios" value="E-commerce B2B" class="form__checkbox" />
-                    <div class="form__option-icon">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="9" cy="21" r="1"></circle>
-                        <circle cx="20" cy="21" r="1"></circle>
-                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                      </svg>
-                    </div>
-                    <span class="form__option-label">E-commerce B2B</span>
-                  </label>
-                  <label class="form__option form__option--checkbox" tabindex="0">
-                    <input type="checkbox" name="servicios" value="Otro" class="form__checkbox" />
-                    <div class="form__option-icon">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="8" x2="12" y2="16"></line>
-                        <line x1="8" y1="12" x2="16" y2="12"></line>
-                      </svg>
-                    </div>
-                    <span class="form__option-label">Otro / Por definir</span>
-                  </label>
-                </div>
-
-                <!-- Campo: Nombre del negocio -->
-                <div class="form__field-group">
-                  <label class="form__label" for="business-name">Nombre de tu Negocio</label>
-                  <input type="text" id="business-name" name="negocio" class="form__input"
-                    placeholder="Ej. Restaurante El Origen" autocomplete="organization" aria-required="true" />
-                </div>
-
-                <!-- Campo: Tu Nombre -->
-                <div class="form__field-group">
-                  <label class="form__label" for="contact-name">Tu Nombre</label>
-                  <input type="text" id="contact-name" name="nombre" class="form__input" placeholder="Ej. María García"
-                    autocomplete="name" aria-required="true" />
-                </div>
-
-                <button class="btn btn--primary btn--full form__next-btn" id="step1-next" type="button"
-                  aria-label="Continuar al paso 2">
-                  <span>Continuar →</span>
-                </button>
-              </div>
-
-              <!-- ========================
-                   PASO 2: Contexto + Envío
-              ======================== -->
-              <div class="form__step" id="step-2" role="group" aria-labelledby="step2-title" hidden>
-
-                <!-- Resumen Inyectado -->
-                <div id="form-summary-box" class="form__summary-box" aria-live="polite">
-                  <span class="form__summary-title">Resumen de tu solicitud:</span>
-                  <div id="form-summary-tags" class="form__summary-tags"></div>
-                </div>
-
-                <h3 class="form__step-title" id="step2-title" style="margin-top: var(--space-6);">
-                  Últimos detalles para<br /><span class="gradient-text">tu propuesta</span>
-                </h3>
-
-                <!-- Campo: Email -->
-                <div class="form__field-group">
-                  <label class="form__label" for="contact-email">Email corporativo <span
-                      class="form__optional">(opcional)</span></label>
-                  <input type="email" id="contact-email" name="email" class="form__input"
-                    placeholder="tucorreo@empresa.com" autocomplete="email" />
-                </div>
-
-                <!-- Campo: WhatsApp -->
-                <div class="form__field-group">
-                  <label class="form__label" for="contact-phone">WhatsApp <span
-                      class="form__optional">(opcional)</span></label>
-                  <input type="tel" id="contact-phone" name="telefono" class="form__input"
-                    placeholder="+52 1 XXX XXX XXXX" autocomplete="tel" />
-                </div>
-
-                <!-- Campo: Desafío Principal -->
-                <div class="form__field-group">
-                  <label class="form__label" for="contact-message">¿Cuál es tu mayor desafío hoy? <span
-                      class="form__optional">(opcional)</span></label>
-                  <textarea id="contact-message" name="mensaje" class="form__input form__textarea"
-                    placeholder="Ej. Necesitamos centralizar nuestros datos y automatizar reportes..."
-                    rows="2"></textarea>
-                </div>
-
-                <!-- Campo: Presupuesto estimado -->
-                <div class="form__field-group">
-                  <label class="form__label" for="budget-select">Presupuesto Estimado <span
-                      class="form__optional">(opcional)</span></label>
-                  <select class="form__input form__select" id="budget-select" name="presupuesto">
-                    <option value="" selected>Selecciona un rango...</option>
-                    <option value="menos_5k">Menos de $5,000 MXN</option>
-                    <option value="5k_15k">$5,000 — $15,000 MXN</option>
-                    <option value="15k_50k">$15,000 — $50,000 MXN</option>
-                    <option value="50k_150k">$50,000 — $150,000 MXN</option>
-                    <option value="mas_150k">Más de $150,000 MXN</option>
-                  </select>
-                  <p class="form__field-note">Si no sabes aún, no hay problema, lo definimos juntos.</p>
-                </div>
-
-                <!-- Loader minimalista HummingX (oculto por defecto) -->
-                <div id="form-loader" class="form__loader" hidden aria-live="assertive" role="status"
-                  aria-label="Enviando tu solicitud...">
-                  <div class="form__loader-spinner" aria-hidden="true"></div>
-                  <span class="form__loader-text">Procesando solicitud...</span>
-                </div>
-
-                <div class="form__send-group" role="group" aria-label="Opciones de envío">
-                  <div class="form__send-buttons" style="display: flex; flex-direction: column; gap: 1rem;">
-                    <!-- Botón WA 1 -->
-                    <button type="button" class="btn btn--send btn--send-wa btn--full" id="send-whatsapp"
-                      data-channel="whatsapp" aria-label="Enviar a Asesor 1">
-                      <div class="btn__send-icon">
-                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                          <path
-                            d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                        </svg>
-                      </div>
-                      <div class="btn__send-text">
-                        <span class="btn__send-name">Enviar Info a Asesor 1</span>
-                      </div>
-                    </button>
-
-                    <!-- Botón WA 2 -->
-                    <button type="button" class="btn btn--send btn--send-wa btn--full" id="send-whatsapp-2"
-                      data-channel="whatsapp2" aria-label="Enviar a Asesor 2">
-                      <div class="btn__send-icon">
-                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                          <path
-                            d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                        </svg>
-                      </div>
-                      <div class="btn__send-text">
-                        <span class="btn__send-name">Enviar Info a Asesor 2</span>
-                      </div>
-                    </button>
-                  </div>
-                  <p class="form__trust-note"
-                    style="text-align: center; margin-top: 1rem; color: var(--color-text-muted); font-size: 0.85rem;">
-                    Sin compromiso. Respuesta en menos de 24h.</p>
-                </div>
-
-                <div class="form__btn-row" style="margin-top: var(--space-6); display: flex; justify-content: center;">
-                  <button class="btn btn--ghost form__back-btn" id="step2-back" type="button"
-                    aria-label="Volver al paso 1">
-                    <span>← Modificar Datos</span>
-                  </button>
-                </div>
-
-                <!-- Estado de éxito (oculto inicialmente) -->
-                <div class="form__success" id="form-success" hidden aria-live="polite" role="status">
-                  <div class="form__success-icon" aria-hidden="true">
-                    <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <circle cx="30" cy="30" r="28" stroke="#0D9488" stroke-width="2" />
-                      <polyline points="15,30 26,41 45,20" stroke="#0D9488" stroke-width="3" stroke-linecap="round"
-                        stroke-linejoin="round" />
-                    </svg>
-                  </div>
-                  <h3 class="form__success-title">¡Solicitud enviada!</h3>
-                  <p class="form__success-text">En menos de 24 horas recibirás una propuesta técnica personalizada para
-                    tu
-                    proyecto.</p>
-                </div>
-
-              </div>
-              <!-- FIN: form-glass -->
-            </div>
-            <!-- FIN: contact__form-wrapper -->
-
-          </div>
-          <!-- FIN: contact__layout -->
-        </div>
-    </section>
-    <!-- FIN: CONTACTO -->
-
-
-    <!-- ========================
-         FOOTER
-    ======================== -->
-    <footer class="footer" role="contentinfo">
-      <div class="container">
-        <div class="footer__layout">
-          <!-- Columna 1: Marca + Tagline + Redes -->
-          <div class="footer__brand">
-            <span class="footer__logo">HUMMING<span class="accent-x">X</span>-<span
-                class="footer__logo-sub">BI</span></span>
-            <p class="footer__tagline">Firma de tecnología e inteligencia de negocios. Software integral, sin límites de
-              nicho.</p>
-            <div class="footer__socials"
-              style="display: flex; gap: var(--space-4); margin-top: var(--space-4); font-size: var(--text-sm); font-weight: 500;">
-              <a href="https://wa.me/525575084267" target="_blank" rel="noopener">WhatsApp</a>
-              <a href="https://www.instagram.com/hummingx.bi" target="_blank" rel="noopener">Instagram</a>
-              <a href="https://www.facebook.com/profile.php?id=61590401354021" target="_blank"
-                rel="noopener">Facebook</a>
-            </div>
-          </div>
-
-          <!-- Columna 2: Servicios -->
-          <nav class="footer__nav" aria-label="Servicios footer">
-            <h4 class="footer__nav-title">Servicios</h4>
-            <ul role="list">
-              <li><a href="#servicios">Software a Medida</a></li>
-              <li><a href="#servicios">Business Intelligence</a></li>
-              <li><a href="#servicios">Automatización IA</a></li>
-              <li><a href="#servicios">E-commerce & Plataformas</a></li>
-            </ul>
-          </nav>
-
-          <!-- Columna 3: Explora -->
-          <nav class="footer__nav" aria-label="Explora footer">
-            <h4 class="footer__nav-title">Explora</h4>
-            <ul role="list">
-              <li><a href="#inicio">Inicio</a></li>
-              <li><a href="#soluciones">Soluciones</a></li>
-              <li><a href="#metodologia">Metodología</a></li>
-              <li><a href="#valores">Valores</a></li>
-              <li><a href="#equipo">Equipo</a></li>
-              <li><a href="#faq">FAQs</a></li>
-            </ul>
-          </nav>
-
-          <!-- Columna 4: Empresa + Contacto -->
-          <div class="footer__contact">
-            <h4 class="footer__nav-title">Empresa</h4>
-            <a href="mailto:contacto@hummingxbi.com" class="footer__contact-link">contacto@hummingxbi.com</a>
-            <p style="font-size: var(--text-sm); color: var(--color-text-secondary); margin-top: var(--space-2);">
-              Lun a Vie 9AM – 7PM (CDMX)
+</div>
+<div class="mt-8 pt-4 border-t border-slate-200/60 flex items-center gap-2 text-royal-blue font-semibold text-xs uppercase tracking-wider">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>Cero pérdidas de documentación</span>
+</div>
+</div>
+<!-- Solución 2 -->
+<div class="reveal-on-scroll bg-surface-saas rounded-3xl p-8 flex flex-col justify-between border border-slate-100 hover:border-cyan-glow/40 transition-all hover:shadow-lg">
+<div class="flex flex-col gap-4">
+<div class="w-12 h-12 rounded-2xl bg-cyan-glow text-[#0b0b0e] flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-[26px]">monitoring</span>
+</div>
+<h3 class="font-display text-xl font-bold text-on-surface">Inteligencia de Activos &amp; Datos</h3>
+<p class="font-body text-sm text-on-surface-variant leading-relaxed">
+              Descubre patrones de consumo, identifica cuellos de botella ocultos y anticipa decisiones de suministro gracias a tableros de control ejecutivos interactivos.
             </p>
-            <div style="margin-top: var(--space-4);">
-              <a href="#contacto" class="btn btn--primary">Agenda una llamada</a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Bottom bar -->
-        <div class="footer__bottom"
-          style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-4);">
-          <p>&copy; 2026 HummingX-BI. Todos los derechos reservados.</p>
-          <div class="footer__bottom-links"
-            style="display: flex; gap: var(--space-6); font-size: var(--text-sm); font-weight: 500;">
-            <a href="aviso-de-privacidad.html">Aviso de Privacidad</a>
-            <a href="terminos-y-condiciones.html">Términos y Condiciones</a>
-          </div>
-        </div>
-      </div>
-    </footer>
-    <!-- FIN: FOOTER -->
-
+</div>
+<div class="mt-8 pt-4 border-t border-slate-200/60 flex items-center gap-2 text-primary font-semibold text-xs uppercase tracking-wider">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>Visibilidad en tiempo real</span>
+</div>
+</div>
+<!-- Solución 3 -->
+<div class="reveal-on-scroll bg-surface-saas rounded-3xl p-8 flex flex-col justify-between border border-slate-100 hover:border-vibrant-purple/40 transition-all hover:shadow-lg">
+<div class="flex flex-col gap-4">
+<div class="w-12 h-12 rounded-2xl bg-[#1e1435] text-cyan-glow border border-cyan-glow/20 flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-[26px]">smart_toy</span>
+</div>
+<h3 class="font-display text-xl font-bold text-on-surface">Automatización Inteligente</h3>
+<p class="font-body text-sm text-on-surface-variant leading-relaxed">
+              Flujos autónomos de extremo a extremo: sincronización de inventarios, conciliación de facturas y notificaciones transaccionales sin errores manuales.
+            </p>
+</div>
+<div class="mt-8 pt-4 border-t border-slate-200/60 flex items-center gap-2 text-[#4B1D6F] font-semibold text-xs uppercase tracking-wider">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>Aceleración de procesos</span>
+</div>
+</div>
+<!-- Solución 4 -->
+<div class="reveal-on-scroll bg-surface-saas rounded-3xl p-8 flex flex-col justify-between border border-slate-100 hover:border-royal-blue/30 transition-all hover:shadow-lg">
+<div class="flex flex-col gap-4">
+<div class="w-12 h-12 rounded-2xl bg-[#004787] text-pure-white flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-[26px]">sentiment_satisfied</span>
+</div>
+<h3 class="font-display text-xl font-bold text-on-surface">Experiencia del Cliente (CX)</h3>
+<p class="font-body text-sm text-on-surface-variant leading-relaxed">
+              Portales B2B e interfaces para usuarios finales diseñadas para facilitar compras, seguimiento de órdenes y pagos seguros en una experiencia ágil y sin fricción.
+            </p>
+</div>
+<div class="mt-8 pt-4 border-t border-slate-200/60 flex items-center gap-2 text-[#004787] font-semibold text-xs uppercase tracking-wider">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>Fidelización y retención</span>
+</div>
+</div>
+<!-- Solución 5: Wide Custom Solutions Banner (Deep Graphite with Cyan + Violet Ambient Lights) -->
+<div class="reveal-on-scroll md:col-span-2 bg-[#0b0b0e] rounded-3xl p-8 sm:p-10 text-pure-white flex flex-col justify-between border border-white/10 shadow-2xl relative overflow-hidden">
+<!-- Ambient glow effects -->
+<div class="absolute -top-10 -right-10 w-72 h-72 bg-cyan-glow/15 rounded-full blur-3xl pointer-events-none"></div>
+<div class="absolute -bottom-10 -left-10 w-72 h-72 bg-[#4B1D6F]/25 rounded-full blur-3xl pointer-events-none"></div>
+<div class="flex flex-col gap-4 relative z-10">
+<div class="inline-flex items-center gap-2 text-cyan-glow font-mono text-xs uppercase tracking-widest font-bold">
+<span class="material-symbols-outlined text-[20px]">architecture</span>
+<span>Propiedad Intelectual Garantizada</span>
+</div>
+<h3 class="font-display text-2xl sm:text-3xl font-extrabold text-pure-white">
+              Sistemas 100% Personalizados a tu Operación
+            </h3>
+<p class="font-body text-sm sm:text-base text-white/75 max-w-2xl leading-relaxed">
+              Las herramientas estándar enlatadas exigen que tu empresa cambie sus procesos para encajar en sus moldes. En HummingX construimos soluciones a la exacta medida de tu modelo de negocio, adaptándonos al ritmo de tu expansión.
+            </p>
+</div>
+<div class="mt-8 pt-6 border-t border-white/10 flex flex-wrap items-center justify-between gap-4 relative z-10">
+<span class="font-display font-semibold text-sm text-white/90">Software diseñado para tu empresa, no al revés.</span>
+<span class="px-3.5 py-1.5 rounded-full bg-cyan-glow/15 border border-cyan-glow/30 text-cyan-glow font-mono text-xs tracking-wider uppercase font-bold">Código Propio</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- =========================================================================
+       5. METODOLOGÍA: 6-Stage Spacious Visual Stepper
+       ========================================================================= -->
+<section class="w-full pt-10 sm:pt-14 pb-24 sm:pb-28 px-6 lg:px-12 bg-[#F4F6FB] border-t border-slate-200/70 scroll-mt-0" id="metodologia">
+<div class="max-w-7xl mx-auto flex flex-col gap-10 sm:gap-12">
+  <!-- Encabezado de Apartado: HummingX BI (Posicionado más arriba) -->
+  <div class="reveal-on-scroll flex items-center gap-3.5 pb-4 border-b border-slate-200/80">
+    <div class="relative w-8 h-8 flex items-center justify-center shrink-0">
+      <img alt="HummingX Colibrí" class="w-full h-full object-contain" src="./src/Logo HummingX BI png.png"/>
+    </div>
+    <div class="flex flex-col">
+      <span class="font-display font-extrabold text-base text-on-surface tracking-tight leading-none">
+        HummingX <span class="bg-gradient-to-r from-royal-blue to-cyan-glow bg-clip-text text-transparent">BI</span>
+      </span>
+      <span class="font-editorial text-[9px] uppercase tracking-[0.25em] text-on-surface-variant/70 mt-1">Firma de Software</span>
+    </div>
   </div>
-  <!-- FIN: main-content -->
 
-  <!-- ========================
-       SCRIPTS
-       main.js gestiona la lógica principal de la app y la animación
-       de vuelo del colibrí (preloader).
-  ======================= -->
-  <!-- Lógica principal de la app (orquestador modular ES) -->
-  <script type="module" src="/src/js/main.js"></script>
-</body>
+<div class="text-center max-w-3xl mx-auto reveal-on-scroll">
+<span class="inline-flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-widest text-royal-blue mb-3">
+<span class="w-2 h-2 rounded-full bg-cyan-glow"></span>
+          Ingeniería Predecible
+        </span>
+<h2 class="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-on-surface tracking-tight">
+          Metodología en 6 Pasos
+        </h2>
+<p class="font-body text-base sm:text-lg text-on-surface-variant mt-4 leading-relaxed">
+          Un marco de ejecución estructurado y transparente para entregar valor tangible desde la concepción inicial hasta la escala evolutiva.
+        </p>
+</div>
+<!-- Stepper Grid 6 Items -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+<!-- Step 01 -->
+<div class="reveal-on-scroll bg-pure-white rounded-3xl p-8 shadow-sm hover:shadow-md border border-slate-100 transition-all flex flex-col justify-between gap-6 relative group">
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="font-mono text-xs font-bold px-3 py-1 rounded-lg bg-[#0b0b0e] text-cyan-glow">PASO 01</span>
+<span class="material-symbols-outlined text-royal-blue text-[26px]">travel_explore</span>
+</div>
+<h3 class="font-display text-xl font-bold text-on-surface group-hover:text-royal-blue transition-colors">01. Descubrimiento</h3>
+<p class="font-body text-sm text-on-surface-variant mt-3 leading-relaxed">
+              Inmersión con tus líderes de negocio para auditar cuellos de botella, requisitos comerciales y expectativas técnicas clave.
+            </p>
+</div>
+<div class="pt-4 border-t border-slate-100 flex items-center gap-2 text-xs font-mono text-on-surface-variant">
+<span class="material-symbols-outlined text-cyan-glow text-[16px]">check_circle</span>
+<span>Matriz de requerimientos</span>
+</div>
+</div>
+<!-- Step 02 -->
+<div class="reveal-on-scroll bg-pure-white rounded-3xl p-8 shadow-sm hover:shadow-md border border-slate-100 transition-all flex flex-col justify-between gap-6 relative group">
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="font-mono text-xs font-bold px-3 py-1 rounded-lg bg-[#0b0b0e] text-cyan-glow">PASO 02</span>
+<span class="material-symbols-outlined text-royal-blue text-[26px]">account_tree</span>
+</div>
+<h3 class="font-display text-xl font-bold text-on-surface group-hover:text-royal-blue transition-colors">02. Estrategia &amp; Arquitectura</h3>
+<p class="font-body text-sm text-on-surface-variant mt-3 leading-relaxed">
+              Selección rigurosa de stacks tecnológicos, diseño de esquemas de datos relacionales y especificación de arquitecturas de microservicios.
+            </p>
+</div>
+<div class="pt-4 border-t border-slate-100 flex items-center gap-2 text-xs font-mono text-on-surface-variant">
+<span class="material-symbols-outlined text-cyan-glow text-[16px]">check_circle</span>
+<span>Blueprint técnico &amp; Sprints</span>
+</div>
+</div>
+<!-- Step 03 -->
+<div class="reveal-on-scroll bg-pure-white rounded-3xl p-8 shadow-sm hover:shadow-md border border-slate-100 transition-all flex flex-col justify-between gap-6 relative group">
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="font-mono text-xs font-bold px-3 py-1 rounded-lg bg-[#0b0b0e] text-cyan-glow">PASO 03</span>
+<span class="material-symbols-outlined text-royal-blue text-[26px]">palette</span>
+</div>
+<h3 class="font-display text-xl font-bold text-on-surface group-hover:text-royal-blue transition-colors">03. Diseño UX / UI</h3>
+<p class="font-body text-sm text-on-surface-variant mt-3 leading-relaxed">
+              Creación de prototipos de alta fidelidad interactivos, testeados y validados para asegurar la adopción inmediata por tu equipo.
+            </p>
+</div>
+<div class="pt-4 border-t border-slate-100 flex items-center gap-2 text-xs font-mono text-on-surface-variant">
+<span class="material-symbols-outlined text-cyan-glow text-[16px]">check_circle</span>
+<span>Prototipos aprobados</span>
+</div>
+</div>
+<!-- Step 04 -->
+<div class="reveal-on-scroll bg-pure-white rounded-3xl p-8 shadow-sm hover:shadow-md border border-slate-100 transition-all flex flex-col justify-between gap-6 relative group">
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="font-mono text-xs font-bold px-3 py-1 rounded-lg bg-[#0b0b0e] text-cyan-glow">PASO 04</span>
+<span class="material-symbols-outlined text-royal-blue text-[26px]">terminal</span>
+</div>
+<h3 class="font-display text-xl font-bold text-on-surface group-hover:text-royal-blue transition-colors">04. Desarrollo Ágil</h3>
+<p class="font-body text-sm text-on-surface-variant mt-3 leading-relaxed">
+              Iteraciones quincenales bajo estándares de código limpio, pipelines de integración continua (CI/CD) y validaciones de seguridad.
+            </p>
+</div>
+<div class="pt-4 border-t border-slate-100 flex items-center gap-2 text-xs font-mono text-on-surface-variant">
+<span class="material-symbols-outlined text-cyan-glow text-[16px]">check_circle</span>
+<span>Demos funcionales quincenales</span>
+</div>
+</div>
+<!-- Step 05 -->
+<div class="reveal-on-scroll bg-pure-white rounded-3xl p-8 shadow-sm hover:shadow-md border border-slate-100 transition-all flex flex-col justify-between gap-6 relative group">
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="font-mono text-xs font-bold px-3 py-1 rounded-lg bg-[#0b0b0e] text-cyan-glow">PASO 05</span>
+<span class="material-symbols-outlined text-royal-blue text-[26px]">rocket_launch</span>
+</div>
+<h3 class="font-display text-xl font-bold text-on-surface group-hover:text-royal-blue transition-colors">05. Implementación</h3>
+<p class="font-body text-sm text-on-surface-variant mt-3 leading-relaxed">
+              Despliegue ordenado y sin interrupciones con migración segura de datos, capacitación operativa y acompañamiento presencial/remoto.
+            </p>
+</div>
+<div class="pt-4 border-t border-slate-100 flex items-center gap-2 text-xs font-mono text-on-surface-variant">
+<span class="material-symbols-outlined text-cyan-glow text-[16px]">check_circle</span>
+<span>Puesta en producción exitosa</span>
+</div>
+</div>
+<!-- Step 06 -->
+<div class="reveal-on-scroll bg-pure-white rounded-3xl p-8 shadow-sm hover:shadow-md border border-slate-100 transition-all flex flex-col justify-between gap-6 relative group">
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="font-mono text-xs font-bold px-3 py-1 rounded-lg bg-[#0b0b0e] text-cyan-glow">PASO 06</span>
+<span class="material-symbols-outlined text-royal-blue text-[26px]">autorenew</span>
+</div>
+<h3 class="font-display text-xl font-bold text-on-surface group-hover:text-royal-blue transition-colors">06. Evolución Continua</h3>
+<p class="font-body text-sm text-on-surface-variant mt-3 leading-relaxed">
+              Optimización basada en telemetría de rendimiento y adición continua de nuevos módulos mediante el respaldo de Créditos HX.
+            </p>
+</div>
+<div class="pt-4 border-t border-slate-100 flex items-center gap-2 text-xs font-mono text-on-surface-variant">
+<span class="material-symbols-outlined text-cyan-glow text-[16px]">check_circle</span>
+<span>Monitoreo 24/7 y mejoras continuas</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- =========================================================================
+       6. VALORES: Sobrio Diseño Editorial
+       ========================================================================= -->
+<section class="w-full pt-10 sm:pt-14 pb-24 sm:pb-28 px-6 lg:px-12 bg-white scroll-mt-0" id="valores">
+<div class="max-w-7xl mx-auto flex flex-col gap-10 sm:gap-12">
+  <!-- Encabezado de Apartado: HummingX BI (Posicionado más arriba) -->
+  <div class="reveal-on-scroll flex items-center gap-3.5 pb-4 border-b border-slate-200/80">
+    <div class="relative w-8 h-8 flex items-center justify-center shrink-0">
+      <img alt="HummingX Colibrí" class="w-full h-full object-contain" src="./src/Logo HummingX BI png.png"/>
+    </div>
+    <div class="flex flex-col">
+      <span class="font-display font-extrabold text-base text-on-surface tracking-tight leading-none">
+        HummingX <span class="bg-gradient-to-r from-royal-blue to-cyan-glow bg-clip-text text-transparent">BI</span>
+      </span>
+      <span class="font-editorial text-[9px] uppercase tracking-[0.25em] text-on-surface-variant/70 mt-1">Firma de Software</span>
+    </div>
+  </div>
 
-</html>
+<div class="max-w-3xl reveal-on-scroll">
+<span class="inline-flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-widest text-royal-blue mb-3">
+<span class="w-2 h-2 rounded-full bg-cyan-glow"></span>
+          Cultura de Excelencia
+        </span>
+<h2 class="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-on-surface tracking-tight">
+          Valores que Rigen Nuestra Ingeniería
+        </h2>
+<p class="font-body text-base sm:text-lg text-on-surface-variant mt-4 leading-relaxed">
+          La destreza técnica carece de sentido sin rigor ético. Construimos software sostenible, transparente y orientado al éxito de nuestros clientes.
+        </p>
+</div>
+<!-- Editorial Horizontal Accordion / Cards -->
+<div class="flex flex-col gap-4">
+<!-- Value 01 -->
+<div class="reveal-on-scroll p-6 sm:p-8 rounded-2xl bg-surface-saas hover:bg-[#F0F3F9] border border-slate-100 transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-6 group">
+<div class="flex items-start sm:items-center gap-6">
+<span class="font-mono text-3xl sm:text-4xl font-extrabold text-slate-300 group-hover:text-royal-blue transition-colors">01</span>
+<div>
+<h3 class="font-display text-xl sm:text-2xl font-bold text-on-surface">Transparencia Radical</h3>
+<p class="font-body text-sm text-on-surface-variant mt-1.5 max-w-2xl leading-relaxed">
+                Claridad absoluta en el avance de proyectos, horas invertidas, métricas técnicas y validación de entregables. Cero cajas negras.
+              </p>
+</div>
+</div>
+<span class="px-4 py-1.5 rounded-full bg-white border border-slate-200 font-mono text-xs font-bold uppercase tracking-wider text-royal-blue shrink-0">
+            Verificabilidad
+          </span>
+</div>
+<!-- Value 02 -->
+<div class="reveal-on-scroll p-6 sm:p-8 rounded-2xl bg-surface-saas hover:bg-[#F0F3F9] border border-slate-100 transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-6 group">
+<div class="flex items-start sm:items-center gap-6">
+<span class="font-mono text-3xl sm:text-4xl font-extrabold text-slate-300 group-hover:text-royal-blue transition-colors">02</span>
+<div>
+<h3 class="font-display text-xl sm:text-2xl font-bold text-on-surface">Calidad de Código</h3>
+<p class="font-body text-sm text-on-surface-variant mt-1.5 max-w-2xl leading-relaxed">
+                Estructura desacoplada, testeada automáticamente y documentada según los más altos estándares mundiales para perdurar con solidez.
+              </p>
+</div>
+</div>
+<span class="px-4 py-1.5 rounded-full bg-white border border-slate-200 font-mono text-xs font-bold uppercase tracking-wider text-[#00696e] shrink-0">
+            Sólida Arquitectura
+          </span>
+</div>
+<!-- Value 03 -->
+<div class="reveal-on-scroll p-6 sm:p-8 rounded-2xl bg-surface-saas hover:bg-[#F0F3F9] border border-slate-100 transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-6 group">
+<div class="flex items-start sm:items-center gap-6">
+<span class="font-mono text-3xl sm:text-4xl font-extrabold text-slate-300 group-hover:text-royal-blue transition-colors">03</span>
+<div>
+<h3 class="font-display text-xl sm:text-2xl font-bold text-on-surface">Cercanía Estratégica</h3>
+<p class="font-body text-sm text-on-surface-variant mt-1.5 max-w-2xl leading-relaxed">
+                Interacción continua con ingenieros senior y arquitectos de soluciones que comprenden las prioridades comerciales de tu empresa.
+              </p>
+</div>
+</div>
+<span class="px-4 py-1.5 rounded-full bg-white border border-slate-200 font-mono text-xs font-bold uppercase tracking-wider text-royal-blue shrink-0">
+            Acompañamiento
+          </span>
+</div>
+<!-- Value 04 -->
+<div class="reveal-on-scroll p-6 sm:p-8 rounded-2xl bg-surface-saas hover:bg-[#F0F3F9] border border-slate-100 transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-6 group">
+<div class="flex items-start sm:items-center gap-6">
+<span class="font-mono text-3xl sm:text-4xl font-extrabold text-slate-300 group-hover:text-royal-blue transition-colors">04</span>
+<div>
+<h3 class="font-display text-xl sm:text-2xl font-bold text-on-surface">Innovación con Propósito</h3>
+<p class="font-body text-sm text-on-surface-variant mt-1.5 max-w-2xl leading-relaxed">
+                Implementamos tecnologías emergentes solo cuando representan una ventaja financiera o una mejora de eficiencia demostrable.
+              </p>
+</div>
+</div>
+<span class="px-4 py-1.5 rounded-full bg-white border border-slate-200 font-mono text-xs font-bold uppercase tracking-wider text-royal-blue shrink-0">
+            Retorno de Inversión
+          </span>
+</div>
+<!-- Value 05 -->
+<div class="reveal-on-scroll p-6 sm:p-8 rounded-2xl bg-surface-saas hover:bg-[#F0F3F9] border border-slate-100 transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-6 group">
+<div class="flex items-start sm:items-center gap-6">
+<span class="font-mono text-3xl sm:text-4xl font-extrabold text-slate-300 group-hover:text-royal-blue transition-colors">05</span>
+<div>
+<h3 class="font-display text-xl sm:text-2xl font-bold text-on-surface">Compromiso a Largo Plazo</h3>
+<p class="font-body text-sm text-on-surface-variant mt-1.5 max-w-2xl leading-relaxed">
+                Generamos relaciones de confianza perdurables: velamos por la estabilidad, vigencia y evolución de cada sistema implementado.
+              </p>
+</div>
+</div>
+<span class="px-4 py-1.5 rounded-full bg-white border border-slate-200 font-mono text-xs font-bold uppercase tracking-wider text-emerald-600 shrink-0">
+            Alianza Continua
+          </span>
+</div>
+</div>
+</div>
+</section>
+<!-- =========================================================================
+       7. PROGRAMA AFÍLIATE & CRÉDITOS HX (Refined Graphite + Ambient Lighting)
+       ========================================================================= -->
+<section class="w-full pt-10 sm:pt-14 pb-24 sm:pb-28 px-6 lg:px-12 bg-[#0b0b0e] text-pure-white relative overflow-hidden scroll-mt-0" id="afiliate">
+<!-- Ambient lighting accents -->
+<div class="absolute -top-32 right-0 w-[500px] h-[500px] bg-cyan-glow/10 blur-[130px] rounded-full pointer-events-none"></div>
+<div class="absolute -bottom-32 left-0 w-[500px] h-[500px] bg-[#4B1D6F]/20 blur-[140px] rounded-full pointer-events-none"></div>
+<div class="relative z-10 max-w-7xl mx-auto flex flex-col gap-10 sm:gap-12">
+  <!-- Encabezado de Apartado: HummingX BI (Posicionado más arriba) -->
+  <div class="reveal-on-scroll flex items-center gap-3.5 pb-4 border-b border-white/10">
+    <div class="relative w-8 h-8 flex items-center justify-center shrink-0">
+      <img alt="HummingX Colibrí" class="w-full h-full object-contain" src="./src/Logo HummingX BI png.png"/>
+    </div>
+    <div class="flex flex-col">
+      <span class="font-display font-extrabold text-base text-pure-white tracking-tight leading-none">
+        HummingX <span class="bg-gradient-to-r from-cyan-glow to-hx-cyan bg-clip-text text-transparent">BI</span>
+      </span>
+      <span class="font-editorial text-[9px] uppercase tracking-[0.25em] text-white/50 mt-1">Firma de Software</span>
+    </div>
+  </div>
+
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-8">
+<div class="max-w-2xl reveal-on-scroll">
+<span class="inline-flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-widest text-cyan-glow mb-3">
+<span class="w-2 h-2 rounded-full bg-cyan-glow animate-ping"></span>
+            Ecosistema de Lealtad
+          </span>
+<h2 class="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-pure-white">
+            Afíliate a <span class="bg-gradient-to-r from-cyan-glow to-hx-cyan bg-clip-text text-transparent">HummingX</span> — <br class="hidden sm:inline"/><span class="text-2xl sm:text-3xl lg:text-4xl text-white/90 font-bold">Recomienda. Gana Créditos HX. Sigue creciendo.</span>
+</h2>
+<p class="font-body text-base sm:text-lg text-white/75 mt-4 leading-relaxed">
+            Comparte HummingX con empresas que puedan beneficiarse de nuestras soluciones. Cuando una recomendación se convierte en un proyecto, recibes una recompensa en Créditos HX que puedes utilizar en servicios HummingX elegibles.
+          </p>
+</div>
+<div class="shrink-0 reveal-on-scroll">
+<a class="px-7 py-4 rounded-xl bg-gradient-to-r from-cyan-glow to-royal-blue text-[#0b0b0e] font-display font-bold text-xs uppercase tracking-wider hover:shadow-[0_0_25px_rgba(0,196,204,0.4)] transition-all inline-flex items-center gap-2" href="afiliate.html">
+<span>Afíliate ahora</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- Mechanics + Tiers Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+<!-- Left: Practical Example Card -->
+<div class="reveal-on-scroll lg:col-span-6 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-3xl p-8 sm:p-10 flex flex-col justify-between gap-6">
+<div>
+<span class="font-mono text-xs uppercase tracking-wider text-cyan-glow font-semibold block mb-2">Dinámica del Programa</span>
+<h3 class="font-display text-2xl font-bold text-pure-white">¿Cómo funciona?</h3>
+<p class="font-body text-sm sm:text-base text-white/75 mt-2 leading-relaxed">
+              Obtén Créditos HX por tus recomendaciones exitosas y reinviértelos en potenciar la tecnología de tu empresa.
+            </p>
+</div>
+<!-- 5 Steps Container -->
+<div class="bg-white/[0.03] rounded-2xl p-6 border border-white/10 flex flex-col gap-3.5">
+<div class="flex items-start gap-3">
+<span class="font-mono text-xs font-bold px-2 py-0.5 rounded bg-white/5 text-cyan-glow border border-white/10 shrink-0">01</span>
+<div>
+<h4 class="font-display font-bold text-xs sm:text-sm text-pure-white">Afíliate</h4>
+<p class="font-body text-xs text-white/70 mt-0.5">Crea tu cuenta HummingX y forma parte de nuestra comunidad.</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="font-mono text-xs font-bold px-2 py-0.5 rounded bg-white/5 text-cyan-glow border border-white/10 shrink-0">02</span>
+<div>
+<h4 class="font-display font-bold text-xs sm:text-sm text-pure-white">Recomienda</h4>
+<p class="font-body text-xs text-white/70 mt-0.5">Comparte HummingX con una empresa que pueda beneficiarse de nuestras soluciones.</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="font-mono text-xs font-bold px-2 py-0.5 rounded bg-white/5 text-cyan-glow border border-white/10 shrink-0">03</span>
+<div>
+<h4 class="font-display font-bold text-xs sm:text-sm text-pure-white">Nosotros hacemos el resto</h4>
+<p class="font-body text-xs text-white/70 mt-0.5">Nuestro equipo se pone en contacto con la empresa recomendada.</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="font-mono text-xs font-bold px-2 py-0.5 rounded bg-white/5 text-cyan-glow border border-white/10 shrink-0">04</span>
+<div>
+<h4 class="font-display font-bold text-xs sm:text-sm text-pure-white">Gana Créditos HX</h4>
+<p class="font-body text-xs text-white/70 mt-0.5">Si la recomendación se convierte en un proyecto bajo las condiciones del programa, recibirás una recompensa en Créditos HX.</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="font-mono text-xs font-bold px-2 py-0.5 rounded bg-white/5 text-cyan-glow border border-white/10 shrink-0">05</span>
+<div>
+<h4 class="font-display font-bold text-xs sm:text-sm text-pure-white">Sigue creciendo</h4>
+<p class="font-body text-xs text-white/70 mt-0.5">Utiliza tus Créditos HX en servicios HummingX elegibles.</p>
+</div>
+</div>
+<p class="font-body text-[11px] text-white/50 leading-relaxed pt-2 border-t border-white/5">
+              *Las recompensas se calculan de acuerdo con tu nivel, el tipo de servicio y las condiciones vigentes del programa.
+            </p>
+</div>
+</div>
+<!-- Right: Tiers (Member, Partner, VIP) -->
+<div class="reveal-on-scroll lg:col-span-6 flex flex-col justify-between gap-4">
+<!-- Level 1: Member -->
+<div class="bg-white/[0.03] hover:bg-white/[0.05] border border-white/10 rounded-2xl p-6 transition-all flex items-center justify-between gap-4">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-white/70">
+<span class="material-symbols-outlined text-[24px]">badge</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h4 class="font-display text-base font-bold text-pure-white">HummingX Member</h4>
+<span class="font-mono text-[10px] uppercase px-2 py-0.5 rounded bg-white/10 text-white/80">Nivel 1</span>
+</div>
+<p class="font-body text-xs text-white/70 mt-1">Acceso al programa de recompensas por recomendaciones exitosas.</p>
+</div>
+</div>
+<span class="font-mono text-xs text-white/60 shrink-0">Activo</span>
+</div>
+<!-- Level 2: Partner -->
+<div class="bg-white/[0.05] hover:bg-white/[0.08] border border-cyan-glow/30 rounded-2xl p-6 transition-all flex items-center justify-between gap-4 shadow-[0_0_20px_rgba(0,196,204,0.1)]">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-cyan-glow/15 flex items-center justify-center text-cyan-glow border border-cyan-glow/30">
+<span class="material-symbols-outlined text-[24px]">verified</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h4 class="font-display text-base font-bold text-pure-white">HummingX Partner</h4>
+<span class="font-mono text-[10px] uppercase px-2 py-0.5 rounded bg-cyan-glow/20 text-cyan-glow font-bold">Nivel 2</span>
+</div>
+<p class="font-body text-xs text-white/80 mt-1">Recompensas mejoradas y beneficios exclusivos por formar parte de nuestra comunidad.</p>
+</div>
+</div>
+<span class="font-mono text-xs text-cyan-glow font-bold shrink-0">Popular</span>
+</div>
+<!-- Level 3: VIP -->
+<div class="bg-white/[0.03] hover:bg-white/[0.05] border border-white/15 rounded-2xl p-6 transition-all flex items-center justify-between gap-4">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-hx-cyan border border-white/10">
+<span class="material-symbols-outlined text-[24px]">diamond</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h4 class="font-display text-base font-bold text-pure-white">HummingX VIP</h4>
+<span class="font-mono text-[10px] uppercase px-2 py-0.5 rounded bg-hx-cyan/20 text-hx-cyan font-bold">Exclusivo</span>
+</div>
+<p class="font-body text-xs text-white/70 mt-1">Recompensas premium y beneficios exclusivos para nuestros clientes más activos.</p>
+</div>
+</div>
+<span class="font-mono text-xs text-hx-cyan font-bold shrink-0">Premium</span>
+</div>
+<div class="px-6 py-4 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between text-xs text-white/70">
+<span>¿Listo para comenzar a recomendar?</span>
+<a class="text-cyan-glow font-semibold hover:underline flex items-center gap-1" href="afiliate.html">
+<span>Afíliate ahora</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- =========================================================================
+       8. DUDAS FRECUENTES (Interactive Clean Accordion)
+       ========================================================================= -->
+<section class="w-full pt-10 sm:pt-14 pb-24 sm:pb-28 px-6 lg:px-12 bg-white scroll-mt-0" id="dudas-frecuentes">
+<div class="max-w-4xl mx-auto flex flex-col gap-10 sm:gap-12">
+  <!-- Encabezado de Apartado: HummingX BI (Posicionado más arriba) -->
+  <div class="reveal-on-scroll flex items-center gap-3.5 pb-4 border-b border-slate-200/80">
+    <div class="relative w-8 h-8 flex items-center justify-center shrink-0">
+      <img alt="HummingX Colibrí" class="w-full h-full object-contain" src="./src/Logo HummingX BI png.png"/>
+    </div>
+    <div class="flex flex-col">
+      <span class="font-display font-extrabold text-base text-on-surface tracking-tight leading-none">
+        HummingX <span class="bg-gradient-to-r from-royal-blue to-cyan-glow bg-clip-text text-transparent">BI</span>
+      </span>
+      <span class="font-editorial text-[9px] uppercase tracking-[0.25em] text-on-surface-variant/70 mt-1">Firma de Software</span>
+    </div>
+  </div>
+
+<div class="text-center max-w-2xl mx-auto reveal-on-scroll">
+<span class="inline-flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-widest text-royal-blue mb-3">
+<span class="w-2 h-2 rounded-full bg-cyan-glow"></span>
+          Certidumbre Total
+        </span>
+<h2 class="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-on-surface tracking-tight">
+          Preguntas Frecuentes
+        </h2>
+<p class="font-body text-base sm:text-lg text-on-surface-variant mt-4 leading-relaxed">
+          Respuestas transparentes a las dudas técnicas, comerciales y metodológicas de nuestros clientes.
+        </p>
+</div>
+<div class="flex flex-col gap-4" id="faq-accordion">
+<!-- FAQ 1 -->
+<div class="reveal-on-scroll rounded-2xl border border-slate-200 bg-surface-saas overflow-hidden transition-all duration-200">
+<button class="w-full p-6 text-left flex items-center justify-between gap-4 font-display text-base sm:text-lg font-bold text-on-surface hover:text-royal-blue" onclick="toggleFaq(this)" type="button">
+<span>¿Cómo se cotiza un proyecto en HummingX BI?</span>
+<span class="material-symbols-outlined text-royal-blue shrink-0 transition-transform">keyboard_arrow_down</span>
+</button>
+<div class="px-6 pb-6 text-sm text-on-surface-variant leading-relaxed hidden">
+            Evaluamos la complejidad de integración, volumen de transacciones y necesidades de infraestructura en una sesión de diagnóstico técnico. Entregamos cotizaciones transparentes por hitos de entrega o modalidades de capacidad ágil dedicada, sin costos ocultos.
+          </div>
+</div>
+<!-- FAQ 2 -->
+<div class="reveal-on-scroll rounded-2xl border border-slate-200 bg-surface-saas overflow-hidden transition-all duration-200">
+<button class="w-full p-6 text-left flex items-center justify-between gap-4 font-display text-base sm:text-lg font-bold text-on-surface hover:text-royal-blue" onclick="toggleFaq(this)" type="button">
+<span>¿Trabajan con empresas medianas o solo grandes corporativos?</span>
+<span class="material-symbols-outlined text-royal-blue shrink-0 transition-transform">keyboard_arrow_down</span>
+</button>
+<div class="px-6 pb-6 text-sm text-on-surface-variant leading-relaxed hidden">
+            Atendemos tanto a empresas medianas en aceleración que necesitan consolidar y automatizar su operación, como a corporativos multinacionales que buscan modernizar sus sistemas e implementar analítica avanzada de alta velocidad.
+          </div>
+</div>
+<!-- FAQ 3 -->
+<div class="reveal-on-scroll rounded-2xl border border-slate-200 bg-surface-saas overflow-hidden transition-all duration-200">
+<button class="w-full p-6 text-left flex items-center justify-between gap-4 font-display text-base sm:text-lg font-bold text-on-surface hover:text-royal-blue" onclick="toggleFaq(this)" type="button">
+<span>¿Pueden integrarse con nuestros sistemas y bases de datos actuales?</span>
+<span class="material-symbols-outlined text-royal-blue shrink-0 transition-transform">keyboard_arrow_down</span>
+</button>
+<div class="px-6 pb-6 text-sm text-on-surface-variant leading-relaxed hidden">
+            Es una de nuestras mayores especialidades. Conectamos ERPs como SAP, Oracle o NetSuite, CRMs como Salesforce o HubSpot, pasarelas de pago y bases de datos legacy sin detener la operación cotidiana del negocio.
+          </div>
+</div>
+<!-- FAQ 4 -->
+<div class="reveal-on-scroll rounded-2xl border border-slate-200 bg-surface-saas overflow-hidden transition-all duration-200">
+<button class="w-full p-6 text-left flex items-center justify-between gap-4 font-display text-base sm:text-lg font-bold text-on-surface hover:text-royal-blue" onclick="toggleFaq(this)" type="button">
+<span>¿Cuánto tiempo toma desarrollar una solución típica?</span>
+<span class="material-symbols-outlined text-royal-blue shrink-0 transition-transform">keyboard_arrow_down</span>
+</button>
+<div class="px-6 pb-6 text-sm text-on-surface-variant leading-relaxed hidden">
+            Un MVP funcional o proyecto enfocado de automatización suele implementarse entre 6 y 10 semanas. Sistemas integrales o bodegas de datos de Inteligencia de Negocios avanzan en entregas quincenales a lo largo de 3 a 5 meses.
+          </div>
+</div>
+<!-- FAQ 5 -->
+<div class="reveal-on-scroll rounded-2xl border border-slate-200 bg-surface-saas overflow-hidden transition-all duration-200">
+<button class="w-full p-6 text-left flex items-center justify-between gap-4 font-display text-base sm:text-lg font-bold text-on-surface hover:text-royal-blue" onclick="toggleFaq(this)" type="button">
+<span>¿Ofrecen acompañamiento y soporte posterior al lanzamiento?</span>
+<span class="material-symbols-outlined text-royal-blue shrink-0 transition-transform">keyboard_arrow_down</span>
+</button>
+<div class="px-6 pb-6 text-sm text-on-surface-variant leading-relaxed hidden">
+            Sí. No abandonamos el software tras su salida a producción. Ofrecemos esquemas continuos de soporte con acuerdos SLA estrictos, monitoreo preventivo de fallos y paquetes de horas evolutivas para mejoras constantes.
+          </div>
+</div>
+</div>
+</div>
+</section>
+<!-- =========================================================================
+       9. FINAL CONTACT & DIAGNOSTIC CTA (Pure Dark Graphite + Subtle Glows)
+       ========================================================================= -->
+<section class="w-full pt-10 sm:pt-14 pb-20 sm:pb-24 px-6 lg:px-12 bg-surface-saas relative scroll-mt-0" id="contacto">
+  <!-- Encabezado de Apartado: HummingX BI (Posicionado más arriba) -->
+  <div class="reveal-on-scroll max-w-6xl mx-auto flex items-center gap-3.5 pb-4 border-b border-slate-200/80 mb-6 sm:mb-8">
+    <div class="relative w-8 h-8 flex items-center justify-center shrink-0">
+      <img alt="HummingX Colibrí" class="w-full h-full object-contain" src="./src/Logo HummingX BI png.png"/>
+    </div>
+    <div class="flex flex-col">
+      <span class="font-display font-extrabold text-base text-on-surface tracking-tight leading-none">
+        HummingX <span class="bg-gradient-to-r from-royal-blue to-cyan-glow bg-clip-text text-transparent">BI</span>
+      </span>
+      <span class="font-editorial text-[9px] uppercase tracking-[0.25em] text-on-surface-variant/70 mt-1">Firma de Software</span>
+    </div>
+  </div>
+
+<div class="reveal-on-scroll max-w-6xl mx-auto rounded-3xl bg-[#0b0b0e] text-pure-white p-8 sm:p-14 lg:p-16 relative overflow-hidden shadow-2xl border border-white/10">
+<!-- Decorative radial gradient accents -->
+<div class="absolute -bottom-24 -left-24 w-80 h-80 bg-[#4B1D6F]/25 rounded-full blur-3xl pointer-events-none"></div>
+<div class="absolute -top-24 -right-24 w-80 h-80 bg-cyan-glow/15 rounded-full blur-3xl pointer-events-none"></div>
+<div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-10">
+<div class="max-w-2xl flex flex-col gap-4">
+<span class="font-mono text-xs font-bold uppercase tracking-widest text-cyan-glow">
+            Diagnóstico Inicial Sin Costo
+          </span>
+<h2 class="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-pure-white">
+            ¿Listo para evolucionar la tecnología de tu empresa?
+          </h2>
+<p class="font-body text-base text-white/75 max-w-xl leading-relaxed">
+            Agenda una sesión con nuestros arquitectos de software. Evaluaremos tus procesos y te presentaremos una ruta de ingeniería viable y escalable.
+          </p>
+</div>
+<div class="shrink-0 flex flex-col sm:flex-row lg:flex-col gap-4">
+<a class="px-8 py-4 rounded-xl bg-gradient-to-r from-cyan-glow to-royal-blue text-[#0b0b0e] font-display font-bold text-xs uppercase tracking-wider hover:shadow-[0_0_28px_rgba(0,196,204,0.4)] transition-all text-center flex items-center justify-center gap-2" href="https://wa.me/525575084267" target="_blank" rel="noopener noreferrer">
+<span>Contáctanos</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</a>
+<a class="px-8 py-4 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/20 text-pure-white font-display font-semibold text-xs uppercase tracking-wider transition-all text-center flex items-center justify-center gap-2" href="#soluciones">
+<span class="material-symbols-outlined text-[18px] text-cyan-glow">grid_view</span>
+<span>Explorar Soluciones</span>
+</a>
+</div>
+</div>
+<div class="relative z-10 pt-10 mt-10 border-t border-white/10 flex flex-wrap items-center justify-between gap-4 font-mono text-xs text-white/60">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-cyan-glow text-[16px]">lock</span>
+<span>Acuerdo de Confidencialidad (NDA) firmado previo al diagnóstico</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-cyan-glow text-[16px]">schedule</span>
+<span>Respuesta técnica garantizada en menos de 24 horas</span>
+</div>
+</div>
+</div>
+</section>
+<!-- =========================================================================
+       10. EXECUTIVE FOOTER (Clean Graphite Deep Dark)
+       ========================================================================= -->
+<footer class="w-full bg-[#08080a] text-white/70 pt-20 pb-12 border-t border-white/5">
+<div class="reveal-on-scroll max-w-7xl mx-auto px-6 lg:px-12 flex flex-col gap-16">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
+<!-- Col 1 & 2: Brand -->
+<div class="lg:col-span-2 flex flex-col gap-5">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 flex items-center justify-center">
+<img alt="HummingX Logo" class="w-full h-full object-contain" src="./src/Logo HummingX BI png.png"/>
+</div>
+<span class="font-display text-xl font-bold text-pure-white tracking-tight">
+              HummingX <span class="text-cyan-glow">BI</span>
+</span>
+</div>
+<p class="font-editorial text-xs uppercase tracking-[0.2em] text-white/60">Firma de Consultoría e Ingeniería de Software</p>
+<p class="font-body text-xs text-white/60 leading-relaxed max-w-sm">
+            Diseñamos soluciones de software que convierten procesos complejos en sistemas simples, inteligentes y escalables para directivos y líderes de operaciones.
+          </p>
+<div class="flex items-center gap-2 pt-2">
+<span class="w-2 h-2 rounded-full bg-cyan-glow animate-pulse"></span>
+<span class="font-mono text-[11px] uppercase tracking-wider text-white/70">Infraestructura Enterprise Certificada</span>
+</div>
+</div>
+<!-- Col 3: Navegación -->
+<div class="flex flex-col gap-3">
+<span class="font-mono text-xs font-bold uppercase tracking-widest text-cyan-glow">Navegación</span>
+<ul class="flex flex-col gap-2.5 text-xs">
+<li><a class="hover:text-cyan-glow transition-colors" href="#inicio">Inicio</a></li>
+<li><a class="hover:text-cyan-glow transition-colors" href="#servicios">Servicios</a></li>
+<li><a class="hover:text-cyan-glow transition-colors" href="#soluciones">Soluciones</a></li>
+<li><a class="hover:text-cyan-glow transition-colors" href="#metodologia">Metodología</a></li>
+<li><a class="hover:text-cyan-glow transition-colors" href="#valores">Valores</a></li>
+<li><a class="hover:text-cyan-glow transition-colors" href="afiliate.html">Afíliate</a></li>
+<li><a class="hover:text-cyan-glow transition-colors" href="#dudas-frecuentes">Preguntas Frecuentes</a></li>
+</ul>
+</div>
+<!-- Col 4: Ecosistema & Legal -->
+<div class="flex flex-col gap-3">
+<span class="font-mono text-xs font-bold uppercase tracking-widest text-cyan-glow">Ecosistema</span>
+<ul class="flex flex-col gap-2.5 text-xs">
+<li><a class="hover:text-cyan-glow transition-colors" href="afiliate.html">Programa Afíliate</a></li>
+<li><a class="hover:text-cyan-glow transition-colors" href="portal-clientes.html">Portal Clientes</a></li>
+</ul>
+<span class="font-mono text-xs font-bold uppercase tracking-widest text-cyan-glow mt-4">Legal</span>
+<ul class="flex flex-col gap-2 text-xs">
+<li><a class="hover:text-cyan-glow transition-colors" href="aviso-de-privacidad.html">Aviso de Privacidad</a></li>
+<li><a class="hover:text-cyan-glow transition-colors" href="terminos-y-condiciones.html">Términos del Servicio</a></li>
+</ul>
+</div>
+<!-- Col 5: Contacto -->
+<div class="flex flex-col gap-3">
+<span class="font-mono text-xs font-bold uppercase tracking-widest text-cyan-glow">Contacto</span>
+<a href="mailto:hummingxbi@gmail.com" class="text-xs text-white/80 font-mono hover:text-cyan-glow transition-colors">hummingxbi@gmail.com</a>
+<p class="text-xs text-white/60">CDMX • Guadalajara • Global Delivery</p>
+<div class="flex items-center gap-2.5 pt-3">
+<a aria-label="Correo" class="w-9 h-9 rounded-xl bg-white/5 hover:bg-cyan-glow/20 hover:text-cyan-glow flex items-center justify-center transition-all text-white/80 border border-white/10" href="mailto:hummingxbi@gmail.com">
+<span class="material-symbols-outlined text-[18px]">mail</span>
+</a>
+<a aria-label="Instagram" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-xl bg-white/5 hover:bg-gradient-to-tr hover:from-amber-500 hover:via-rose-500 hover:to-purple-600 hover:text-white flex items-center justify-center transition-all text-white/80 border border-white/10" href="https://www.instagram.com/hummingx.bi/">
+<svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+<path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+</svg>
+</a>
+<a aria-label="LinkedIn" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-xl bg-white/5 hover:bg-[#0077B5] hover:text-white flex items-center justify-center transition-all text-white/80 border border-white/10" href="https://www.linkedin.com/company/hummingx-bi/">
+<svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+<path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+</svg>
+</a>
+<a aria-label="WhatsApp" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-xl bg-white/5 hover:bg-emerald-600 hover:text-white flex items-center justify-center transition-all text-white/80 border border-white/10" href="https://wa.me/525575084267">
+<span class="material-symbols-outlined text-[18px]">chat</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Copyright Bar -->
+<div class="pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-white/40">
+<p>© 2026 HummingX BI. Todos los derechos reservados.</p>
+<p class="text-cyan-glow/60">Ingeniería de Alta Precisión • Software Confiable</p>
+</div>
+</div>
+</footer>
+<!-- =========================================================================
+     LUXURY LEFT-SIDE NAVIGATION DRAWER / OVERLAY (Sin fondo duro, degradado con blur)
+     ========================================================================= -->
+<div id="luxury-nav-backdrop" onclick="toggleLuxuryMenu()" class="hidden fixed inset-0 z-[100] bg-black/40 backdrop-blur-2xl opacity-0 pointer-events-none transition-opacity duration-500 ease-out"></div>
+
+<aside id="luxury-nav-panel" class="hidden fixed top-0 left-0 bottom-0 w-full sm:w-[380px] md:w-[420px] z-[101] flex flex-col justify-center p-6 sm:p-10 overflow-hidden -translate-x-full opacity-0 pointer-events-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] bg-transparent sm:bg-gradient-to-r sm:from-[#0b0b0e]/95 sm:via-[#0b0b0e]/75 sm:to-transparent">
+  
+  <!-- Navigation: Left-aligned, compact and comfortable without any scrollbar -->
+  <nav class="relative z-10 flex flex-col items-start gap-2.5 sm:gap-3 my-auto text-left w-full">
+    
+    <a href="#inicio" onclick="navigateToSection('#inicio', event)" class="group flex items-baseline gap-3.5 py-0.5 text-xl sm:text-2xl md:text-3xl font-display font-bold text-white/75 hover:text-pure-white transition-all">
+      <span class="font-mono text-xs text-white/30 group-hover:text-cyan-glow transition-colors">01</span>
+      <span class="group-hover:translate-x-2 transition-transform duration-300">Inicio</span>
+    </a>
+
+    <a href="#servicios" onclick="navigateToSection('#servicios', event)" class="group flex items-baseline gap-3.5 py-0.5 text-xl sm:text-2xl md:text-3xl font-display font-bold text-white/75 hover:text-pure-white transition-all">
+      <span class="font-mono text-xs text-white/30 group-hover:text-cyan-glow transition-colors">02</span>
+      <span class="group-hover:translate-x-2 transition-transform duration-300">Servicios</span>
+    </a>
+
+    <a href="#soluciones" onclick="navigateToSection('#soluciones', event)" class="group flex items-baseline gap-3.5 py-0.5 text-xl sm:text-2xl md:text-3xl font-display font-bold text-white/75 hover:text-pure-white transition-all">
+      <span class="font-mono text-xs text-white/30 group-hover:text-cyan-glow transition-colors">03</span>
+      <span class="group-hover:translate-x-2 transition-transform duration-300">Soluciones</span>
+    </a>
+
+    <a href="#metodologia" onclick="navigateToSection('#metodologia', event)" class="group flex items-baseline gap-3.5 py-0.5 text-xl sm:text-2xl md:text-3xl font-display font-bold text-white/75 hover:text-pure-white transition-all">
+      <span class="font-mono text-xs text-white/30 group-hover:text-cyan-glow transition-colors">04</span>
+      <span class="group-hover:translate-x-2 transition-transform duration-300">Metodología</span>
+    </a>
+
+    <a href="#valores" onclick="navigateToSection('#valores', event)" class="group flex items-baseline gap-3.5 py-0.5 text-xl sm:text-2xl md:text-3xl font-display font-bold text-white/75 hover:text-pure-white transition-all">
+      <span class="font-mono text-xs text-white/30 group-hover:text-cyan-glow transition-colors">05</span>
+      <span class="group-hover:translate-x-2 transition-transform duration-300">Valores</span>
+    </a>
+
+    <a href="#afiliate" onclick="navigateToSection('#afiliate', event)" class="group flex items-baseline gap-3.5 py-0.5 text-xl sm:text-2xl md:text-3xl font-display font-bold text-white/75 hover:text-pure-white transition-all">
+      <span class="font-mono text-xs text-white/30 group-hover:text-cyan-glow transition-colors">06</span>
+      <span class="group-hover:translate-x-2 transition-transform duration-300">Afíliate</span>
+    </a>
+
+    <a href="#dudas-frecuentes" onclick="navigateToSection('#dudas-frecuentes', event)" class="group flex items-baseline gap-3.5 py-0.5 text-xl sm:text-2xl md:text-3xl font-display font-bold text-white/75 hover:text-pure-white transition-all">
+      <span class="font-mono text-xs text-white/30 group-hover:text-cyan-glow transition-colors">07</span>
+      <span class="group-hover:translate-x-2 transition-transform duration-300">Preguntas Frecuentes</span>
+    </a>
+
+    <a href="portal-clientes.html" class="group flex items-baseline gap-3.5 py-0.5 text-xl sm:text-2xl md:text-3xl font-display font-bold text-cyan-glow/85 hover:text-cyan-glow transition-all">
+      <span class="font-mono text-xs text-cyan-glow/50 group-hover:text-cyan-glow transition-colors">08</span>
+      <span class="group-hover:translate-x-2 transition-transform duration-300">Portal de Clientes</span>
+    </a>
+
+    <a href="#contacto" onclick="navigateToSection('#contacto', event)" class="group flex items-baseline gap-3.5 py-0.5 text-xl sm:text-2xl md:text-3xl font-display font-bold text-white/75 hover:text-pure-white transition-all">
+      <span class="font-mono text-xs text-white/30 group-hover:text-cyan-glow transition-colors">09</span>
+      <span class="group-hover:translate-x-2 transition-transform duration-300">Contacto</span>
+    </a>
+
+  </nav>
+
+</aside>
+
+<!-- Scripts -->
+<script>
+    function toggleFaq(btn) {
+      const parent = btn.parentElement;
+      const content = parent.querySelector('div');
+      const icon = btn.querySelector('.material-symbols-outlined');
+      const isHidden = content.classList.contains('hidden');
+
+      // Close all others
+      document.querySelectorAll('#faq-accordion > div').forEach(card => {
+        card.querySelector('div').classList.add('hidden');
+        card.querySelector('.material-symbols-outlined').classList.remove('rotate-180');
+        card.classList.remove('border-royal-blue', 'bg-white');
+        card.classList.add('bg-surface-saas', 'border-slate-200');
+      });
+
+      if (isHidden) {
+        content.classList.remove('hidden');
+        icon.classList.add('rotate-180');
+        parent.classList.remove('bg-surface-saas', 'border-slate-200');
+        parent.classList.add('bg-white', 'border-royal-blue', 'shadow-md');
+      }
+    }
+
+    /* Menú Lateral Izquierdo con Animación Suave y sin Scroll */
+    let luxuryMenuCloseTimer = null;
+    function toggleLuxuryMenu() {
+      const backdrop = document.getElementById('luxury-nav-backdrop');
+      const panel = document.getElementById('luxury-nav-panel');
+      const hamburger = document.getElementById('luxury-hamburger-btn');
+      if (!backdrop || !panel) return;
+
+      const isClosed = panel.classList.contains('hidden') || panel.classList.contains('-translate-x-full');
+
+      if (!isClosed) {
+        // Cerrar menú
+        panel.classList.add('-translate-x-full', 'opacity-0', 'pointer-events-none');
+        panel.classList.remove('translate-x-0', 'opacity-100', 'pointer-events-auto');
+        backdrop.classList.remove('opacity-100', 'pointer-events-auto');
+        backdrop.classList.add('opacity-0', 'pointer-events-none');
+        if (hamburger) hamburger.classList.remove('is-open');
+        document.body.style.overflow = '';
+
+        clearTimeout(luxuryMenuCloseTimer);
+        luxuryMenuCloseTimer = setTimeout(() => {
+          backdrop.classList.add('hidden');
+          panel.classList.add('hidden');
+        }, 500);
+      } else {
+        // Abrir menú
+        clearTimeout(luxuryMenuCloseTimer);
+        backdrop.classList.remove('hidden');
+        panel.classList.remove('hidden');
+        // Trigger reflow for CSS transition
+        void panel.offsetWidth;
+
+        backdrop.classList.remove('opacity-0', 'pointer-events-none');
+        backdrop.classList.add('opacity-100', 'pointer-events-auto');
+        panel.classList.remove('-translate-x-full', 'opacity-0', 'pointer-events-none');
+        panel.classList.add('translate-x-0', 'opacity-100', 'pointer-events-auto');
+        if (hamburger) hamburger.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    /* Navegación precisa y fluida a cada apartado */
+    function navigateToSection(targetId, e) {
+      if (e) e.preventDefault();
+      toggleLuxuryMenu();
+      const target = document.querySelector(targetId);
+      if (target) {
+        setTimeout(() => {
+          if (targetId === '#inicio') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+          }
+          const rect = target.getBoundingClientRect();
+          const targetY = rect.top + window.pageYOffset;
+          window.scrollTo({
+            top: targetY,
+            behavior: 'smooth'
+          });
+        }, 60);
+      }
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        const panel = document.getElementById('luxury-nav-panel');
+        if (panel && !panel.classList.contains('hidden') && !panel.classList.contains('-translate-x-full')) {
+          toggleLuxuryMenu();
+        }
+      }
+    });
+
+    /* =========================================================
+       EXPERIENCIA DE CARGA Y SECUENCIA DE ANIMACIÓN DEL HERO
+       ========================================================= */
+    function initExperience() {
+      document.body.style.overflow = '';
+      const loader = document.getElementById('page-loader');
+      const hero = document.getElementById('inicio');
+      const hamburger = document.getElementById('luxury-hamburger-btn');
+
+      // Ocultar loader minimalista
+      setTimeout(() => {
+        if (loader) {
+          loader.classList.add('loaded');
+          setTimeout(() => {
+            loader.style.display = 'none';
+          }, 700);
+        }
+        // Iniciar secuencia progresiva del hero
+        if (hero) hero.classList.add('hero-active');
+        if (hamburger) hamburger.classList.add('hero-active');
+      }, 750);
+    }
+
+    if (document.readyState === 'complete') {
+      initExperience();
+    } else {
+      window.addEventListener('load', initExperience);
+    }
+
+    // Fallback de seguridad
+    setTimeout(() => {
+      const loader = document.getElementById('page-loader');
+      if (loader && !loader.classList.contains('loaded')) {
+        initExperience();
+      }
+    }, 2000);
+
+    /* =========================================================
+       SCROLL REVEAL (Aparición progresiva al hacer scroll)
+       ========================================================= */
+    const scrollObserver = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          obs.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.1,
+      rootMargin: '0px 0px -40px 0px'
+    });
+
+    document.querySelectorAll('.reveal-on-scroll').forEach(el => {
+      scrollObserver.observe(el);
+    });
+  </script>
+</body></html>

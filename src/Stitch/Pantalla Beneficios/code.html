@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-surface": "#1b1b1e",
+          "surface-container-high": "#eae7eb",
+          "outline-variant": "#bbc9ca",
+          "surface-variant": "#e4e1e6",
+          "on-tertiary-container": "#5b2e7f",
+          "surface": "#fcf8fc",
+          "on-secondary": "#ffffff",
+          "background": "#fcf8fc",
+          "on-surface-variant": "#3c494a",
+          "on-primary": "#ffffff",
+          "on-error-container": "#93000a",
+          "border-dark-subtle": "rgba(255, 255, 255, 0.12)",
+          "primary-fixed": "#63f7ff",
+          "secondary-container": "#75adfd",
+          "hx-credit-glow": "#00E5FF",
+          "midnight-purple": "#230E38",
+          "primary-container": "#00c4cc",
+          "warning": "#F59E0B",
+          "error-container": "#ffdad6",
+          "on-secondary-container": "#00407a",
+          "inverse-surface": "#303033",
+          "tertiary-container": "#cf9cf6",
+          "secondary": "#195faa",
+          "surface-container-lowest": "#ffffff",
+          "surface-container-low": "#f6f2f7",
+          "on-secondary-fixed": "#001c3b",
+          "secondary-fixed": "#d5e3ff",
+          "tertiary-fixed-dim": "#e0b6ff",
+          "surface-tint": "#00696e",
+          "on-tertiary": "#ffffff",
+          "surface-dim": "#dcd9dd",
+          "border-subtle": "#E2E8F0",
+          "on-primary-container": "#004c4f",
+          "primary-fixed-dim": "#3cdae2",
+          "on-primary-fixed-variant": "#004f53",
+          "pure-white": "#FFFFFF",
+          "tertiary-fixed": "#f2daff",
+          "inverse-primary": "#3cdae2",
+          "tertiary": "#784a9c",
+          "outline": "#6c7a7a",
+          "on-primary-fixed": "#002021",
+          "surface-bright": "#fcf8fc",
+          "on-secondary-fixed-variant": "#004787",
+          "on-background": "#1b1b1e",
+          "primary": "#00696e",
+          "inverse-on-surface": "#f3f0f4",
+          "on-tertiary-fixed-variant": "#5e3183",
+          "surface-saas": "#F4F6F9",
+          "surface-container": "#f0edf1",
+          "error": "#EF4444",
+          "surface-container-highest": "#e4e1e6",
+          "on-tertiary-fixed": "#2e004e",
+          "success": "#10B981",
+          "on-error": "#ffffff",
+          "secondary-fixed-dim": "#a6c8ff"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "space-sm": "0.5rem",
+          "gutter": "1.5rem",
+          "space-xl": "2.5rem",
+          "space-md": "1rem",
+          "margin-mobile": "1rem",
+          "space-lg": "1.5rem",
+          "gutter-mobile": "1rem",
+          "space-xs": "0.25rem",
+          "margin": "2rem"
+        },
+        "fontFamily": {
+          "label-code-metric": ["Space Grotesk"],
+          "body-lg": ["Inter"],
+          "headline-md": ["Plus Jakarta Sans"],
+          "display-hero": ["Plus Jakarta Sans"],
+          "body-md": ["Inter"],
+          "display-hero-mobile": ["Plus Jakarta Sans"],
+          "headline-sm": ["Plus Jakarta Sans"],
+          "headline-xl": ["Plus Jakarta Sans"],
+          "body-sm": ["Inter"],
+          "label-caption": ["Inter"],
+          "label-badge": ["Space Grotesk"],
+          "headline-xl-mobile": ["Plus Jakarta Sans"],
+          "headline-lg": ["Plus Jakarta Sans"]
+        },
+        "fontSize": {
+          "label-code-metric": ["14px", {"lineHeight": "18px", "letterSpacing": "0.04em", "fontWeight": "600"}],
+          "body-lg": ["18px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "400"}],
+          "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+          "display-hero": ["56px", {"lineHeight": "64px", "letterSpacing": "-0.03em", "fontWeight": "800"}],
+          "body-md": ["15px", {"lineHeight": "24px", "fontWeight": "400"}],
+          "display-hero-mobile": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+          "headline-sm": ["18px", {"lineHeight": "26px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+          "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.025em", "fontWeight": "700"}],
+          "body-sm": ["13px", {"lineHeight": "20px", "fontWeight": "400"}],
+          "label-caption": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+          "label-badge": ["11px", {"lineHeight": "14px", "letterSpacing": "0.08em", "fontWeight": "700"}],
+          "headline-xl-mobile": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+          "headline-lg": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+        }
+      }
+    }
+  }</script></head><body class="bg-surface font-body-md text-body-md text-on-surface"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between py-space-lg"><div class="flex flex-col"><div class="px-space-lg mb-space-lg flex items-center justify-between"><span class="font-label-badge text-label-badge uppercase text-outline tracking-wider">Navegación</span><span class="h-2 w-2 rounded-full bg-primary-container"></span></div><nav class="flex flex-col gap-space-xs px-space-md" data-active-classes="bg-primary-container text-on-primary-container font-semibold rounded-lg shadow-[0_0_16px_rgba(0,196,204,0.18)]"><a aria-current="page" class="flex items-center gap-space-md px-space-md py-space-sm transition-all bg-primary-container text-on-primary-container font-semibold rounded-lg shadow-[0_0_16px_rgba(0,196,204,0.18)]" data-path="inicio" href="#"><span class="material-symbols-outlined text-[20px]">home</span><span class="font-body-sm text-body-sm font-medium">Inicio</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="mi-proyecto" href="#"><span class="material-symbols-outlined text-[20px]">rocket_launch</span><span class="font-body-sm text-body-sm font-medium">Mi proyecto</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="creditos-hx" href="#"><span class="material-symbols-outlined text-[20px]">credit_card</span><span class="font-body-sm text-body-sm font-medium">Créditos HX</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="mis-referidos" href="#"><span class="material-symbols-outlined text-[20px]">handshake</span><span class="font-body-sm text-body-sm font-medium">Mis referidos</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="beneficios" href="#"><span class="material-symbols-outlined text-[20px]">emoji_events</span><span class="font-body-sm text-body-sm font-medium">Beneficios</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="servicios" href="#"><span class="material-symbols-outlined text-[20px]">shopping_bag</span><span class="font-body-sm text-body-sm font-medium">Servicios</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="soporte" href="#"><span class="material-symbols-outlined text-[20px]">chat_bubble</span><span class="font-body-sm text-body-sm font-medium">Soporte</span></a></nav></div><div class="px-space-md"><div class="bg-surface-container-low rounded-lg p-space-md"><div class="flex items-center justify-between mb-space-xs"><span class="font-label-badge text-label-badge text-outline uppercase">Estatus</span><span class="font-label-code-metric text-label-caption text-primary font-semibold">Activo</span></div><p class="font-body-sm text-body-sm text-on-surface-variant leading-snug">Acompañamiento corporativo continuo</p></div></div></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-space-lg"><div class="flex items-center gap-space-md"><img alt="logo-white.png" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WAdnw7oudxtEkCE3tMmSw1PQ7JPB0hBVw89XfpFwB2YYzUPfQU3i3pMEzk0kPe1O-1rPV5ZZPqYH4oQuzTckZMgUUMsUrzU0R0Y6P4c_SQliDvp0CFDB7DIC7nBAQD4-VN-rXlzSQeHdUsUjpZjFKrNlpuq-bul3njhfYj1agsyeB3OVBCsjifSQrF-QpOTwYdn2_We_VCUdtROhVxznbTEvYN7Ro2vgQhjr3QXJRtg_mmmOK1HfkeV7GyBegU2U9jgKl3CPkgcWE"/><div class="flex items-center gap-space-sm"><span class="font-headline-sm text-headline-sm font-bold tracking-tight text-on-surface">HummingX BI</span><span class="inline-flex items-center rounded-full bg-surface-container px-space-sm py-0.5 font-label-badge text-label-badge text-on-surface-variant font-medium">Portal Clientes</span></div></div><div class="flex items-center gap-space-lg"><button aria-label="Notificaciones" class="relative p-space-xs rounded-full text-on-surface-variant hover:text-on-surface transition-colors focus:outline-none" type="button"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-1 right-1 h-2 w-2 rounded-full bg-primary-container ring-2 ring-surface-container-lowest"></span></button><a class="flex items-center gap-space-sm pl-space-sm text-on-surface hover:text-primary transition-colors" data-path="perfil-tahara-cafe" href="#"><div class="text-right hidden sm:block"><span class="block font-body-sm text-body-sm font-semibold text-on-surface leading-tight">Tahara Café</span><span class="block font-label-caption text-label-caption text-outline">Cliente HummingX</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></a></div></header><main class="w-full pt-16 bg-surface min-h-screen px-space-lg py-space-lg"><div class="flex flex-col w-full">
+<script>
+    (() => {
+      const navLinks = document.querySelectorAll('aside nav a');
+      navLinks.forEach(link => {
+        if (link.getAttribute('data-path') === 'beneficios') {
+          link.className = 'flex items-center gap-space-md px-space-md py-space-sm rounded-lg bg-primary-container text-on-primary-container font-semibold shadow-[0_0_16px_rgba(0,196,204,0.18)] transition-all';
+          const icon = link.querySelector('.material-symbols-outlined');
+          if (icon) icon.style.fontVariationSettings = "'FILL' 1";
+        } else {
+          link.className = 'flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all';
+        }
+      });
+    })();
+  </script>
+<!-- Header Contextual / Overline -->
+<div class="flex flex-col gap-space-xs mb-space-lg">
+<div class="flex items-center gap-space-sm">
+<span class="inline-flex items-center gap-1.5 px-space-sm py-1 rounded-full bg-surface-container-high text-on-surface-variant font-label-badge text-label-badge tracking-wider uppercase">
+<span class="h-1.5 w-1.5 rounded-full bg-primary-container animate-pulse"></span>
+        Programa de Fidelidad &amp; Membresía Empresarial
+      </span>
+<span class="inline-flex items-center px-space-sm py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-badge text-label-badge tracking-wider uppercase">
+        Cliente Exclusivo
+      </span>
+</div>
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-sm mt-1">
+<div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Tus Beneficios HummingX</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-3xl mt-1">
+          Gracias por formar parte activa de nuestra comunidad empresarial. Tu lealtad y recomendaciones impulsan ventajas continuas para la aceleración digital de tu negocio.
+        </p>
+</div>
+<div class="hidden lg:flex items-center gap-space-sm bg-surface-container-lowest px-space-md py-space-sm rounded-xl shadow-sm">
+<span class="material-symbols-outlined text-primary text-[22px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+<div class="text-left">
+<span class="block font-label-badge text-label-caption text-outline uppercase tracking-wider">Certificación Activa</span>
+<span class="block font-headline-sm text-label-code-metric text-on-surface font-semibold">Tahara Café · Partner Elite</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Hero Section: Nivel Actual & Progresión hacia VIP -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg mb-space-xl">
+<!-- Hero Card: Membresía Actual (7 cols) -->
+<div class="lg:col-span-7 bg-midnight-purple text-pure-white rounded-xl p-space-lg shadow-xl relative overflow-hidden flex flex-col justify-between">
+<!-- Glow ambient background -->
+<div class="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-primary-container/20 blur-3xl pointer-events-none"></div>
+<div class="absolute -left-20 -bottom-20 w-72 h-72 rounded-full bg-secondary/30 blur-3xl pointer-events-none"></div>
+<div class="relative z-10">
+<div class="flex items-center justify-between mb-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="h-10 w-10 rounded-lg bg-primary-container text-on-primary-container flex items-center justify-center font-bold shadow-[0_0_16px_rgba(0,196,204,0.4)]">
+<span class="material-symbols-outlined text-[24px]">workspace_premium</span>
+</div>
+<div>
+<span class="font-label-badge text-label-badge uppercase tracking-widest text-primary-fixed">Nivel Corporativo 2 de 3</span>
+<div class="flex items-center gap-2">
+<h2 class="font-headline-lg text-headline-lg text-pure-white tracking-tight">HummingX Partner</h2>
+<span class="text-xl">🐝</span>
+</div>
+</div>
+</div>
+<span class="inline-flex items-center gap-1.5 px-space-sm py-1 rounded-full bg-pure-white/10 text-primary-fixed font-label-badge text-label-badge uppercase backdrop-blur-md">
+<span class="h-2 w-2 rounded-full bg-success"></span>
+            Membresía Activa
+          </span>
+</div>
+<p class="font-body-md text-body-md text-surface-container-high max-w-xl mb-space-lg leading-relaxed">
+          Cuentas con acceso preferencial a Créditos HX acumulables, atención de ingeniería prioritaria y privilegios arquitectónicos exclusivos en el desarrollo continuo de software.
+        </p>
+<!-- Métricas clave en chips ejecutivos -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-sm">
+<div class="bg-pure-white/5 backdrop-blur-sm rounded-lg p-space-md">
+<span class="block font-label-caption text-label-caption text-surface-container-high/80 uppercase">Recomendaciones</span>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="font-headline-md text-headline-md text-pure-white">5</span>
+<span class="font-label-caption text-label-caption text-primary-fixed font-medium">Exitosas</span>
+</div>
+<span class="block font-label-caption text-label-caption text-surface-container-high/60 mt-1">Acumuladas</span>
+</div>
+<div class="bg-pure-white/5 backdrop-blur-sm rounded-lg p-space-md">
+<span class="block font-label-caption text-label-caption text-surface-container-high/80 uppercase">Créditos Generados</span>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="font-headline-md text-headline-md text-primary-fixed">$10,500</span>
+<span class="font-label-badge text-label-badge text-pure-white">HX</span>
+</div>
+<span class="block font-label-caption text-label-caption text-surface-container-high/60 mt-1">Disponibles / Canjeables</span>
+</div>
+<div class="bg-pure-white/5 backdrop-blur-sm rounded-lg p-space-md">
+<span class="block font-label-caption text-label-caption text-surface-container-high/80 uppercase">Tasa de Asignación</span>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="font-headline-md text-headline-md text-pure-white">10%</span>
+<span class="font-label-caption text-label-caption text-primary-fixed font-medium">Cashback HX</span>
+</div>
+<span class="block font-label-caption text-label-caption text-surface-container-high/60 mt-1">Por proyecto contratado</span>
+</div>
+</div>
+</div>
+<!-- Footer Micro-badge -->
+<div class="relative z-10 mt-space-lg pt-space-md flex items-center justify-between text-surface-container-high/70">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary-fixed text-[18px]">verified_user</span>
+<span class="font-body-sm text-body-sm">Acreditación válida durante todo el ejercicio fiscal 2025</span>
+</div>
+<a class="font-label-code-metric text-label-caption text-primary-fixed hover:underline flex items-center gap-1" data-path="mi-proyecto" href="#">
+          Ver aplicaciones en curso
+          <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- Próximo Nivel: Camino hacia VIP (5 cols) -->
+<div class="lg:col-span-5 bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col justify-between relative overflow-hidden">
+<div>
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-badge text-label-badge uppercase tracking-wider text-secondary">Ruta de Crecimiento</span>
+<span class="font-label-code-metric text-label-caption px-2 py-0.5 rounded bg-secondary-fixed text-on-secondary-fixed font-bold">VIP Target</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface tracking-tight mb-space-xs">Próximo Nivel: HummingX VIP</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-space-md">
+          Alcanza la máxima distinción corporativa con beneficios de ingeniería dedicados y exenciones operativas directas.
+        </p>
+<!-- Barra de Progreso Fluida con Porcentaje -->
+<div class="bg-surface-container rounded-lg p-space-md mb-space-md">
+<div class="flex justify-between items-center mb-space-xs">
+<div class="flex items-center gap-1.5">
+<span class="font-label-badge text-label-badge uppercase text-on-surface">Progreso a VIP</span>
+<span class="inline-flex items-center px-1.5 py-0.2 bg-primary/10 text-primary text-label-caption font-bold rounded">4 / 5 Referidos</span>
+</div>
+<span class="font-headline-sm text-headline-sm text-secondary font-bold font-label-code-metric">80%</span>
+</div>
+<!-- Progress track -->
+<div class="w-full bg-surface-container-high h-3 rounded-full overflow-hidden p-0.5 relative">
+<div class="h-full bg-gradient-to-r from-secondary via-primary to-primary-container rounded-full transition-all duration-700 shadow-[0_0_12px_rgba(0,196,204,0.4)]" style="width: 80%;"></div>
+</div>
+<div class="flex items-center gap-2 mt-space-sm text-on-surface">
+<span class="material-symbols-outlined text-secondary text-[20px]">flag</span>
+<p class="font-body-sm text-body-sm text-on-surface font-medium">
+              Te falta solamente <strong class="text-secondary font-semibold">1 recomendación exitosa</strong> para alcanzar el nivel VIP.
+            </p>
+</div>
+</div>
+<!-- Vista Previa de Desbloqueo VIP -->
+<div class="space-y-2 mb-space-md">
+<span class="font-label-badge text-label-caption uppercase tracking-wider text-outline block mb-1">Beneficios al desbloquear VIP:</span>
+<div class="flex items-start gap-2.5 p-2 rounded-lg hover:bg-surface-container-low transition-colors">
+<span class="flex-shrink-0 w-6 h-6 rounded-md bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center text-[14px]">🎁</span>
+<div class="leading-tight">
+<span class="block font-body-sm text-body-sm font-semibold text-on-surface">1 Mes completo de mantenimiento preventivo</span>
+<span class="font-label-caption text-label-caption text-on-surface-variant">Bonificado íntegramente cada año de servicio</span>
+</div>
+</div>
+<div class="flex items-start gap-2.5 p-2 rounded-lg hover:bg-surface-container-low transition-colors">
+<span class="flex-shrink-0 w-6 h-6 rounded-md bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center text-[14px]">⚡</span>
+<div class="leading-tight">
+<span class="block font-body-sm text-body-sm font-semibold text-on-surface">Soporte técnico ultra prioritario</span>
+<span class="font-label-caption text-label-caption text-on-surface-variant">Garantía SLA de respuesta menor a 1 hora</span>
+</div>
+</div>
+<div class="flex items-start gap-2.5 p-2 rounded-lg hover:bg-surface-container-low transition-colors">
+<span class="flex-shrink-0 w-6 h-6 rounded-md bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center text-[14px]">✨</span>
+<div class="leading-tight">
+<span class="block font-body-sm text-body-sm font-semibold text-on-surface">Actualización anual de diseño y UX gratuita</span>
+<span class="font-label-caption text-label-caption text-on-surface-variant">Refresco visual y optimización de interfaces sin costo</span>
+</div>
+</div>
+<div class="flex items-start gap-2.5 p-2 rounded-lg hover:bg-surface-container-low transition-colors">
+<span class="flex-shrink-0 w-6 h-6 rounded-md bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center text-[14px]">🛡️</span>
+<div class="leading-tight">
+<span class="block font-body-sm text-body-sm font-semibold text-on-surface">Arquitecto de software dedicado</span>
+<span class="font-label-caption text-label-caption text-on-surface-variant">Consultoría de estrategia e infraestructura continua</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Trigger -->
+<div class="pt-space-sm">
+<a class="w-full flex items-center justify-center gap-space-sm bg-primary-container hover:bg-primary-fixed-dim text-on-primary-container font-headline-sm text-body-md font-semibold py-space-sm px-space-md rounded-lg shadow-[0_0_20px_rgba(0,196,204,0.25)] hover:shadow-[0_0_28px_rgba(0,196,204,0.4)] transition-all" data-path="mis-referidos" href="#">
+<span class="material-symbols-outlined text-[20px]">person_add</span>
+          Recomendar empresa para alcanzar VIP
+        </a>
+</div>
+</div>
+</div>
+<!-- Section: Comparativa Integral de Niveles (3 Columnas) -->
+<div class="flex flex-col gap-space-md mb-space-xl">
+<div class="flex flex-col sm:flex-row sm:items-end justify-between gap-space-xs">
+<div>
+<span class="font-label-badge text-label-badge uppercase tracking-wider text-outline">Matriz de Membresías</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Comparativa de Niveles HummingX</h2>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant max-w-md">
+        Evoluciona tu estatus comercial a través de contrataciones continuas y sinergias en tu red empresarial.
+      </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-lg items-stretch">
+<!-- Card 1: Member (Nivel de Entrada - Completado) -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col justify-between relative opacity-90 hover:opacity-100 transition-opacity">
+<div>
+<!-- Header Card -->
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-badge text-label-badge uppercase tracking-wider text-outline">Nivel 1</span>
+<span class="inline-flex items-center gap-1 px-space-sm py-0.5 rounded-full bg-surface-container text-outline font-label-badge text-label-badge">
+<span class="material-symbols-outlined text-[14px] text-success">check_circle</span>
+              Completado
+            </span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface tracking-tight">HummingX Member</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 mb-space-lg">
+            Punto de partida otorgado a toda organización al iniciar su primer desarrollo de software con nosotros.
+          </p>
+<div class="h-px bg-surface-container-highest w-full mb-space-md"></div>
+<!-- Feature list -->
+<ul class="space-y-space-sm">
+<li class="flex items-start gap-space-sm text-on-surface font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-success text-[20px] flex-shrink-0">check</span>
+<span>Acreditación inicial de bienvenida (<strong class="font-semibold text-on-surface">$500 Créditos HX</strong>)</span>
+</li>
+<li class="flex items-start gap-space-sm text-on-surface font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-success text-[20px] flex-shrink-0">check</span>
+<span>Generación de Créditos HX (<strong class="font-semibold text-on-surface">8%</strong> del valor de proyectos)</span>
+</li>
+<li class="flex items-start gap-space-sm text-on-surface font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-success text-[20px] flex-shrink-0">check</span>
+<span>Seguimiento visual de fases de proyecto en tiempo real</span>
+</li>
+<li class="flex items-start gap-space-sm text-on-surface font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-success text-[20px] flex-shrink-0">check</span>
+<span>Soporte estándar vía portal con resolución programada</span>
+</li>
+<li class="flex items-start gap-space-sm text-outline/60 font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-outline/40 text-[20px] flex-shrink-0">remove</span>
+<span class="line-through">Mantenimiento bonificado</span>
+</li>
+<li class="flex items-start gap-space-sm text-outline/60 font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-outline/40 text-[20px] flex-shrink-0">remove</span>
+<span class="line-through">Arquitecto dedicado</span>
+</li>
+</ul>
+</div>
+<div class="mt-space-xl pt-space-md bg-surface-container-low -mx-space-lg -mb-space-lg p-space-md rounded-b-xl text-center">
+<span class="font-label-badge text-label-caption text-outline uppercase font-semibold">Nivel superado con éxito</span>
+</div>
+</div>
+<!-- Card 2: Partner (NIVEL ACTUAL - DESTACADO) -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-xl relative flex flex-col justify-between transform md:-translate-y-2">
+<!-- Floating Active Accent Ribbon / Glow -->
+<div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-on-primary px-space-md py-1 rounded-full font-label-badge text-label-badge uppercase tracking-widest shadow-md flex items-center gap-1.5">
+<span class="h-2 w-2 rounded-full bg-primary-container animate-ping"></span>
+          Tu Nivel Actual
+        </div>
+<div>
+<!-- Header Card -->
+<div class="flex items-center justify-between mb-space-sm mt-1">
+<span class="font-label-badge text-label-badge uppercase tracking-wider text-primary font-bold">Nivel 2 · Recomendado</span>
+<span class="inline-flex items-center gap-1 px-space-sm py-0.5 rounded-full bg-primary/10 text-primary font-label-badge text-label-badge font-bold">
+<span class="material-symbols-outlined text-[14px]">shield</span>
+              Verificado
+            </span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface tracking-tight flex items-center gap-2">
+            HummingX Partner
+            <span class="text-lg">🐝</span>
+</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 mb-space-lg">
+            Para clientes con dinámica recurrente y compromiso de red compartida que multiplican sus recursos.
+          </p>
+<div class="h-0.5 bg-primary-container/40 w-full mb-space-md"></div>
+<!-- Feature list -->
+<ul class="space-y-space-sm">
+<li class="flex items-start gap-space-sm text-on-surface font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-primary text-[20px] flex-shrink-0" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-semibold text-secondary">Todos los beneficios de HummingX Member</span>
+</li>
+<li class="flex items-start gap-space-sm text-on-surface font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-primary text-[20px] flex-shrink-0" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>Generación ampliada: <strong class="font-semibold text-on-surface">10% del valor de proyectos</strong> en Créditos HX</span>
+</li>
+<li class="flex items-start gap-space-sm text-on-surface font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-primary text-[20px] flex-shrink-0" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>Soporte prioritario garantizado (<strong class="font-semibold text-on-surface">Respuesta en &lt; 2 horas</strong>)</span>
+</li>
+<li class="flex items-start gap-space-sm text-on-surface font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-primary text-[20px] flex-shrink-0" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>Sesiones de consultoría técnica estratégica bimestrales</span>
+</li>
+<li class="flex items-start gap-space-sm text-on-surface font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-primary text-[20px] flex-shrink-0" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>Acceso preferencial a catálogo de servicios canjeables sin tope</span>
+</li>
+<li class="flex items-start gap-space-sm text-outline/60 font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-outline/40 text-[20px] flex-shrink-0">remove</span>
+<span class="line-through">SLA &lt; 1 hora y arquitecto full dedicado</span>
+</li>
+</ul>
+</div>
+<div class="mt-space-xl pt-space-md bg-primary/5 -mx-space-lg -mb-space-lg p-space-md rounded-b-xl flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">local_fire_department</span>
+<span class="font-label-badge text-label-caption text-primary font-bold uppercase">Disfrutando beneficios activos</span>
+</div>
+<span class="font-label-code-metric text-label-caption text-on-surface-variant font-semibold">Tahara Café</span>
+</div>
+</div>
+<!-- Card 3: VIP (Próximo Nivel) -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
+<!-- Subtle gradient ribbon -->
+<div class="absolute -right-12 -top-12 w-32 h-32 bg-secondary-container/20 rounded-full blur-xl pointer-events-none"></div>
+<div>
+<!-- Header Card -->
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-badge text-label-badge uppercase tracking-wider text-secondary font-bold">Nivel 3 · Máxima Distinción</span>
+<span class="inline-flex items-center gap-1 px-space-sm py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-badge text-label-badge">
+<span class="material-symbols-outlined text-[14px]">lock_open</span>
+              Por Desbloquear
+            </span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface tracking-tight flex items-center gap-2">
+            HummingX VIP
+            <span class="material-symbols-outlined text-warning text-[24px]" style="font-variation-settings: 'FILL' 1;">stars</span>
+</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 mb-space-lg">
+            El círculo de mayor prestigio corporativo para socios estratégicos de alto volumen e impacto.
+          </p>
+<div class="h-px bg-surface-container-highest w-full mb-space-md"></div>
+<!-- Feature list -->
+<ul class="space-y-space-sm">
+<li class="flex items-start gap-space-sm text-on-surface font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-secondary text-[20px] flex-shrink-0" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-semibold text-on-surface">Todo lo incluido en HummingX Partner</span>
+</li>
+<li class="flex items-start gap-space-sm text-on-surface font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-secondary text-[20px] flex-shrink-0" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>Tasa máxima de asignación: <strong class="font-semibold text-secondary">12% del valor de proyectos</strong> en Créditos HX</span>
+</li>
+<li class="flex items-start gap-space-sm text-on-surface font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-secondary text-[20px] flex-shrink-0" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span><strong class="font-semibold text-on-surface">1 Mes de mantenimiento preventivo anual</strong> 100% bonificado</span>
+</li>
+<li class="flex items-start gap-space-sm text-on-surface font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-secondary text-[20px] flex-shrink-0" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>Asesoría directa y canal permanente con <strong class="font-semibold text-on-surface">Arquitecto de Software Senior</strong></span>
+</li>
+<li class="flex items-start gap-space-sm text-on-surface font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-secondary text-[20px] flex-shrink-0" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>Actualización anual de diseño de interfaz (UI/UX) sin costo adicional</span>
+</li>
+<li class="flex items-start gap-space-sm text-on-surface font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-secondary text-[20px] flex-shrink-0" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>SLA de atención crítica 24/7 en incidentes nivel 1 (<strong class="font-semibold text-secondary">&lt; 1 hora</strong>)</span>
+</li>
+</ul>
+</div>
+<div class="mt-space-xl pt-space-md">
+<a class="w-full flex items-center justify-center gap-1.5 py-space-sm px-space-md rounded-lg bg-surface-container hover:bg-secondary-fixed text-on-surface hover:text-on-secondary-fixed font-label-code-metric text-label-caption font-semibold transition-colors" data-path="mis-referidos" href="#">
+            Completar meta con 1 referido
+            <span class="material-symbols-outlined text-[16px]">trending_up</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<!-- FAQ / Beneficios Explicados Brevemente (Bento Insights) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-lg mb-space-xl">
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex items-start gap-space-md">
+<div class="w-12 h-12 rounded-lg bg-surface-container-high text-primary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[24px]">account_balance_wallet</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface font-semibold mb-1">Sin Vencimiento Oculto</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          Tus Créditos HX generados se conservan en tu billetera corporativa y pueden utilizarse en nuevos módulos o soporte cuando lo necesites.
+        </p>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex items-start gap-space-md">
+<div class="w-12 h-12 rounded-lg bg-surface-container-high text-secondary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[24px]">handshake</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface font-semibold mb-1">Transferencia Directa</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          Puedes transferir o aplicar Créditos HX a marcas subsidiarias o proyectos hermanos administrados dentro de tu portal.
+        </p>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex items-start gap-space-md">
+<div class="w-12 h-12 rounded-lg bg-surface-container-high text-tertiary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[24px]">verified</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface font-semibold mb-1">SLA Contractual</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          Los tiempos reducidos de respuesta de cada nivel quedan formalizados en tu anexo contractual de servicio HummingX.
+        </p>
+</div>
+</div>
+</div>
+<!-- Bloque Inferior de Soporte / Preguntas sobre Membresía -->
+<div class="bg-gradient-to-r from-surface-container-lowest via-surface-container-low to-surface-container-lowest rounded-xl p-space-lg md:p-space-xl shadow-sm flex flex-col md:flex-row items-center justify-between gap-space-lg">
+<div class="flex items-center gap-space-md">
+<div class="h-14 w-14 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[30px]">support_agent</span>
+</div>
+<div>
+<span class="font-label-badge text-label-badge uppercase tracking-wider text-outline">Atención Ejecutiva Personalizada</span>
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface tracking-tight mt-0.5">
+          ¿Tienes dudas sobre tus beneficios o cómo aplicar tus ventajas corporativas?
+        </h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+          Tu asesor directivo asignado puede guiarte para optimizar tu saldo de Créditos HX o activar sesiones de consultoría técnica sin costo.
+        </p>
+</div>
+</div>
+<div class="flex items-center gap-space-sm flex-shrink-0 w-full md:w-auto justify-end">
+<a class="w-full md:w-auto inline-flex items-center justify-center gap-2 bg-secondary text-on-secondary hover:bg-secondary/90 font-headline-sm text-body-md font-semibold px-space-lg py-space-sm rounded-lg shadow-sm transition-all" data-path="soporte" href="#">
+<span class="material-symbols-outlined text-[20px]">chat_bubble</span>
+        Conversar con tu asesor designado
+      </a>
+</div>
+</div>
+</div></main></div></body></html>

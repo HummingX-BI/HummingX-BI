@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-surface": "#1b1b1e",
+          "surface-container-high": "#eae7eb",
+          "outline-variant": "#bbc9ca",
+          "surface-variant": "#e4e1e6",
+          "on-tertiary-container": "#5b2e7f",
+          "surface": "#fcf8fc",
+          "on-secondary": "#ffffff",
+          "background": "#fcf8fc",
+          "on-surface-variant": "#3c494a",
+          "on-primary": "#ffffff",
+          "on-error-container": "#93000a",
+          "border-dark-subtle": "rgba(255, 255, 255, 0.12)",
+          "primary-fixed": "#63f7ff",
+          "secondary-container": "#75adfd",
+          "hx-credit-glow": "#00E5FF",
+          "midnight-purple": "#230E38",
+          "primary-container": "#00c4cc",
+          "warning": "#F59E0B",
+          "error-container": "#ffdad6",
+          "on-secondary-container": "#00407a",
+          "inverse-surface": "#303033",
+          "tertiary-container": "#cf9cf6",
+          "secondary": "#195faa",
+          "surface-container-lowest": "#ffffff",
+          "surface-container-low": "#f6f2f7",
+          "on-secondary-fixed": "#001c3b",
+          "secondary-fixed": "#d5e3ff",
+          "tertiary-fixed-dim": "#e0b6ff",
+          "surface-tint": "#00696e",
+          "on-tertiary": "#ffffff",
+          "surface-dim": "#dcd9dd",
+          "border-subtle": "#E2E8F0",
+          "on-primary-container": "#004c4f",
+          "primary-fixed-dim": "#3cdae2",
+          "on-primary-fixed-variant": "#004f53",
+          "pure-white": "#FFFFFF",
+          "tertiary-fixed": "#f2daff",
+          "inverse-primary": "#3cdae2",
+          "tertiary": "#784a9c",
+          "outline": "#6c7a7a",
+          "on-primary-fixed": "#002021",
+          "surface-bright": "#fcf8fc",
+          "on-secondary-fixed-variant": "#004787",
+          "on-background": "#1b1b1e",
+          "primary": "#00696e",
+          "inverse-on-surface": "#f3f0f4",
+          "on-tertiary-fixed-variant": "#5e3183",
+          "surface-saas": "#F4F6F9",
+          "surface-container": "#f0edf1",
+          "error": "#EF4444",
+          "surface-container-highest": "#e4e1e6",
+          "on-tertiary-fixed": "#2e004e",
+          "success": "#10B981",
+          "on-error": "#ffffff",
+          "secondary-fixed-dim": "#a6c8ff"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "space-sm": "0.5rem",
+          "gutter": "1.5rem",
+          "space-xl": "2.5rem",
+          "space-md": "1rem",
+          "margin-mobile": "1rem",
+          "space-lg": "1.5rem",
+          "gutter-mobile": "1rem",
+          "space-xs": "0.25rem",
+          "margin": "2rem"
+        },
+        "fontFamily": {
+          "label-code-metric": ["Space Grotesk"],
+          "body-lg": ["Inter"],
+          "headline-md": ["Plus Jakarta Sans"],
+          "display-hero": ["Plus Jakarta Sans"],
+          "body-md": ["Inter"],
+          "display-hero-mobile": ["Plus Jakarta Sans"],
+          "headline-sm": ["Plus Jakarta Sans"],
+          "headline-xl": ["Plus Jakarta Sans"],
+          "body-sm": ["Inter"],
+          "label-caption": ["Inter"],
+          "label-badge": ["Space Grotesk"],
+          "headline-xl-mobile": ["Plus Jakarta Sans"],
+          "headline-lg": ["Plus Jakarta Sans"]
+        },
+        "fontSize": {
+          "label-code-metric": ["14px", {"lineHeight": "18px", "letterSpacing": "0.04em", "fontWeight": "600"}],
+          "body-lg": ["18px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "400"}],
+          "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+          "display-hero": ["56px", {"lineHeight": "64px", "letterSpacing": "-0.03em", "fontWeight": "800"}],
+          "body-md": ["15px", {"lineHeight": "24px", "fontWeight": "400"}],
+          "display-hero-mobile": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+          "headline-sm": ["18px", {"lineHeight": "26px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+          "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.025em", "fontWeight": "700"}],
+          "body-sm": ["13px", {"lineHeight": "20px", "fontWeight": "400"}],
+          "label-caption": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+          "label-badge": ["11px", {"lineHeight": "14px", "letterSpacing": "0.08em", "fontWeight": "700"}],
+          "headline-xl-mobile": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+          "headline-lg": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+        }
+      }
+    }
+  }</script></head><body class="bg-surface font-body-md text-body-md text-on-surface"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between py-space-lg"><div class="flex flex-col"><div class="px-space-lg mb-space-lg flex items-center justify-between"><span class="font-label-badge text-label-badge uppercase text-outline tracking-wider">Navegación</span><span class="h-2 w-2 rounded-full bg-primary-container"></span></div><nav class="flex flex-col gap-space-xs px-space-md" data-active-classes="bg-primary-container text-on-primary-container font-semibold rounded-lg shadow-[0_0_16px_rgba(0,196,204,0.18)]"><a aria-current="page" class="flex items-center gap-space-md px-space-md py-space-sm transition-all bg-primary-container text-on-primary-container font-semibold rounded-lg shadow-[0_0_16px_rgba(0,196,204,0.18)]" data-path="inicio" href="#"><span class="material-symbols-outlined text-[20px]">home</span><span class="font-body-sm text-body-sm font-medium">Inicio</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="mi-proyecto" href="#"><span class="material-symbols-outlined text-[20px]">rocket_launch</span><span class="font-body-sm text-body-sm font-medium">Mi proyecto</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="creditos-hx" href="#"><span class="material-symbols-outlined text-[20px]">credit_card</span><span class="font-body-sm text-body-sm font-medium">Créditos HX</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="mis-referidos" href="#"><span class="material-symbols-outlined text-[20px]">handshake</span><span class="font-body-sm text-body-sm font-medium">Mis referidos</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="beneficios" href="#"><span class="material-symbols-outlined text-[20px]">emoji_events</span><span class="font-body-sm text-body-sm font-medium">Beneficios</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="servicios" href="#"><span class="material-symbols-outlined text-[20px]">shopping_bag</span><span class="font-body-sm text-body-sm font-medium">Servicios</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="soporte" href="#"><span class="material-symbols-outlined text-[20px]">chat_bubble</span><span class="font-body-sm text-body-sm font-medium">Soporte</span></a></nav></div><div class="px-space-md"><div class="bg-surface-container-low rounded-lg p-space-md"><div class="flex items-center justify-between mb-space-xs"><span class="font-label-badge text-label-badge text-outline uppercase">Estatus</span><span class="font-label-code-metric text-label-caption text-primary font-semibold">Activo</span></div><p class="font-body-sm text-body-sm text-on-surface-variant leading-snug">Acompañamiento corporativo continuo</p></div></div></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-space-lg"><div class="flex items-center gap-space-md"><img alt="logo-white.png" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WAdnw7oudxtEkCE3tMmSw1PQ7JPB0hBVw89XfpFwB2YYzUPfQU3i3pMEzk0kPe1O-1rPV5ZZPqYH4oQuzTckZMgUUMsUrzU0R0Y6P4c_SQliDvp0CFDB7DIC7nBAQD4-VN-rXlzSQeHdUsUjpZjFKrNlpuq-bul3njhfYj1agsyeB3OVBCsjifSQrF-QpOTwYdn2_We_VCUdtROhVxznbTEvYN7Ro2vgQhjr3QXJRtg_mmmOK1HfkeV7GyBegU2U9jgKl3CPkgcWE"/><div class="flex items-center gap-space-sm"><span class="font-headline-sm text-headline-sm font-bold tracking-tight text-on-surface">HummingX BI</span><span class="inline-flex items-center rounded-full bg-surface-container px-space-sm py-0.5 font-label-badge text-label-badge text-on-surface-variant font-medium">Portal Clientes</span></div></div><div class="flex items-center gap-space-lg"><button aria-label="Notificaciones" class="relative p-space-xs rounded-full text-on-surface-variant hover:text-on-surface transition-colors focus:outline-none" type="button"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-1 right-1 h-2 w-2 rounded-full bg-primary-container ring-2 ring-surface-container-lowest"></span></button><a class="flex items-center gap-space-sm pl-space-sm text-on-surface hover:text-primary transition-colors" data-path="perfil-tahara-cafe" href="#"><div class="text-right hidden sm:block"><span class="block font-body-sm text-body-sm font-semibold text-on-surface leading-tight">Tahara Café</span><span class="block font-label-caption text-label-caption text-outline">Cliente HummingX</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></a></div></header><main class="w-full pt-16 bg-surface min-h-screen px-space-lg py-space-lg"><div class="flex flex-col w-full">
+<!-- Script para sincronizar navegación activa del app shell y filtros -->
+<script>
+    (function () {
+      // Sincronizar navegación en Sidebar de Shell
+      const navLinks = document.querySelectorAll('aside nav a');
+      navLinks.forEach(a => {
+        if (a.getAttribute('data-path') === 'servicios') {
+          a.className = 'flex items-center gap-space-md px-space-md py-space-sm rounded-lg bg-primary-container text-on-primary-container font-semibold shadow-[0_0_16px_rgba(0,196,204,0.18)] transition-all';
+          const icon = a.querySelector('.material-symbols-outlined');
+          if (icon) icon.style.fontVariationSettings = "'FILL' 1";
+        } else {
+          a.className = 'flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all';
+          const icon = a.querySelector('.material-symbols-outlined');
+          if (icon) icon.style.fontVariationSettings = "'FILL' 0";
+        }
+      });
+    })();
+
+    function filterServices(category) {
+      const cards = document.querySelectorAll('[data-service-category]');
+      const filterBtns = document.querySelectorAll('.service-filter-pill');
+      
+      filterBtns.forEach(btn => {
+        if (btn.getAttribute('data-filter') === category) {
+          btn.className = 'service-filter-pill px-space-md py-space-xs rounded-full font-label-badge text-label-badge bg-primary-container text-on-primary-container shadow-sm transition-all flex items-center gap-1.5';
+        } else {
+          btn.className = 'service-filter-pill px-space-md py-space-xs rounded-full font-label-badge text-label-badge bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all flex items-center gap-1.5';
+        }
+      });
+
+      cards.forEach(card => {
+        const categories = card.getAttribute('data-service-category').split(' ');
+        if (category === 'all' || categories.includes(category)) {
+          card.classList.remove('hidden');
+          card.classList.add('flex');
+        } else {
+          card.classList.add('hidden');
+          card.classList.remove('flex');
+        }
+      });
+    }
+  </script>
+<!-- Banner Flotante Sutil: Balance Disponible de Créditos HX -->
+<div class="w-full mb-space-lg">
+<div class="relative overflow-hidden rounded-xl bg-midnight-purple p-space-lg text-pure-white shadow-xl">
+<!-- Glow ambiental decorativo -->
+<div class="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-hx-credit-glow/15 blur-3xl pointer-events-none"></div>
+<div class="absolute -left-12 -bottom-12 w-48 h-48 rounded-full bg-secondary-container/10 blur-2xl pointer-events-none"></div>
+<div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-lg bg-pure-white/10 backdrop-blur-md flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">stars</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-sm">
+<span class="font-label-badge text-label-badge uppercase tracking-widest text-primary-container">Balance Disponible</span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-pure-white/10 font-label-caption text-label-caption text-pure-white/80">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container animate-pulse"></span>
+                Tahara Café
+              </span>
+</div>
+<div class="flex items-baseline gap-space-xs mt-0.5">
+<span class="font-label-code-metric text-[32px] leading-tight font-bold tracking-tight text-pure-white">$2,000</span>
+<span class="font-headline-sm text-headline-sm font-semibold text-primary-container">Créditos HX</span>
+<span class="font-body-sm text-body-sm text-pure-white/70 ml-1">listos para canjear de inmediato</span>
+</div>
+</div>
+</div>
+<!-- Indicador de uso rápido -->
+<div class="flex items-center gap-space-md bg-pure-white/5 rounded-lg px-space-md py-space-sm backdrop-blur-sm">
+<div class="flex flex-col text-left">
+<span class="font-label-caption text-label-caption text-pure-white/60">Poder de Aplicación</span>
+<span class="font-body-sm text-body-sm font-semibold text-pure-white">100% de cobertura en módulos seleccionados</span>
+</div>
+<a class="px-space-md py-space-xs rounded bg-pure-white/10 hover:bg-pure-white/20 text-pure-white font-label-badge text-label-badge uppercase transition-colors" data-path="creditos-hx" href="#">
+            Ver Historial
+          </a>
+</div>
+</div>
+</div>
+</div>
+<!-- Encabezado de Sección & Pacing -->
+<div class="w-full flex flex-col md:flex-row md:items-end justify-between gap-space-lg mb-space-xl">
+<div class="max-w-2xl">
+<div class="inline-flex items-center gap-2 mb-space-xs">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="font-label-badge text-label-badge uppercase text-secondary font-bold">Catálogo de Capacidades &amp; Soluciones</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl font-bold tracking-tight text-on-surface">
+        Soluciones y Servicios HummingX
+      </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-space-xs">
+        Impulsa la evolución digital de tu negocio. Aplica tus Créditos HX acumulados o contrata nuevas capacidades tecnológicas con acompañamiento prioritario.
+      </p>
+</div>
+<!-- Filtros Minimalistas Estilo Pills -->
+<div class="flex flex-wrap items-center gap-space-xs bg-surface-container-low p-1.5 rounded-full">
+<button class="service-filter-pill px-space-md py-space-xs rounded-full font-label-badge text-label-badge bg-primary-container text-on-primary-container shadow-sm transition-all flex items-center gap-1.5" data-filter="all" onclick="filterServices('all')" type="button">
+<span>Todos los servicios</span>
+<span class="w-4 h-4 rounded-full bg-midnight-purple/20 text-[10px] flex items-center justify-center font-bold">5</span>
+</button>
+<button class="service-filter-pill px-space-md py-space-xs rounded-full font-label-badge text-label-badge bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all flex items-center gap-1.5" data-filter="elegible" onclick="filterServices('elegible')" type="button">
+<span class="material-symbols-outlined text-[14px] text-secondary">verified</span>
+<span>Elegibles con Créditos HX</span>
+</button>
+<button class="service-filter-pill px-space-md py-space-xs rounded-full font-label-badge text-label-badge bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all flex items-center gap-1.5" data-filter="software" onclick="filterServices('software')" type="button">
+<span>Desarrollo y Software</span>
+</button>
+<button class="service-filter-pill px-space-md py-space-xs rounded-full font-label-badge text-label-badge bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all flex items-center gap-1.5" data-filter="soporte" onclick="filterServices('soporte')" type="button">
+<span>Optimización y Soporte</span>
+</button>
+</div>
+</div>
+<!-- Catálogo de Servicios (Tarjetas Amplias, Respiradas y Corporativas) -->
+<div class="flex flex-col gap-space-lg w-full mb-space-xl">
+<!-- Card A: Actualización de Diseño & UX (100% Cubierto con Créditos HX) -->
+<div class="group relative flex flex-col lg:flex-row items-stretch justify-between rounded-xl bg-surface-container-lowest p-space-xl shadow-sm hover:shadow-xl transition-all duration-300" data-service-category="elegible software">
+<!-- Indicador cromático de estado de crédito en el costado -->
+<div class="absolute top-0 left-0 bottom-0 w-1.5 bg-primary-container rounded-l-xl"></div>
+<div class="flex flex-col lg:max-w-xl pr-0 lg:pr-space-lg">
+<div class="flex flex-wrap items-center gap-space-sm mb-space-sm">
+<span class="inline-flex items-center gap-1.5 px-space-sm py-0.5 rounded-full bg-primary-container/15 font-label-badge text-label-badge text-on-primary-container">
+<span class="material-symbols-outlined text-[15px] text-primary" style="font-variation-settings: 'FILL' 1;">stars</span>
+            100% CANJEABLE SIN COSTO ADICIONAL
+          </span>
+<span class="font-label-badge text-label-badge uppercase text-outline">Software &amp; Experiencia</span>
+</div>
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface group-hover:text-primary transition-colors">
+          Actualización de Diseño &amp; UX
+        </h3>
+<!-- Matriz Problema -> Solución -->
+<div class="mt-space-md grid grid-cols-1 sm:grid-cols-2 gap-space-md bg-surface-saas p-space-md rounded-lg">
+<div>
+<span class="block font-label-caption text-label-caption uppercase tracking-wider text-outline mb-1">El Desafío</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              Páginas de aterrizaje o interfaces obsoletas que reducen la confianza del usuario y frenan la conversión de clientes potenciales.
+            </p>
+</div>
+<div>
+<span class="block font-label-caption text-label-caption uppercase tracking-wider text-primary font-semibold mb-1">La Solución HummingX</span>
+<p class="font-body-sm text-body-sm text-on-surface leading-relaxed">
+              Renovación visual integral, optimización quirúrgica de flujos y modernización de interfaces basada en métricas de conversión comercial.
+            </p>
+</div>
+</div>
+<!-- Cobertura y saldo proyectado -->
+<div class="mt-space-md flex items-center gap-2 text-success font-body-sm text-body-sm font-medium">
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+<span>100% Cubierto con tus $2,000 Créditos HX disponibles. Saldo restante después del canje: $0 USD.</span>
+</div>
+</div>
+<!-- Métricas Financieras & Acción -->
+<div class="mt-space-lg lg:mt-0 flex flex-col justify-between items-start lg:items-end lg:min-w-[280px] pt-space-md lg:pt-0">
+<div class="lg:text-right w-full">
+<span class="font-label-caption text-label-caption uppercase tracking-wider text-outline block">Inversión Estimada</span>
+<div class="flex items-baseline lg:justify-end gap-1.5 mt-0.5">
+<span class="font-label-code-metric text-[34px] leading-tight font-bold text-on-surface">$2,000</span>
+<span class="font-body-sm text-body-sm font-semibold text-outline">USD / HX</span>
+</div>
+<div class="inline-block mt-1 px-2.5 py-1 rounded bg-primary-container/20 text-on-primary-container font-label-code-metric text-label-code-metric font-semibold">
+            Saldo aplicado: -$2,000 HX
+          </div>
+<div class="mt-1 font-body-sm text-body-sm font-semibold text-primary">
+            Costo Neto: $0 USD
+          </div>
+</div>
+<div class="w-full mt-space-lg flex flex-col gap-space-xs">
+<button class="w-full flex items-center justify-center gap-space-sm px-space-lg py-space-sm rounded-lg bg-primary-container text-on-primary font-semibold shadow-[0_0_20px_rgba(0,196,204,0.28)] hover:shadow-[0_0_24px_rgba(0,196,204,0.45)] hover:-translate-y-0.5 transition-all" type="button">
+<span class="material-symbols-outlined text-[20px]">redeem</span>
+<span class="font-headline-sm text-[15px] font-bold text-on-surface">Canjear con Créditos HX</span>
+</button>
+<span class="font-label-caption text-label-caption text-center text-outline">Activación y kickoff en menos de 48 hrs hábiles</span>
+</div>
+</div>
+</div>
+<!-- Card B: Automatización de Procesos Operativos (Aplica $2,000 HX + Diferencia) -->
+<div class="group relative flex flex-col lg:flex-row items-stretch justify-between rounded-xl bg-surface-container-lowest p-space-xl shadow-sm hover:shadow-xl transition-all duration-300" data-service-category="software">
+<div class="flex flex-col lg:max-w-xl pr-0 lg:pr-space-lg">
+<div class="flex flex-wrap items-center gap-space-sm mb-space-sm">
+<span class="inline-flex items-center gap-1.5 px-space-sm py-0.5 rounded-full bg-secondary-container/20 font-label-badge text-label-badge text-secondary font-bold">
+<span class="material-symbols-outlined text-[15px]">autorenew</span>
+            EFICIENCIA OPERACIONAL
+          </span>
+<span class="font-label-badge text-label-badge uppercase text-outline">Optimización de Procesos</span>
+</div>
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface group-hover:text-secondary transition-colors">
+          Automatización de Procesos Operativos
+        </h3>
+<!-- Matriz Problema -> Solución -->
+<div class="mt-space-md grid grid-cols-1 sm:grid-cols-2 gap-space-md bg-surface-saas p-space-md rounded-lg">
+<div>
+<span class="block font-label-caption text-label-caption uppercase tracking-wider text-outline mb-1">El Desafío</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              Equipos atrapados en transcripción manual de datos, sincronizaciones erráticas y demoras en atención comercial y facturación.
+            </p>
+</div>
+<div>
+<span class="block font-label-caption text-label-caption uppercase tracking-wider text-secondary font-semibold mb-1">La Solución HummingX</span>
+<p class="font-body-sm text-body-sm text-on-surface leading-relaxed">
+              Eliminación de tareas repetitivas e integración fluida de tus sistemas operativos con flujos automatizados de alta disponibilidad y trazabilidad.
+            </p>
+</div>
+</div>
+<!-- Cobertura y saldo proyectado -->
+<div class="mt-space-md flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[18px] text-primary">swap_horiz</span>
+<span>Puedes aplicar tus <strong class="text-on-surface">$2,000 Créditos HX</strong> y cubrir la diferencia restante ($4,000 USD).</span>
+</div>
+</div>
+<!-- Métricas Financieras & Acción -->
+<div class="mt-space-lg lg:mt-0 flex flex-col justify-between items-start lg:items-end lg:min-w-[280px] pt-space-md lg:pt-0">
+<div class="lg:text-right w-full">
+<span class="font-label-caption text-label-caption uppercase tracking-wider text-outline block">Inversión Base</span>
+<div class="flex items-baseline lg:justify-end gap-1.5 mt-0.5">
+<span class="font-body-sm text-body-sm text-outline font-semibold">Desde</span>
+<span class="font-label-code-metric text-[34px] leading-tight font-bold text-on-surface">$6,000</span>
+<span class="font-body-sm text-body-sm font-semibold text-outline">USD</span>
+</div>
+<div class="inline-block mt-1 px-2.5 py-1 rounded bg-secondary/10 text-secondary font-label-code-metric text-label-code-metric font-semibold">
+            Créditos aplicables: -$2,000 HX
+          </div>
+<div class="mt-1 font-body-sm text-body-sm font-semibold text-on-surface">
+            Inversión ajustada: <span class="text-secondary">$4,000 USD</span>
+</div>
+</div>
+<div class="w-full mt-space-lg flex flex-col gap-space-xs">
+<button class="w-full flex items-center justify-center gap-space-sm px-space-lg py-space-sm rounded-lg bg-secondary text-on-secondary font-semibold hover:bg-secondary/90 transition-all" type="button">
+<span class="material-symbols-outlined text-[20px]">calculate</span>
+<span class="font-headline-sm text-[15px] font-semibold">Aplicar Créditos y Cotizar</span>
+</button>
+<span class="font-label-caption text-label-caption text-center text-outline">Incluye diagnóstico de arquitectura sin costo</span>
+</div>
+</div>
+</div>
+<!-- Card C: Mantenimiento Preventivo & Monitoreo (Cubierto con Remanente) -->
+<div class="group relative flex flex-col lg:flex-row items-stretch justify-between rounded-xl bg-surface-container-lowest p-space-xl shadow-sm hover:shadow-xl transition-all duration-300" data-service-category="elegible soporte">
+<div class="absolute top-0 left-0 bottom-0 w-1.5 bg-primary rounded-l-xl"></div>
+<div class="flex flex-col lg:max-w-xl pr-0 lg:pr-space-lg">
+<div class="flex flex-wrap items-center gap-space-sm mb-space-sm">
+<span class="inline-flex items-center gap-1.5 px-space-sm py-0.5 rounded-full bg-primary/10 font-label-badge text-label-badge text-primary font-bold">
+<span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">shield</span>
+            CONTINUIDAD ASEGURADA
+          </span>
+<span class="font-label-badge text-label-badge uppercase text-outline">Operaciones &amp; SLA</span>
+</div>
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface group-hover:text-primary transition-colors">
+          Mantenimiento Preventivo &amp; Monitoreo
+        </h3>
+<!-- Matriz Problema -> Solución -->
+<div class="mt-space-md grid grid-cols-1 sm:grid-cols-2 gap-space-md bg-surface-saas p-space-md rounded-lg">
+<div>
+<span class="block font-label-caption text-label-caption uppercase tracking-wider text-outline mb-1">El Desafío</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              Vulnerabilidades imprevistas, lentitud acumulada por falta de mantenimiento y riesgo de caídas de servicio en horarios clave.
+            </p>
+</div>
+<div>
+<span class="block font-label-caption text-label-caption uppercase tracking-wider text-primary font-semibold mb-1">La Solución HummingX</span>
+<p class="font-body-sm text-body-sm text-on-surface leading-relaxed">
+              Supervisión continua, copias de seguridad garantizadas, actualizaciones críticas y soporte preferencial con SLA garantizado.
+            </p>
+</div>
+</div>
+<!-- Cobertura y saldo proyectado -->
+<div class="mt-space-md flex items-center gap-2 text-success font-body-sm text-body-sm font-medium">
+<span class="material-symbols-outlined text-[18px]">account_balance_wallet</span>
+<span>Totalmente cubierto: te quedarán <strong>$500 Créditos HX</strong> de saldo a favor tras activar 1 mes.</span>
+</div>
+</div>
+<!-- Métricas Financieras & Acción -->
+<div class="mt-space-lg lg:mt-0 flex flex-col justify-between items-start lg:items-end lg:min-w-[280px] pt-space-md lg:pt-0">
+<div class="lg:text-right w-full">
+<span class="font-label-caption text-label-caption uppercase tracking-wider text-outline block">Modalidad Mensual</span>
+<div class="flex items-baseline lg:justify-end gap-1.5 mt-0.5">
+<span class="font-label-code-metric text-[34px] leading-tight font-bold text-on-surface">$1,500</span>
+<span class="font-body-sm text-body-sm font-semibold text-outline">USD / mes</span>
+</div>
+<div class="inline-block mt-1 px-2.5 py-1 rounded bg-success/10 text-success font-label-code-metric text-label-code-metric font-semibold">
+            Cubierto 100% con saldo HX
+          </div>
+<div class="mt-1 font-body-sm text-body-sm font-medium text-outline">
+            Remanente disponible: <span class="font-bold text-on-surface">$500 HX</span>
+</div>
+</div>
+<div class="w-full mt-space-lg flex flex-col gap-space-xs">
+<button class="w-full flex items-center justify-center gap-space-sm px-space-lg py-space-sm rounded-lg bg-primary text-on-primary font-semibold hover:bg-primary/90 transition-all" type="button">
+<span class="material-symbols-outlined text-[20px]">done_all</span>
+<span class="font-headline-sm text-[15px] font-semibold">Canjear 1 Mes</span>
+</button>
+<span class="font-label-caption text-label-caption text-center text-outline">Respuesta preferencial en menos de 2 horas</span>
+</div>
+</div>
+</div>
+<!-- Card D: Inteligencia de Negocios & Dashboard Ejecutivo -->
+<div class="group relative flex flex-col lg:flex-row items-stretch justify-between rounded-xl bg-surface-container-lowest p-space-xl shadow-sm hover:shadow-xl transition-all duration-300" data-service-category="software">
+<div class="flex flex-col lg:max-w-xl pr-0 lg:pr-space-lg">
+<div class="flex flex-wrap items-center gap-space-sm mb-space-sm">
+<span class="inline-flex items-center gap-1.5 px-space-sm py-0.5 rounded-full bg-midnight-purple/10 font-label-badge text-label-badge text-tertiary font-bold">
+<span class="material-symbols-outlined text-[15px]">insights</span>
+            ANALYTICS &amp; DECISIONES
+          </span>
+<span class="font-label-badge text-label-badge uppercase text-outline">Business Intelligence</span>
+</div>
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface group-hover:text-tertiary transition-colors">
+          Inteligencia de Negocios &amp; Dashboard Ejecutivo
+        </h3>
+<!-- Matriz Problema -> Solución -->
+<div class="mt-space-md grid grid-cols-1 sm:grid-cols-2 gap-space-md bg-surface-saas p-space-md rounded-lg">
+<div>
+<span class="block font-label-caption text-label-caption uppercase tracking-wider text-outline mb-1">El Desafío</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              Toma de decisiones a ciegas o basada en reportes dispersos que toman días compilar manualmente en hojas de cálculo.
+            </p>
+</div>
+<div>
+<span class="block font-label-caption text-label-caption uppercase tracking-wider text-tertiary font-semibold mb-1">La Solución HummingX</span>
+<p class="font-body-sm text-body-sm text-on-surface leading-relaxed">
+              Centralización de métricas de ventas, rentabilidad y operaciones en paneles de control interactivos en tiempo real diseñados para directores.
+            </p>
+</div>
+</div>
+<!-- Cobertura y saldo proyectado -->
+<div class="mt-space-md flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[18px] text-tertiary">lock_open</span>
+<span>Aplica tus <strong class="text-on-surface">$2,000 Créditos HX</strong> como anticipo de arranque en este proyecto estratégico.</span>
+</div>
+</div>
+<!-- Métricas Financieras & Acción -->
+<div class="mt-space-lg lg:mt-0 flex flex-col justify-between items-start lg:items-end lg:min-w-[280px] pt-space-md lg:pt-0">
+<div class="lg:text-right w-full">
+<span class="font-label-caption text-label-caption uppercase tracking-wider text-outline block">Inversión Estratégica</span>
+<div class="flex items-baseline lg:justify-end gap-1.5 mt-0.5">
+<span class="font-body-sm text-body-sm text-outline font-semibold">Desde</span>
+<span class="font-label-code-metric text-[34px] leading-tight font-bold text-on-surface">$12,000</span>
+<span class="font-body-sm text-body-sm font-semibold text-outline">USD</span>
+</div>
+<div class="inline-block mt-1 px-2.5 py-1 rounded bg-tertiary-fixed/40 text-on-tertiary-container font-label-code-metric text-label-code-metric font-semibold">
+            Anticipo financiado con HX: -$2,000
+          </div>
+<div class="mt-1 font-body-sm text-body-sm font-semibold text-outline">
+            Plan a la medida con acompañamiento BI
+          </div>
+</div>
+<div class="w-full mt-space-lg flex flex-col gap-space-xs">
+<button class="w-full flex items-center justify-center gap-space-sm px-space-lg py-space-sm rounded-lg bg-midnight-purple text-pure-white font-semibold hover:bg-midnight-purple/90 transition-all" type="button">
+<span class="material-symbols-outlined text-[20px]">explore</span>
+<span class="font-headline-sm text-[15px] font-semibold">Explorar Solución</span>
+</button>
+<span class="font-label-caption text-label-caption text-center text-outline">Demostración ejecutiva en vivo disponible</span>
+</div>
+</div>
+</div>
+<!-- Card E: Módulo de Reservas y Pagos en Línea -->
+<div class="group relative flex flex-col lg:flex-row items-stretch justify-between rounded-xl bg-surface-container-lowest p-space-xl shadow-sm hover:shadow-xl transition-all duration-300" data-service-category="elegible software">
+<div class="flex flex-col lg:max-w-xl pr-0 lg:pr-space-lg">
+<div class="flex flex-wrap items-center gap-space-sm mb-space-sm">
+<span class="inline-flex items-center gap-1.5 px-space-sm py-0.5 rounded-full bg-primary-container/20 font-label-badge text-label-badge text-on-primary-container font-bold">
+<span class="material-symbols-outlined text-[15px]">payments</span>
+            TRANSACCIONAL DIRECTO
+          </span>
+<span class="font-label-badge text-label-badge uppercase text-outline">E-commerce &amp; Reservas</span>
+</div>
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface group-hover:text-primary transition-colors">
+          Módulo de Reservas y Pagos en Línea
+        </h3>
+<!-- Matriz Problema -> Solución -->
+<div class="mt-space-md grid grid-cols-1 sm:grid-cols-2 gap-space-md bg-surface-saas p-space-md rounded-lg">
+<div>
+<span class="block font-label-caption text-label-caption uppercase tracking-wider text-outline mb-1">El Desafío</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              Depender de plataformas terceras que cobran altas comisiones por transacción o perder reservaciones por falta de cobro inmediato.
+            </p>
+</div>
+<div>
+<span class="block font-label-caption text-label-caption uppercase tracking-wider text-primary font-semibold mb-1">La Solución HummingX</span>
+<p class="font-body-sm text-body-sm text-on-surface leading-relaxed">
+              Pasarela de pagos segura y experiencia de checkout optimizada para venta directa sin intermediarios, conectada a tu inventario.
+            </p>
+</div>
+</div>
+<!-- Cobertura y saldo proyectado -->
+<div class="mt-space-md flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[18px] text-primary">local_atm</span>
+<span>Aplica tus <strong class="text-on-surface">$2,000 Créditos HX</strong> (Monto restante a liquidar: $2,500 USD).</span>
+</div>
+</div>
+<!-- Métricas Financieras & Acción -->
+<div class="mt-space-lg lg:mt-0 flex flex-col justify-between items-start lg:items-end lg:min-w-[280px] pt-space-md lg:pt-0">
+<div class="lg:text-right w-full">
+<span class="font-label-caption text-label-caption uppercase tracking-wider text-outline block">Inversión Llave en Mano</span>
+<div class="flex items-baseline lg:justify-end gap-1.5 mt-0.5">
+<span class="font-label-code-metric text-[34px] leading-tight font-bold text-on-surface">$4,500</span>
+<span class="font-body-sm text-body-sm font-semibold text-outline">USD</span>
+</div>
+<div class="inline-block mt-1 px-2.5 py-1 rounded bg-primary-container/20 text-on-primary-container font-label-code-metric text-label-code-metric font-semibold">
+            Créditos aplicables: -$2,000 HX
+          </div>
+<div class="mt-1 font-body-sm text-body-sm font-semibold text-on-surface">
+            Restante: <span class="text-primary">$2,500 USD</span>
+</div>
+</div>
+<div class="w-full mt-space-lg flex flex-col gap-space-xs">
+<button class="w-full flex items-center justify-center gap-space-sm px-space-lg py-space-sm rounded-lg bg-secondary text-on-secondary font-semibold hover:bg-secondary/90 transition-all" type="button">
+<span class="material-symbols-outlined text-[20px]">shopping_cart_checkout</span>
+<span class="font-headline-sm text-[15px] font-semibold">Solicitar Módulo</span>
+</button>
+<span class="font-label-caption text-label-caption text-center text-outline">Despliegue operativo en 3 a 4 semanas</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Bloque Inferior: Asistencia y Consultoría a Medida -->
+<div class="w-full relative overflow-hidden rounded-xl bg-surface-container-lowest p-space-xl shadow-sm mb-space-lg">
+<!-- Acento geométrico abstracto sutil de fondo -->
+<div class="absolute right-0 top-0 bottom-0 w-1/3 bg-gradient-to-l from-primary-container/10 via-surface-saas to-transparent pointer-events-none"></div>
+<div class="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-space-xl">
+<div class="max-w-2xl">
+<div class="flex items-center gap-2 mb-space-xs">
+<div class="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[18px]">support_agent</span>
+</div>
+<span class="font-label-badge text-label-badge uppercase tracking-wider text-secondary font-bold">Acompañamiento Corporativo HummingX</span>
+</div>
+<h2 class="font-headline-md text-headline-md font-bold text-on-surface">
+          ¿Necesitas un desarrollo a la medida de tu empresa?
+        </h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-space-xs">
+          Tu asesor tecnológico senior de HummingX te ayuda a definir el alcance técnico, calcular el retorno de inversión y estructurar la aplicación óptima de tus créditos disponibles.
+        </p>
+</div>
+<div class="flex flex-col sm:flex-row items-center gap-space-md w-full lg:w-auto">
+<a class="w-full sm:w-auto flex items-center justify-center gap-space-sm px-space-lg py-space-sm rounded-lg bg-secondary text-on-secondary font-semibold hover:bg-secondary/90 transition-all shadow-sm" href="#">
+<span class="material-symbols-outlined text-[20px]">calendar_month</span>
+<span class="font-body-sm text-body-sm font-semibold">Agendar llamada con asesor</span>
+</a>
+<a class="w-full sm:w-auto flex items-center justify-center gap-space-sm px-space-lg py-space-sm rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-all" href="https://wa.me/" rel="noopener noreferrer" target="_blank">
+<span class="material-symbols-outlined text-[20px] text-success">chat</span>
+<span class="font-body-sm text-body-sm font-semibold">Hablar por WhatsApp</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Pie de Garantía de Nivel Corporativo -->
+<div class="w-full py-space-md flex flex-col sm:flex-row items-center justify-between gap-space-md text-outline font-label-caption text-label-caption border-t border-border-subtle/0">
+<div class="flex items-center gap-space-md">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[15px] text-secondary">verified_user</span> Acuerdos de Nivel de Servicio (SLA) Corporativos</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[15px] text-primary">history_toggle_off</span> Aplicación Instantánea de Créditos HX</span>
+</div>
+<span>HummingX Business Intelligence © Tahara Café Partner Portal</span>
+</div>
+</div></main></div></body></html>

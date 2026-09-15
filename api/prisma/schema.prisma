@@ -1,0 +1,139 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  admin
+  client
+}
+
+enum ProjectStatus {
+  active
+  completed
+  paused
+  cancelled
+}
+
+enum ReferralStatus {
+  registered
+  contacted
+  negotiating
+  converted
+  inactive
+}
+
+enum CreditType {
+  referral_converted
+  welcome_bonus
+  redeemed
+  adjustment
+}
+
+enum ActivityType {
+  update
+  milestone
+  delivery
+  note
+}
+
+model User {
+  id                String    @id @default(cuid())
+  name              String
+  email             String    @unique
+  passwordHash      String?
+  role              Role      @default(client)
+  companyName       String?
+  phone             String?
+  referralCode      String?   @unique
+  level             Int       @default(1)
+  active            Boolean   @default(true)
+  invitationToken   String?   @unique
+  invitationExpires DateTime?
+  invitationAccepted Boolean  @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relations
+  projects          Project[]
+  referralsMade     Referral[]         @relation("ReferralMaker")
+  creditMovements   CreditMovement[]
+  projectActivities ProjectActivity[]  @relation("ActivityAuthor")
+
+  @@map("users")
+}
+
+model Project {
+  id                  String        @id @default(cuid())
+  clientId            String
+  name                String
+  description         String?
+  currentPhase        Int           @default(1)   // 1-6
+  progressPercent     Int           @default(0)   // 0-100
+  estimatedDelivery   DateTime?
+  status              ProjectStatus @default(active)
+  internalNotes       String?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  // Relations
+  client              User          @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  activities          ProjectActivity[]
+
+  @@map("projects")
+}
+
+model ProjectActivity {
+  id          String       @id @default(cuid())
+  projectId   String
+  authorId    String?
+  description String
+  type        ActivityType @default(update)
+  createdAt   DateTime     @default(now())
+
+  // Relations
+  project     Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  author      User?        @relation("ActivityAuthor", fields: [authorId], references: [id])
+
+  @@map("project_activities")
+}
+
+model Referral {
+  id               String         @id @default(cuid())
+  referrerId       String
+  companyName      String
+  contactName      String?
+  contactEmail     String?
+  contactPhone     String?
+  status           ReferralStatus @default(registered)
+  creditsGenerated Int            @default(0)
+  notes            String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  // Relations
+  referrer         User           @relation("ReferralMaker", fields: [referrerId], references: [id])
+
+  @@map("referrals")
+}
+
+model CreditMovement {
+  id          String     @id @default(cuid())
+  clientId    String
+  amount      Int        // positive = earned, negative = redeemed
+  type        CreditType
+  description String
+  createdAt   DateTime   @default(now())
+
+  // Relations
+  client      User       @relation(fields: [clientId], references: [id])
+
+  @@map("credit_movements")
+}

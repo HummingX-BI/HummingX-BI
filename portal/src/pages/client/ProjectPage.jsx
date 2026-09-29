@@ -1,54 +1,54 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import api from '../../lib/api';
+import { useAuth } from '../../context/AuthContext';
 import { 
-  Rocket, 
-  Check, 
-  Clock, 
-  Calendar, 
-  FileText, 
-  ExternalLink, 
-  Download, 
-  ShieldCheck, 
-  Layers, 
-  MessageCircle, 
-  ArrowRight,
-  CheckCircle2,
-  Construction
+  Check, Clock, Calendar, FileText, ExternalLink, Download, 
+  ShieldCheck, Layers, MessageCircle, ArrowRight, Construction, CheckCircle, Activity
 } from 'lucide-react';
 
-const ROADMAP_STEPS = [
-  { num: 1, title: '1. Planeación', subtitle: 'Objetivos y alcance', status: 'completed' },
-  { num: 2, title: '2. Diseño', subtitle: 'Identidad visual y flujos', status: 'completed' },
-  { num: 3, title: '3. Desarrollo', subtitle: 'Construcción interactiva', status: 'active' },
-  { num: 4, title: '4. Revisión', subtitle: 'Validación final conjunta', status: 'upcoming' },
-  { num: 5, title: '5. Lanzamiento', subtitle: 'Publicación al público', status: 'pending' },
+const Pin = ({ className, style }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className={className} style={style}>
+    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+    <path d="M16 3a1 1 0 0 1 .117 1.993l-.117 .007v4.764l1.894 3.789a1 1 0 0 1 .1 .331l.006 .116v2a1 1 0 0 1 -.883 .993l-.117 .007h-4v4a1 1 0 0 1 -1.993 .117l-.007 -.117v-4h-4a1 1 0 0 1 -.993 -.883l-.007 -.117v-2a1 1 0 0 1 .06 -.34l.046 -.107l1.894 -3.791v-4.762a1 1 0 0 1 -.117 -1.993l.117 -.007h8z" />
+  </svg>
+);
+
+const ROADMAP_BASE = [
+  { num: 1, title: 'Análisis', subtitle: 'Objetivos y alcance' },
+  { num: 2, title: 'Diseño', subtitle: 'Identidad visual y flujos' },
+  { num: 3, title: 'Revisión', subtitle: 'Validación conjunta' },
+  { num: 4, title: 'Desarrollo', subtitle: 'Construcción interactiva' },
+  { num: 5, title: 'Lanzamiento', subtitle: 'Publicación al público' },
 ];
 
 export default function ProjectPage() {
+  const { user } = useAuth();
+  const location = useLocation();
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+  const revisionRef = useRef(null);
+
+  useEffect(() => {
+    if (!loading && project && revisionRef.current) {
+      if (project.currentPhase === 3 || location.state?.scrollTo === 'revision') {
+        setTimeout(() => {
+          revisionRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
+      }
+    }
+  }, [loading, project, location.state]);
 
   useEffect(() => {
     api.get('/projects/my')
       .then(res => {
         const active = res.data.find(p => p.status === 'active') || res.data[0];
-        setProject(active || {
-          name: 'Página Web + Menú Digital',
-          description: 'Estamos diseñando y desarrollando la nueva experiencia digital interactiva para Tahara Café, pensada para cautivar a tus clientes desde cualquier dispositivo.',
-          progressPercent: 75,
-          currentPhase: 3,
-          estimatedDelivery: '18 de septiembre, 2024'
-        });
+        setProject(active || null);
       })
       .catch(() => {
-        setProject({
-          name: 'Página Web + Menú Digital',
-          description: 'Estamos diseñando y desarrollando la nueva experiencia digital interactiva para Tahara Café, pensada para cautivar a tus clientes desde cualquier dispositivo.',
-          progressPercent: 75,
-          currentPhase: 3,
-          estimatedDelivery: '18 de septiembre, 2024'
-        });
+        setProject(null);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -57,423 +57,405 @@ export default function ProjectPage() {
     return (
       <Layout>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
-          <div style={{ width: '36px', height: '36px', border: '3px solid #E2E8F0', borderTopColor: '#00C4CC', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          <div className="bars-loader"><div></div><div></div><div></div></div>
         </div>
       </Layout>
     );
   }
 
-  const progress = project?.progressPercent ?? 75;
+  if (!project) {
+    return (
+      <Layout>
+        <div className="fade-in-up card" style={{ padding: '60px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh' }}>
+          <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
+            <Layers size={32} color="#9CA3AF" />
+          </div>
+          <h2 style={{ fontSize: '24px', fontWeight: 700, color: '#111827', margin: '0 0 12px' }}>Aún no tienes un proyecto activo</h2>
+          <p style={{ fontSize: '16px', color: '#6B7280', margin: '0 0 32px', maxWidth: '400px', lineHeight: 1.5 }}>
+            Estamos preparando todo tu entorno de trabajo. Cuando tu proyecto esté configurado, aparecerá aquí todo el panel de seguimiento.
+          </p>
+        </div>
+      </Layout>
+    );
+  }
+
+  const progress = project?.progressPercent ?? 0;
+  const currentPhaseNum = project?.currentPhase ?? 1;
+
+  const ROADMAP_STEPS = ROADMAP_BASE.map(step => ({
+    ...step,
+    status: step.num < currentPhaseNum ? 'completed' : step.num === currentPhaseNum ? 'active' : 'pending'
+  }));
 
   return (
     <Layout>
-      <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-        
-        {/* Hero & Overview Header */}
-        <section style={{
-          position: 'relative',
-          overflow: 'hidden',
-          background: '#FFFFFF',
-          borderRadius: '16px',
-          border: '1px solid #E2E8F0',
-          padding: '32px',
-          boxShadow: '0 2px 12px -2px rgba(15, 23, 42, 0.04)'
-        }}>
-          {/* Ambient blur */}
-          <div style={{
-            position: 'absolute',
-            right: '-40px',
-            top: '-40px',
-            width: '260px',
-            height: '260px',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(0, 196, 204, 0.12) 0%, rgba(10, 88, 163, 0.04) 70%, transparent 100%)',
-            pointerEvents: 'none',
-            filter: 'blur(30px)'
-          }} />
+      <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '20px', marginBottom: '24px' }}>
-              <div style={{ maxWidth: '640px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 12px', background: 'rgba(0, 196, 204, 0.12)', borderRadius: '9999px', fontSize: '11px', fontWeight: 700, color: '#00696E', textTransform: 'uppercase', fontFamily: "'Space Grotesk', sans-serif" }}>
-                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#00C4CC' }} />
-                    Proyecto en Ejecución
-                  </span>
-                  <span style={{ fontSize: '12px', color: '#94A3B8', fontFamily: "'Space Grotesk', sans-serif" }}>
-                    Tahara Café · Expansión Digital
-                  </span>
-                </div>
-                <h1 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '28px', fontWeight: 800, color: '#0F172A', letterSpacing: '-0.025em', margin: '0 0 10px 0' }}>
-                  {project?.name || 'Página Web + Menú Digital'}
-                </h1>
-                <p style={{ fontSize: '15px', color: '#64748B', lineHeight: '1.6', margin: 0 }}>
-                  {project?.description || 'Estamos desarrollando tu solución digital personalizada para cautivar a tus clientes.'}
-                </p>
+        {/* Hero / Project Header */}
+        <div id="tour-project-header" className="card" style={{ padding: '28px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
+            <div style={{ maxWidth: '800px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                {project?.currentPhase !== 6 && (
+                  <span className="badge badge-cyan">En ejecución</span>
+                )}
+                <span style={{ fontSize: '12px', color: '#9CA3AF' }}>{project?.clientName || user?.companyName || user?.name || 'Cliente'} · Proyecto Digital</span>
               </div>
-
-              {/* Action Buttons */}
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <a 
-                  href="https://wa.me/525575084267?text=Hola%20HummingX%2C%20quisiera%20consultar%20sobre%20mi%20proyecto" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="btn-secondary" 
-                  style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}
-                >
-                  <MessageCircle size={16} color="#0A58A3" />
-                  <span>Consultar con equipo</span>
-                </a>
-                <a 
-                  href="#entregables" 
-                  className="btn-primary" 
-                  style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}
-                >
-                  <FileText size={16} />
-                  <span>Ver entregables</span>
-                </a>
-              </div>
+              <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#111827', margin: '0 0 6px' }}>
+                {project?.name || 'Página Web + Menú Digital'}
+              </h1>
+              <p style={{ fontSize: '14px', color: '#6B7280', lineHeight: '1.6', margin: 0 }}>
+                {project?.description}
+              </p>
             </div>
-
-            {/* Progress Metric Band */}
-            <div style={{ background: '#F8FAFC', padding: '16px 20px', borderRadius: '12px', border: '1px solid #F1F5F9' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '12px', fontWeight: 700, color: '#0A58A3', textTransform: 'uppercase', fontFamily: "'Space Grotesk', sans-serif" }}>
-                    Avance general
-                  </span>
-                  <span style={{ color: '#CBD5E1' }}>•</span>
-                  <span style={{ fontSize: '13px', color: '#64748B' }}>
-                    Fase 3 de 5 en marcha
-                  </span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                  <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '24px', fontWeight: 800, color: '#0F172A' }}>
-                    {progress}%
-                  </span>
-                  <span style={{ fontSize: '11px', color: '#94A3B8', textTransform: 'uppercase' }}>completado</span>
-                </div>
-              </div>
-              <div style={{ width: '100%', height: '10px', background: '#E2E8F0', borderRadius: '9999px', overflow: 'hidden' }}>
-                <div style={{
-                  width: `${progress}%`,
-                  height: '100%',
-                  background: 'linear-gradient(90deg, #0A58A3, #00C4CC)',
-                  borderRadius: '9999px',
-                  transition: 'width 0.6s ease'
-                }} />
-              </div>
-            </div>
-
           </div>
-        </section>
 
-        {/* Interactive Visual Timeline (Ruta de trabajo) */}
-        <section style={{
-          background: '#FFFFFF',
-          borderRadius: '16px',
-          border: '1px solid #E2E8F0',
-          padding: '28px 32px',
-          boxShadow: '0 2px 12px -2px rgba(15, 23, 42, 0.04)'
-        }}>
+          {/* Progress Bar */}
+          <div style={{ background: '#F9FAFB', padding: '24px 28px', borderRadius: '12px', border: '1px solid #E5E7EB', marginTop: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '15px', fontWeight: 600, color: '#111827' }}>Avance general del proyecto</span>
+                {currentPhaseNum <= 5 ? (
+                  <span style={{ fontSize: '13px', color: '#6B7280', background: '#E5E7EB', padding: '2px 8px', borderRadius: '99px' }}>Fase {currentPhaseNum} de 5</span>
+                ) : (
+                  <span style={{ fontSize: '13px', color: '#059669', background: '#D1FAE5', padding: '2px 8px', borderRadius: '99px' }}>Completado</span>
+                )}
+              </div>
+              <span style={{ fontSize: '28px', fontWeight: 800, color: '#00C4CC' }}>{progress}%</span>
+            </div>
+            <div className="progress-track" style={{ height: '16px', background: '#E5E7EB' }}>
+              <div className="progress-fill" style={{ width: `${progress}%`, background: 'linear-gradient(90deg, #00C4CC, #7B2FBE)' }} />
+            </div>
+          </div>
+        </div>
+
+        {/* Timeline Stepper */}
+        <div id="tour-project-timeline" className="card" style={{ padding: '28px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
             <div>
-              <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '18px', fontWeight: 700, color: '#0F172A', margin: '0 0 4px 0' }}>
-                Ruta de trabajo
-              </h2>
-              <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>
-                Un recorrido claro desde la conceptualización hasta el estreno de tu plataforma.
-              </p>
+              <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', margin: '0 0 4px' }}>Ruta de trabajo</h2>
+              <p style={{ fontSize: '13px', color: '#6B7280', margin: 0 }}>Desde la conceptualización hasta el lanzamiento.</p>
             </div>
-            <span style={{ fontSize: '11px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: "'Space Grotesk', sans-serif" }}>
-              Metodología HummingX
-            </span>
+            <span style={{ fontSize: '11px', fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Metodología HummingX</span>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
-            {ROADMAP_STEPS.map((step) => {
-              const isDone = step.status === 'completed';
-              const isActive = step.status === 'active';
-              
-              return (
-                <div key={step.num} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{
-                      width: '36px',
-                      height: '36px',
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontWeight: 700,
-                      fontSize: '12px',
-                      fontFamily: "'Space Grotesk', sans-serif",
-                      background: isDone ? '#0A58A3' : isActive ? '#00C4CC' : '#F1F5F9',
-                      color: isDone || isActive ? '#FFFFFF' : '#94A3B8',
-                      boxShadow: isActive ? '0 0 16px rgba(0, 196, 204, 0.45)' : 'none',
-                      flexShrink: 0
-                    }}>
-                      {isDone ? <Check size={18} strokeWidth={3} /> : isActive ? <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#FFFFFF' }} /> : `0${step.num}`}
+          {/* Timeline Stepper (Post-its) */}
+          <div style={{ position: 'relative', marginTop: '24px', zIndex: 0 }}>
+
+
+            <div className="custom-scrollbar" style={{ display: 'flex', flexWrap: 'nowrap', overflowX: 'auto', gap: '12px', paddingBottom: '24px', paddingTop: '10px', position: 'relative', zIndex: 1, scrollSnapType: 'x mandatory' }}>
+              {ROADMAP_STEPS.map((step, idx) => {
+                const isDone = step.status === 'completed';
+                const isActive = step.status === 'active';
+                
+                const bgColors = {
+                  completed: '#F3E8FF', // Morado claro
+                  active: '#CFFAFE', // Cyan claro
+                  pending: '#F9FAFB' // Gris claro
+                };
+                const textColors = {
+                  completed: '#6B21A8',
+                  active: '#0E7490',
+                  pending: '#6B7280'
+                };
+                const borderColors = {
+                  completed: '#D8B4FE',
+                  active: '#A5F3FC',
+                  pending: '#E5E7EB'
+                };
+                const pinColors = {
+                  completed: '#A855F7',
+                  active: '#00C4CC',
+                  pending: '#9CA3AF'
+                };
+                
+                // Alternating rotation for the post-it effect
+                const rotations = ['rotate(-2deg)', 'rotate(2deg)', 'rotate(-1.5deg)', 'rotate(2.5deg)', 'rotate(-3deg)'];
+                const rotate = rotations[idx % rotations.length];
+
+                return (
+                  <div key={step.num} className="post-it-wrapper" style={{ transform: rotate, minWidth: '195px', flex: '1 0 auto', scrollSnapAlign: 'start' }}>
+                    <div className="post-it-container" style={{ minHeight: '190px' }}>
+                      <div className="post-it-pin">
+                        <Pin style={{ color: pinColors[step.status], width: '28px', height: '28px', transform: 'translateY(-4px)' }} />
+                      </div>
+                      <div className="post-it-content" style={{ backgroundColor: bgColors[step.status], borderColor: borderColors[step.status], color: textColors[step.status] }}>
+                        <span className="post-it-num" style={{ opacity: 0.5 }}>0{step.num}</span>
+                        <h3 style={{ fontSize: '18px', fontWeight: 700, margin: '0 0 4px', lineHeight: 1.2 }}>{step.title}</h3>
+                        <p style={{ fontSize: '13px', opacity: 0.8, margin: '0 0 20px', lineHeight: 1.4 }}>{step.subtitle}</p>
+                        
+                        <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 600, padding: '4px 8px', background: 'rgba(255,255,255,0.7)', borderRadius: '999px', width: 'fit-content', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+                          {isDone ? <Check size={14} /> : isActive ? <Clock size={14} /> : <Calendar size={14} />}
+                          {isDone ? 'Listo' : isActive ? 'En curso' : 'Pendiente'}
+                        </div>
+                      </div>
                     </div>
-                    <span style={{
-                      fontSize: '10px',
-                      fontWeight: 700,
-                      textTransform: 'uppercase',
-                      fontFamily: "'Space Grotesk', sans-serif",
-                      color: isDone ? '#0A58A3' : isActive ? '#008B91' : '#94A3B8'
-                    }}>
-                      {isDone ? 'Completado' : isActive ? 'Fase Actual' : 'Pendiente'}
-                    </span>
                   </div>
-
-                  <div>
-                    <h3 style={{ fontSize: '14px', fontWeight: 700, color: isDone || isActive ? '#0F172A' : '#64748B', margin: '0 0 2px 0' }}>
-                      {step.title}
-                    </h3>
-                    <p style={{ fontSize: '12px', color: '#94A3B8', margin: 0 }}>
-                      {step.subtitle}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* Detailed Dual Focus: Etapa Actual & Próximo Paso */}
-        <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
-          
-          {/* Active Stage Card */}
-          <div className="glass-card" style={{ padding: '28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '20px', borderTop: '4px solid #00C4CC' }}>
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ padding: '4px 8px', borderRadius: '6px', background: 'rgba(0, 196, 204, 0.12)', color: '#00696E', display: 'inline-flex' }}>
-                    <Construction size={16} />
-                  </span>
-                  <span style={{ fontSize: '11px', fontWeight: 700, color: '#00696E', textTransform: 'uppercase', fontFamily: "'Space Grotesk', sans-serif" }}>
-                    Etapa en curso
-                  </span>
-                </div>
-                <span style={{ fontSize: '11px', fontWeight: 600, color: '#10B981', display: 'inline-flex', alignItems: 'center', gap: '4px', background: 'rgba(16, 185, 129, 0.1)', padding: '2px 8px', borderRadius: '9999px' }}>
-                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10B981' }} />
-                  Al día con el cronograma
-                </span>
-              </div>
-
-              <h3 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '20px', fontWeight: 700, color: '#0F172A', margin: '0 0 8px 0' }}>
-                Desarrollo de la experiencia
-              </h3>
-              <p style={{ fontSize: '14px', color: '#64748B', lineHeight: '1.6', margin: '0 0 16px 0' }}>
-                Nuestro equipo de ingeniería está construyendo la plataforma interactiva del menú digital para que tus comensales ordenen y exploren con total fluidez.
-              </p>
-
-              <div style={{ padding: '14px', background: '#F8FAFC', borderRadius: '10px', border: '1px solid #F1F5F9' }}>
-                <span style={{ fontSize: '10px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', fontFamily: "'Space Grotesk', sans-serif" }}>
-                  Módulo prioritario en desarrollo
-                </span>
-                <div style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A', marginTop: '2px' }}>
-                  Catálogo digital de especialidad y pedidos en tiempo real
-                </div>
-                <div style={{ fontSize: '12px', color: '#64748B', marginTop: '2px' }}>
-                  Optimizando tiempos de respuesta y navegación táctil en smartphones.
-                </div>
-              </div>
+                );
+              })}
             </div>
+          </div>
+        </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid #F1F5F9' }}>
+        {/* Completion Banner */}
+        {project?.currentPhase === 6 && (
+          <div className="card fade-in-up" style={{ width: '100%', marginBottom: '24px', padding: '40px', textAlign: 'center', background: '#111827', color: '#fff', border: '1px solid #374151', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <CheckCircle size={48} color="#00C4CC" style={{ margin: '0 auto 16px' }} />
+            <h2 style={{ fontSize: '28px', fontWeight: 800, margin: '0 0 16px', letterSpacing: '-0.02em', color: '#fff' }}>
+              ¡Hemos terminado al 100% con tu proyecto!
+            </h2>
+            <p style={{ fontSize: '16px', color: '#D1D5DB', margin: '0 auto 24px', maxWidth: '600px', lineHeight: 1.6 }}>
+              Tu proyecto está completamente desplegado y activo. Nos encantó trabajar contigo y esperamos que a ti también. Para cualquier proyecto adicional, no dudes en contactarnos.
+              <br /><br />
+              Recuerda que tienes puntos HummingX disponibles en tu cuenta. Puedes usarlos en cualquier momento, ¡solo escríbenos por WhatsApp y dinos en qué te gustaría usarlos!
+            </p>
+            <a href="https://wa.me/525575084267" target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', textDecoration: 'none', background: '#00C4CC', color: '#111827', border: 'none', padding: '12px 24px', fontSize: '15px', fontWeight: 700, borderRadius: '8px' }}>
+              <MessageCircle size={18} /> Contactar a Soporte
+            </a>
+          </div>
+        )}
+
+        {/* Two Detail Cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            
+            {/* Active Stage */}
+          <div id="tour-active-stage" className="card" style={{ padding: '24px', borderTop: '3px solid #00C4CC', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+              <Construction size={16} color="#0E7490" />
+              <span style={{ fontSize: '12px', fontWeight: 600, color: '#0E7490', textTransform: 'uppercase' }}>
+                {project?.currentPhase === 6 ? 'Proyecto Terminado' : 'Etapa en curso'}
+              </span>
+              <span className="badge badge-green" style={{ marginLeft: 'auto', fontSize: '11px' }}>Al día</span>
+            </div>
+            <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#111827', margin: '0 0 8px' }}>
+              {project?.currentPhase === 6 ? '100% Desplegado' : (project?.currentStageTitle || (() => {
+                const activeStep = ROADMAP_STEPS.find(s => s.status === 'active') || ROADMAP_STEPS[ROADMAP_STEPS.length - 1];
+                return activeStep.title;
+              })())}
+            </h3>
+            <p style={{ fontSize: '14px', color: '#6B7280', lineHeight: '1.6', margin: '0 0 16px' }}>
+              {project?.currentPhase === 6 ? 'Hemos terminado al 100% tu proyecto. Ya está listo para usarse.' : (project?.currentStageDescription || (() => {
+                const activeStep = ROADMAP_STEPS.find(s => s.status === 'active') || ROADMAP_STEPS[ROADMAP_STEPS.length - 1];
+                const messages = {
+                  'Análisis': 'Nuestro equipo está evaluando paso a paso el contexto de tu negocio y modelo de operación para ofrecerte la solución ideal.',
+                  'Diseño': 'Nuestro equipo está diseñando y estructurando paso a paso las pantallas y flujos de tu nueva plataforma.',
+                  'Revisión': 'Hemos terminado una versión de tu proyecto. Necesitamos que lo revises a detalle y nos compartas tus observaciones o si necesitas alguna modificación.',
+                  'Desarrollo': 'Estamos plasmando todas tus ideas y los diseños aprobados en código para hacer realidad tu proyecto.',
+                  'Lanzamiento': 'Estamos afinando los últimos detalles y configurando servidores para que tu proyecto vea la luz.'
+                };
+                return messages[activeStep.title] || 'Ajustando los últimos detalles para la entrega final.';
+              })())}
+            </p>
+            {(() => {
+              const activeStep = ROADMAP_STEPS.find(s => s.status === 'active') || ROADMAP_STEPS[ROADMAP_STEPS.length - 1];
+              if (activeStep.title === 'Revisión') {
+                return (
+                  <div ref={revisionRef} style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>
+                    <div style={{ background: '#F0FDF4', padding: '12px', borderRadius: '8px', border: '1px solid #BBF7D0' }}>
+                      <span style={{ fontSize: '13px', fontWeight: 600, color: '#166534', textAlign: 'center', display: 'block' }}>
+                        ¡Revisión lista! Verifica tu proyecto y envíanos tu aprobación o comentarios por WhatsApp para poder continuar.
+                      </span>
+                    </div>
+                    {project?.previewUrl ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div style={{ width: '100%', height: '400px', borderRadius: '8px', overflow: 'hidden', border: '2px solid #D1D5DB', background: '#F9FAFB' }}>
+                          <iframe src={project.previewUrl} title="Vista previa" style={{ width: '100%', height: '100%', border: 'none', pointerEvents: 'none' }} />
+                        </div>
+                        <a href={project.previewUrl} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ textDecoration: 'none', justifyContent: 'center' }}>
+                          Ver Diseño Completo <ExternalLink size={16} style={{ marginLeft: '6px' }}/>
+                        </a>
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: '12px', color: '#166534', textAlign: 'center' }}>El enlace estará disponible pronto.</div>
+                    )}
+                    
+                    <div style={{ textAlign: 'center', marginTop: '4px' }}>
+                      <a href="https://wa.me/525575084267?text=Hola%20HummingX%2C%20ya%20revisé%20el%20avance%20de%20mi%20proyecto." target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 12px', background: '#25D366', color: '#fff', border: 'none' }}>
+                        <MessageCircle size={14} /> Validar por WhatsApp
+                      </a>
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: '12px', borderTop: '1px solid #F3F4F6' }}>
               <div>
-                <span style={{ fontSize: '11px', color: '#94A3B8', display: 'block' }}>Fecha estimada de entrega:</span>
-                <span style={{ fontSize: '14px', fontWeight: 700, color: '#0A58A3', fontFamily: "'Space Grotesk', sans-serif" }}>
+                <span style={{ fontSize: '11px', color: '#9CA3AF', display: 'block' }}>Entrega estimada:</span>
+                <span style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>
                   {project?.estimatedDelivery ? new Date(project.estimatedDelivery).toLocaleDateString('es-ES', { month: 'long', day: 'numeric', year: 'numeric' }) : '18 de septiembre, 2024'}
                 </span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#00696E', fontWeight: 600 }}>
-                <ShieldCheck size={16} color="#00C4CC" />
-                Supervisión HummingX
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#0E7490', fontWeight: 500 }}>
+                <ShieldCheck size={14} /> Supervisión HummingX
               </div>
             </div>
           </div>
 
-          {/* Next Step Card (Midnight Purple) */}
-          <div className="midnight-card" style={{ padding: '28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '20px' }}>
-            {/* Ambient Cyan Glow */}
-            <div style={{
-              position: 'absolute',
-              right: '-40px',
-              top: '-40px',
-              width: '180px',
-              height: '180px',
-              borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(0, 196, 204, 0.25) 0%, transparent 70%)',
-              pointerEvents: 'none'
-            }} />
-
-            <div style={{ position: 'relative', zIndex: 1 }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 10px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '9999px', fontSize: '11px', fontWeight: 700, color: '#00E5FF', textTransform: 'uppercase', fontFamily: "'Space Grotesk', sans-serif", marginBottom: '12px' }}>
-                <Clock size={12} />
-                Próximo paso
-              </div>
-
-              <h3 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '20px', fontWeight: 700, margin: '0 0 8px 0', letterSpacing: '-0.01em' }}>
-                Revisión del diseño interactivo
-              </h3>
-              <p style={{ fontSize: '14px', opacity: 0.85, lineHeight: '1.6', margin: '0 0 20px 0' }}>
-                Pronto podrás explorar la siguiente versión funcional en vivo desde tu propio dispositivo y compartirnos tus observaciones para el lanzamiento.
-              </p>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
-                  <CheckCircle2 size={16} color="#00E5FF" />
-                  <span>Navegación completa desde tu propio smartphone</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
-                  <CheckCircle2 size={16} color="#00E5FF" />
-                  <span>Alineación final de precios, fotos y descripción de productos</span>
-                </div>
-              </div>
+          {/* Next Step */}
+          <div className="card" style={{ padding: '24px', background: '#F9FAFB' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '14px' }}>
+              <Clock size={14} color="#6B7280" />
+              <span style={{ fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>
+                {project?.currentPhase === 6 ? 'Publicación Finalizada' : 'Próximo paso'}
+              </span>
             </div>
+            
+            {(() => {
+              if (project?.currentPhase === 6) {
+                return (
+                  <>
+                    <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#111827', margin: '0 0 8px' }}>100% Finalizado</h3>
+                    <p style={{ fontSize: '14px', color: '#6B7280', lineHeight: '1.6', margin: '0 0 20px' }}>
+                      Tu proyecto se encuentra activo y publicado.
+                    </p>
+                  </>
+                );
+              }
+              const activeStep = ROADMAP_STEPS.find(s => s.status === 'active') || ROADMAP_STEPS[ROADMAP_STEPS.length - 1];
+              if (activeStep.title === 'Análisis') {
+                return (
+                  <>
+                    <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#111827', margin: '0 0 8px' }}>Diseño</h3>
+                    <p style={{ fontSize: '14px', color: '#6B7280', lineHeight: '1.6', margin: '0 0 20px' }}>
+                      Pronto vas a poder ver el diseño y estructura visual de tu página.
+                    </p>
+                  </>
+                );
+              } else if (activeStep.title === 'Diseño') {
+                return (
+                  <>
+                    <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#111827', margin: '0 0 8px' }}>Revisión</h3>
+                    <p style={{ fontSize: '14px', color: '#6B7280', lineHeight: '1.6', margin: '0 0 20px' }}>
+                      Vas a poder revisar el avance interactivo del diseño y hacernos tus comentarios.
+                    </p>
+                  </>
+                );
+              } else if (activeStep.title === 'Revisión') {
+                return (
+                  <>
+                    <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#111827', margin: '0 0 8px' }}>Desarrollo</h3>
+                    <p style={{ fontSize: '14px', color: '#6B7280', lineHeight: '1.6', margin: '0 0 20px' }}>
+                      Una vez aprobado el diseño, vamos a codificar y desarrollar todas las funciones de tu página.
+                    </p>
+                  </>
+                );
+              } else if (activeStep.title === 'Desarrollo') {
+                return (
+                  <>
+                    <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#111827', margin: '0 0 8px' }}>Lanzamiento</h3>
+                    <p style={{ fontSize: '14px', color: '#6B7280', lineHeight: '1.6', margin: '0 0 20px' }}>
+                      Vamos a planear el lanzamiento oficial de tu proyecto, configurando los servidores y dominios.
+                    </p>
+                  </>
+                );
+              } else if (activeStep.title === 'Lanzamiento') {
+                return (
+                  <>
+                    <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#111827', margin: '0 0 8px' }}>¡Página desplegada y lista!</h3>
+                    <p style={{ fontSize: '14px', color: '#6B7280', lineHeight: '1.6', margin: '0 0 20px' }}>
+                      El próximo paso es entregar el proyecto activo y en producción.
+                    </p>
+                  </>
+                );
+              }
+              return null;
+            })()}
 
-            <div style={{ position: 'relative', zIndex: 1, paddingTop: '16px', borderTop: '1px solid rgba(255, 255, 255, 0.1)' }}>
-              <a 
-                href="https://wa.me/525575084267?text=Hola%20HummingX%2C%20estoy%20listo%20para%20la%20siguiente%20revisi%C3%B3n" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  width: '100%',
-                  padding: '10px 16px',
-                  background: '#FFFFFF',
-                  color: '#230E38',
-                  fontWeight: 700,
-                  fontSize: '13px',
-                  borderRadius: '10px',
-                  textDecoration: 'none',
-                  transition: 'all 0.2s'
-                }}
-              >
-                <span>Agendar sesión de revisión</span>
-                <ArrowRight size={15} />
+            <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #E5E7EB' }}>
+              <a href="https://wa.me/525575084267" target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', textDecoration: 'none', background: '#111827', color: '#fff', padding: '10px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, border: 'none', width: '100%', justifyContent: 'center' }}>
+                <MessageCircle size={16} /> ¿Tienes dudas? Contáctanos
               </a>
             </div>
+            </div>
           </div>
 
-        </section>
-
-        {/* Key Deliverables & Documents (Entregables importantes) */}
-        <section id="entregables" style={{
-          background: '#FFFFFF',
-          borderRadius: '16px',
-          border: '1px solid #E2E8F0',
-          padding: '28px 32px',
-          boxShadow: '0 2px 12px -2px rgba(15, 23, 42, 0.04)'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
+        {/* Deliverables */}
+        <div id="entregables" className="card" style={{ padding: '28px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             <div>
-              <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '18px', fontWeight: 700, color: '#0F172A', margin: '0 0 4px 0' }}>
-                Entregables importantes
-              </h2>
-              <p style={{ fontSize: '13px', color: '#64748B', margin: 0 }}>
-                Acceso inmediato a los documentos estratégicos y archivos clave de tu solución.
-              </p>
+              <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', margin: '0 0 4px' }}>Entregables importantes</h2>
+              <p style={{ fontSize: '13px', color: '#6B7280', margin: 0 }}>Documentos y archivos clave de tu solución.</p>
             </div>
-            <span style={{ fontSize: '11px', fontWeight: 700, color: '#008B91', background: 'rgba(0, 196, 204, 0.1)', padding: '3px 10px', borderRadius: '9999px', fontFamily: "'Space Grotesk', sans-serif" }}>
-              3 DOCUMENTOS DISPONIBLES
-            </span>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
-            
-            {/* Deliverable 1 */}
-            <div style={{ padding: '20px', background: '#F8FAFC', borderRadius: '12px', border: '1px solid #F1F5F9', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '14px' }}>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                  <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0A58A3', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-                    <FileText size={18} />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+            {[
+              { 
+                title: 'Cotización de Servicios', 
+                desc: project?.quoteLink ? 'Propuesta económica, alcance y tiempos.' : 'Aún no está listo, tu administrador lo agregará muy pronto para que lo tengas disponible.', 
+                type: 'DOCUMENTO', 
+                icon: FileText, 
+                iconColor: project?.quoteLink ? '#00C4CC' : '#9CA3AF',
+                link: project?.quoteLink,
+                isPending: !project?.quoteLink
+              },
+              { 
+                title: 'Contrato de Servicios', 
+                desc: project?.contractLink ? 'Acuerdos legales, propiedad intelectual y SLA.' : 'Aún no está listo, tu administrador lo agregará muy pronto para que lo tengas disponible.', 
+                type: 'LEGAL', 
+                icon: ShieldCheck, 
+                iconColor: project?.contractLink ? '#059669' : '#9CA3AF',
+                typeColor: project?.contractLink ? '#059669' : '#6B7280', 
+                typeBg: project?.contractLink ? '#ECFDF5' : '#F3F4F6',
+                link: project?.contractLink,
+                isPending: !project?.contractLink
+              }
+            ].map((doc, i) => (
+              <div key={i} style={{ padding: '20px', background: '#F9FAFB', borderRadius: '8px', border: '1px solid #F3F4F6', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '16px' }}>
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                    <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#FFFFFF', border: '1px solid #E5E7EB', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <doc.icon size={18} color={doc.iconColor} />
+                    </div>
+                    <span style={{ fontSize: '10px', fontWeight: 600, padding: '3px 8px', background: doc.typeBg || '#F3F4F6', borderRadius: '9999px', color: doc.typeColor || '#6B7280' }}>
+                      {doc.type}
+                    </span>
                   </div>
-                  <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 6px', background: '#E2E8F0', borderRadius: '4px', color: '#475569' }}>
-                    PDF
-                  </span>
+                  <h3 style={{ fontSize: '15px', fontWeight: 600, color: doc.isPending ? '#6B7280' : '#111827', margin: '0 0 6px' }}>{doc.title}</h3>
+                  <p style={{ fontSize: '13px', color: '#6B7280', margin: 0, lineHeight: 1.5 }}>{doc.desc}</p>
                 </div>
-                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#0F172A', margin: '0 0 4px 0' }}>
-                  Brief del proyecto
-                </h3>
-                <p style={{ fontSize: '13px', color: '#64748B', margin: 0, lineHeight: 1.4 }}>
-                  Objetivos comerciales, alcance acordado y visión de marca formalizada.
-                </p>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid #E2E8F0' }}>
-                <span style={{ fontSize: '11px', color: '#94A3B8' }}>1.2 MB</span>
-                <a href="#" onClick={(e) => { e.preventDefault(); alert('Descargando Brief del proyecto...'); }} style={{ fontSize: '12px', fontWeight: 600, color: '#0A58A3', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <span>Descargar</span>
-                  <Download size={13} />
-                </a>
-              </div>
-            </div>
-
-            {/* Deliverable 2 */}
-            <div style={{ padding: '20px', background: '#F8FAFC', borderRadius: '12px', border: '1px solid #F1F5F9', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '14px' }}>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                  <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#784A9C', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-                    <Layers size={18} />
-                  </div>
-                  <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 6px', background: 'rgba(0, 196, 204, 0.15)', borderRadius: '4px', color: '#00696E' }}>
-                    APROBADO
-                  </span>
+                
+                <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid #E5E7EB' }}>
+                  {doc.isPending ? (
+                    <span style={{ fontSize: '12px', color: '#9CA3AF', fontWeight: 500 }}>Pendiente</span>
+                  ) : (
+                    <a href={doc.link} target="_blank" rel="noopener noreferrer" className="btn-ghost" style={{ padding: '6px 12px', fontSize: '12px', color: '#0E7490', textDecoration: 'none', background: '#ECFEFF', borderRadius: '6px' }}>
+                      <ExternalLink size={14} style={{ marginRight: '4px' }} /> Ver documento
+                    </a>
+                  )}
                 </div>
-                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#0F172A', margin: '0 0 4px 0' }}>
-                  Diseño interactivo
-                </h3>
-                <p style={{ fontSize: '13px', color: '#64748B', margin: 0, lineHeight: 1.4 }}>
-                  Prototipo visual validado de la experiencia de usuario y presentación de la carta.
-                </p>
               </div>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid #E2E8F0' }}>
-                <span style={{ fontSize: '11px', color: '#94A3B8' }}>Figma / Web</span>
-                <a href="#" onClick={(e) => { e.preventDefault(); alert('Abriendo prototipo interactivo...'); }} style={{ fontSize: '12px', fontWeight: 600, color: '#008B91', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <span>Ver diseño</span>
-                  <ExternalLink size={13} />
-                </a>
-              </div>
-            </div>
-
-            {/* Deliverable 3 */}
-            <div style={{ padding: '20px', background: '#F8FAFC', borderRadius: '12px', border: '1px solid #F1F5F9', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '14px' }}>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                  <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-                    <ShieldCheck size={18} />
-                  </div>
-                  <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 6px', background: '#E2E8F0', borderRadius: '4px', color: '#475569' }}>
-                    LEGAL
-                  </span>
-                </div>
-                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#0F172A', margin: '0 0 4px 0' }}>
-                  Acuerdo & Contrato
-                </h3>
-                <p style={{ fontSize: '13px', color: '#64748B', margin: 0, lineHeight: 1.4 }}>
-                  Acuerdo de confidencialidad, garantías de propiedad intelectual y SLA de entrega.
-                </p>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid #E2E8F0' }}>
-                <span style={{ fontSize: '11px', color: '#94A3B8' }}>850 KB</span>
-                <a href="#" onClick={(e) => { e.preventDefault(); alert('Descargando Contrato y Garantías...'); }} style={{ fontSize: '12px', fontWeight: 600, color: '#0A58A3', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                  <span>Descargar</span>
-                  <Download size={13} />
-                </a>
-              </div>
-            </div>
-
+            ))}
           </div>
-        </section>
+        </div>
+
+        {/* Bitácora / Activities (Horizontal Full Width) */}
+        {project?.activities && project.activities.length > 0 && (
+          <div id="tour-bitacora" className="card" style={{ padding: '28px', marginTop: '8px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Activity size={16} color="#6B7280" /> Bitácora de Desarrollo
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', position: 'relative', paddingLeft: '16px' }}>
+              <div style={{ position: 'absolute', left: '4px', top: '8px', bottom: '8px', width: '2px', background: '#E5E7EB' }} />
+              {project.activities.map(act => {
+                const dateObj = new Date(act.createdAt);
+                const dayStr = dateObj.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' });
+                const timeStr = dateObj.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: false });
+                return (
+                  <div key={act.id} style={{ position: 'relative', padding: '16px', background: '#F9FAFB', borderRadius: '8px', border: '1px solid #E5E7EB', marginLeft: '16px' }}>
+                    <div style={{ position: 'absolute', left: '-33px', top: '20px', width: '12px', height: '12px', borderRadius: '50%', background: '#1D4ED8', border: '2px solid #fff', boxShadow: '0 0 0 1px #E5E7EB' }} />
+                    <div style={{ fontSize: '14px', fontWeight: 500, color: '#111827', marginBottom: '6px' }}>{act.description}</div>
+                    <div style={{ fontSize: '12px', color: '#6B7280', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Calendar size={12} /> {dayStr}, {timeStr} hrs.
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
       </div>
     </Layout>

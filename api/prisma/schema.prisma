@@ -51,6 +51,7 @@ model User {
   passwordHash      String?
   role              Role      @default(client)
   companyName       String?
+  logoUrl           String?
   phone             String?
   referralCode      String?   @unique
   level             Int       @default(1)
@@ -58,6 +59,11 @@ model User {
   invitationToken   String?   @unique
   invitationExpires DateTime?
   invitationAccepted Boolean  @default(false)
+  
+  resetToken           String?   @unique
+  resetTokenExpires    DateTime?
+  lastPasswordResetReq DateTime?
+
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
@@ -80,6 +86,10 @@ model Project {
   estimatedDelivery   DateTime?
   status              ProjectStatus @default(active)
   internalNotes       String?
+  quoteLink           String?
+  contractLink        String?
+  designLink          String?
+  previewUrl          String?
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
 

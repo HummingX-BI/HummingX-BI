@@ -1,47 +1,110 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 
 const authRoutes = require('./src/routes/auth');
 const projectRoutes = require('./src/routes/projects');
 const adminRoutes = require('./src/routes/admin');
 const referralRoutes = require('./src/routes/referrals');
 
+const {
+  globalApiLimiter,
+  sanitizeBody,
+} = require('./src/middleware/security');
+
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// Middleware
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5177',
-  credentials: true,
-}));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// ─── Trust proxy (Render / Cloudflare) ───────────────────────────────────────
+// CRITICAL: Only set to 1 when behind exactly one trusted proxy.
+// Without this, express-rate-limit sees Cloudflare's IP, not the real client IP.
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
 
-// Request logging (dev)
-if (process.env.NODE_ENV === 'development') {
+// ─── Security Headers (Helmet) ────────────────────────────────────────────────
+app.use(helmet({
+  crossOriginEmbedderPolicy: false, // Portal loads iframes (design previews)
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'"],
+      frameSrc: ["'none'"],
+      objectSrc: ["'none'"],
+      upgradeInsecureRequests: [],
+    },
+  },
+}));
+
+// ─── CORS — Allowlist only ────────────────────────────────────────────────────
+const allowedOrigins = [
+  process.env.FRONTEND_URL || 'http://localhost:5177',
+  'http://localhost:5177',
+  'http://localhost:3000',
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, Postman in dev)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS: Origin not allowed'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+// ─── Body parsing — payload size limits ──────────────────────────────────────
+// Limits: prevents memory exhaustion from huge JSON payloads (DoS vector).
+app.use(express.json({ limit: '50kb' }));
+app.use(express.urlencoded({ extended: true, limit: '50kb' }));
+
+// ─── Global rate limiting ─────────────────────────────────────────────────────
+app.use('/auth', globalApiLimiter);
+app.use('/admin', globalApiLimiter);
+app.use('/projects', globalApiLimiter);
+app.use('/referrals', globalApiLimiter);
+
+// ─── Input sanitization (all routes) ─────────────────────────────────────────
+app.use(sanitizeBody);
+
+// ─── Request logging ─────────────────────────────────────────────────────────
+if (process.env.NODE_ENV !== 'production') {
   app.use((req, _res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
     next();
   });
 }
 
-// Routes
+// ─── Routes ───────────────────────────────────────────────────────────────────
 app.use('/auth', authRoutes);
 app.use('/projects', projectRoutes);
 app.use('/admin', adminRoutes);
 app.use('/referrals', referralRoutes);
 
-// Health check
-app.get('/health', (_req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
+// ─── Health check (no auth needed, no sensitive data) ────────────────────────
+app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
-// 404 handler
+// ─── 404 handler ─────────────────────────────────────────────────────────────
 app.use((_req, res) => res.status(404).json({ error: 'Ruta no encontrada.' }));
 
-// Error handler
+// ─── Global error handler — NEVER expose stack traces in production ───────────
 app.use((err, _req, res, _next) => {
-  console.error('Unhandled error:', err);
-  res.status(500).json({ error: 'Error interno del servidor.' });
+  // Log full error internally
+  console.error('[ERROR]', err.message || err);
+
+  // Return sanitized response (no internal paths, no stack traces)
+  const isDev = process.env.NODE_ENV !== 'production';
+  res.status(err.status || 500).json({
+    error: isDev ? (err.message || 'Error interno del servidor.') : 'Error interno del servidor.',
+  });
 });
 
 app.listen(PORT, () => {

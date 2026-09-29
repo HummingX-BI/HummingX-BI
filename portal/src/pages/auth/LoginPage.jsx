@@ -51,7 +51,12 @@ export default function LoginPage() {
 
       <div style={{ width: '100%', maxWidth: '420px', position: 'relative', zIndex: 2 }} className="fade-in-up">
         {/* Card */}
-        <div className="glass-card" style={{ padding: '40px 36px' }}>
+        <div className="glass-card" style={{ 
+          padding: '40px 36px', 
+          background: 'rgba(15, 15, 20, 0.6)', 
+          backdropFilter: 'blur(16px)', 
+          border: '1px solid rgba(255,255,255,0.08)' 
+        }}>
 
           {/* Logo */}
           <div style={{ textAlign: 'center', marginBottom: '32px' }}>
@@ -97,7 +102,12 @@ export default function LoginPage() {
                   type="email"
                   required
                   className="hx-input"
-                  style={{ paddingLeft: '42px' }}
+                  style={{ 
+                    paddingLeft: '42px', 
+                    background: 'rgba(0,0,0,0.2)', 
+                    border: '1px solid rgba(255,255,255,0.1)', 
+                    color: 'white' 
+                  }}
                   placeholder="tu@empresa.com"
                   value={form.email}
                   onChange={(e) => setForm(f => ({ ...f, email: e.target.value }))}
@@ -116,7 +126,12 @@ export default function LoginPage() {
                   type={showPassword ? 'text' : 'password'}
                   required
                   className="hx-input"
-                  style={{ paddingLeft: '42px', paddingRight: '42px' }}
+                  style={{ 
+                    paddingLeft: '42px', paddingRight: '42px',
+                    background: 'rgba(0,0,0,0.2)', 
+                    border: '1px solid rgba(255,255,255,0.1)', 
+                    color: 'white' 
+                  }}
                   placeholder="Tu contraseña"
                   value={form.password}
                   onChange={(e) => setForm(f => ({ ...f, password: e.target.value }))}
@@ -154,6 +169,26 @@ export default function LoginPage() {
             </button>
           </form>
 
+          {/* Quick Login Buttons (Dev) */}
+          {import.meta.env.DEV && (
+            <div style={{ marginTop: '16px', display: 'flex', gap: '8px', justifyContent: 'center' }}>
+              <button
+                type="button"
+                onClick={() => setForm({ email: 'admin@hummingxbi.com', password: 'HummingX2024!' })}
+                style={{ padding: '4px 10px', fontSize: '10px', background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', cursor: 'pointer' }}
+              >
+                Llenar Admin
+              </button>
+              <button
+                type="button"
+                onClick={() => setForm({ email: 'demo@tahara.cafe', password: 'demo1234' })}
+                style={{ padding: '4px 10px', fontSize: '10px', background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', cursor: 'pointer' }}
+              >
+                Llenar Demo
+              </button>
+            </div>
+          )}
+
           {/* Footer */}
           <div style={{ marginTop: '24px', textAlign: 'center' }}>
             <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)' }}>
@@ -167,7 +202,7 @@ export default function LoginPage() {
 
         {/* Back to landing */}
         <div style={{ textAlign: 'center', marginTop: '20px' }}>
-          <a href="/" style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)', textDecoration: 'none' }}>
+          <a href="https://hummingxbi.com" style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)', textDecoration: 'none' }}>
             ← Volver a HummingX BI
           </a>
         </div>

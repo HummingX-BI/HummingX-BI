@@ -57,7 +57,7 @@ router.get('/:id', authenticate, async (req, res) => {
 // PUT /projects/:id — Admin updates project phase/progress
 router.put('/:id', authenticate, requireAdmin, async (req, res) => {
   try {
-    const { name, description, currentPhase, progressPercent, estimatedDelivery, status, internalNotes } = req.body;
+    const { name, description, currentPhase, progressPercent, estimatedDelivery, status, internalNotes, quoteLink, contractLink } = req.body;
 
     const project = await prisma.project.findUnique({ where: { id: req.params.id } });
     if (!project) return res.status(404).json({ error: 'Proyecto no encontrado.' });
@@ -72,6 +72,8 @@ router.put('/:id', authenticate, requireAdmin, async (req, res) => {
         ...(estimatedDelivery !== undefined && { estimatedDelivery: new Date(estimatedDelivery) }),
         ...(status !== undefined && { status }),
         ...(internalNotes !== undefined && { internalNotes }),
+        ...(quoteLink !== undefined && { quoteLink }),
+        ...(contractLink !== undefined && { contractLink }),
       },
       include: { activities: { orderBy: { createdAt: 'desc' }, take: 10 } }
     });

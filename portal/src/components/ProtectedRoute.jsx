@@ -6,11 +6,23 @@ export function ProtectedRoute({ children, adminOnly = false }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0b0b0e' }}>
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-2 border-cyan-glow border-t-transparent rounded-full animate-spin" 
-               style={{ borderColor: '#00C4CC', borderTopColor: 'transparent' }} />
-          <p className="text-sm text-white/40 font-body">Cargando sesión...</p>
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#0b0b0e'
+      }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+          <div style={{
+            width: '40px', height: '40px',
+            border: '2px solid transparent',
+            borderColor: '#00C4CC',
+            borderTopColor: 'transparent',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite'
+          }} />
+          <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)', fontFamily: 'sans-serif' }}>Cargando sesión...</p>
         </div>
       </div>
     );

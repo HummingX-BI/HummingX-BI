@@ -1,23 +1,54 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../../components/Layout';
+import { SkeletonTableRow } from '../../components/Skeleton';
 import api from '../../lib/api';
-import { Search, Plus, Building2, ChevronRight, UserPlus, FileText, X } from 'lucide-react';
+import { Search, Plus, Building2, ChevronRight, UserPlus, FileText, X, Users, FolderKanban, TrendingUp, CreditCard, Mail } from 'lucide-react';
 
 export default function AdminClientsPage() {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-
-  // New Client Modal State
   const [showModal, setShowModal] = useState(false);
-  const [newClientData, setNewClientData] = useState({ name: '', email: '', companyName: '', phone: '' });
+  const [closingModal, setClosingModal] = useState(false);
+  const [newClientData, setNewClientData] = useState({ name: '', email: '', companyName: '', logoUrl: '', phone: '', projectName: '' });
   const [savingClient, setSavingClient] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
-  useEffect(() => {
-    fetchClients();
-  }, []);
+  const closeModal = () => {
+    setClosingModal(true);
+    setTimeout(() => { setShowModal(false); setClosingModal(false); }, 180);
+  };
+
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadingLogo(true);
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', 'hummingx_unsigned');
+    formData.append('cloud_name', 'mzqtikab');
+
+    try {
+      const res = await fetch(`https://api.cloudinary.com/v1_1/mzqtikab/image/upload`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.secure_url) {
+        setNewClientData({ ...newClientData, logoUrl: data.secure_url });
+      }
+    } catch (err) {
+      console.error('Error uploading to Cloudinary', err);
+      alert('Error subiendo imagen a Cloudinary');
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
+  useEffect(() => { fetchClients(); }, []);
 
   const fetchClients = () => {
     setLoading(true);
@@ -33,174 +64,225 @@ export default function AdminClientsPage() {
     setErrorMsg('');
     try {
       await api.post('/admin/clients', newClientData);
-      setShowModal(false);
-      setNewClientData({ name: '', email: '', companyName: '', phone: '' });
+      closeModal();
+      setNewClientData({ name: '', email: '', companyName: '', phone: '', projectName: '' });
       fetchClients();
     } catch (err) {
-      console.error(err);
       setErrorMsg(err.response?.data?.error || 'Error al crear el cliente.');
-    } finally {
-      setSavingClient(false);
-    }
+    } finally { setSavingClient(false); }
   };
 
-  const filteredClients = clients.filter(c => 
-    c.name.toLowerCase().includes(search.toLowerCase()) || 
+  const filteredClients = clients.filter(c =>
+    c.name.toLowerCase().includes(search.toLowerCase()) ||
     (c.companyName && c.companyName.toLowerCase().includes(search.toLowerCase())) ||
     c.email.toLowerCase().includes(search.toLowerCase())
   );
 
+  const totalClients = clients.length;
+  const activeProjects = clients.reduce((n, c) => n + (c.projects?.filter(p => p.status === 'active').length || 0), 0);
+
+  const totalCreditsEmitted = clients.reduce((sum, client) => sum + (client.creditMovements?.reduce((s, m) => s + (m.amount > 0 ? m.amount : 0), 0) || 0), 0);
+
   return (
     <Layout>
-      <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-        
+      <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-              <span className="badge badge-purple" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Building2 size={14} /> Panel Administrativo
-              </span>
-            </div>
-            <h1 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 800, fontSize: '32px', letterSpacing: '-0.02em' }}>
-              Directorio de Clientes
+            <h1 style={{ fontSize: '28px', fontWeight: 700, color: '#111827', letterSpacing: '-0.025em', margin: '0 0 4px' }}>
+              Dashboard Administrativo
             </h1>
+            <p style={{ fontSize: '14px', color: '#6B7280', margin: 0 }}>
+              Gestiona clientes, proyectos y seguimiento desde aquí.
+            </p>
           </div>
-          
-          <button onClick={() => setShowModal(true)} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px' }}>
-            <Plus size={18} /> Nuevo Cliente
+          <button onClick={() => setShowModal(true)} className="btn-primary" style={{ padding: '10px 20px' }}>
+            <Plus size={16} /> Nuevo Cliente
           </button>
         </div>
 
-        {/* Toolbar */}
-        <div className="midnight-card" style={{ padding: '24px', display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, position: 'relative', minWidth: '250px' }}>
-            <Search size={18} color="rgba(255,255,255,0.5)" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
-            <input 
-              type="text" 
-              placeholder="Buscar por empresa, nombre o email..." 
+        {/* 3 KPI Cards — stagger-list for sequential entrance */}
+        <div className="stagger-list stats-grid-3">
+          <div className="stat-card">
+            <div className="stat-label"><Users size={16} color="#6B7280" /> Total Clientes</div>
+            <div className="stat-value">{totalClients}</div>
+            <div style={{ fontSize: '12px', color: '#6B7280' }}>Cuentas registradas</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-label"><FolderKanban size={16} color="#6B7280" /> Proyectos Activos</div>
+            <div className="stat-value">{activeProjects}</div>
+            <div className="stat-trend up"><TrendingUp size={14} /> En desarrollo</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-label"><CreditCard size={16} color="#6B7280" /> Créditos Emitidos</div>
+            <div className="stat-value">${totalCreditsEmitted.toLocaleString()}</div>
+            <div style={{ fontSize: '12px', color: '#6B7280' }}>Total acumulado</div>
+          </div>
+        </div>
+
+        {/* Search Bar */}
+        <div className="card" style={{ padding: '16px 20px', display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <div style={{ flex: 1, position: 'relative' }}>
+            <Search size={16} color="#9CA3AF" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+            <input
+              type="text"
+              placeholder="Buscar por empresa, nombre o email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="hx-input"
-              style={{ width: '100%', padding: '12px 16px 12px 44px', fontSize: '14px', borderRadius: '10px' }}
+              style={{ paddingLeft: '40px' }}
             />
           </div>
         </div>
 
+        {/* Client Table */}
         {loading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
-            <div className="bars-loader">
-              <div></div><div></div><div></div>
-            </div>
+          <div className="card" style={{ overflow: 'hidden' }}>
+            <table className="hx-table">
+              <thead><tr><th>Cliente / Empresa</th><th>Contacto</th><th>Proyectos</th><th style={{ textAlign: 'right' }}>Acciones</th></tr></thead>
+              <tbody>
+                <SkeletonTableRow cols={4} />
+                <SkeletonTableRow cols={4} />
+                <SkeletonTableRow cols={4} />
+              </tbody>
+            </table>
           </div>
         ) : filteredClients.length === 0 ? (
-          <div className="midnight-card" style={{ padding: '60px 40px', textAlign: 'center' }}>
-            <UserPlus size={64} color="rgba(255,255,255,0.2)" style={{ margin: '0 auto 24px' }} />
-            <h3 style={{ fontSize: '20px', fontWeight: 600, marginBottom: '8px' }}>No hay clientes encontrados</h3>
-            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '15px' }}>
-              Crea un nuevo cliente o ajusta los filtros de búsqueda.
-            </p>
+          <div className="card" style={{ padding: '60px 40px', textAlign: 'center' }}>
+            <UserPlus size={48} color="#D1D5DB" style={{ margin: '0 auto 16px' }} />
+            <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#111827', marginBottom: '8px' }}>No hay clientes encontrados</h3>
+            <p style={{ color: '#6B7280', fontSize: '14px' }}>Crea un nuevo cliente o ajusta los filtros de búsqueda.</p>
           </div>
         ) : (
-          <div className="midnight-card" style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+          <div className="card" style={{ overflow: 'hidden' }}>
+            <table className="hx-table">
               <thead>
-                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.02)' }}>
-                  <th style={{ padding: '16px 24px', fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Cliente / Empresa</th>
-                  <th style={{ padding: '16px 24px', fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Contacto</th>
-                  <th style={{ padding: '16px 24px', fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Proyectos</th>
-                  <th style={{ padding: '16px 24px', fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'right' }}>Acciones</th>
+                <tr>
+                  <th>Cliente / Empresa</th>
+                  <th>Contacto</th>
+                  <th>Proyectos</th>
+                  <th style={{ textAlign: 'right' }}>Acciones</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="stagger-list">
                 {filteredClients.map((client) => (
-                  <tr key={client.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.2s' }}>
-                    
-                    <td style={{ padding: '20px 24px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                        <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(0,196,204,0.1)', border: '1px solid rgba(0,196,204,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#00C4CC', fontWeight: 700, fontSize: '16px' }}>
-                          {(client.companyName || client.name).charAt(0).toUpperCase()}
-                        </div>
+                  <tr key={client.id}>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        {client.logoUrl ? (
+                          <img src={client.logoUrl} alt="Logo" style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'contain', background: '#fff', border: '1px solid #E5E7EB', padding: '2px' }} />
+                        ) : (
+                          <div className="avatar avatar-md" style={{ background: '#DBEAFE', color: '#1D4ED8', borderRadius: '8px', width: '40px', height: '40px' }}>
+                            {(client.companyName || client.name).charAt(0).toUpperCase()}
+                          </div>
+                        )}
                         <div>
-                          <div style={{ fontSize: '15px', fontWeight: 700, marginBottom: '2px' }}>
+                          <div style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>
                             {client.companyName || client.name}
                           </div>
                           {client.companyName && (
-                            <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>
-                              Rep: {client.name}
-                            </div>
+                            <div style={{ fontSize: '12px', color: '#6B7280' }}>Rep: {client.name}</div>
                           )}
                         </div>
                       </div>
                     </td>
-
-                    <td style={{ padding: '20px 24px' }}>
-                      <div style={{ fontSize: '14px', marginBottom: '4px' }}>{client.email}</div>
-                      <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>{client.phone || 'Sin teléfono'}</div>
+                    <td>
+                      <div style={{ fontSize: '14px', color: '#111827' }}>{client.email}</div>
+                      <div style={{ fontSize: '12px', color: '#9CA3AF' }}>{client.phone || 'Sin teléfono'}</div>
                     </td>
-
-                    <td style={{ padding: '20px 24px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <FileText size={16} color="rgba(255,255,255,0.5)" />
-                        <span style={{ fontSize: '14px', fontWeight: 600 }}>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <FileText size={14} color="#9CA3AF" />
+                        <span style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>
                           {client.projects?.length || 0}
                         </span>
                       </div>
                     </td>
-
-                    <td style={{ padding: '20px 24px', textAlign: 'right' }}>
-                      <Link to={`/admin/clients/${client.id}`} style={{ textDecoration: 'none', display: 'inline-block' }}>
-                        <button className="btn-secondary" style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600 }}>
+                    <td style={{ textAlign: 'right' }}>
+                      <Link to={`/admin/clients/${client.id}`} style={{ textDecoration: 'none' }}>
+                        <button className="btn-secondary" style={{ padding: '6px 14px', fontSize: '13px' }}>
                           Administrar <ChevronRight size={14} />
                         </button>
                       </Link>
                     </td>
-
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         )}
-
       </div>
 
       {/* New Client Modal */}
       {showModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div className="midnight-card" style={{ width: '100%', maxWidth: '500px', padding: '32px', position: 'relative' }}>
-            <button onClick={() => setShowModal(false)} style={{ position: 'absolute', top: '24px', right: '24px', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.5)' }}>
+        <div className={`modal-overlay${closingModal ? ' closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}>
+          <div className="modal-content">
+            <button onClick={closeModal} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', cursor: 'pointer', color: '#6B7280', transition: 'color 150ms, transform 150ms' }} onMouseEnter={e => { e.currentTarget.style.color = '#111827'; e.currentTarget.style.transform = 'scale(1.1)'; }} onMouseLeave={e => { e.currentTarget.style.color = '#6B7280'; e.currentTarget.style.transform = 'scale(1)'; }}>
               <X size={20} />
             </button>
-            <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '24px' }}>Crear Nuevo Cliente</h2>
+            <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '24px', color: '#111827' }}>Crear Nuevo Cliente</h2>
             <form onSubmit={handleCreateClient} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>Nombre del Representante *</label>
-                <input type="text" className="hx-input" style={{ width: '100%', padding: '10px 12px', borderRadius: '8px' }} required 
+                <label style={{ fontSize: '13px', fontWeight: 500, color: '#374151' }}>Nombre del Representante *</label>
+                <input type="text" className="hx-input" required
                   value={newClientData.name} onChange={e => setNewClientData({...newClientData, name: e.target.value})} placeholder="Ej. Juan Pérez" />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>Correo Electrónico *</label>
-                <input type="email" className="hx-input" style={{ width: '100%', padding: '10px 12px', borderRadius: '8px' }} required 
+                <label style={{ fontSize: '13px', fontWeight: 500, color: '#374151' }}>Correo Electrónico *</label>
+                <input type="email" className="hx-input" required
                   value={newClientData.email} onChange={e => setNewClientData({...newClientData, email: e.target.value})} placeholder="juan@empresa.com" />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>Nombre de la Empresa</label>
-                <input type="text" className="hx-input" style={{ width: '100%', padding: '10px 12px', borderRadius: '8px' }} 
+                <label style={{ fontSize: '13px', fontWeight: 500, color: '#374151' }}>Nombre de la Empresa</label>
+                <input type="text" className="hx-input"
                   value={newClientData.companyName} onChange={e => setNewClientData({...newClientData, companyName: e.target.value})} placeholder="Ej. Empresa SA de CV" />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>Teléfono (WhatsApp)</label>
-                <input type="text" className="hx-input" style={{ width: '100%', padding: '10px 12px', borderRadius: '8px' }} 
+                <label style={{ fontSize: '13px', fontWeight: 500, color: '#374151' }}>Foto de Perfil / Logo de la Empresa (Opcional)</label>
+                {!newClientData.logoUrl ? (
+                  <div style={{ position: 'relative', border: '1px dashed #D1D5DB', borderRadius: '8px', padding: '12px', textAlign: 'center', background: '#F9FAFB', cursor: 'pointer' }}>
+                    <input type="file" accept="image/png, image/jpeg, image/jpg" onChange={handleLogoUpload} style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', width: '100%' }} disabled={uploadingLogo} />
+                    <span style={{ fontSize: '12px', color: '#6B7280' }}>
+                      {uploadingLogo ? 'Subiendo imagen...' : 'Arrastra un archivo .PNG o .JPG aquí para subir el logo'}
+                    </span>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px', border: '1px solid #E5E7EB', borderRadius: '8px', background: '#F9FAFB' }}>
+                    <img src={newClientData.logoUrl} alt="Logo subido" style={{ width: '40px', height: '40px', objectFit: 'contain', background: '#fff', borderRadius: '4px', border: '1px solid #E5E7EB', padding: '2px' }} />
+                    <button type="button" onClick={() => setNewClientData({...newClientData, logoUrl: ''})} style={{ fontSize: '12px', color: '#EF4444', background: 'none', border: 'none', cursor: 'pointer' }}>
+                      Quitar Logo
+                    </button>
+                  </div>
+                )}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '13px', fontWeight: 500, color: '#374151' }}>Teléfono (WhatsApp)</label>
+                <input type="text" className="hx-input"
                   value={newClientData.phone} onChange={e => setNewClientData({...newClientData, phone: e.target.value})} placeholder="+52 55..." />
               </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '13px', fontWeight: 500, color: '#374151' }}>Nombre del Proyecto Inicial *</label>
+                <input type="text" className="hx-input" required
+                  value={newClientData.projectName} onChange={e => setNewClientData({...newClientData, projectName: e.target.value})} placeholder="Ej. Página Web + Menú Digital" />
+              </div>
               {errorMsg && (
-                <div style={{ padding: '12px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#FCA5A5', borderRadius: '8px', fontSize: '14px' }}>
+                <div className="msg-enter" style={{ padding: '10px 14px', background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626', borderRadius: '8px', fontSize: '13px' }}>
                   {errorMsg}
                 </div>
               )}
-              <button type="submit" className="btn-primary" disabled={savingClient} style={{ padding: '12px', marginTop: '8px' }}>
-                {savingClient ? 'Creando Cliente...' : 'Crear y Enviar Invitación'}
+              
+              <div style={{ padding: '12px 14px', background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '8px', display: 'flex', gap: '10px', marginTop: '4px' }}>
+                <Mail size={16} color="#16A34A" style={{ marginTop: '2px', flexShrink: 0 }} />
+                <p style={{ margin: 0, fontSize: '12px', color: '#166534', lineHeight: 1.4 }}>
+                  <strong>Envío automático:</strong> Al crear el cliente, se le enviará un correo con un enlace para que configure su contraseña y acceda a su portal.
+                </p>
+              </div>
+
+              <button type="submit" className="btn-primary" disabled={savingClient} style={{ marginTop: '4px', opacity: savingClient ? 0.8 : 1 }}>
+                {savingClient ? (
+                  <><span className="btn-spinner" /> Creando Cliente...</>
+                ) : 'Crear y Enviar Invitación'}
               </button>
             </form>
           </div>

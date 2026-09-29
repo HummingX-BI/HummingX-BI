@@ -4,19 +4,13 @@ import { useAuth } from '../../context/AuthContext';
 import Layout from '../../components/Layout';
 import api from '../../lib/api';
 import { 
-  Rocket, 
-  CreditCard, 
-  Users, 
-  ArrowRight, 
-  CheckCircle2, 
-  Flag, 
-  ShieldCheck, 
-  Bell, 
-  Award, 
-  PlusCircle,
-  TrendingUp,
-  Clock
+  Rocket, CreditCard, Users, ArrowRight, CheckCircle2, Flag, 
+  TrendingUp, Clock, BarChart3, FolderKanban, ExternalLink, CheckCircle
 } from 'lucide-react';
+import Confetti from 'react-confetti';
+import { Player } from '@lottiefiles/react-lottie-player';
+import trophyAnimation from '../../assets/lottie/Trophy.json';
+import conversationAnimation from '../../assets/lottie/Conversation.json';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -36,25 +30,27 @@ export default function DashboardPage() {
 
   const activeProject = projects.find(p => p.status === 'active') || projects[0] || {
     name: 'Página Web + Menú Digital',
-    description: 'Diseño de experiencia interactiva y plataforma digital personalizada para la carta de Tahara Café con integración directa a pedidos.',
+    description: 'Diseño de experiencia interactiva y plataforma digital personalizada.',
     progressPercent: 75,
     currentPhase: 3,
     estimatedDelivery: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000)
   };
 
-  const totalCredits = referralData.totalCredits || 2000;
+  const totalCredits = referralData.totalCredits || 0;
   const referrals = referralData.referrals || [];
-  const convertedCount = referrals.filter(r => r.status === 'converted').length || 5;
-  const negotiatingCount = referrals.filter(r => r.status === 'negotiating' || r.status === 'contacted').length || 2;
-
+  const convertedCount = referrals.filter(r => r.status === 'converted').length || 0;
+  const negotiatingCount = referrals.filter(r => r.status === 'negotiating' || r.status === 'contacted').length || 0;
+  const totalReferrals = referrals.length || 0;
   const clientName = user?.companyName || user?.name || 'Tahara Café';
+
+  const phaseNames = ['', 'Análisis', 'Diseño', 'Revisión', 'Desarrollo', 'Lanzamiento', 'Activo'];
+  const currentPhaseName = phaseNames[activeProject.currentPhase] || 'Desarrollo';
 
   if (loading) {
     return (
       <Layout>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
-          <div style={{ width: '36px', height: '36px', border: '3px solid #E2E8F0', borderTopColor: '#00C4CC', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          <div className="bars-loader"><div></div><div></div><div></div></div>
         </div>
       </Layout>
     );
@@ -62,343 +58,259 @@ export default function DashboardPage() {
 
   return (
     <Layout>
-      <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+      {activeProject && activeProject.currentPhase === 6 && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 9999, pointerEvents: 'none' }}>
+          <Confetti width={window.innerWidth} height={window.innerHeight} recycle={false} numberOfPieces={500} />
+        </div>
+      )}
+      <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginTop: '-16px' }}>
         
-        {/* Saludo Ejecutivo / Executive Greeting */}
-        <section style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
-          <div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 12px', background: '#F1F5F9', borderRadius: '9999px', marginBottom: '10px' }}>
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', display: 'inline-block' }} />
-              <span style={{ fontSize: '11px', fontWeight: 700, color: '#00696E', textTransform: 'uppercase', letterSpacing: '0.06em', fontFamily: "'Space Grotesk', sans-serif" }}>
-                Portal Activo
-              </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {user?.logoUrl ? (
+            <div style={{ width: '56px', height: '56px', borderRadius: '12px', background: '#fff', border: '1px solid #E5E7EB', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+              <img src={user.logoUrl} alt="Logo de la empresa" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
             </div>
-            <h1 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '32px', fontWeight: 800, color: '#0F172A', letterSpacing: '-0.025em', margin: '0 0 6px 0' }}>
-              Hola, {clientName}
+          ) : (
+            <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'linear-gradient(135deg, #00C4CC 0%, #004953 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '24px', fontWeight: 700, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+              {user?.companyName ? user.companyName.charAt(0).toUpperCase() : (user?.name ? user.name.charAt(0).toUpperCase() : 'C')}
+            </div>
+          )}
+          <div>
+            <h1 style={{ fontFamily: "'Nunito', sans-serif", fontSize: '28px', fontWeight: 800, color: '#111827', letterSpacing: '-0.015em', margin: '0 0 4px 0' }}>
+              Bienvenido, {user?.name ? user.name.split(' ')[0] : 'Cliente'}
             </h1>
-            <p style={{ fontSize: '15px', color: '#64748B', margin: 0 }}>
-              Qué gusto seguir construyendo contigo. Aquí tienes el pulso de tu operación digital.
+            <p style={{ fontSize: '14px', color: '#6B7280', margin: 0 }}>
+              {new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} — Aquí tienes el resumen de tu operación.
             </p>
           </div>
+        </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', background: '#FFFFFF', borderRadius: '12px', border: '1px solid #E2E8F0', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
-            <ShieldCheck size={22} color="#00C4CC" />
-            <div style={{ textAlign: 'left' }}>
-              <span style={{ display: 'block', fontSize: '10px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: "'Space Grotesk', sans-serif" }}>
-                Tu suscripción
-              </span>
-              <span style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>
-                Acompañamiento VIP
-              </span>
+        {/* Main Project Card - HIGHEST PRIORITY */}
+        <div id="tour-active-project" className="card" style={{ padding: '32px', borderTop: '4px solid #00C4CC' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start', marginBottom: '24px', flexWrap: 'wrap', gap: '48px' }}>
+            <div style={{ flex: '1 1 auto', maxWidth: '500px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                <FolderKanban size={18} color="#00C4CC" />
+                <span style={{ fontSize: '13px', fontWeight: 600, color: '#00C4CC', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Tu proyecto activo</span>
+                {activeProject.currentPhase === 6 ? (
+                  <span className="badge badge-green" style={{ fontSize: '11px' }}>Completado</span>
+                ) : (
+                  <span className="badge badge-cyan" style={{ fontSize: '11px' }}>En desarrollo</span>
+                )}
+              </div>
+              <h2 style={{ fontSize: '24px', fontWeight: 700, color: '#111827', margin: '0 0 24px 0' }}>
+                {activeProject.name}
+              </h2>
+
+              {/* Dynamic Phase Message */}
+              {activeProject.currentPhase !== 6 && (
+                <div style={{ padding: '16px', background: '#F3F4F6', borderRadius: '8px', borderLeft: '4px solid #7B2FBE', display: 'inline-block' }}>
+                  <p style={{ fontSize: '15px', fontWeight: 600, color: '#111827', margin: '0 0 4px 0' }}>
+                    {activeProject.currentPhase === 1 && "Estamos dando el primer paso en tu proyecto."}
+                    {activeProject.currentPhase === 2 && "Estamos trabajando paso a paso en el diseño de tu página."}
+                    {activeProject.currentPhase === 3 && "¡Tómate un tiempo para revisar el avance!"}
+                    {activeProject.currentPhase === 4 && "Estamos afinando los últimos detalles en el desarrollo."}
+                    {activeProject.currentPhase === 5 && "Estamos afinando los últimos detalles. El próximo paso es el lanzamiento."}
+                  </p>
+                  <p style={{ fontSize: '13px', color: '#4B5563', margin: 0 }}>
+                    {activeProject.currentPhase === 3 && "Por favor revisa el proyecto y déjanos tus comentarios para poder avanzar."}
+                  </p>
+                </div>
+              )}
             </div>
-          </div>
-        </section>
-
-        {/* Bloque Dominante — Tu Proyecto */}
-        <section style={{
-          position: 'relative',
-          overflow: 'hidden',
-          background: '#FFFFFF',
-          borderRadius: '16px',
-          border: '1px solid #E2E8F0',
-          padding: '28px 32px',
-          boxShadow: '0 4px 20px -4px rgba(15, 23, 42, 0.04)'
-        }}>
-          {/* Ambient Glow */}
-          <div style={{
-            position: 'absolute',
-            right: '-60px',
-            top: '-60px',
-            width: '260px',
-            height: '260px',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(0, 196, 204, 0.15) 0%, rgba(10, 88, 163, 0.05) 70%, transparent 100%)',
-            pointerEvents: 'none',
-            filter: 'blur(30px)'
-          }} />
-
-          <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: '24px' }}>
             
-            {/* Top row: tags & estimated delivery */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 12px', background: '#F1F5F9', borderRadius: '9999px', fontSize: '11px', fontWeight: 700, color: '#0F172A', textTransform: 'uppercase', fontFamily: "'Space Grotesk', sans-serif" }}>
-                  <Rocket size={13} color="#0A58A3" /> Tu proyecto
-                </span>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 12px', background: 'rgba(0, 196, 204, 0.12)', borderRadius: '9999px', fontSize: '11px', fontWeight: 700, color: '#00696E', textTransform: 'uppercase', fontFamily: "'Space Grotesk', sans-serif" }}>
-                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#00C4CC' }} />
-                  En desarrollo
-                </span>
+            {activeProject.currentPhase === 3 && activeProject.previewUrl ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center', marginTop: '-4px' }}>
+                <div style={{ width: '400px', height: '240px', borderRadius: '8px', overflow: 'hidden', border: '2px solid #E5E7EB', background: '#F3F4F6', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', marginBottom: '8px' }}>
+                  <iframe 
+                    src={activeProject.previewUrl} 
+                    style={{ width: '1600px', height: '960px', transform: 'scale(0.25)', transformOrigin: 'top left', border: 'none', pointerEvents: 'none' }}
+                    title="Vista previa del sitio"
+                  />
+                </div>
+                <Link to="/project" state={{ scrollTo: 'revision' }} className="btn-primary" style={{ textDecoration: 'none', justifyContent: 'center', width: '400px', fontSize: '13px' }}>
+                  Ver diseño completo <ArrowRight size={14} style={{ marginLeft: '6px' }}/>
+                </Link>
               </div>
-              <span style={{ fontSize: '12px', color: '#64748B', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600 }}>
-                Entrega estimada: 3 semanas
-              </span>
-            </div>
-
-            {/* Middle Row: Title & Progress Bar */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', alignItems: 'center' }}>
-              <div>
-                <h2 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '24px', fontWeight: 700, color: '#0F172A', margin: '0 0 8px 0', letterSpacing: '-0.02em' }}>
-                  {activeProject.name}
-                </h2>
-                <p style={{ fontSize: '14px', color: '#64748B', lineHeight: '1.6', margin: 0, maxWidth: '520px' }}>
-                  {activeProject.description}
-                </p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px', marginLeft: 'auto' }}>
+                <Link to="/project" className="btn-primary" style={{ textDecoration: 'none', justifyContent: 'center' }}>
+                  Ver detalles del proyecto <ArrowRight size={16} style={{ marginLeft: '6px' }}/>
+                </Link>
               </div>
-
-              {/* Progress Container */}
-              <div style={{ background: '#F8FAFC', padding: '18px', borderRadius: '12px', border: '1px solid #F1F5F9' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#0F172A' }}>Avance general</span>
-                  <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '22px', fontWeight: 800, color: '#00C4CC' }}>
-                    {activeProject.progressPercent}%
-                  </span>
-                </div>
-                {/* Progress bar track */}
-                <div style={{ width: '100%', height: '10px', background: '#E2E8F0', borderRadius: '9999px', overflow: 'hidden' }}>
-                  <div style={{
-                    width: `${activeProject.progressPercent}%`,
-                    height: '100%',
-                    borderRadius: '9999px',
-                    background: 'linear-gradient(90deg, #0A58A3, #00C4CC)',
-                    transition: 'width 0.6s ease'
-                  }} />
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#94A3B8', marginTop: '6px', fontFamily: "'Inter', sans-serif" }}>
-                  <span>Planeación</span>
-                  <span>Diseño UX</span>
-                  <span style={{ color: '#00C4CC', fontWeight: 600 }}>Desarrollo</span>
-                  <span>Lanzamiento</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom Row: Next Step & CTA */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-              gap: '16px',
-              paddingTop: '16px',
-              borderTop: '1px solid #F1F5F9'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(10, 88, 163, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0A58A3', flexShrink: 0 }}>
-                  <Flag size={18} />
-                </div>
-                <div>
-                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>
-                    Próximo paso: Revisión del diseño interactivo
-                  </div>
-                  <div style={{ fontSize: '12px', color: '#64748B' }}>
-                    Pronto podrás revisar la siguiente versión de tu proyecto y dejarnos comentarios.
-                  </div>
-                </div>
-              </div>
-
-              <Link to="/project" className="btn-primary" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 20px', fontSize: '13px' }}>
-                <span>Ver proyecto</span>
-                <ArrowRight size={16} />
-              </Link>
-            </div>
-
+            )}
           </div>
-        </section>
-
-        {/* 2 Essential Cards (Créditos HX & Mis Referidos) */}
-        <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
-          
-          {/* Card 1: Créditos HX */}
-          <div className="glass-card glass-card-hover" style={{ padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '20px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(0, 196, 204, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00C4CC' }}>
-                    <CreditCard size={20} />
-                  </div>
-                  <h3 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '17px', fontWeight: 700, color: '#0F172A', margin: 0 }}>
-                    Créditos HX
-                  </h3>
-                </div>
-                <span style={{ fontSize: '11px', fontWeight: 700, padding: '3px 10px', borderRadius: '9999px', background: 'rgba(0, 196, 204, 0.12)', color: '#008B91', fontFamily: "'Space Grotesk', sans-serif", textTransform: 'uppercase' }}>
-                  Disponibles
-                </span>
+          {activeProject.currentPhase === 6 && (
+            <div style={{ width: '100%', padding: '32px 40px', background: '#111827', borderRadius: '12px', border: '1px solid #374151', marginBottom: '24px', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '40px', color: '#fff' }}>
+              
+              <div style={{ flexShrink: 0, width: 160, height: 160 }}>
+                <Player autoplay loop src={trophyAnimation} style={{ width: '160px', height: '160px' }} />
               </div>
 
-              <div>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-                  <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '32px', fontWeight: 800, color: '#0F172A', letterSpacing: '-0.03em' }}>
-                    ${totalCredits.toLocaleString()}
-                  </span>
-                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#94A3B8', fontFamily: "'Space Grotesk', sans-serif" }}>
-                    HX
-                  </span>
-                </div>
-                <p style={{ fontSize: '13px', color: '#64748B', margin: '6px 0 0 0', lineHeight: 1.5 }}>
-                  Utilizables en servicios HummingX elegibles, nuevas funciones o mantenimiento preventivo.
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left', maxWidth: '600px' }}>
+                <h3 style={{ fontSize: '22px', fontWeight: 800, color: '#fff', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <CheckCircle size={24} color="#00C4CC" /> ¡Hemos terminado al 100% con tu proyecto!
+                </h3>
+                <p style={{ fontSize: '15px', color: '#D1D5DB', margin: '0 0 12px 0', lineHeight: 1.6 }}>
+                  Tu proyecto está completamente desplegado y activo. Nos encantó trabajar contigo y esperamos que a ti también. Para cualquier proyecto adicional, no dudes en contactarnos.
+                </p>
+                <p style={{ fontSize: '15px', color: '#D1D5DB', margin: 0, lineHeight: 1.6 }}>
+                  Recuerda que puedes usar tus puntos HummingX en cualquier momento, ¡solo escríbenos por WhatsApp y dinos en qué te gustaría usarlos!
                 </p>
               </div>
             </div>
+          )}
 
-            <Link to="/credits" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, color: '#0A58A3' }}>
-              <span>Ver mis créditos</span>
-              <ArrowRight size={14} />
-            </Link>
+          {/* Big Progress Bar */}
+          <div id="tour-progress" style={{ background: '#F9FAFB', padding: '24px 28px', borderRadius: '12px', border: '1px solid #E5E7EB' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '15px', fontWeight: 600, color: '#111827' }}>Avance general del proyecto</span>
+                {activeProject.currentPhase <= 5 ? (
+                  <span style={{ fontSize: '13px', color: '#6B7280', background: '#E5E7EB', padding: '4px 10px', borderRadius: '99px' }}>Fase {activeProject.currentPhase} de 5</span>
+                ) : (
+                  <span style={{ fontSize: '13px', color: '#059669', background: '#D1FAE5', padding: '4px 10px', borderRadius: '99px' }}>Completado</span>
+                )}
+              </div>
+              <span style={{ fontSize: '32px', fontWeight: 800, color: '#00C4CC' }}>{activeProject.progressPercent}%</span>
+            </div>
+            <div className="progress-track" style={{ height: '16px', background: '#E5E7EB' }}>
+              <div className="progress-fill" style={{ width: `${activeProject.progressPercent}%`, background: 'linear-gradient(90deg, #00C4CC, #7B2FBE)' }} />
+            </div>
+          </div>
+        </div>
+
+        {/* 4 KPI Stat Cards */}
+        <div className={activeProject.currentPhase === 6 ? 'stats-grid-2' : 'stats-grid-4'}>
+          {activeProject.currentPhase !== 6 && (
+            <>
+              <div className="stat-card">
+                <div className="stat-label">
+                  <BarChart3 size={16} color="#6B7280" /> Estado del Proyecto
+                </div>
+                <div className="stat-value">A tiempo</div>
+                <div className="stat-trend up">
+                  <TrendingUp size={14} /> Avanzando según lo planeado
+                </div>
+              </div>
+
+              <div className="stat-card">
+                <div className="stat-label">
+                  <Rocket size={16} color="#6B7280" /> Siguiente Hito
+                </div>
+                <div className="stat-value" style={{ fontSize: '20px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {phaseNames[activeProject.currentPhase + 1] || 'Entrega Final'}
+                </div>
+                <div style={{ fontSize: '12px', color: '#6B7280' }}>Próximamente</div>
+              </div>
+            </>
+          )}
+
+          <div id="tour-credits" className="stat-card">
+            <div className="stat-label">
+              <CreditCard size={16} color="#6B7280" /> Créditos HX
+            </div>
+            <div className="stat-value">${totalCredits.toLocaleString()}</div>
+            <div style={{ fontSize: '12px', color: '#6B7280' }}>Disponibles para canje</div>
           </div>
 
-          {/* Card 2: Tus Recomendaciones */}
-          <div className="glass-card glass-card-hover" style={{ padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '20px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(10, 88, 163, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0A58A3' }}>
-                    <Users size={20} />
-                  </div>
-                  <h3 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '17px', fontWeight: 700, color: '#0F172A', margin: 0 }}>
-                    Tus recomendaciones
-                  </h3>
-                </div>
-                <span style={{ fontSize: '11px', fontWeight: 700, padding: '3px 10px', borderRadius: '9999px', background: '#F1F5F9', color: '#475569', fontFamily: "'Space Grotesk', sans-serif", textTransform: 'uppercase' }}>
-                  Red HummingX
-                </span>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div style={{ padding: '12px', background: '#F8FAFC', borderRadius: '10px', border: '1px solid #F1F5F9' }}>
-                  <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '22px', fontWeight: 800, color: '#00C4CC' }}>
-                    {convertedCount}
-                  </div>
-                  <div style={{ fontSize: '12px', color: '#64748B', fontWeight: 500 }}>
-                    convertidas
-                  </div>
-                </div>
-                <div style={{ padding: '12px', background: '#F8FAFC', borderRadius: '10px', border: '1px solid #F1F5F9' }}>
-                  <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '22px', fontWeight: 800, color: '#0A58A3' }}>
-                    {negotiatingCount}
-                  </div>
-                  <div style={{ fontSize: '12px', color: '#64748B', fontWeight: 500 }}>
-                    en negociación
-                  </div>
-                </div>
-              </div>
+          <div id="tour-referrals" className="stat-card">
+            <div className="stat-label">
+              <Users size={16} color="#6B7280" /> Referidos
             </div>
+            <div className="stat-value">{totalReferrals}</div>
+            <div className={`stat-trend ${convertedCount > 0 ? 'up' : ''}`} style={{ color: convertedCount === 0 ? '#6B7280' : undefined }}>
+              <CheckCircle2 size={14} /> {convertedCount} convertidos
+            </div>
+          </div>
+        </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-              <Link to="/referrals" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, color: '#0A58A3' }}>
-                <span>Ver mis referidos</span>
-                <ArrowRight size={14} />
+        {/* Two Bottom Cards */}
+        <div className="stats-grid-2" style={{ alignItems: 'start' }}>
+
+          {/* Activity Log */}
+          <div id="tour-activity" className="card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', margin: 0 }}>
+                Actividad reciente
+              </h3>
+              <Link to="/project" style={{ fontSize: '13px', fontWeight: 500, color: '#0E7490', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                Ver todo <ArrowRight size={14} />
               </Link>
-              <Link to="/referrals" className="btn-secondary" style={{ textDecoration: 'none', padding: '6px 14px', fontSize: '12px' }}>
-                <PlusCircle size={14} style={{ marginRight: '4px' }} />
-                Recomendar empresa
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+              {(!activeProject.activities || activeProject.activities.length === 0) ? (
+                <div style={{ padding: '20px 0', textAlign: 'center', color: '#6B7280', fontSize: '14px' }}>
+                  Tu proyecto fue creado exitosamente. Estamos configurando tu entorno de trabajo.
+                </div>
+              ) : (
+                activeProject.activities.map((activity, i) => (
+                  <div key={activity.id || i} style={{ 
+                    display: 'flex', alignItems: 'flex-start', gap: '12px', 
+                    padding: '12px 0',
+                    borderBottom: i < activeProject.activities.length - 1 ? '1px solid #F3F4F6' : 'none' 
+                  }}>
+                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#00C4CC', marginTop: '6px', flexShrink: 0 }} />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '14px', fontWeight: 500, color: '#111827' }}>{activity.description}</div>
+                      <div style={{ fontSize: '12px', color: '#9CA3AF' }}>
+                        {new Date(activity.createdAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })} a las {new Date(activity.createdAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div id="tour-recommendations" className="card" style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', margin: 0 }}>
+                Tus recomendaciones
+              </h3>
+              <Link to="/referrals" style={{ fontSize: '13px', fontWeight: 500, color: '#0E7490', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                Ver todo <ArrowRight size={14} />
               </Link>
             </div>
-          </div>
 
-        </section>
-
-        {/* Two Balanced Lower Sections: Actividad Reciente & Nivel HummingX */}
-        <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
-          
-          {/* Left: Actividad Reciente */}
-          <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '20px' }}>
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <TrendingUp size={18} color="#00C4CC" />
-                  <h3 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '16px', fontWeight: 700, color: '#0F172A', margin: 0 }}>
-                    Actividad reciente
-                  </h3>
-                </div>
-                <span style={{ fontSize: '11px', color: '#94A3B8', textTransform: 'uppercase', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600 }}>
-                  Últimos eventos
-                </span>
+            {totalReferrals === 0 ? (
+              <div style={{ padding: '32px 0 16px 0', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <Player autoplay loop src={conversationAnimation} style={{ width: '200px', height: '200px', marginBottom: '16px', marginTop: '-40px' }} />
+                <p style={{ fontSize: '14px', color: '#6B7280', margin: '0 0 20px', maxWidth: '320px' }}>
+                  Aún no tienes ninguna recomendación. Recomienda a una empresa para obtener recompensas.
+                </p>
+                <Link to="/referrals" className="btn-secondary" style={{ textDecoration: 'none', padding: '8px 14px', fontSize: '13px' }}>
+                  Recomendar ahora
+                </Link>
               </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '10px 12px', borderRadius: '10px', background: '#F8FAFC' }}>
-                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', marginTop: '6px', flexShrink: 0 }} />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '13px', fontWeight: 600, color: '#0F172A' }}>Tu proyecto avanzó a Desarrollo</div>
-                    <div style={{ fontSize: '11px', color: '#94A3B8' }}>Hace 2 horas</div>
+            ) : (
+              <>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+                  <div style={{ padding: '16px', background: '#F9FAFB', borderRadius: '8px', border: '1px solid #F3F4F6' }}>
+                    <div style={{ fontSize: '24px', fontWeight: 700, color: '#111827' }}>{convertedCount}</div>
+                    <div style={{ fontSize: '12px', color: '#6B7280' }}>Convertidas</div>
+                  </div>
+                  <div style={{ padding: '16px', background: '#F9FAFB', borderRadius: '8px', border: '1px solid #F3F4F6' }}>
+                    <div style={{ fontSize: '24px', fontWeight: 700, color: '#111827' }}>{negotiatingCount}</div>
+                    <div style={{ fontSize: '12px', color: '#6B7280' }}>En negociación</div>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '10px 12px', borderRadius: '10px', background: '#F8FAFC' }}>
-                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#00C4CC', marginTop: '6px', flexShrink: 0 }} />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '13px', fontWeight: 600, color: '#0F172A' }}>Recibiste 2,000 Créditos HX de bono</div>
-                    <div style={{ fontSize: '11px', color: '#94A3B8' }}>Ayer</div>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '10px 12px', borderRadius: '10px', background: '#F8FAFC' }}>
-                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#0A58A3', marginTop: '6px', flexShrink: 0 }} />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '13px', fontWeight: 600, color: '#0F172A' }}>Diseño interactivo aprobado por el cliente</div>
-                    <div style={{ fontSize: '11px', color: '#94A3B8' }}>Hace 2 días</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <Link to="/project" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, color: '#0A58A3', paddingTop: '8px' }}>
-              <span>Ver bitácora completa</span>
-              <ArrowRight size={14} />
-            </Link>
-          </div>
-
-          {/* Right: Nivel HummingX */}
-          <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '20px' }}>
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Award size={18} color="#784A9C" />
-                  <h3 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '16px', fontWeight: 700, color: '#0F172A', margin: 0 }}>
-                    Nivel de membresía
-                  </h3>
-                </div>
-                <span style={{ fontSize: '11px', fontWeight: 700, padding: '3px 10px', borderRadius: '9999px', background: 'rgba(120, 74, 156, 0.1)', color: '#784A9C', fontFamily: "'Space Grotesk', sans-serif", textTransform: 'uppercase' }}>
-                  Exclusivo
-                </span>
-              </div>
-
-              {/* Partner Highlight Box */}
-              <div style={{ padding: '16px', borderRadius: '12px', background: 'linear-gradient(135deg, rgba(35, 14, 56, 0.05), rgba(0, 196, 204, 0.05))', border: '1px solid rgba(120, 74, 156, 0.15)', marginBottom: '16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#230E38', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00E5FF' }}>
-                    <Award size={22} />
-                  </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid #F3F4F6' }}>
                   <div>
-                    <div style={{ fontSize: '15px', fontWeight: 700, color: '#0F172A' }}>HummingX Partner</div>
-                    <div style={{ fontSize: '12px', color: '#64748B' }}>Beneficios especiales y soporte de ingeniería preferencial.</div>
+                    <div style={{ fontSize: '12px', color: '#6B7280' }}>Créditos acumulados</div>
+                    <div style={{ fontSize: '20px', fontWeight: 700, color: '#111827' }}>${totalCredits.toLocaleString()} HX</div>
                   </div>
+                  <Link to="/referrals" className="btn-secondary" style={{ textDecoration: 'none', padding: '8px 14px', fontSize: '13px' }}>
+                    Ir a Referidos
+                  </Link>
                 </div>
-              </div>
-
-              {/* Progress to VIP */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', fontSize: '12px' }}>
-                  <span style={{ fontWeight: 600, color: '#0F172A' }}>80% hacia HummingX VIP</span>
-                  <span style={{ color: '#784A9C', fontWeight: 700, fontFamily: "'Space Grotesk', sans-serif" }}>Nivel 2 de 3</span>
-                </div>
-                <div style={{ width: '100%', height: '8px', background: '#E2E8F0', borderRadius: '9999px', overflow: 'hidden' }}>
-                  <div style={{ width: '80%', height: '100%', background: 'linear-gradient(90deg, #784A9C, #00C4CC)', borderRadius: '9999px' }} />
-                </div>
-                <div style={{ fontSize: '12px', color: '#64748B', marginTop: '10px', lineHeight: 1.4 }}>
-                  Te falta 1 recomendación exitosa para desbloquear mantenimiento y beneficios VIP.
-                </div>
-              </div>
-            </div>
-
-            <Link to="/benefits" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, color: '#0A58A3', paddingTop: '8px' }}>
-              <span>Ver mis beneficios</span>
-              <ArrowRight size={14} />
-            </Link>
+              </>
+            )}
           </div>
 
-        </section>
+        </div>
 
       </div>
     </Layout>

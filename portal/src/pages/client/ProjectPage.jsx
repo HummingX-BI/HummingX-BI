@@ -437,18 +437,29 @@ export default function ProjectPage() {
             <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Activity size={16} color="#6B7280" /> Bitácora de Desarrollo
             </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', position: 'relative', paddingLeft: '16px' }}>
-              <div style={{ position: 'absolute', left: '4px', top: '8px', bottom: '8px', width: '2px', background: '#E5E7EB' }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
               {project.activities.map(act => {
                 const dateObj = new Date(act.createdAt);
-                const dayStr = dateObj.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' });
+                const monthStr = dateObj.toLocaleDateString('es-ES', { month: 'short' }).substring(0, 3).toUpperCase();
+                const dayNum = dateObj.getDate();
                 const timeStr = dateObj.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: false });
                 return (
-                  <div key={act.id} style={{ position: 'relative', padding: '16px', background: '#F9FAFB', borderRadius: '8px', border: '1px solid #E5E7EB', marginLeft: '16px' }}>
-                    <div style={{ position: 'absolute', left: '-33px', top: '20px', width: '12px', height: '12px', borderRadius: '50%', background: '#1D4ED8', border: '2px solid #fff', boxShadow: '0 0 0 1px #E5E7EB' }} />
-                    <div style={{ fontSize: '14px', fontWeight: 500, color: '#111827', marginBottom: '6px' }}>{act.description}</div>
-                    <div style={{ fontSize: '12px', color: '#6B7280', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <Calendar size={12} /> {dayStr}, {timeStr} hrs.
+                  <div key={act.id} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 0', borderBottom: '1px solid #F3F4F6' }}>
+                    <div style={{ 
+                      width: '46px', height: '52px', background: '#F9FAFB', borderRadius: '8px', 
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', 
+                      flexShrink: 0, border: '1px solid #E5E7EB' 
+                    }}>
+                      <span style={{ fontSize: '10px', fontWeight: 700, color: '#6B7280', letterSpacing: '0.05em' }}>{monthStr}</span>
+                      <span style={{ fontSize: '18px', fontWeight: 800, color: '#111827', lineHeight: 1, marginTop: '2px' }}>{dayNum}</span>
+                    </div>
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                      <div style={{ fontSize: '15px', fontWeight: 600, color: '#111827', marginBottom: '2px' }}>{act.description}</div>
+                      <div style={{ fontSize: '13px', color: '#6B7280', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span>Fase del proyecto</span>
+                        <span style={{ color: '#D1D5DB' }}>•</span>
+                        <span>{timeStr} hrs</span>
+                      </div>
                     </div>
                   </div>
                 );

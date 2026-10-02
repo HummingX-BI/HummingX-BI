@@ -20,6 +20,7 @@ const PHASE_NAMES = ['N/A', 'Análisis', 'Diseño', 'Revisión', 'Desarrollo', '
 export default function AdminAnalyticsPage() {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showPendingDesigns, setShowPendingDesigns] = useState(false);
 
   useEffect(() => {
     fetchClients();
@@ -115,7 +116,50 @@ export default function AdminAnalyticsPage() {
               <h3 style={{ fontSize: '28px', fontWeight: 800, color: '#111827', margin: 0 }}>{completedProjects.length}</h3>
             </div>
           </div>
+          
+          {/* New Card: Design Requests */}
+          <div 
+            className="card" 
+            onClick={() => setShowPendingDesigns(!showPendingDesigns)}
+            style={{ 
+              padding: '24px', display: 'flex', alignItems: 'center', gap: '16px', 
+              cursor: 'pointer', border: showPendingDesigns ? '2px solid #D97706' : '1px solid #E5E7EB',
+              background: showPendingDesigns ? '#FEF3C7' : '#FFFFFF', transition: 'all 0.2s'
+            }}
+          >
+            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#FEF3C7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#D97706' }}>
+              <AlertTriangle size={24} />
+            </div>
+            <div>
+              <p style={{ fontSize: '13px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.02em', margin: '0 0 4px 0' }}>Solics. de Diseño</p>
+              <h3 style={{ fontSize: '28px', fontWeight: 800, color: '#92400E', margin: 0 }}>
+                {activeProjects.filter(p => p.designStatus === 'modifications_requested').length}
+              </h3>
+            </div>
+          </div>
         </div>
+
+        {/* Expandable List for Design Requests */}
+        {showPendingDesigns && (
+          <div className="card fade-in-up" style={{ padding: '24px', background: '#FEF3C7', border: '1px solid #FCD34D' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#92400E', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <AlertTriangle size={18} /> Clientes esperando modificaciones de diseño
+            </h3>
+            {activeProjects.filter(p => p.designStatus === 'modifications_requested').length === 0 ? (
+              <p style={{ color: '#B45309', fontSize: '14px', margin: 0 }}>No hay solicitudes de diseño pendientes.</p>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+                {activeProjects.filter(p => p.designStatus === 'modifications_requested').map(p => (
+                  <Link key={p.id} to={`/admin/clients/${p.clientId}`} style={{ background: '#FFFBEB', padding: '16px', borderRadius: '8px', border: '1px solid #FDE68A', textDecoration: 'none', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ fontSize: '14px', fontWeight: 700, color: '#92400E' }}>{p.clientName}</div>
+                    <div style={{ fontSize: '13px', color: '#B45309' }}>{p.name}</div>
+                    <div style={{ fontSize: '12px', fontWeight: 600, color: '#D97706', marginTop: '4px' }}>Ver cliente →</div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Charts Row */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px' }}>

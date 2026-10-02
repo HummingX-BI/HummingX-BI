@@ -23,6 +23,40 @@ router.get('/my', authenticate, async (req, res) => {
   }
 });
 
+// PUT /projects/:id/design-status — Client updates design status
+router.put('/:id/design-status', authenticate, async (req, res) => {
+  try {
+    const { designStatus } = req.body;
+    
+    if (!['approved', 'modifications_requested'].includes(designStatus)) {
+      return res.status(400).json({ error: 'Estado de diseño inválido.' });
+    }
+
+    const project = await prisma.project.findUnique({ where: { id: req.params.id } });
+    if (!project || project.clientId !== req.user.id) {
+      return res.status(404).json({ error: 'Proyecto no encontrado o acceso denegado.' });
+    }
+
+    const updated = await prisma.project.update({
+      where: { id: req.params.id },
+      data: { designStatus }
+    });
+    
+    // Log activity
+    await prisma.projectActivity.create({
+      data: {
+        projectId: req.params.id,
+        description: designStatus === 'approved' ? 'El cliente aprobó el diseño UX/UI.' : 'El cliente solicitó modificaciones al diseño.',
+        type: 'update'
+      }
+    });
+
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: 'Error al actualizar el estado de diseño.' });
+  }
+});
+
 // GET /projects/:id — Get single project detail
 router.get('/:id', authenticate, async (req, res) => {
   try {

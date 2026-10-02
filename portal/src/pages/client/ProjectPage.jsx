@@ -4,9 +4,10 @@ import Layout from '../../components/Layout';
 import api from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import { 
-  Check, Clock, Calendar, FileText, ExternalLink, Download, 
-  ShieldCheck, Layers, MessageCircle, ArrowRight, Construction, CheckCircle, Activity
+  Check, Clock, Calendar, FileText, ExternalLink, 
+  ShieldCheck, Layers, MessageCircle, Construction, CheckCircle, Activity, CheckCircle2
 } from 'lucide-react';
+import ProgressTicks from '../../components/ProgressTicks';
 
 const Pin = ({ className, style }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className={className} style={style}>
@@ -28,6 +29,7 @@ export default function ProjectPage() {
   const location = useLocation();
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [designApproved, setDesignApproved] = useState(false);
   
   const revisionRef = useRef(null);
 
@@ -92,41 +94,138 @@ export default function ProjectPage() {
       <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
         {/* Hero / Project Header */}
-        <div id="tour-project-header" className="card" style={{ padding: '28px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
-            <div style={{ maxWidth: '800px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+        <div id="tour-project-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'stretch', gap: '24px', flexWrap: 'wrap' }}>
+          
+          {/* Card Izquierda: Proyecto y Avance cortada a la mitad */}
+          <div className="card" style={{ flex: '1 1 360px', padding: '28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minWidth: '280px' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
                 {project?.currentPhase !== 6 && (
                   <span className="badge badge-cyan">En ejecución</span>
                 )}
-                <span style={{ fontSize: '12px', color: '#9CA3AF' }}>{project?.clientName || user?.companyName || user?.name || 'Cliente'} · Proyecto Digital</span>
+                <span style={{ fontSize: '12px', color: '#9CA3AF' }}>
+                  {project?.clientName || user?.companyName || user?.name || 'Cliente'} · Proyecto Digital
+                </span>
               </div>
-              <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#111827', margin: '0 0 6px' }}>
-                {project?.name || 'Página Web + Menú Digital'}
+              <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#111827', margin: '0 0 10px 0' }}>
+                {project?.name || 'Sin título'}
               </h1>
-              <p style={{ fontSize: '14px', color: '#6B7280', lineHeight: '1.6', margin: 0 }}>
-                {project?.description}
-              </p>
+              {project?.description && (
+                <p style={{ fontSize: '14px', color: '#6B7280', lineHeight: '1.6', margin: '0 0 20px 0' }}>
+                  {project?.description}
+                </p>
+              )}
+              
+              {/* Approve Buttons */}
+              {(project?.currentPhase === 3 && (project?.designStatus === 'pending' || project?.designStatus === 'modifications_resolved' || project?.designStatus === 'modifications_requested' || project?.designStatus === 'approved' || designApproved)) && (
+                <div style={{ marginTop: '16px', background: '#F9FAFB', border: '1px solid #E5E7EB', padding: '16px', borderRadius: '12px' }}>
+                  <p style={{ fontSize: '13px', color: '#4B5563', margin: '0 0 12px 0', lineHeight: 1.5 }}>
+                    Por favor revisa el diseño en el enlace de la derecha. Si tienes comentarios, solicítalos. Si todo está perfecto, aprueba el diseño para avanzar a Desarrollo.
+                  </p>
+                  
+                  {project.designStatus === 'approved' || designApproved ? (
+                    <div style={{ padding: '10px 14px', background: '#D1FAE5', color: '#065F46', borderRadius: '8px', fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <CheckCircle2 size={16} color="#059669" />
+                      Diseño aprobado. Preparando desarrollo.
+                    </div>
+                  ) : project.designStatus === 'modifications_requested' ? (
+                    <div style={{ padding: '10px 14px', background: '#FEF3C7', color: '#92400E', borderRadius: '8px', fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Clock size={16} color="#D97706" />
+                      Modificaciones solicitadas.
+                    </div>
+                  ) : (
+                    <>
+                      {project.designStatus === 'modifications_resolved' && (
+                        <div style={{ padding: '10px 14px', background: '#E0E7FF', color: '#3730A3', borderRadius: '8px', fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                          <CheckCircle2 size={16} color="#4338CA" />
+                          Cambios listos, por favor revisa de nuevo.
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                        <button 
+                          onClick={async () => {
+                            setDesignApproved(true);
+                            await api.put(`/projects/${project.id}/design-status`, { designStatus: 'approved' }).catch(console.error);
+                            setProject(prev => ({ ...prev, designStatus: 'approved' }));
+                          }}
+                          style={{ background: '#00C4CC', color: '#111827', border: 'none', padding: '8px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                        >
+                          <CheckCircle2 size={14} /> Aprobar diseño
+                        </button>
+                        <a 
+                          href="https://wa.me/525575084267?text=Hola,%20me%20gustar%C3%ADa%20solicitar%20algunas%20modificaciones%20al%20dise%C3%B1o%20de%20mi%20proyecto." 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          onClick={async () => {
+                            await api.put(`/projects/${project.id}/design-status`, { designStatus: 'modifications_requested' }).catch(console.error);
+                            setProject(prev => ({ ...prev, designStatus: 'modifications_requested' }));
+                          }}
+                          style={{ background: 'transparent', color: '#374151', border: '1px solid #D1D5DB', padding: '8px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}
+                        >
+                          Solicitar modificaciones
+                        </a>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Progress Bar (mitad izquierda) */}
+            <div style={{ background: '#F9FAFB', padding: '20px 24px', borderRadius: '12px', border: '1px solid #E5E7EB', marginTop: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>Avance general del proyecto</span>
+                  {currentPhaseNum <= 5 ? (
+                    <span style={{ fontSize: '12px', color: '#6B7280', background: '#E5E7EB', padding: '2px 8px', borderRadius: '99px' }}>
+                      Fase {currentPhaseNum} de 5
+                    </span>
+                  ) : (
+                    <span style={{ fontSize: '12px', color: '#059669', background: '#D1FAE5', padding: '2px 8px', borderRadius: '99px' }}>
+                      Completado
+                    </span>
+                  )}
+                </div>
+                <span style={{ fontSize: '26px', fontWeight: 800, color: '#00C4CC' }}>{progress}%</span>
+              </div>
+              <ProgressTicks value={progress} />
             </div>
           </div>
 
-          {/* Progress Bar */}
-          <div style={{ background: '#F9FAFB', padding: '24px 28px', borderRadius: '12px', border: '1px solid #E5E7EB', marginTop: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '15px', fontWeight: 600, color: '#111827' }}>Avance general del proyecto</span>
-                {currentPhaseNum <= 5 ? (
-                  <span style={{ fontSize: '13px', color: '#6B7280', background: '#E5E7EB', padding: '2px 8px', borderRadius: '99px' }}>Fase {currentPhaseNum} de 5</span>
-                ) : (
-                  <span style={{ fontSize: '13px', color: '#059669', background: '#D1FAE5', padding: '2px 8px', borderRadius: '99px' }}>Completado</span>
-                )}
+          {/* Lado Derecho: en la misma posición, sólo el frame y el botón (fuera de la card) */}
+          {project?.previewUrl && (
+            <div ref={revisionRef} style={{ flex: '1 1 440px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px', minWidth: '300px' }}>
+              <div className="browser-mockup" style={{ width: '100%', maxWidth: '480px' }}>
+                <div className="browser-mockup-header">
+                  <div className="browser-mockup-dots">
+                    <span className="browser-mockup-dot red"></span>
+                    <span className="browser-mockup-dot yellow"></span>
+                    <span className="browser-mockup-dot green"></span>
+                  </div>
+                  <div className="browser-mockup-address">
+                    <ExternalLink size={10} style={{ opacity: 0.6 }} />
+                    <span>{project.previewUrl.replace(/^https?:\/\//, '')}</span>
+                  </div>
+                </div>
+                <div className="browser-mockup-body" style={{ height: '260px' }}>
+                  <iframe 
+                    src={project.previewUrl} 
+                    title="Vista previa del sitio"
+                  />
+                </div>
               </div>
-              <span style={{ fontSize: '28px', fontWeight: 800, color: '#00C4CC' }}>{progress}%</span>
+              <a 
+                href={project.previewUrl} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="btn-primary" 
+                style={{ textDecoration: 'none', justifyContent: 'center', width: '100%', maxWidth: '480px', fontSize: '13.5px', padding: '10px 16px' }}
+              >
+                Ver diseño completo <ExternalLink size={15} style={{ marginLeft: '6px' }} />
+              </a>
             </div>
-            <div className="progress-track" style={{ height: '16px', background: '#E5E7EB' }}>
-              <div className="progress-fill" style={{ width: `${progress}%`, background: 'linear-gradient(90deg, #00C4CC, #7B2FBE)' }} />
-            </div>
-          </div>
+          )}
+
         </div>
 
         {/* Timeline Stepper */}
@@ -199,12 +298,17 @@ export default function ProjectPage() {
 
         {/* Completion Banner */}
         {project?.currentPhase === 6 && (
-          <div className="card fade-in-up" style={{ width: '100%', marginBottom: '24px', padding: '40px', textAlign: 'center', background: '#111827', color: '#fff', border: '1px solid #374151', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <CheckCircle size={48} color="#00C4CC" style={{ margin: '0 auto 16px' }} />
-            <h2 style={{ fontSize: '28px', fontWeight: 800, margin: '0 0 16px', letterSpacing: '-0.02em', color: '#fff' }}>
-              ¡Hemos terminado al 100% con tu proyecto!
-            </h2>
-            <p style={{ fontSize: '16px', color: '#D1D5DB', margin: '0 auto 24px', maxWidth: '600px', lineHeight: 1.6 }}>
+          <div className="card fade-in-up" style={{ position: 'relative', overflow: 'hidden', width: '100%', marginBottom: '24px', padding: '40px', textAlign: 'center', background: '#0b0b0e', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', alignItems: 'center', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.2)' }}>
+            
+            <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '280px', height: '280px', background: 'rgba(0,196,204,0.15)', borderRadius: '50%', filter: 'blur(48px)', pointerEvents: 'none', zIndex: 0 }}></div>
+            <div style={{ position: 'absolute', bottom: '-40px', left: '-40px', width: '280px', height: '280px', background: 'rgba(75,29,111,0.25)', borderRadius: '50%', filter: 'blur(48px)', pointerEvents: 'none', zIndex: 0 }}></div>
+
+            <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <CheckCircle size={48} color="#00C4CC" style={{ margin: '0 auto 16px' }} />
+              <h2 style={{ fontSize: '28px', fontWeight: 800, margin: '0 0 16px', letterSpacing: '-0.02em', color: '#fff' }}>
+                ¡Hemos terminado al 100% con tu proyecto!
+              </h2>
+              <p style={{ fontSize: '16px', color: '#D1D5DB', margin: '0 auto 24px', maxWidth: '600px', lineHeight: 1.6 }}>
               Tu proyecto está completamente desplegado y activo. Nos encantó trabajar contigo y esperamos que a ti también. Para cualquier proyecto adicional, no dudes en contactarnos.
               <br /><br />
               Recuerda que tienes puntos HummingX disponibles en tu cuenta. Puedes usarlos en cualquier momento, ¡solo escríbenos por WhatsApp y dinos en qué te gustaría usarlos!
@@ -212,11 +316,13 @@ export default function ProjectPage() {
             <a href="https://wa.me/525575084267" target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', textDecoration: 'none', background: '#00C4CC', color: '#111827', border: 'none', padding: '12px 24px', fontSize: '15px', fontWeight: 700, borderRadius: '8px' }}>
               <MessageCircle size={18} /> Contactar a Soporte
             </a>
+            </div>
           </div>
         )}
 
         {/* Two Detail Cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        {project?.currentPhase !== 6 && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             
             {/* Active Stage */}
           <div id="tour-active-stage" className="card" style={{ padding: '24px', borderTop: '3px solid #00C4CC', display: 'flex', flexDirection: 'column' }}>
@@ -250,28 +356,22 @@ export default function ProjectPage() {
               const activeStep = ROADMAP_STEPS.find(s => s.status === 'active') || ROADMAP_STEPS[ROADMAP_STEPS.length - 1];
               if (activeStep.title === 'Revisión') {
                 return (
-                  <div ref={revisionRef} style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>
-                    <div style={{ background: '#F0FDF4', padding: '12px', borderRadius: '8px', border: '1px solid #BBF7D0' }}>
-                      <span style={{ fontSize: '13px', fontWeight: 600, color: '#166534', textAlign: 'center', display: 'block' }}>
-                        ¡Revisión lista! Verifica tu proyecto y envíanos tu aprobación o comentarios por WhatsApp para poder continuar.
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '16px' }}>
+                    <div style={{ background: '#F0FDF4', padding: '14px 16px', borderRadius: '10px', border: '1px solid #BBF7D0' }}>
+                      <span style={{ fontSize: '13px', fontWeight: 600, color: '#166534', lineHeight: 1.5, display: 'block' }}>
+                        ¡Revisión lista! Puedes revisar la vista previa arriba y enviarnos tu aprobación o comentarios por WhatsApp para continuar.
                       </span>
                     </div>
-                    {project?.previewUrl ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <div style={{ width: '100%', height: '400px', borderRadius: '8px', overflow: 'hidden', border: '2px solid #D1D5DB', background: '#F9FAFB' }}>
-                          <iframe src={project.previewUrl} title="Vista previa" style={{ width: '100%', height: '100%', border: 'none', pointerEvents: 'none' }} />
-                        </div>
-                        <a href={project.previewUrl} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ textDecoration: 'none', justifyContent: 'center' }}>
-                          Ver Diseño Completo <ExternalLink size={16} style={{ marginLeft: '6px' }}/>
-                        </a>
-                      </div>
-                    ) : (
-                      <div style={{ fontSize: '12px', color: '#166534', textAlign: 'center' }}>El enlace estará disponible pronto.</div>
-                    )}
                     
-                    <div style={{ textAlign: 'center', marginTop: '4px' }}>
-                      <a href="https://wa.me/525575084267?text=Hola%20HummingX%2C%20ya%20revisé%20el%20avance%20de%20mi%20proyecto." target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', padding: '6px 12px', background: '#25D366', color: '#fff', border: 'none' }}>
-                        <MessageCircle size={14} /> Validar por WhatsApp
+                    <div>
+                      <a 
+                        href="https://wa.me/525575084267?text=Hola%20HummingX%2C%20ya%20revisé%20el%20avance%20de%20mi%20proyecto." 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="btn-secondary" 
+                        style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '13px', fontWeight: 600, padding: '10px 16px', background: '#25D366', color: '#fff', border: 'none', borderRadius: '8px', width: '100%', textDecoration: 'none' }}
+                      >
+                        <MessageCircle size={16} /> Validar por WhatsApp
                       </a>
                     </div>
                   </div>
@@ -370,6 +470,7 @@ export default function ProjectPage() {
             </div>
             </div>
           </div>
+        )}
 
         {/* Deliverables */}
         <div id="entregables" className="card" style={{ padding: '28px' }}>

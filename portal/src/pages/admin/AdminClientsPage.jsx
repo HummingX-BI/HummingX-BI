@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { SkeletonTableRow } from '../../components/Skeleton';
 import api from '../../lib/api';
-import { Search, Plus, Building2, ChevronRight, UserPlus, FileText, X, Users, FolderKanban, TrendingUp, CreditCard, Mail } from 'lucide-react';
+import { Search, Plus, Building2, ChevronRight, UserPlus, FileText, X, Users, FolderKanban, TrendingUp, CreditCard, Mail, AlertTriangle, CheckCircle2 } from 'lucide-react';
 
 export default function AdminClientsPage() {
   const [clients, setClients] = useState([]);
@@ -11,6 +11,8 @@ export default function AdminClientsPage() {
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [closingModal, setClosingModal] = useState(false);
+  const [showPendingDesigns, setShowPendingDesigns] = useState(false);
+  const [showApprovedDesigns, setShowApprovedDesigns] = useState(false);
   const [newClientData, setNewClientData] = useState({ name: '', email: '', companyName: '', logoUrl: '', phone: '', projectName: '' });
   const [savingClient, setSavingClient] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -83,6 +85,22 @@ export default function AdminClientsPage() {
 
   const totalCreditsEmitted = clients.reduce((sum, client) => sum + (client.creditMovements?.reduce((s, m) => s + (m.amount > 0 ? m.amount : 0), 0) || 0), 0);
 
+  const pendingDesignProjects = clients.flatMap(c => 
+    (c.projects || []).filter(p => p.designStatus === 'modifications_requested').map(p => ({
+      ...p,
+      clientName: c.companyName || c.name,
+      clientId: c.id
+    }))
+  );
+
+  const approvedDesignProjects = clients.flatMap(c => 
+    (c.projects || []).filter(p => p.designStatus === 'approved').map(p => ({
+      ...p,
+      clientName: c.companyName || c.name,
+      clientId: c.id
+    }))
+  );
+
   return (
     <Layout>
       <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -102,24 +120,106 @@ export default function AdminClientsPage() {
           </button>
         </div>
 
-        {/* 3 KPI Cards — stagger-list for sequential entrance */}
-        <div className="stagger-list stats-grid-3">
-          <div className="stat-card">
-            <div className="stat-label"><Users size={16} color="#6B7280" /> Total Clientes</div>
-            <div className="stat-value">{totalClients}</div>
-            <div style={{ fontSize: '12px', color: '#6B7280' }}>Cuentas registradas</div>
+        {/* 5 KPI Cards */}
+        {loading ? (
+          <div className="stagger-list" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '24px' }}>
+            {[1, 2, 3, 4, 5].map(i => (
+              <div key={i} className="stat-card" style={{ height: '104px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ width: '100px', height: '16px', background: '#F3F4F6', borderRadius: '4px' }}></div>
+                <div style={{ width: '40px', height: '32px', background: '#E5E7EB', borderRadius: '6px' }}></div>
+                <div style={{ width: '120px', height: '12px', background: '#F3F4F6', borderRadius: '4px' }}></div>
+              </div>
+            ))}
           </div>
-          <div className="stat-card">
-            <div className="stat-label"><FolderKanban size={16} color="#6B7280" /> Proyectos Activos</div>
-            <div className="stat-value">{activeProjects}</div>
-            <div className="stat-trend up"><TrendingUp size={14} /> En desarrollo</div>
+        ) : (
+          <div className="stagger-list" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '24px' }}>
+            <div className="stat-card">
+              <div className="stat-label"><Users size={16} color="#6B7280" /> Total Clientes</div>
+              <div className="stat-value">{totalClients}</div>
+              <div style={{ fontSize: '12px', color: '#6B7280' }}>Cuentas registradas</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-label"><FolderKanban size={16} color="#6B7280" /> Proyectos Activos</div>
+              <div className="stat-value">{activeProjects}</div>
+              <div className="stat-trend up"><TrendingUp size={14} /> En desarrollo</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-label"><CreditCard size={16} color="#6B7280" /> Créditos Emitidos</div>
+              <div className="stat-value">${totalCreditsEmitted.toLocaleString()}</div>
+              <div style={{ fontSize: '12px', color: '#6B7280' }}>Total acumulado</div>
+            </div>
+            <div 
+              className="stat-card"
+              onClick={() => { setShowPendingDesigns(!showPendingDesigns); setShowApprovedDesigns(false); }}
+              style={{ 
+                cursor: 'pointer', border: showPendingDesigns ? '2px solid #D97706' : '1px solid #E5E7EB',
+                background: showPendingDesigns ? '#FEF3C7' : '#FFFFFF', transition: 'all 0.2s',
+                display: 'flex', flexDirection: 'column', gap: '4px'
+              }}
+            >
+              <div className="stat-label" style={{ color: showPendingDesigns ? '#92400E' : '#6B7280' }}><AlertTriangle size={16} /> Solics. de Diseño</div>
+              <div className="stat-value" style={{ color: '#92400E' }}>{pendingDesignProjects.length}</div>
+              <div style={{ fontSize: '12px', color: '#B45309' }}>Pendientes de ajuste</div>
+            </div>
+            <div 
+              className="stat-card"
+              onClick={() => { setShowApprovedDesigns(!showApprovedDesigns); setShowPendingDesigns(false); }}
+              style={{ 
+                cursor: 'pointer', border: showApprovedDesigns ? '2px solid #059669' : '1px solid #E5E7EB',
+                background: showApprovedDesigns ? '#D1FAE5' : '#FFFFFF', transition: 'all 0.2s',
+                display: 'flex', flexDirection: 'column', gap: '4px'
+              }}
+            >
+              <div className="stat-label" style={{ color: showApprovedDesigns ? '#065F46' : '#6B7280' }}><CheckCircle2 size={16} /> Diseños Aprobados</div>
+              <div className="stat-value" style={{ color: '#065F46' }}>{approvedDesignProjects.length}</div>
+              <div style={{ fontSize: '12px', color: '#047857' }}>Listos para desarrollo</div>
+            </div>
           </div>
-          <div className="stat-card">
-            <div className="stat-label"><CreditCard size={16} color="#6B7280" /> Créditos Emitidos</div>
-            <div className="stat-value">${totalCreditsEmitted.toLocaleString()}</div>
-            <div style={{ fontSize: '12px', color: '#6B7280' }}>Total acumulado</div>
+        )}
+
+        {/* Expandable List for Design Requests */}
+        {showPendingDesigns && (
+          <div className="card fade-in-up" style={{ padding: '24px', background: '#FEF3C7', border: '1px solid #FCD34D' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#92400E', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <AlertTriangle size={18} /> Clientes esperando modificaciones de diseño
+            </h3>
+            {pendingDesignProjects.length === 0 ? (
+              <p style={{ color: '#B45309', fontSize: '14px', margin: 0 }}>No hay solicitudes de diseño pendientes.</p>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+                {pendingDesignProjects.map(p => (
+                  <Link key={p.id} to={`/admin/clients/${p.clientId}`} style={{ background: '#FFFBEB', padding: '16px', borderRadius: '8px', border: '1px solid #FDE68A', textDecoration: 'none', display: 'flex', flexDirection: 'column', gap: '8px', transition: 'transform 0.2s' }}>
+                    <div style={{ fontSize: '14px', fontWeight: 700, color: '#92400E' }}>{p.clientName}</div>
+                    <div style={{ fontSize: '13px', color: '#B45309' }}>{p.name}</div>
+                    <div style={{ fontSize: '12px', fontWeight: 600, color: '#D97706', marginTop: '4px' }}>Ver cliente →</div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
+        )}
+
+        {/* Expandable List for Approved Designs */}
+        {showApprovedDesigns && (
+          <div className="card fade-in-up" style={{ padding: '24px', background: '#D1FAE5', border: '1px solid #6EE7B7' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#065F46', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <CheckCircle2 size={18} /> Clientes que aprobaron el diseño
+            </h3>
+            {approvedDesignProjects.length === 0 ? (
+              <p style={{ color: '#047857', fontSize: '14px', margin: 0 }}>No hay diseños aprobados recientemente.</p>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+                {approvedDesignProjects.map(p => (
+                  <Link key={p.id} to={`/admin/clients/${p.clientId}`} style={{ background: '#F0FDF4', padding: '16px', borderRadius: '8px', border: '1px solid #A7F3D0', textDecoration: 'none', display: 'flex', flexDirection: 'column', gap: '8px', transition: 'transform 0.2s' }}>
+                    <div style={{ fontSize: '14px', fontWeight: 700, color: '#065F46' }}>{p.clientName}</div>
+                    <div style={{ fontSize: '13px', color: '#047857' }}>{p.name}</div>
+                    <div style={{ fontSize: '12px', fontWeight: 600, color: '#059669', marginTop: '4px' }}>Ver cliente →</div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Search Bar */}
         <div className="card" style={{ padding: '16px 20px', display: 'flex', gap: '12px', alignItems: 'center' }}>

@@ -4,8 +4,8 @@ import Layout from '../../components/Layout';
 import api from '../../lib/api';
 import { 
   ArrowLeft, User, Mail, Phone, Building, Save, FolderOpen, AlertCircle,
-  ClipboardList, Paintbrush, Code2, Search, Rocket, CheckCircle, Activity,
-  Plus, Trash2, Calendar, X, Users, DollarSign
+  ClipboardList, Paintbrush, Code2, Search, Rocket, CheckCircle, CheckCircle2, Activity,
+  Plus, Trash2, Calendar, X, Users, DollarSign, Clock, Edit2, Sparkles, Check
 } from 'lucide-react';
 
 const PHASES = [
@@ -16,6 +16,22 @@ const PHASES = [
   { num: 5, label: 'Lanzamiento', icon: Rocket },
   { num: 6, label: 'Activo', icon: CheckCircle },
 ];
+
+const parseSafeLocalDate = (dateVal) => {
+  if (!dateVal) return new Date();
+  const dateStr = typeof dateVal === 'string' ? dateVal.split('T')[0] : '';
+  const parts = dateStr.split('-');
+  if (parts.length === 3) {
+    return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10), 12, 0, 0);
+  }
+  return new Date(dateVal);
+};
+
+const formatSafeDate = (dateVal) => {
+  if (!dateVal) return '—';
+  const d = parseSafeLocalDate(dateVal);
+  return d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' });
+};
 
 export default function AdminClientDetailPage() {
   const { id } = useParams();
@@ -39,6 +55,29 @@ export default function AdminClientDetailPage() {
   const [creditAmount, setCreditAmount] = useState('');
   const [adjustingCredits, setAdjustingCredits] = useState(false);
 
+  // Plan de Pagos por Cliente
+  const [payments, setPayments] = useState([]);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [editingPayment, setEditingPayment] = useState(null);
+  const [paymentForm, setPaymentForm] = useState({
+    title: '',
+    description: '',
+    amount: '',
+    status: 'pending',
+    dueDate: '',
+  });
+  const [savingPayment, setSavingPayment] = useState(false);
+  const [paymentError, setPaymentError] = useState('');
+
+  // Plan Wizard State
+  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [planTotalAmount, setPlanTotalAmount] = useState('15000');
+  const [planInstallmentsCount, setPlanInstallmentsCount] = useState(5);
+  const [planReplaceExisting, setPlanReplaceExisting] = useState(true);
+  const [planInstallments, setPlanInstallments] = useState([]);
+  const [savingPlan, setSavingPlan] = useState(false);
+  const [planError, setPlanError] = useState('');
+
   const [isEditingClient, setIsEditingClient] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
 
@@ -54,9 +93,10 @@ export default function AdminClientDetailPage() {
       .then(res => {
         setClient(res.data);
         setClientData({ name: res.data.name, companyName: res.data.companyName || '', logoUrl: res.data.logoUrl || '', email: res.data.email, phone: res.data.phone || '' });
-        const proj = res.data.projects?.find(p => p.status === 'active');
+        const proj = res.data.projects?.find(p => p.status === 'active') || res.data.projects?.[0];
         if (proj) {
           setActiveProject(proj);
+          setPayments(proj.payments || []);
           setProjectData({ 
             name: proj.name, 
             description: proj.description || '', 
@@ -65,8 +105,12 @@ export default function AdminClientDetailPage() {
             estimatedDelivery: proj.estimatedDelivery ? proj.estimatedDelivery.split('T')[0] : '',
             quoteLink: proj.quoteLink || '',
             contractLink: proj.contractLink || '',
-            previewUrl: proj.previewUrl || ''
+            previewUrl: proj.previewUrl || '',
+            designStatus: proj.designStatus || 'pending_review'
           });
+        } else {
+          setActiveProject(null);
+          setPayments([]);
         }
       })
       .catch(console.error)
@@ -202,6 +246,231 @@ export default function AdminClientDetailPage() {
       await api.delete(`/admin/projects/${activeProject.id}/activities/${activityId}`);
       fetchClient();
     } catch (err) { console.error(err); }
+  };
+
+  const handleOpenAddPayment = () => {
+    setEditingPayment(null);
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    setPaymentForm({
+      title: '',
+      description: '',
+      amount: '',
+      status: 'pending',
+      dueDate: `${year}-${month}-${day}`,
+    });
+    setPaymentError('');
+    setShowPaymentModal(true);
+  };
+
+  const handleOpenAddAnnuity = () => {
+    setEditingPayment(null);
+    const nextYear = new Date();
+    nextYear.setFullYear(nextYear.getFullYear() + 1);
+    const year = nextYear.getFullYear();
+    const month = String(nextYear.getMonth() + 1).padStart(2, '0');
+    const day = String(nextYear.getDate()).padStart(2, '0');
+    setPaymentForm({
+      title: 'Anualidad de Mantenimiento',
+      description: 'Pago por renovación anual y mantenimiento.',
+      amount: '',
+      status: 'upcoming',
+      dueDate: `${year}-${month}-${day}`,
+    });
+    setPaymentError('');
+    setShowPaymentModal(true);
+  };
+
+  const handleOpenEditPayment = (p) => {
+    setEditingPayment(p);
+    setPaymentForm({
+      title: p.title,
+      description: p.description || '',
+      amount: p.amount,
+      status: p.status,
+      dueDate: p.dueDate ? (typeof p.dueDate === 'string' ? p.dueDate.split('T')[0] : '') : '',
+    });
+    setPaymentError('');
+    setShowPaymentModal(true);
+  };
+
+  const generateInstallments = (total, count, existingList = []) => {
+    const num = Math.max(1, parseInt(count) || 1);
+    const tot = Math.max(0, parseFloat(total) || 0);
+    const baseAmount = tot > 0 ? Math.floor((tot / num) * 100) / 100 : 0;
+    const remainder = tot > 0 ? parseFloat((tot - (baseAmount * (num - 1))).toFixed(2)) : 0;
+
+    const today = new Date();
+    const items = [];
+    for (let i = 0; i < num; i++) {
+      const isFirst = i === 0;
+      const isLast = i === num - 1;
+      
+      let defaultTitle = `Pago ${i + 1} de ${num}`;
+      if (num === 1) defaultTitle = 'Pago Único / Total';
+      else if (isFirst) defaultTitle = `Pago 1 de ${num} (Anticipo)`;
+      else if (isLast) defaultTitle = `Pago ${num} de ${num} (Liquidación)`;
+
+      // Date: staggered weekly by default if not set
+      const d = new Date(today);
+      d.setDate(today.getDate() + (i * 7));
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const defaultDateStr = `${year}-${month}-${day}`;
+
+      const existing = existingList[i];
+
+      items.push({
+        title: existing?.title || defaultTitle,
+        amount: existing?.amount !== undefined ? existing.amount : (isLast ? remainder : baseAmount),
+        dueDate: existing?.dueDate ? (typeof existing.dueDate === 'string' ? existing.dueDate.split('T')[0] : defaultDateStr) : defaultDateStr,
+        status: existing?.status || 'pending',
+      });
+    }
+    return items;
+  };
+
+  const handleOpenPlanWizard = () => {
+    setPlanError('');
+    const existingTotal = payments.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+    const initialTotal = existingTotal > 0 ? String(existingTotal) : '15000';
+    const initialCount = payments.length > 0 ? payments.length : 5;
+    
+    setPlanTotalAmount(initialTotal);
+    setPlanInstallmentsCount(initialCount);
+    setPlanReplaceExisting(true);
+    setPlanInstallments(generateInstallments(initialTotal, initialCount, payments));
+    setShowPlanModal(true);
+  };
+
+  const handlePlanTotalChange = (newTotal) => {
+    setPlanTotalAmount(newTotal);
+    setPlanInstallments(generateInstallments(newTotal, planInstallmentsCount));
+  };
+
+  const handlePlanCountChange = (newCount) => {
+    const count = Math.max(1, Math.min(24, parseInt(newCount) || 1));
+    setPlanInstallmentsCount(count);
+    setPlanInstallments(generateInstallments(planTotalAmount, count));
+  };
+
+  const handleInstallmentChange = (index, field, value) => {
+    setPlanInstallments(prev => {
+      const next = [...prev];
+      next[index] = { ...next[index], [field]: value };
+      return next;
+    });
+  };
+
+  const handleAutoBalanceInstallments = () => {
+    const tot = parseFloat(planTotalAmount) || 0;
+    const num = planInstallments.length;
+    if (num === 0 || tot <= 0) return;
+    const baseAmount = Math.floor((tot / num) * 100) / 100;
+    const remainder = parseFloat((tot - (baseAmount * (num - 1))).toFixed(2));
+    setPlanInstallments(prev => prev.map((inst, i) => ({
+      ...inst,
+      amount: i === num - 1 ? remainder : baseAmount
+    })));
+  };
+
+  const handleSavePlan = async (e) => {
+    e.preventDefault();
+    if (!activeProject) {
+      setPlanError('Se requiere un proyecto asignado para registrar el plan de pagos.');
+      return;
+    }
+    if (!planInstallments || planInstallments.length === 0) {
+      setPlanError('Debe haber al menos 1 pago en el plan.');
+      return;
+    }
+    for (let i = 0; i < planInstallments.length; i++) {
+      const inst = planInstallments[i];
+      if (!inst.dueDate) {
+        setPlanError(`Por favor selecciona la fecha para el ${inst.title || `Pago ${i + 1}`}.`);
+        return;
+      }
+      if (inst.amount === '' || isNaN(parseFloat(inst.amount))) {
+        setPlanError(`Por favor ingresa un monto válido para el ${inst.title || `Pago ${i + 1}`}.`);
+        return;
+      }
+    }
+
+    setSavingPlan(true);
+    setPlanError('');
+    try {
+      await api.post('/payments/plan', {
+        projectId: activeProject.id,
+        replaceExisting: planReplaceExisting,
+        payments: planInstallments.map(inst => ({
+          title: inst.title,
+          amount: parseFloat(inst.amount),
+          dueDate: inst.dueDate,
+          status: inst.status || 'pending',
+          description: inst.status === 'completed' ? 'Pagado' : 'Programado'
+        }))
+      });
+      setShowPlanModal(false);
+      fetchClient();
+    } catch (err) {
+      console.error('Error saving payment plan:', err);
+      setPlanError(err.response?.data?.error || 'Error al guardar el plan de pagos.');
+    } finally {
+      setSavingPlan(false);
+    }
+  };
+
+  const handleSavePayment = async (e) => {
+    e.preventDefault();
+    if (!activeProject) {
+      setPaymentError('Se requiere un proyecto asignado para registrar pagos.');
+      return;
+    }
+    setSavingPayment(true);
+    setPaymentError('');
+    try {
+      if (editingPayment) {
+        await api.put(`/payments/${editingPayment.id}`, {
+          ...paymentForm,
+          amount: parseFloat(paymentForm.amount),
+        });
+      } else {
+        await api.post(`/payments`, {
+          ...paymentForm,
+          projectId: activeProject.id,
+          amount: parseFloat(paymentForm.amount),
+        });
+      }
+      setShowPaymentModal(false);
+      fetchClient();
+    } catch (err) {
+      setPaymentError(err.response?.data?.error || 'Error al guardar el pago.');
+    } finally {
+      setSavingPayment(false);
+    }
+  };
+
+  const handleDeletePayment = async (paymentId) => {
+    if (!confirm('¿Estás seguro de eliminar este pago? Se removerá del calendario.')) return;
+    try {
+      await api.delete(`/payments/${paymentId}`);
+      fetchClient();
+    } catch (err) {
+      console.error('Error deleting payment:', err);
+      alert('Error al eliminar el pago.');
+    }
+  };
+
+  const handleQuickStatusChange = async (paymentId, newStatus) => {
+    try {
+      await api.put(`/payments/${paymentId}`, { status: newStatus });
+      fetchClient();
+    } catch (err) {
+      console.error('Error updating payment status:', err);
+    }
   };
 
   if (loading) return (
@@ -348,6 +617,35 @@ export default function AdminClientDetailPage() {
               ) : (
                 <>
                   <form onSubmit={handleUpdateProject} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    
+                    {activeProject.designStatus === 'approved' && activeProject.currentPhase < 4 && (
+                      <div style={{ padding: '16px', background: '#D1FAE5', border: '1px solid #34D399', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#065F46', fontSize: '14px', fontWeight: 600 }}>
+                          <CheckCircle2 size={18} color="#059669" /> El cliente ha aprobado el diseño.
+                        </div>
+                        <p style={{ margin: 0, fontSize: '13px', color: '#047857' }}>
+                          El siguiente paso es cambiar la Fase del Proyecto a <strong>Desarrollo</strong> en el formulario de abajo y guardar los cambios.
+                        </p>
+                      </div>
+                    )}
+                    
+                    {activeProject.designStatus === 'modifications_requested' && (
+                      <div style={{ padding: '16px', background: '#FEF3C7', border: '1px solid #FBBF24', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#92400E', fontSize: '14px', fontWeight: 600 }}>
+                          <Clock size={18} color="#D97706" /> El cliente solicitó modificaciones.
+                        </div>
+                        <button type="button" onClick={async () => {
+                          if (window.confirm('¿Estás seguro de que quieres marcar las modificaciones como resueltas? Se enviará un correo automáticamente al cliente para notificarle.')) {
+                            await api.put(`/admin/projects/${activeProject.id}`, { designStatus: 'modifications_resolved' });
+                            fetchClient();
+                            alert('Estado actualizado. El cliente ha sido notificado.');
+                          }
+                        }} style={{ background: '#D97706', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', alignSelf: 'flex-start' }}>
+                          Marcar como resuelto (Enviar correo)
+                        </button>
+                      </div>
+                    )}
+
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                       <label style={{ fontSize: '13px', fontWeight: 500, color: '#374151' }}>Nombre del Proyecto</label>
                       <input type="text" className="hx-input" value={projectData.name} onChange={e => setProjectData({...projectData, name: e.target.value})} required />
@@ -488,6 +786,217 @@ export default function AdminClientDetailPage() {
 
         </div>
 
+        {/* Plan de Pagos Card (Full Width) */}
+        <div className="card" style={{ padding: '28px', marginTop: '4px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
+            <div>
+              <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#111827', margin: '0 0 4px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <DollarSign size={20} color="#00C4CC" /> Plan de Pagos del Cliente
+              </h3>
+              <p style={{ fontSize: '13px', color: '#6B7280', margin: 0 }}>
+                {activeProject ? `Proyecto: ${activeProject.name} — Los cambios se actualizan automáticamente en el calendario.` : 'Registra y administra los abonos programados para este cliente.'}
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: '16px', background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '10px', padding: '8px 16px' }}>
+                <div>
+                  <div style={{ fontSize: '11px', color: '#6B7280', fontWeight: 500 }}>Total Proyecto</div>
+                  <div style={{ fontSize: '15px', fontWeight: 700, color: '#111827' }}>
+                    {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(
+                      payments.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0)
+                    )}
+                  </div>
+                </div>
+                <div style={{ width: '1px', background: '#E5E7EB' }} />
+                <div>
+                  <div style={{ fontSize: '11px', color: '#059669', fontWeight: 500 }}>Cobrado</div>
+                  <div style={{ fontSize: '15px', fontWeight: 700, color: '#059669' }}>
+                    {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(
+                      payments.filter(p => p.status === 'completed').reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0)
+                    )}
+                  </div>
+                </div>
+                <div style={{ width: '1px', background: '#E5E7EB' }} />
+                <div>
+                  <div style={{ fontSize: '11px', color: '#D97706', fontWeight: 500 }}>Por Cobrar</div>
+                  <div style={{ fontSize: '15px', fontWeight: 700, color: '#D97706' }}>
+                    {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(
+                      payments.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0) -
+                      payments.filter(p => p.status === 'completed').reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0)
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <button 
+                type="button" 
+                onClick={handleOpenPlanWizard} 
+                className="btn-primary" 
+                style={{ 
+                  padding: '9px 16px', 
+                  fontSize: '13px', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '6px',
+                  background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)',
+                  boxShadow: '0 2px 6px rgba(37,99,235,0.25)' 
+                }}
+                disabled={!activeProject}
+              >
+                <Sparkles size={16} /> Configurar Plan de Pagos
+              </button>
+
+              <button 
+                type="button" 
+                onClick={handleOpenAddAnnuity} 
+                className="btn-secondary" 
+                style={{ padding: '9px 14px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', color: '#059669', borderColor: '#059669', background: '#ECFDF5' }}
+                disabled={!activeProject}
+              >
+                <Calendar size={16} /> Configurar Anualidad
+              </button>
+
+              <button 
+                type="button" 
+                onClick={handleOpenAddPayment} 
+                className="btn-secondary" 
+                style={{ padding: '9px 14px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                disabled={!activeProject}
+              >
+                <Plus size={16} /> Pago Individual
+              </button>
+            </div>
+          </div>
+
+          {!activeProject ? (
+            <div style={{ padding: '30px', textAlign: 'center', background: '#F9FAFB', borderRadius: '10px', border: '1px dashed #D1D5DB' }}>
+              <AlertCircle size={24} color="#9CA3AF" style={{ margin: '0 auto 8px' }} />
+              <p style={{ color: '#4B5563', fontSize: '14px', margin: '0 0 12px 0' }}>El cliente no tiene un proyecto activo asignado aún.</p>
+              <button type="button" className="btn-secondary" onClick={() => setShowProjectModal(true)}>
+                Asignar Proyecto Primero
+              </button>
+            </div>
+          ) : payments.length === 0 ? (
+            <div style={{ padding: '36px', textAlign: 'center', background: '#F9FAFB', borderRadius: '10px', border: '1px dashed #D1D5DB' }}>
+              <Calendar size={28} color="#9CA3AF" style={{ margin: '0 auto 8px' }} />
+              <p style={{ color: '#374151', fontSize: '14px', fontWeight: 600, margin: '0 0 4px 0' }}>No hay abonos ni pagos registrados para este cliente</p>
+              <p style={{ color: '#6B7280', fontSize: '13px', margin: '0 0 16px 0' }}>Configura el plan de pagos completo o agrega abonos individuales para sincronizarlos en el calendario.</p>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
+                <button 
+                  type="button" 
+                  className="btn-primary" 
+                  onClick={handleOpenPlanWizard}
+                  style={{ background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)' }}
+                >
+                  <Sparkles size={15} /> Configurar Plan de Pagos
+                </button>
+                <button type="button" className="btn-secondary" onClick={handleOpenAddAnnuity} style={{ color: '#059669', borderColor: '#059669', background: '#ECFDF5' }}>
+                  <Calendar size={15} /> Configurar Anualidad
+                </button>
+                <button type="button" className="btn-secondary" onClick={handleOpenAddPayment}>
+                  <Plus size={15} /> Pago Individual
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid #E5E7EB', color: '#6B7280', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    <th style={{ padding: '12px 14px', fontWeight: 600 }}>Concepto / Título</th>
+                    <th style={{ padding: '12px 14px', fontWeight: 600 }}>Fecha Programada</th>
+                    <th style={{ padding: '12px 14px', fontWeight: 600 }}>Monto</th>
+                    <th style={{ padding: '12px 14px', fontWeight: 600 }}>Estado</th>
+                    <th style={{ padding: '12px 14px', fontWeight: 600, textAlign: 'right' }}>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody style={{ fontSize: '13.5px' }}>
+                  {payments.map((p) => {
+                    const formattedDate = formatSafeDate(p.dueDate);
+                    return (
+                      <tr key={p.id} style={{ borderBottom: '1px solid #F3F4F6' }}>
+                        <td style={{ padding: '14px' }}>
+                          <div style={{ fontWeight: 600, color: '#111827' }}>{p.title}</div>
+                          {p.description && <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '2px' }}>{p.description}</div>}
+                        </td>
+                        <td style={{ padding: '14px', color: '#4B5563', whiteSpace: 'nowrap' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <Calendar size={14} color="#6B7280" />
+                            {formattedDate}
+                          </div>
+                        </td>
+                        <td style={{ padding: '14px', fontWeight: 700, color: '#111827', whiteSpace: 'nowrap' }}>
+                          {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(p.amount)}
+                        </td>
+                        <td style={{ padding: '14px' }}>
+                          <select
+                            className="hx-input"
+                            value={p.status}
+                            onChange={(e) => handleQuickStatusChange(p.id, e.target.value)}
+                            style={{
+                              padding: '5px 10px',
+                              fontSize: '12px',
+                              fontWeight: 600,
+                              height: 'auto',
+                              width: 'auto',
+                              borderRadius: '6px',
+                              border: '1px solid',
+                              borderColor: p.status === 'completed' ? '#BBF7D0' : p.status === 'upcoming' ? '#FED7AA' : p.status === 'overdue' ? '#FECACA' : '#E5E7EB',
+                              background: p.status === 'completed' ? '#F0FDF4' : p.status === 'upcoming' ? '#FFFBEB' : p.status === 'overdue' ? '#FEF2F2' : '#F9FAFB',
+                              color: p.status === 'completed' ? '#15803D' : p.status === 'upcoming' ? '#B45309' : p.status === 'overdue' ? '#B91C1C' : '#374151',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            <option value="pending">Pendiente</option>
+                            <option value="upcoming">Próximo</option>
+                            <option value="completed">Completado</option>
+                            <option value="overdue">Vencido</option>
+                          </select>
+                        </td>
+                        <td style={{ padding: '14px', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditPayment(p)}
+                              title="Editar Pago"
+                              style={{
+                                background: '#F3F4F6',
+                                border: '1px solid #E5E7EB',
+                                borderRadius: '6px',
+                                padding: '6px',
+                                cursor: 'pointer',
+                                color: '#374151',
+                              }}
+                            >
+                              <Edit2 size={14} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeletePayment(p.id)}
+                              title="Eliminar Pago"
+                              style={{
+                                background: '#FEF2F2',
+                                border: '1px solid #FECACA',
+                                borderRadius: '6px',
+                                padding: '6px',
+                                cursor: 'pointer',
+                                color: '#DC2626',
+                              }}
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
         {/* Bitácora / Activities for Admin (Horizontal Full Width) */}
         {activeProject && activeProject.activities && activeProject.activities.length > 0 && (
           <div className="card" style={{ padding: '28px', marginTop: '8px' }}>
@@ -538,6 +1047,372 @@ export default function AdminClientDetailPage() {
               <button type="submit" className="btn-primary" disabled={creatingProject}>
                 {creatingProject ? 'Creando...' : 'Crear Proyecto'}
               </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Payment Create / Edit Modal */}
+      {showPaymentModal && (
+        <div className="modal-overlay">
+          <div className="modal-content" style={{ maxWidth: '480px' }}>
+            <button 
+              onClick={() => setShowPaymentModal(false)} 
+              style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', cursor: 'pointer', color: '#6B7280' }}
+            >
+              <X size={20} />
+            </button>
+            <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#111827', marginBottom: '20px' }}>
+              {editingPayment ? 'Editar Pago Programado' : 'Registrar Nuevo Pago'}
+            </h2>
+            <form onSubmit={handleSavePayment} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '13px', fontWeight: 500, color: '#374151' }}>Concepto / Título *</label>
+                <input 
+                  type="text" 
+                  className="hx-input" 
+                  required 
+                  placeholder="Ej. Anticipo 50% o Finiquito" 
+                  value={paymentForm.title} 
+                  onChange={e => setPaymentForm({...paymentForm, title: e.target.value})} 
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: 500, color: '#374151' }}>Monto (MXN) *</label>
+                  <input 
+                    type="number" 
+                    step="0.01" 
+                    min="0" 
+                    className="hx-input" 
+                    required 
+                    placeholder="2500" 
+                    value={paymentForm.amount} 
+                    onChange={e => setPaymentForm({...paymentForm, amount: e.target.value})} 
+                  />
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: 500, color: '#374151' }}>Fecha Programada *</label>
+                  <input 
+                    type="date" 
+                    className="hx-input" 
+                    required 
+                    value={paymentForm.dueDate} 
+                    onChange={e => setPaymentForm({...paymentForm, dueDate: e.target.value})} 
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '13px', fontWeight: 500, color: '#374151' }}>Estado del Pago</label>
+                <select 
+                  className="hx-input" 
+                  value={paymentForm.status} 
+                  onChange={e => setPaymentForm({...paymentForm, status: e.target.value})}
+                >
+                  <option value="pending">Pendiente</option>
+                  <option value="upcoming">Próximo</option>
+                  <option value="completed">Completado</option>
+                  <option value="overdue">Vencido</option>
+                </select>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '13px', fontWeight: 500, color: '#374151' }}>Descripción o Notas (Opcional)</label>
+                <textarea 
+                  className="hx-input" 
+                  rows={2} 
+                  placeholder="Detalles sobre entregables o método de pago..." 
+                  value={paymentForm.description} 
+                  onChange={e => setPaymentForm({...paymentForm, description: e.target.value})} 
+                />
+              </div>
+
+              {paymentError && (
+                <div style={{ padding: '10px 14px', background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626', borderRadius: '8px', fontSize: '13px' }}>
+                  {paymentError}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px' }}>
+                <button type="button" className="btn-secondary" onClick={() => setShowPaymentModal(false)}>
+                  Cancelar
+                </button>
+                <button type="submit" className="btn-primary" disabled={savingPayment}>
+                  {savingPayment ? 'Guardando...' : editingPayment ? 'Actualizar Pago' : 'Registrar Pago'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Plan Wizard Modal */}
+      {showPlanModal && (
+        <div className="modal-overlay">
+          <div className="modal-content" style={{ maxWidth: '680px', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+            <button 
+              onClick={() => setShowPlanModal(false)} 
+              style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', cursor: 'pointer', color: '#6B7280' }}
+            >
+              <X size={20} />
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563EB', flexShrink: 0 }}>
+                <Sparkles size={22} />
+              </div>
+              <div>
+                <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#111827', margin: 0 }}>
+                  Configurar Plan de Pagos
+                </h2>
+                <p style={{ fontSize: '13px', color: '#6B7280', margin: '2px 0 0 0' }}>
+                  {activeProject ? activeProject.name : client?.name} — Divide el monto total en las cuotas deseadas y programa sus fechas.
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSavePlan} style={{ display: 'flex', flexDirection: 'column', gap: '16px', overflowY: 'auto', paddingRight: '4px', marginTop: '10px' }}>
+              {/* Parameters Row */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.3fr', gap: '14px', background: '#F9FAFB', padding: '16px', borderRadius: '10px', border: '1px solid #E5E7EB' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>
+                    Monto Total del Proyecto (MXN) *
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF', fontWeight: 600, fontSize: '14px' }}>$</span>
+                    <input 
+                      type="number" 
+                      step="0.01" 
+                      min="1" 
+                      className="hx-input" 
+                      required 
+                      placeholder="15000" 
+                      value={planTotalAmount} 
+                      onChange={e => handlePlanTotalChange(e.target.value)} 
+                      style={{ paddingLeft: '28px', fontWeight: 700, fontSize: '15px' }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <label style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>
+                      ¿En cuántos pagos se divide? *
+                    </label>
+                    <span style={{ fontSize: '12px', color: '#2563EB', fontWeight: 600 }}>
+                      {planInstallmentsCount} {planInstallmentsCount === 1 ? 'pago' : 'pagos'}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <input 
+                      type="number" 
+                      min="1" 
+                      max="24" 
+                      className="hx-input" 
+                      required 
+                      value={planInstallmentsCount} 
+                      onChange={e => handlePlanCountChange(e.target.value)} 
+                      style={{ width: '70px', textAlign: 'center', fontWeight: 700 }}
+                    />
+                    <div style={{ display: 'flex', gap: '4px', flex: 1 }}>
+                      {[2, 3, 4, 5].map(cnt => (
+                        <button
+                          key={cnt}
+                          type="button"
+                          onClick={() => handlePlanCountChange(cnt)}
+                          style={{
+                            flex: 1,
+                            padding: '6px 2px',
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            borderRadius: '6px',
+                            border: planInstallmentsCount === cnt ? '1px solid #2563EB' : '1px solid #E5E7EB',
+                            background: planInstallmentsCount === cnt ? '#EFF6FF' : '#fff',
+                            color: planInstallmentsCount === cnt ? '#1D4ED8' : '#4B5563',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          {cnt}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Installments Table / List */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 700, color: '#111827', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    Cuotas Programadas ({planInstallments.length})
+                  </span>
+                  <button 
+                    type="button" 
+                    onClick={handleAutoBalanceInstallments}
+                    style={{ background: 'none', border: 'none', color: '#2563EB', fontSize: '12px', fontWeight: 600, cursor: 'pointer', padding: 0 }}
+                  >
+                    ↺ Dividir partes iguales
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '270px', overflowY: 'auto', paddingRight: '4px' }}>
+                  {planInstallments.map((inst, idx) => {
+                    const isCompleted = inst.status === 'completed';
+                    return (
+                      <div 
+                        key={idx} 
+                        style={{ 
+                          display: 'grid', 
+                          gridTemplateColumns: '28px 1.4fr 1.1fr 1.2fr 105px', 
+                          gap: '8px', 
+                          alignItems: 'center',
+                          padding: '10px 12px',
+                          background: isCompleted ? '#F0FDF4' : '#FFFFFF',
+                          border: isCompleted ? '1px solid #BBF7D0' : '1px solid #E5E7EB',
+                          borderRadius: '8px'
+                        }}
+                      >
+                        <div style={{ 
+                          width: '26px', height: '26px', borderRadius: '50%', 
+                          background: isCompleted ? '#16A34A' : '#EFF6FF', 
+                          color: isCompleted ? '#fff' : '#2563EB', 
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                          fontSize: '12px', fontWeight: 700 
+                        }}>
+                          {isCompleted ? <Check size={14} /> : idx + 1}
+                        </div>
+
+                        <div>
+                          <input 
+                            type="text" 
+                            className="hx-input" 
+                            required 
+                            placeholder={`Pago ${idx + 1}`}
+                            value={inst.title} 
+                            onChange={e => handleInstallmentChange(idx, 'title', e.target.value)}
+                            style={{ padding: '6px 10px', fontSize: '12.5px' }}
+                          />
+                        </div>
+
+                        <div style={{ position: 'relative' }}>
+                          <span style={{ position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF', fontSize: '12px' }}>$</span>
+                          <input 
+                            type="number" 
+                            step="0.01" 
+                            min="0" 
+                            className="hx-input" 
+                            required 
+                            placeholder="Monto"
+                            value={inst.amount} 
+                            onChange={e => handleInstallmentChange(idx, 'amount', e.target.value)}
+                            style={{ padding: '6px 8px 6px 18px', fontSize: '12.5px', fontWeight: 600 }}
+                          />
+                        </div>
+
+                        <div>
+                          <input 
+                            type="date" 
+                            className="hx-input" 
+                            required 
+                            value={inst.dueDate} 
+                            onChange={e => handleInstallmentChange(idx, 'dueDate', e.target.value)}
+                            style={{ padding: '6px 8px', fontSize: '12px' }}
+                          />
+                        </div>
+
+                        <div>
+                          <select
+                            className="hx-input"
+                            value={inst.status || 'pending'}
+                            onChange={e => handleInstallmentChange(idx, 'status', e.target.value)}
+                            style={{ 
+                              padding: '6px 6px', 
+                              fontSize: '11.5px', 
+                              fontWeight: 600,
+                              background: isCompleted ? '#DCFCE7' : '#F9FAFB',
+                              color: isCompleted ? '#15803D' : '#374151'
+                            }}
+                          >
+                            <option value="pending">Pendiente</option>
+                            <option value="completed">Pagado</option>
+                            <option value="upcoming">Próximo</option>
+                          </select>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Balance Summary & Options */}
+              <div style={{ background: '#F8FAFC', padding: '12px 14px', borderRadius: '8px', border: '1px solid #E2E8F0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                  <div style={{ fontSize: '13px', color: '#475569' }}>
+                    Suma cuotas: <strong style={{ color: '#0F172A' }}>
+                      {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(
+                        planInstallments.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0)
+                      )}
+                    </strong>
+                    {' '} de <strong style={{ color: '#0F172A' }}>
+                      {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(parseFloat(planTotalAmount) || 0)}
+                    </strong>
+                  </div>
+
+                  {(() => {
+                    const sum = planInstallments.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
+                    const tot = parseFloat(planTotalAmount) || 0;
+                    const diff = Math.abs(sum - tot);
+                    if (diff < 0.01) {
+                      return (
+                        <span style={{ fontSize: '12px', fontWeight: 600, color: '#15803D', background: '#DCFCE7', padding: '3px 8px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <CheckCircle2 size={13} /> 100% distribuido
+                        </span>
+                      );
+                    }
+                    return (
+                      <span style={{ fontSize: '12px', fontWeight: 600, color: '#B45309', background: '#FEF3C7', padding: '3px 8px', borderRadius: '4px' }}>
+                        Diferencia: {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(sum - tot)}
+                      </span>
+                    );
+                  })()}
+                </div>
+
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', color: '#475569', cursor: 'pointer' }}>
+                  <input 
+                    type="checkbox" 
+                    checked={planReplaceExisting} 
+                    onChange={e => setPlanReplaceExisting(e.target.checked)} 
+                    style={{ accentColor: '#2563EB', width: '15px', height: '15px' }}
+                  />
+                  <span>Reemplazar pagos anteriores de este proyecto (recomendado)</span>
+                </label>
+              </div>
+
+              {planError && (
+                <div style={{ padding: '10px 14px', background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626', borderRadius: '8px', fontSize: '13px' }}>
+                  {planError}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '4px' }}>
+                <button type="button" className="btn-secondary" onClick={() => setShowPlanModal(false)}>
+                  Cancelar
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn-primary" 
+                  disabled={savingPlan} 
+                  style={{ 
+                    background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)',
+                    boxShadow: '0 2px 6px rgba(37,99,235,0.25)' 
+                  }}
+                >
+                  {savingPlan ? 'Guardando Plan...' : 'Crear y Guardar Plan de Pagos'}
+                </button>
+              </div>
             </form>
           </div>
         </div>

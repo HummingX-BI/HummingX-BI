@@ -7,6 +7,18 @@
   width: 100%;
 }
 
+/* Ocultar la barra de scroll para una experiencia más inmersiva */
+html.hide-scrollbar-global::-webkit-scrollbar,
+html.hide-scrollbar-global body::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+}
+html.hide-scrollbar-global,
+html.hide-scrollbar-global body {
+  -ms-overflow-style: none !important;  /* IE and Edge */
+  scrollbar-width: none !important;  /* Firefox */
+}
+
 /* ══ SCROLL CONTAINER ══ */
 .welcome-root .scroll-track {
   height: 650vh;
@@ -138,12 +150,12 @@
   border-right: 2px solid rgba(255,255,255,0.3);
   border-bottom: 2px solid rgba(255,255,255,0.3);
   transform: rotate(45deg);
-  animation: bounce 1.6s ease-in-out infinite;
+  animation: scroll-float 2s ease-in-out infinite;
 }
 
-@keyframes bounce {
-  0%,100% { transform: rotate(45deg) translateY(0); }
-  50%      { transform: rotate(45deg) translateY(6px); }
+@keyframes scroll-float {
+  0%, 100% { transform: rotate(45deg) translateY(0); opacity: 0.5; }
+  50%      { transform: rotate(45deg) translateY(6px); opacity: 0.9; }
 }
 @keyframes fadeIn {
   to { opacity: 1; }
@@ -218,7 +230,7 @@
   margin-bottom: 32px;
   opacity: 0;
   transform: scale(0.7);
-  transition: opacity 0.8s ease 0.3s, transform 0.8s cubic-bezier(0.34,1.56,0.64,1) 0.3s;
+  transition: opacity 0.8s ease 0.3s, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s;
 }
 .welcome-root #final-splash.active .splash-logo { opacity: 1; transform: scale(1); }
 
@@ -264,3 +276,38 @@
 .text-purple-400 { color: #c084fc !important; }
 .text-blue-400 { color: #60a5fa !important; }
 
+/* ══ GLOBAL SCROLL HINT ══ */
+.global-scroll-hint {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+  z-index: 100;
+  pointer-events: none;
+}
+.global-scroll-hint.visible {
+  opacity: 1;
+  visibility: visible;
+}
+.global-scroll-hint span {
+  animation: pulse-opacity 2s infinite;
+}
+.global-scroll-hint .scroll-arrow {
+  width: 20px;
+  height: 20px;
+  border-right: 2px solid rgba(255, 255, 255, 0.4);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+  transform: rotate(45deg);
+  animation: scroll-bounce 2s infinite;
+}

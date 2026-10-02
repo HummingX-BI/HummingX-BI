@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 import { Hammer } from 'lucide-react';
 import { Player } from '@lottiefiles/react-lottie-player';
@@ -17,7 +18,6 @@ export default function ReferralsPage() {
             Programa de referidos HummingX BI.
           </p>
         </div>
-
         {/* Coming Soon Card */}
         <div id="tour-coming-soon" className="card" style={{ 
           padding: '40px 32px 80px 32px', 

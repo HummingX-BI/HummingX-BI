@@ -14,6 +14,7 @@ import {
   BarChart3,
   Menu,
   X,
+  Calendar
 } from 'lucide-react';
 
 const logoSrc = '/logo.png';
@@ -45,11 +46,13 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
   const clientLinks = [
     { to: '/dashboard', icon: LayoutDashboard, label: 'Inicio' },
     { to: '/project',   icon: FolderKanban,   label: 'Mi Proyecto' },
+    { to: '/pagos',     icon: Calendar,       label: 'Plan de Pagos' },
     { to: '/referrals', icon: Users,           label: 'Mis Referidos', isDev: true },
   ];
 
   const adminLinks = [
     { to: '/admin/clients',   icon: Users,    label: 'Resumen Clientes' },
+    { to: '/admin/pagos',     icon: Calendar, label: 'Plan de Pagos' },
     { to: '/admin/analytics', icon: BarChart3, label: 'Control & Analíticas' },
   ];
 
@@ -175,7 +178,7 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
                   }}
                 />
               </div>
-              <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 {filteredClients.map(c => {
                   const isActive = location.pathname === `/admin/clients/${c.id}`;
                   return (
@@ -222,9 +225,9 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
         </nav>
 
         {/* ── User Card + Logout ────────────────────────────── */}
-        <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', padding: '12px 12px 16px' }}>
+        <div style={{ padding: '12px 12px 16px' }}>
           {/* User info row */}
-          {user && (
+          {user && !isAdminRoute && (
             <div style={{
               display: 'flex', alignItems: 'center', gap: '10px',
               padding: '10px 10px', borderRadius: '10px',

@@ -53,7 +53,12 @@ export default function Layout({ children, customBreadcrumbLabel, fullWidth = fa
     { target: '.tour-step-dashboard', title: 'Inicio', content: 'Este es tu panel principal donde verás el resumen de todo.', placement: 'right' },
     { target: '#tour-active-project', title: 'Tu Proyecto Activo', content: 'Aquí verás el nombre de tu proyecto, en qué etapa se encuentra actualmente, y botones para revisar los avances.', placement: 'bottom' },
     { target: '#tour-progress', title: 'Barra de Progreso', content: 'Este indicador te mostrará el avance general de todo el proyecto en tiempo real.', placement: 'top' },
+    { target: '#tour-payments', title: 'Próximo Pago', content: 'Aquí podrás ver la fecha y monto de tu siguiente pago. Haz clic para ver el plan de pagos.', placement: 'top' },
+    { target: '#tour-milestone', title: 'Siguiente Hito', content: 'El siguiente gran objetivo a cumplir en la ruta de tu proyecto.', placement: 'top' },
     { target: '#tour-credits', title: 'Créditos HX', content: 'Acumula créditos que podrás canjear por nuevos módulos o servicios.', placement: 'top' },
+    { target: '#tour-referrals', title: 'Referidos', content: 'La cantidad de empresas que nos has recomendado. ¡Invita a más para ganar créditos!', placement: 'top' },
+    { target: '#tour-activity', title: 'Actividad Reciente', content: 'Un resumen de las últimas actualizaciones, entregas y mensajes de tu proyecto.', placement: 'top' },
+    { target: '#tour-recommendations', title: 'Recomendaciones', content: 'Sugerencias para escalar tu negocio digital o aprovechar al máximo tus créditos disponibles.', placement: 'top' },
     { target: '.tour-step-project', title: 'Mi Proyecto', content: 'Aquí puedes ver los detalles a fondo. En el siguiente paso te llevaremos ahí automáticamente.', placement: 'right' },
     { target: '#tour-project-timeline', title: 'Ruta de trabajo', content: 'En esta sección podrás ver toda la metodología y los pasos que seguiremos hasta lanzar tu proyecto.', placement: 'bottom' },
     { target: '#tour-active-stage', title: 'Detalles de la etapa', content: 'Te mantendremos al tanto de qué estamos haciendo exactamente y si necesitamos que revises algo.', placement: 'top' },
@@ -64,11 +69,11 @@ export default function Layout({ children, customBreadcrumbLabel, fullWidth = fa
   ];
 
   const handleIndexChange = (i) => {
-    if (i <= 5) {
+    if (i <= 10) {
       if (location.pathname !== '/dashboard') navigate('/dashboard');
-    } else if (i >= 6 && i <= 9) {
+    } else if (i >= 11 && i <= 14) {
       if (location.pathname !== '/project') navigate('/project');
-    } else if (i >= 10) {
+    } else if (i >= 15) {
       if (location.pathname !== '/referrals') navigate('/referrals');
     }
     tour.setIndex(i);

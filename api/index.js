@@ -7,6 +7,7 @@ const authRoutes = require('./src/routes/auth');
 const projectRoutes = require('./src/routes/projects');
 const adminRoutes = require('./src/routes/admin');
 const referralRoutes = require('./src/routes/referrals');
+const paymentRoutes = require('./src/routes/payments');
 
 const {
   globalApiLimiter,
@@ -42,10 +43,19 @@ app.use(helmet({
 
 // ─── CORS — Allowlist only ────────────────────────────────────────────────────
 const allowedOrigins = [
-  process.env.FRONTEND_URL || 'http://localhost:5177',
+  // Production domains
+  'https://hummingxbi.com',
+  'https://www.hummingxbi.com',
+  'https://portal.hummingxbi.com',
+  // Vercel preview deployments
+  process.env.FRONTEND_URL,
+  // Local development
   'http://localhost:5177',
+  'http://127.0.0.1:5177',
+  'http://localhost:5180',
+  'http://127.0.0.1:5180',
   'http://localhost:3000',
-];
+].filter(Boolean);
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -63,14 +73,15 @@ app.use(cors({
 
 // ─── Body parsing — payload size limits ──────────────────────────────────────
 // Limits: prevents memory exhaustion from huge JSON payloads (DoS vector).
-app.use(express.json({ limit: '50kb' }));
-app.use(express.urlencoded({ extended: true, limit: '50kb' }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // ─── Global rate limiting ─────────────────────────────────────────────────────
 app.use('/auth', globalApiLimiter);
 app.use('/admin', globalApiLimiter);
 app.use('/projects', globalApiLimiter);
 app.use('/referrals', globalApiLimiter);
+app.use('/payments', globalApiLimiter);
 
 // ─── Input sanitization (all routes) ─────────────────────────────────────────
 app.use(sanitizeBody);
@@ -88,6 +99,7 @@ app.use('/auth', authRoutes);
 app.use('/projects', projectRoutes);
 app.use('/admin', adminRoutes);
 app.use('/referrals', referralRoutes);
+app.use('/payments', paymentRoutes);
 
 // ─── Health check (no auth needed, no sensitive data) ────────────────────────
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));

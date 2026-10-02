@@ -28,7 +28,7 @@ router.get('/clients', authenticate, requireAdmin, adminLimiter, async (req, res
         phone: true, level: true, active: true, referralCode: true,
         invitationAccepted: true, createdAt: true,
         projects: {
-          select: { id: true, clientId: true, name: true, currentPhase: true, progressPercent: true, status: true, estimatedDelivery: true, updatedAt: true, createdAt: true },
+          select: { id: true, clientId: true, name: true, currentPhase: true, progressPercent: true, status: true, estimatedDelivery: true, updatedAt: true, createdAt: true, designStatus: true },
           orderBy: { updatedAt: 'desc' },
         },
         _count: { select: { referralsMade: true } },
@@ -86,15 +86,7 @@ router.post('/clients', authenticate, requireAdmin, adminLimiter, async (req, re
       select: { id: true, name: true, email: true, companyName: true, logoUrl: true, referralCode: true, createdAt: true }
     });
 
-    // Add welcome bonus credit
-    await prisma.creditMovement.create({
-      data: {
-        clientId: user.id,
-        amount: 500,
-        type: 'welcome_bonus',
-        description: 'Bono de bienvenida HummingX',
-      }
-    });
+    // Welcome bonus removed per user request
 
     if (projectName) {
       const project = await prisma.project.create({
@@ -190,8 +182,24 @@ router.get('/clients/:id', authenticate, requireAdmin, async (req, res) => {
           orderBy: { updatedAt: 'desc' },
           select: {
             id: true, name: true, currentPhase: true, progressPercent: true,
-            status: true, estimatedDelivery: true, createdAt: true,
-            activities: { orderBy: { createdAt: 'desc' }, take: 5 }
+            status: true, estimatedDelivery: true, createdAt: true, designStatus: true,
+            quoteLink: true, contractLink: true, previewUrl: true,
+            activities: { orderBy: { createdAt: 'desc' }, take: 10 },
+            payments: {
+              orderBy: { dueDate: 'asc' },
+              select: {
+                id: true,
+                projectId: true,
+                title: true,
+                description: true,
+                amount: true,
+                status: true,
+                dueDate: true,
+                invoiceLink: true,
+                receiptLink: true,
+                createdAt: true
+              }
+            }
           }
         },
         referralsMade: { orderBy: { createdAt: 'desc' }, select: { id: true, companyName: true, status: true, createdAt: true } },
@@ -286,8 +294,11 @@ router.post('/projects', authenticate, requireAdmin, async (req, res) => {
 // PUT /admin/projects/:id — Update project
 router.put('/projects/:id', authenticate, requireAdmin, async (req, res) => {
   try {
-    const { name, description, estimatedDelivery, currentPhase, progressPercent, quoteLink, contractLink, designLink, previewUrl } = req.body;
-    const existing = await prisma.project.findUnique({ where: { id: req.params.id } });
+    const { name, description, estimatedDelivery, currentPhase, progressPercent, quoteLink, contractLink, designLink, previewUrl, designStatus } = req.body;
+    const existing = await prisma.project.findUnique({ 
+      where: { id: req.params.id },
+      include: { client: true }
+    });
     
     const updated = await prisma.project.update({
       where: { id: req.params.id },
@@ -300,9 +311,57 @@ router.put('/projects/:id', authenticate, requireAdmin, async (req, res) => {
         ...(contractLink !== undefined && { contractLink }),
         ...(designLink !== undefined && { designLink }),
         ...(previewUrl !== undefined && { previewUrl }),
+        ...(designStatus !== undefined && { designStatus }),
         ...(estimatedDelivery !== undefined && { estimatedDelivery: estimatedDelivery ? new Date(estimatedDelivery) : null }),
       }
     });
+
+    if (designStatus === 'modifications_resolved' && existing && existing.designStatus === 'modifications_requested') {
+      let emailSuccess = false;
+      
+      if (existing.client && existing.client.email) {
+        const emailBody = `¡Hola <strong>${existing.client.name}</strong>!<br><br>Nuestro equipo ha actualizado los cambios que pediste. Ingresa a tu portal de HummingX BI para revisar la nueva versión de tu proyecto.`;
+        try {
+          await transporter.sendMail({
+            from: `"HummingX BI" <${process.env.EMAIL_USER}>`,
+            to: existing.client.email,
+            subject: 'Actualización de tu proyecto (Cambios listos)',
+            html: `
+              <div style="font-family: 'Arial', sans-serif; max-width: 600px; margin: 0 auto; background: #f9fafb; padding: 40px 20px;">
+                <div style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); border: 1px solid #e5e7eb;">
+                  <div style="background: linear-gradient(135deg, #0b0b0e 0%, #1a1a24 100%); padding: 40px 20px; text-align: center;">
+                    <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.02em;">
+                      HummingX <span style="color: #00C4CC;">BI</span>
+                    </h1>
+                  </div>
+                  <div style="padding: 40px 32px;">
+                    <p style="font-size: 16px; color: #4B5563; line-height: 1.6;">${emailBody}</p>
+                    <div style="text-align: center; margin: 40px 0;">
+                      <a href="https://portal.hummingxbi.com" style="background: linear-gradient(135deg, #00C4CC 0%, #0E7490 100%); color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">
+                        Ver mi Portal
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `
+          });
+          console.log(`📧 Modifications resolved email sent to ${existing.client.email}`);
+          emailSuccess = true;
+        } catch (err) {
+          console.error('Error sending modifications email:', err);
+        }
+      }
+
+      await prisma.projectActivity.create({
+        data: {
+          projectId: req.params.id,
+          authorId: req.user.id,
+          description: emailSuccess ? 'El equipo resolvió las modificaciones solicitadas. Correo de notificación enviado exitosamente.' : 'El equipo resolvió las modificaciones solicitadas. Error al enviar el correo automático de notificación.',
+          type: 'update',
+        }
+      });
+    }
 
     if (currentPhase !== undefined && existing && existing.currentPhase !== currentPhase) {
       const phaseNames = { 1: 'Análisis', 2: 'Diseño', 3: 'Revisión', 4: 'Desarrollo', 5: 'Lanzamiento', 6: 'Activo' };
@@ -315,6 +374,72 @@ router.put('/projects/:id', authenticate, requireAdmin, async (req, res) => {
           type: 'milestone',
         }
       });
+
+      // Automated emails for phase changes (excluding phase 1)
+      if (currentPhase > 1 && existing.client && existing.client.email) {
+        let emailTitle = '';
+        let emailBody = '';
+
+        if (currentPhase === 2) {
+          emailTitle = '¡Tu proyecto está cobrando vida visual!';
+          emailBody = '¡Qué emoción! Acabamos de encender los motores y hemos entrado de lleno a la fase de <strong>Diseño UX/UI</strong>. En este momento, nuestros artistas digitales están moldeando la identidad visual y estructurando prototipos interactivos para que tu proyecto no solo funcione perfecto, sino que enamore a primera vista. Sumérgete en tu portal para seguir de cerca los primeros bocetos.';
+        } else if (currentPhase === 3) {
+          emailTitle = '¡Queremos escuchar tu voz: Tiempo de Revisión!';
+          emailBody = 'Tu proyecto acaba de aterrizar en la fase de <strong>Revisión</strong>. Hemos preparado tus prototipos interactivos y ahora el escenario es tuyo. Tu retroalimentación es la pieza clave para asegurar que el resultado final sea exactamente como lo soñaste antes de pasar a la programación. ¡Entra al portal, explora los diseños y cuéntanos todo!';
+        } else if (currentPhase === 4) {
+          emailTitle = '¡Magia en progreso: Arranca el Desarrollo!';
+          emailBody = '¡Prepárate para la acción! Tu proyecto ha pasado a la fase de <strong>Desarrollo</strong>. Nuestro equipo de ingenieros está escribiendo las líneas de código que convertirán tus diseños en una plataforma ágil, robusta y escalable. Podrás ver la evolución y el progreso técnico directamente desde tu portal de clientes.';
+        } else if (currentPhase === 5) {
+          emailTitle = '¡Ajusta tu cinturón: Fase de Lanzamiento!';
+          emailBody = '¡Se respira pura emoción! Hemos llegado a la fase de <strong>Lanzamiento</strong>. Estamos afinando cada último detalle, ejecutando pruebas rigurosas de seguridad y preparando los servidores de producción para garantizar que tu gran despliegue sea absolutamente espectacular. ¡Ya casi lo logramos!';
+        } else if (currentPhase === 6) {
+          emailTitle = '¡Misión cumplida: Tu proyecto está 100% Activo!';
+          emailBody = '¡Boom! Hemos cruzado la línea de meta. Tu proyecto ha finalizado al 100% y ahora se encuentra totalmente <strong>Activo</strong>. Ha sido un viaje increíble y estamos muy orgullosos del resultado. Ya puedes acceder a tu plataforma final y exprimir al máximo todas sus capacidades. ¡Gracias infinitas por confiar en la ingeniería de HummingX BI para hacer esto realidad!';
+        }
+
+        if (emailTitle && emailBody) {
+          try {
+            await transporter.sendMail({
+              from: `"HummingX BI" <${process.env.EMAIL_USER}>`,
+              to: existing.client.email,
+              subject: emailTitle,
+              html: `
+                <div style="font-family: 'Arial', sans-serif; max-width: 600px; margin: 0 auto; background: #f9fafb; padding: 40px 20px;">
+                  <div style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); border: 1px solid #e5e7eb;">
+                    
+                    <div style="background: linear-gradient(135deg, #0b0b0e 0%, #1a1a24 100%); padding: 40px 20px; text-align: center;">
+                      <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.02em;">
+                        HummingX <span style="color: #00C4CC;">BI</span>
+                      </h1>
+                      <p style="color: rgba(255,255,255,0.6); font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em; margin: 8px 0 0 0;">
+                        Actualización de Proyecto
+                      </p>
+                    </div>
+                    
+                    <div style="padding: 40px 32px;">
+                      <p style="font-size: 16px; color: #374151; margin-top: 0;">Hola <strong>${existing.client.name}</strong>,</p>
+                      <p style="font-size: 16px; color: #4B5563; line-height: 1.6;">${emailBody}</p>
+                      
+                      <div style="text-align: center; margin: 40px 0;">
+                        <a href="https://portal.hummingxbi.com" style="background: linear-gradient(135deg, #00C4CC 0%, #0E7490 100%); color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 6px -1px rgba(0, 196, 204, 0.3);">
+                          Ver mi Portal
+                        </a>
+                      </div>
+                      
+                      <p style="font-size: 14px; color: #9CA3AF; margin-top: 32px; text-align: center;">
+                        El equipo de HummingX BI.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              `
+            });
+            console.log(`📧 Phase update email sent successfully to ${existing.client.email}`);
+          } catch (emailErr) {
+            console.error('Error sending phase update email:', emailErr);
+          }
+        }
+      }
     }
 
     res.json(updated);

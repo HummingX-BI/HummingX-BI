@@ -1,321 +1,260 @@
 <!DOCTYPE html>
-<html lang="es">
-
+<html lang="es" class="scroll-smooth">
 <head>
-  <!-- ============================================================
-       HummingX-BI — Landing Page
-       Versión: 1.0.0
-       Autor: HummingX-BI Engineering Team
-       Descripción: Landing page de alta gama para agencia de
-                    software e inteligencia de negocios.
-  ============================================================ -->
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="robots" content="index, follow" />
-  <link rel="canonical" href="https://hummingxbi.com/" />
-  <meta name="description"
-    content="Firma de tecnología e inteligencia de negocios. Automatizamos operaciones y creamos ecosistemas web, IA y Business Intelligence para aliados estratégicos." />
-  <meta name="keywords"
-    content="firma de tecnología, inteligencia de negocios, business intelligence méxico, desarrollo de software a medida, consultoría de software CDMX, ecosistemas web, agentes IA, nfc y lealtad, software integral" />
-  <meta property="og:title" content="HummingX BI | Firma de Tecnología e Inteligencia de Negocios" />
-  <meta property="og:description"
-    content="Firma de tecnología e inteligencia de negocios. Automatizamos operaciones y creamos ecosistemas web, IA y Business Intelligence para aliados estratégicos." />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://hummingxbi.com/og-image.png" />
-  <!-- Twitter Card Data -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="HummingX BI | Firma de Tecnología e Inteligencia de Negocios" />
-  <meta name="twitter:description"
-    content="Firma de tecnología e inteligencia de negocios. Automatizamos operaciones y creamos ecosistemas web, IA y Business Intelligence para aliados estratégicos." />
-  <meta name="twitter:image" content="https://hummingxbi.com/og-image.png" />
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>Términos y Condiciones | HummingX BI</title>
-
-  <!-- Favicons optimizados para Google Search -->
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-
-  <!-- Datos estructurados JSON-LD SEO -->
-  <script type="application/ld+json">
-  [
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "HummingX-BI",
-      "url": "https://hummingxbi.com",
-      "logo": "https://hummingxbi.com/apple-touch-icon.png",
-      "image": "https://hummingxbi.com/og-image.png",
-      "email": "contacto@hummingxbi.com",
-      "description": "Desarrollo de software empresarial a medida y Business Intelligence para PyMEs en México.",
-      "areaServed": "MX",
-      "sameAs": [
-        "https://www.facebook.com/profile.php?id=61590401354021",
-        "https://www.instagram.com/",
-        "https://wa.me/"
-      ]
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "Service",
-      "name": "Plataformas Empresariales",
-      "description": "Sistema ERP a medida y software empresarial para centralizar la operación de tu negocio."
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "Service",
-      "name": "Business Intelligence",
-      "description": "Dashboard BI en tiempo real para pequeña empresa que convierte datos en ventajas competitivas."
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "Service",
-      "name": "Desarrollo Cloud & API",
-      "description": "Arquitectura backend escalable e integraciones sin fisuras."
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "Service",
-      "name": "Automatización RPA",
-      "description": "Automatización con IA para empresas en CDMX y todo México, elimina tareas manuales."
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "Service",
-      "name": "E-commerce & Portales B2B",
-      "description": "Experiencias de compra y gestión a medida de alto rendimiento."
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "Service",
-      "name": "Consultoría Tech & IA",
-      "description": "Auditorías de arquitectura, machine learning y roadmap tecnológico."
-    }
-  ]
+  <meta name="description" content="Términos y Condiciones oficiales de uso del portal web y contratación preliminar de HummingX BI."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "royal-blue": "#0A58A3",
+            "hx-cyan": "#00A3A9"
+          },
+          fontFamily: {
+            sans: ["Inter", "sans-serif"],
+            display: ["Plus Jakarta Sans", "sans-serif"],
+            editorial: ["Cinzel", "serif"],
+            mono: ["Space Grotesk", "monospace"]
+          }
+        }
+      }
+    };
   </script>
-
-  <!-- Fuentes auto-hospedadas vía @fontsource (importadas en src/css/main.css
-       y empaquetadas por Vite). No requiere preloads ni CDN. -->
-
-  <!-- Preconnect a WhatsApp (CTA directo del formulario) -->
-  <link rel="preconnect" href="https://wa.me" />
-
-  <!-- Stylesheets -->
-  <link rel="stylesheet" href="/src/css/main.css" />
+  <style>
+    body {
+      background-color: #ffffff;
+      color: #1e293b;
+    }
+    ::selection {
+      background-color: #0f172a;
+      color: #ffffff;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f8fafc;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
 </head>
+<body class="bg-white text-slate-800 antialiased min-h-screen flex flex-col justify-between font-sans selection:bg-slate-900 selection:text-white">
 
-<body>
+  <!-- Header Institucional Formal -->
+  <header class="w-full bg-white border-b border-slate-200 sticky top-0 z-30">
+    <div class="max-w-4xl mx-auto px-6 py-4 sm:px-8 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3.5 group">
+        <div class="w-8 h-8 relative flex items-center justify-center">
+          <img src="./src/Logo HummingX BI png.png" alt="HummingX Colibrí" class="w-full h-full object-contain"/>
+        </div>
+        <div class="flex flex-col">
+          <span class="font-display font-extrabold text-base text-slate-900 tracking-tight leading-none">
+            HummingX <span class="text-[#0A58A3]">BI</span>
+          </span>
+          <span class="text-[9px] uppercase tracking-[0.25em] text-slate-500 font-medium mt-0.5">Firma de Software</span>
+        </div>
+      </a>
 
-  <!-- Partículas de fondo globales (burbujas/nodos) -->
-  <canvas class="global__particles" id="particles-canvas" aria-hidden="true"></canvas>
+      <a href="index.html" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 border border-slate-300 hover:border-slate-400 bg-white hover:bg-slate-50 transition-colors px-3.5 py-1.5 rounded-lg shadow-sm">
+        <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+        <span>Volver al Inicio</span>
+      </a>
+    </div>
+  </header>
 
-  <!-- ============================================================
-       PRELOADER VECTORIAL INTERACTIVO — HummingX-BI
-       Un colibrí vectorizado vuela en el centro y aletea rápidamente.
-       Al terminar la carga, el colibrí realiza una transición de vuelo
-       dinámico y aterriza exactamente en la esquina superior izquierda,
-       fusionándose con el logo de la cabecera.
-  ============================================================ -->
-
-  <!-- Cursor magnético (solo desktop) -->
-  <div id="magnetic-cursor" aria-hidden="true"></div>
-
-
-  <!-- ============================================================
-       PÁGINA PRINCIPAL (oculta mientras carga el preloader)
-  ============================================================ -->
-  <div id="main-content" class="main-content" aria-hidden="true">
-
-    <!-- ========================
-         NAVEGACIÓN
-    ======================== -->
-    <header class="nav-header" id="navbar" role="banner">
-      <nav class="nav container" aria-label="Navegación principal">
-        <!-- Logo en la navbar -->
-        <a href="index.html#inicio" class="nav__logo" aria-label="HummingX - BI - Inicio">
-          <!-- Logo SVG oficial -->
-          <!-- Logo SVG oficial (Inyectado dinámicamente) -->
-          <div data-inject-svg data-src="/logo.svg" class="nav__logo-icon" aria-hidden="true"></div>
-          <span class="nav__logo-text">HUMMING<span class="accent-x">X</span>-<span
-              class="nav__logo-sub">BI</span></span>
-        </a>
-
-        <!-- Menú de navegación desktop -->
-        <ul class="nav__menu" role="list">
-          <li><a href="index.html#inicio" class="nav__link" aria-current="page">Inicio</a></li>
-          <li><a href="index.html#servicios" class="nav__link">Servicios</a></li>
-          <li><a href="index.html#soluciones" class="nav__link">Soluciones</a></li>
-          <li><a href="index.html#metodologia" class="nav__link">Metodología</a></li>
-          <li><a href="index.html#valores" class="nav__link">Valores</a></li>
-          <li><a href="index.html#equipo" class="nav__link">Equipo</a></li>
-          <li><a href="index.html#faq" class="nav__link">FAQs</a></li>
-        </ul>
-
-        <!-- Botón CTA en navbar -->
-        <a href="index.html#contacto" class="btn btn--nav" id="nav-cta-btn">Agenda una llamada</a>
-
-        <!-- Hamburger (mobile) -->
-        <button class="nav__hamburger" id="hamburger-btn" aria-label="Abrir menú" aria-expanded="false"
-          aria-controls="mobile-menu">
-          <span class="hamburger-line"></span>
-          <span class="hamburger-line"></span>
-          <span class="hamburger-line"></span>
-        </button>
-      </nav>
-
-      <!-- Menú móvil -->
-      <div class="mobile-menu" id="mobile-menu" role="dialog" aria-label="Menú móvil" aria-hidden="true">
-        <ul class="mobile-menu__list" role="list">
-          <li><a href="index.html#inicio" class="mobile-menu__link" data-close-menu>Inicio</a></li>
-          <li><a href="index.html#servicios" class="mobile-menu__link" data-close-menu>Servicios</a></li>
-          <li><a href="index.html#soluciones" class="mobile-menu__link" data-close-menu>Soluciones</a></li>
-          <li><a href="index.html#metodologia" class="mobile-menu__link" data-close-menu>Metodología</a></li>
-          <li><a href="index.html#valores" class="mobile-menu__link" data-close-menu>Valores</a></li>
-          <li><a href="index.html#equipo" class="mobile-menu__link" data-close-menu>Equipo</a></li>
-          <li><a href="index.html#faq" class="mobile-menu__link" data-close-menu>FAQs</a></li>
-          <li><a href="index.html#contacto" class="btn btn--primary mobile-menu__cta" data-close-menu>Agenda una llamada</a>
-          </li>
-        </ul>
+  <!-- Cuerpo Principal del Documento (Diseño Editorial Formal, Sin Cards) -->
+  <main class="flex-1 max-w-3xl w-full mx-auto px-6 py-12 sm:py-16">
+    
+    <!-- Encabezado del Documento Legal -->
+    <header class="border-b border-slate-200 pb-8 mb-10">
+      <p class="text-[11px] font-mono font-semibold uppercase tracking-widest text-slate-500 mb-2">
+        Documento Institucional • Condiciones Generales de Uso y Contratación
+      </p>
+      <h1 class="font-display text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-4">
+        Términos y Condiciones
+      </h1>
+      <div class="text-xs text-slate-600 space-y-1 font-mono">
+        <p><strong>Firma:</strong> HummingX BI — Consultoría e Ingeniería de Software</p>
+        <p><strong>Ámbito de Aplicación:</strong> Portal web institucional y relaciones informativas / contractuales preliminares</p>
+        <p><strong>Fecha de Emisión y Última Actualización:</strong> Septiembre de 2026 • Ciudad de México, México</p>
       </div>
     </header>
-    <!-- FIN: NAVEGACIÓN -->
 
+    <!-- Contenido en Texto Corrido y Artículos Numerados Formales (Cero Cards) -->
+    <article class="space-y-10 text-[15px] sm:text-base leading-relaxed text-slate-700">
 
-    <!-- =======
-    <!-- CONTENIDO LEGAL -->
-    <main class="legal-page container" style="margin-top: 120px; padding-bottom: 80px;">
-      <!-- BORRADOR — pendiente de revisión por asesoría legal antes de publicación oficial. -->
-      <h1>Términos y Condiciones</h1>
-      <span class="legal-date">Última actualización: 19 de Junio de 2026</span>
+      <!-- Cláusula 1 -->
+      <section class="space-y-3">
+        <h2 class="font-display font-bold text-lg text-slate-900">
+          1. Objeto y Aceptación de los Términos
+        </h2>
+        <p>
+          Las presentes condiciones generales regulan el acceso, navegación, uso y consultas técnico-comerciales realizadas a través del portal institucional de <strong class="text-slate-900">HummingX BI</strong> (en lo sucesivo, "la Firma"). El acceso al portal web y la remisión de información a través de cualquiera de nuestros formularios o canales de comunicación implica la aceptación plena, expresa y sin reservas de todos y cada uno de los términos aquí estipulados por parte del usuario o de la entidad corporativa a la que representa.
+        </p>
+      </section>
 
-      <h2>1. Objeto y Aceptación</h2>
-      <p>Los presentes Términos y Condiciones regulan el acceso y uso del sitio web <strong>hummingxbi.com</strong> (en adelante, "el Sitio") y la relación informativa entre el usuario y HummingX BI. Al navegar por este Sitio y/o solicitar información de nuestros servicios, usted acepta tácita e incondicionalmente estos Términos y Condiciones.</p>
-
-      <h2>2. Descripción de los Servicios</h2>
-      <p>HummingX BI es una firma de tecnología enfocada en inteligencia de negocios, desarrollando soluciones como:</p>
-      <ul>
-        <li>Software empresarial a la medida.</li>
-        <li>Integración de agentes IA y automatización inteligente.</li>
-        <li>Ecosistemas web y plataformas transaccionales.</li>
-        <li>Tarjetas NFC y programas de lealtad (loyalty).</li>
-        <li>Digital Signage (señalización digital inteligente).</li>
-        <li>Business Intelligence y analítica de datos.</li>
-      </ul>
-      <p><strong>Nota importante:</strong> La información contenida en el Sitio tiene un carácter exclusivamente informativo y referencial. Estos términos NO sustituyen ni representan un contrato de prestación de servicios. Todo servicio técnico o desarrollo quedará estrictamente regido por su respectiva propuesta, cotización y/o contrato de servicios formalmente firmado entre el cliente y HummingX BI.</p>
-
-      <h2>3. Condiciones de Uso del Sitio Web</h2>
-      <p>El usuario se compromete a hacer un uso lícito, diligente y responsable del Sitio y de su contenido. Queda estrictamente prohibido:</p>
-      <ul>
-        <li>Realizar ingeniería inversa, descompilar o intentar extraer el código fuente del Sitio o de sus integraciones.</li>
-        <li>Ejecutar técnicas de <em>web scraping</em>, minería de datos o uso de bots automatizados no autorizados.</li>
-        <li>Utilizar el Sitio para transmitir malware, virus o llevar a cabo ciberataques.</li>
-        <li>Hacerse pasar por otra persona o entidad al enviar formularios de contacto.</li>
-      </ul>
-
-      <h2>4. Propiedad Intelectual e Industrial</h2>
-      <p>La marca "HummingX BI", los logotipos, textos, diseños, código fuente, componentes visuales, metodologías de trabajo descritas y todo el contenido del Sitio son propiedad exclusiva de HummingX BI o de terceros que han autorizado su uso. El usuario no adquiere ningún derecho de propiedad intelectual, derecho de uso comercial ni licencia sobre las metodologías internas o el diseño tecnológico de HummingX BI por el simple hecho de navegar por el Sitio.</p>
-
-      <h2>5. Cotizaciones, Modelos Tiered y Contratación</h2>
-      <p>HummingX BI ofrece soluciones estructuradas bajo un modelo <em>Tiered</em> (ej. niveles Silver, Gold, Platinum, Elite). Cualquier precio, estimación o característica general de este modelo mencionada en el Sitio es únicamente ilustrativa. Toda cotización solicitada carece de carácter vinculante hasta que se emita una propuesta formal validada, firmada y acompañada del pago o anticipo correspondiente. Los entregables técnicos exactos, garantías, plazos de ejecución y condiciones de facturación se definirán de forma exclusiva en el contrato de cada proyecto individual.</p>
-
-      <h2>6. Confidencialidad</h2>
-      <p>En HummingX BI entendemos la naturaleza crítica de los datos de nuestros clientes. Garantizamos el estricto manejo confidencial de toda información, idea, modelo de negocio o infraestructura técnica compartida por el cliente durante el proceso comercial o de evaluación, incluso antes de la firma de un contrato formal o Acuerdo de Confidencialidad (NDA).</p>
-
-      <h2>7. Limitación de Responsabilidad</h2>
-      <ul>
-        <li><strong>Disponibilidad:</strong> Nos esforzamos por mantener el Sitio accesible en todo momento; sin embargo, no nos hacemos responsables por caídas temporales del servidor, mantenimientos o errores técnicos fuera de nuestro control.</li>
-        <li><strong>Exactitud:</strong> La información publicada busca ser lo más precisa posible, pero puede estar sujeta a actualizaciones sin previo aviso.</li>
-        <li><strong>Resultados de Negocio:</strong> Las herramientas tecnológicas y metodologías (como IA o BI) son aceleradores operativos; HummingX BI no garantiza retornos de inversión (ROI) específicos ni resultados comerciales directos, ya que estos dependen enteramente de la ejecución estratégica y operativa propia del cliente, independientemente del software entregado.</li>
-      </ul>
-
-      <h2>8. Enlaces a Terceros</h2>
-      <p>El Sitio puede contener hipervínculos a plataformas externas (como WhatsApp Business, redes sociales u otros proveedores). HummingX BI no controla ni asume responsabilidad por el contenido, políticas de privacidad ni prácticas de seguridad de dichos sitios externos.</p>
-
-      <h2>9. Modificaciones y Vigencia</h2>
-      <p>Nos reservamos el derecho de modificar estos Términos y Condiciones en cualquier momento, de acuerdo con las necesidades operativas de la firma. Los cambios entrarán en vigor de manera inmediata al ser publicados en el Sitio.</p>
-
-      <h2>10. Ley Aplicable y Jurisdicción</h2>
-      <p>Para la interpretación, cumplimiento y ejecución de los presentes Términos y Condiciones, así como para la resolución de cualquier controversia que pudiera derivarse del uso del Sitio, las partes se someten a las leyes vigentes de los Estados Unidos Mexicanos y a los tribunales competentes en la Ciudad de México (CDMX), renunciando a cualquier otro fuero que pudiera corresponderles en razón de su domicilio presente o futuro.</p>
-
-      <h2>11. Contacto</h2>
-      <p>Para cualquier duda, comentario o notificación legal respecto a estos Términos y Condiciones, por favor envíe un correo electrónico a <strong>contacto@hummingxbi.com</strong>.</p>
-    </main>
-    <!-- FIN: CONTENIDO LEGAL -->
-
-
-    <footer class="footer" role="contentinfo">
-      <div class="container">
-        <div class="footer__layout">
-          <!-- Columna 1: Marca + Tagline + Redes -->
-          <div class="footer__brand">
-            <span class="footer__logo">HUMMING<span class="accent-x">X</span>-<span
-                class="footer__logo-sub">BI</span></span>
-            <p class="footer__tagline">Consultoría AI-Native. Ingeniería de Software de Alta Precisión.</p>
-            <div class="footer__socials" style="display: flex; gap: var(--space-4); margin-top: var(--space-4); font-size: var(--text-sm); font-weight: 500;">
-              <a href="https://wa.me/525575084267" target="_blank" rel="noopener">WhatsApp</a>
-              <a href="https://www.instagram.com/hummingx.bi" target="_blank" rel="noopener">Instagram</a>
-              <a href="https://www.facebook.com/profile.php?id=61590401354021" target="_blank" rel="noopener">Facebook</a>
-            </div>
-          </div>
-
-          <!-- Columna 2: Servicios -->
-          <nav class="footer__nav" aria-label="Servicios footer">
-            <h4 class="footer__nav-title">Servicios</h4>
-            <ul role="list">
-              <li><a href="index.html#servicios">Software a Medida</a></li>
-              <li><a href="index.html#servicios">Business Intelligence</a></li>
-              <li><a href="index.html#servicios">Automatización IA</a></li>
-              <li><a href="index.html#servicios">E-commerce & Plataformas</a></li>
-            </ul>
-          </nav>
-
-          <!-- Columna 3: Explora -->
-          <nav class="footer__nav" aria-label="Explora footer">
-            <h4 class="footer__nav-title">Explora</h4>
-            <ul role="list">
-              <li><a href="index.html#inicio">Inicio</a></li>
-              <li><a href="index.html#soluciones">Soluciones</a></li>
-              <li><a href="index.html#metodologia">Metodología</a></li>
-              <li><a href="index.html#valores">Valores</a></li>
-              <li><a href="index.html#equipo">Equipo</a></li>
-              <li><a href="index.html#faq">FAQs</a></li>
-            </ul>
-          </nav>
-
-          <!-- Columna 4: Empresa + Contacto -->
-          <div class="footer__contact">
-            <h4 class="footer__nav-title">Empresa</h4>
-            <a href="mailto:colibrixbi@gmail.com" class="footer__contact-link">colibrixbi@gmail.com</a>
-            <p style="font-size: var(--text-sm); color: var(--color-text-secondary); margin-top: var(--space-2);">
-              Lun a Vie 9AM – 7PM (CDMX)
-            </p>
-            <div style="margin-top: var(--space-4);">
-              <a href="index.html#contacto" class="btn btn--primary">Agenda una llamada</a>
-            </div>
-          </div>
+      <!-- Cláusula 2 -->
+      <section class="space-y-3">
+        <h2 class="font-display font-bold text-lg text-slate-900">
+          2. Naturaleza y Alcance de los Servicios Tecnológicos
+        </h2>
+        <p>
+          HummingX BI es una firma especializada en consultoría, arquitectura tecnológica e ingeniería de software de alto impacto, enfocada en las siguientes áreas de especialización:
+        </p>
+        <ul class="list-disc list-outside pl-6 space-y-1.5 text-slate-700">
+          <li><strong>Desarrollo de Software a la Medida:</strong> Diseño, codificación e implementación de plataformas web escalables, arquitecturas de microservicios y sistemas empresariales de misión crítica.</li>
+          <li><strong>Automatización e Inteligencia Artificial:</strong> Creación de agentes de IA, automatización robótica de procesos (RPA) y flujos operacionales autónomos.</li>
+          <li><strong>Business Intelligence & Analítica Avanzada:</strong> Modelado de bodegas de datos (Data Warehouses), pipelines analíticos y tableros interactivos de toma de decisiones.</li>
+          <li><strong>Ecosistemas de Lealtad & Hardware Inteligente:</strong> Integración de tarjetas inteligentes con tecnología NFC, billeteras digitales y arquitecturas transaccionales.</li>
+          <li><strong>Infraestructura Cloud & DevOps:</strong> Alojamiento en la nube de alta resiliencia, monitoreo continuo y despliegues automatizados (CI/CD).</li>
+        </ul>
+        <div class="border-l-2 border-slate-900 pl-4 py-1.5 my-3 text-sm text-slate-600 bg-slate-50">
+          <strong>Aclaración vinculante:</strong> La información, metodologías y casos de estudio exhibidos en este portal tienen propósitos estrictamente ilustrativos e informativos. La prestación formal de servicios se sujetará en todo momento a la suscripción individualizada de una Propuesta Técnico-Económica (SOW) y un Contrato de Prestación de Servicios Profesionales debidamente firmado por los apoderados legales de las partes.
         </div>
+      </section>
 
-        <!-- Bottom bar -->
-        <div class="footer__bottom" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-4);">
-          <p>&copy; 2026 HummingX-BI. Todos los derechos reservados.</p>
-          <div class="footer__bottom-links" style="display: flex; gap: var(--space-6); font-size: var(--text-sm); font-weight: 500;">
-            <a href="aviso-de-privacidad.html">Aviso de Privacidad</a>
-            <a href="terminos-y-condiciones.html">Términos y Condiciones</a>
-          </div>
+      <!-- Cláusula 3 -->
+      <section class="space-y-3">
+        <h2 class="font-display font-bold text-lg text-slate-900">
+          3. Obligaciones y Reglas de Uso del Portal Web
+        </h2>
+        <p>
+          El usuario se compromete a hacer un uso lícito, diligente y de buena fe de las herramientas e interfaces del portal. Queda expresamente prohibido:
+        </p>
+        <ul class="list-disc list-outside pl-6 space-y-1 text-slate-700">
+          <li>Efectuar actividades de ingeniería inversa, desensamblado o intento de extracción de código fuente de la plataforma.</li>
+          <li>Utilizar scripts automatizados, robots, arañas (spiders) o herramientas de extracción masiva de datos (scraping) sin autorización escrita previa.</li>
+          <li>Transmitir virus, gusanos, código malicioso o provocar sobrecargas no autorizadas en la infraestructura tecnológica del servidor.</li>
+          <li>Proporcionar información falsa, ilegítima o usurpar identidades comerciales en las solicitudes de diagnóstico técnico.</li>
+        </ul>
+      </section>
+
+      <!-- Cláusula 4 -->
+      <section class="space-y-3">
+        <h2 class="font-display font-bold text-lg text-slate-900">
+          4. Propiedad Intelectual e Industrial
+        </h2>
+        <p>
+          Los derechos de propiedad intelectual e industrial sobre el portal web, su diseño visual, código fuente, componentes interactivos, logotipos, nombres comerciales, metodologías de trabajo en fases y materiales de difusión corresponden en forma exclusiva a <strong class="text-slate-900">HummingX BI</strong> o a sus respectivos licenciantes. La navegación en el portal no confiere derecho o licencia alguna sobre tales activos.
+        </p>
+        <p class="text-sm text-slate-600">
+          Los derechos sobre entregables de software, código fuente personalizado y bases de datos desarrolladas a la medida para clientes se regirán taxativamente por lo convenido en las cláusulas de cesión y licenciamiento del contrato de desarrollo específico suscrito con cada cliente.
+        </p>
+      </section>
+
+      <!-- Cláusula 5 -->
+      <section class="space-y-3">
+        <h2 class="font-display font-bold text-lg text-slate-900">
+          5. Propuestas Comerciales, Cotizaciones y Estimaciones
+        </h2>
+        <p>
+          Toda estimación preliminar, rango de inversión, valor de créditos o cotización general divulgada a través del portal o en fases exploratorias es de carácter meramente referencial y carece de efectos vinculantes hasta que sea validada mediante un levantamiento formal de requerimientos (Sprint 0) y plasmada en una propuesta contractual formal con vigencia expresa.
+        </p>
+      </section>
+
+      <!-- Cláusula 6 -->
+      <section class="space-y-3">
+        <h2 class="font-display font-bold text-lg text-slate-900">
+          6. Estricta Confidencialidad y Acuerdos Bilaterales (NDA)
+        </h2>
+        <p>
+          HummingX BI trata bajo estricto secreto profesional y comercial cualquier plan de negocio, métrica financiera, modelo de datos, requerimiento operativo o arquitectura de sistemas que le sea revelada por prospectos o clientes durante las sesiones de evaluación técnica o diagnóstico inicial.
+        </p>
+        <p class="text-sm text-slate-600">
+          A requerimiento del cliente o prospecto, la Firma pone a disposición la firma inmediata de un Acuerdo de Confidencialidad Bilateral (Non-Disclosure Agreement - NDA) previo a cualquier intercambio de información sensible, código fuente existente o credenciales de acceso a entornos corporativos.
+        </p>
+      </section>
+
+      <!-- Cláusula 7 -->
+      <section class="space-y-3">
+        <h2 class="font-display font-bold text-lg text-slate-900">
+          7. Limitación de Responsabilidad
+        </h2>
+        <div class="space-y-2 text-slate-700">
+          <p>
+            <strong>Continuidad Operativa del Portal:</strong> Si bien la Firma emplea infraestructura cloud de alta resiliencia y monitoreo continuo, no se garantiza la disponibilidad ininterrumpida del sitio frente a fallas imprevistas de conectividad troncal, ciberataques externos o periodos de mantenimiento programado.
+          </p>
+          <p>
+            <strong>Resultados Comerciales y Rentabilidad:</strong> Las soluciones tecnológicas desarrolladas optimizan procesos operativos, fortalecen la seguridad y proveen analítica estratégica; no obstante, el éxito comercial, el crecimiento de ventas o los retornos de inversión corresponden exclusivamente a la gestión empresarial y condiciones del mercado de la empresa contratante.
+          </p>
         </div>
+      </section>
+
+      <!-- Cláusula 8 -->
+      <section class="space-y-3">
+        <h2 class="font-display font-bold text-lg text-slate-900">
+          8. Enlaces a Servicios y Plataformas de Terceros
+        </h2>
+        <p>
+          El portal puede incluir enlaces hacia redes sociales profesionales, canales de mensajería empresarial (WhatsApp/Meta) o herramientas en la nube. Dichas plataformas operan bajo sus propios términos de servicio y políticas de privacidad, por lo que HummingX BI no asume responsabilidad alguna por el uso directo que el usuario haga de dichos entornos externos.
+        </p>
+      </section>
+
+      <!-- Cláusula 9 -->
+      <section class="space-y-3">
+        <h2 class="font-display font-bold text-lg text-slate-900">
+          9. Vigencia y Modificaciones de los Términos
+        </h2>
+        <p>
+          HummingX BI se reserva el derecho de actualizar, modificar o complementar estos Términos y Condiciones en cualquier momento para adecuarlos a nuevas disposiciones legales, mejoras técnicas o cambios en su catálogo de servicios. Dichas actualizaciones cobrarán vigencia inmediata al ser publicadas en este portal.
+        </p>
+      </section>
+
+      <!-- Cláusula 10 -->
+      <section class="space-y-3">
+        <h2 class="font-display font-bold text-lg text-slate-900">
+          10. Legislación Aplicable, Jurisdicción y Controversias
+        </h2>
+        <p>
+          Para todo lo relativo a la interpretación, cumplimiento y ejecución de estos Términos y Condiciones, las partes se someten expresamente a las leyes federales vigentes en los Estados Unidos Mexicanos y a la jurisdicción de los tribunales competentes de la <strong class="text-slate-900">Ciudad de México (CDMX)</strong>, renunciando de forma expresa a cualquier otro fuero que por razón de sus domicilios presentes o futuros pudiera corresponderles.
+        </p>
+      </section>
+
+      <!-- Cláusula 11 -->
+      <section class="space-y-3 pt-6 border-t border-slate-200">
+        <h2 class="font-display font-bold text-lg text-slate-900">
+          11. Canal Institucional de Contacto y Solicitudes de NDA
+        </h2>
+        <p>
+          Para cualquier consulta legal, notificación formal o para solicitar la firma de un Acuerdo de Confidencialidad previo al inicio de un proyecto, diríjase a:
+        </p>
+        <div class="text-sm text-slate-700 space-y-1 font-mono">
+          <p>• <strong>Buzón de Atención Legal:</strong> <a href="mailto:hummingxbi@gmail.com" class="text-slate-900 font-semibold underline">hummingxbi@gmail.com</a></p>
+          <p>• <strong>Entidad:</strong> HummingX BI — Firma de Consultoría e Ingeniería de Software</p>
+          <p>• <strong>Sede:</strong> Ciudad de México y Estado de México, México.</p>
+        </div>
+      </section>
+
+    </article>
+
+  </main>
+
+  <!-- Footer Formal en Blanco / Gris Claro -->
+  <footer class="w-full bg-slate-50 border-t border-slate-200 text-slate-600 text-xs py-8">
+    <div class="max-w-4xl mx-auto px-6 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+      <p>&copy; 2026 HummingX BI. Todos los derechos reservados.</p>
+      <div class="flex items-center gap-6">
+        <a href="aviso-de-privacidad.html" class="hover:text-slate-900 transition-colors">Aviso de Privacidad</a>
+        <a href="terminos-y-condiciones.html" class="font-semibold text-slate-900 underline">Términos y Condiciones</a>
+        <a href="index.html#contacto" class="hover:text-slate-900 transition-colors">Contacto</a>
       </div>
-    </footer>
-    <!-- FIN: FOOTER -->
+    </div>
+  </footer>
 
-  </div>
-  <!-- FIN: main-content -->
-
-  <!-- ========================
-       SCRIPTS
-       main.js gestiona la lógica principal de la app y la animación
-       de vuelo del colibrí (preloader).
-  ======================= -->
-  <!-- Lógica principal de la app (orquestador modular ES) -->
-  <script type="module" src="/src/js/main.js"></script>
 </body>
-
 </html>

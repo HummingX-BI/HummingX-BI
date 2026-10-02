@@ -1,314 +1,273 @@
 <!DOCTYPE html>
-<html lang="es">
-
+<html lang="es" class="scroll-smooth">
 <head>
-  <!-- ============================================================
-       HummingX-BI — Landing Page
-       Versión: 1.0.0
-       Autor: HummingX-BI Engineering Team
-       Descripción: Landing page de alta gama para agencia de
-                    software e inteligencia de negocios.
-  ============================================================ -->
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="robots" content="index, follow" />
-  <link rel="canonical" href="https://hummingxbi.com/" />
-  <meta name="description"
-    content="Firma de tecnología e inteligencia de negocios. Automatizamos operaciones y creamos ecosistemas web, IA y Business Intelligence para aliados estratégicos." />
-  <meta name="keywords"
-    content="firma de tecnología, inteligencia de negocios, business intelligence méxico, desarrollo de software a medida, consultoría de software CDMX, ecosistemas web, agentes IA, nfc y lealtad, software integral" />
-  <meta property="og:title" content="HummingX BI | Firma de Tecnología e Inteligencia de Negocios" />
-  <meta property="og:description"
-    content="Firma de tecnología e inteligencia de negocios. Automatizamos operaciones y creamos ecosistemas web, IA y Business Intelligence para aliados estratégicos." />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://hummingxbi.com/og-image.png" />
-  <!-- Twitter Card Data -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="HummingX BI | Firma de Tecnología e Inteligencia de Negocios" />
-  <meta name="twitter:description"
-    content="Firma de tecnología e inteligencia de negocios. Automatizamos operaciones y creamos ecosistemas web, IA y Business Intelligence para aliados estratégicos." />
-  <meta name="twitter:image" content="https://hummingxbi.com/og-image.png" />
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>Aviso de Privacidad | HummingX BI</title>
-
-  <!-- Favicons optimizados para Google Search -->
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-
-  <!-- Datos estructurados JSON-LD SEO -->
-  <script type="application/ld+json">
-  [
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "HummingX-BI",
-      "url": "https://hummingxbi.com",
-      "logo": "https://hummingxbi.com/apple-touch-icon.png",
-      "image": "https://hummingxbi.com/og-image.png",
-      "email": "contacto@hummingxbi.com",
-      "description": "Desarrollo de software empresarial a medida y Business Intelligence para PyMEs en México.",
-      "areaServed": "MX",
-      "sameAs": [
-        "https://www.facebook.com/profile.php?id=61590401354021",
-        "https://www.instagram.com/",
-        "https://wa.me/"
-      ]
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "Service",
-      "name": "Plataformas Empresariales",
-      "description": "Sistema ERP a medida y software empresarial para centralizar la operación de tu negocio."
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "Service",
-      "name": "Business Intelligence",
-      "description": "Dashboard BI en tiempo real para pequeña empresa que convierte datos en ventajas competitivas."
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "Service",
-      "name": "Desarrollo Cloud & API",
-      "description": "Arquitectura backend escalable e integraciones sin fisuras."
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "Service",
-      "name": "Automatización RPA",
-      "description": "Automatización con IA para empresas en CDMX y todo México, elimina tareas manuales."
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "Service",
-      "name": "E-commerce & Portales B2B",
-      "description": "Experiencias de compra y gestión a medida de alto rendimiento."
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "Service",
-      "name": "Consultoría Tech & IA",
-      "description": "Auditorías de arquitectura, machine learning y roadmap tecnológico."
-    }
-  ]
+  <meta name="description" content="Aviso de Privacidad oficial de HummingX BI. Marco de protección y tratamiento de datos personales conforme a la LFPDPPP."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "royal-blue": "#0A58A3",
+            "hx-cyan": "#00A3A9"
+          },
+          fontFamily: {
+            sans: ["Inter", "sans-serif"],
+            display: ["Plus Jakarta Sans", "sans-serif"],
+            editorial: ["Cinzel", "serif"],
+            mono: ["Space Grotesk", "monospace"]
+          }
+        }
+      }
+    };
   </script>
-
-  <!-- Fuentes auto-hospedadas vía @fontsource (importadas en src/css/main.css
-       y empaquetadas por Vite). No requiere preloads ni CDN. -->
-
-  <!-- Preconnect a WhatsApp (CTA directo del formulario) -->
-  <link rel="preconnect" href="https://wa.me" />
-
-  <!-- Stylesheets -->
-  <link rel="stylesheet" href="/src/css/main.css" />
+  <style>
+    body {
+      background-color: #ffffff;
+      color: #1e293b;
+    }
+    ::selection {
+      background-color: #0f172a;
+      color: #ffffff;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f8fafc;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
 </head>
+<body class="bg-white text-slate-800 antialiased min-h-screen flex flex-col justify-between font-sans selection:bg-slate-900 selection:text-white">
 
-<body>
+  <!-- Header Institucional Formal -->
+  <header class="w-full bg-white border-b border-slate-200 sticky top-0 z-30">
+    <div class="max-w-4xl mx-auto px-6 py-4 sm:px-8 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3.5 group">
+        <div class="w-8 h-8 relative flex items-center justify-center">
+          <img src="./src/Logo HummingX BI png.png" alt="HummingX Colibrí" class="w-full h-full object-contain"/>
+        </div>
+        <div class="flex flex-col">
+          <span class="font-display font-extrabold text-base text-slate-900 tracking-tight leading-none">
+            HummingX <span class="text-[#0A58A3]">BI</span>
+          </span>
+          <span class="text-[9px] uppercase tracking-[0.25em] text-slate-500 font-medium mt-0.5">Firma de Software</span>
+        </div>
+      </a>
 
-  <!-- Partículas de fondo globales (burbujas/nodos) -->
-  <canvas class="global__particles" id="particles-canvas" aria-hidden="true"></canvas>
+      <a href="index.html" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 border border-slate-300 hover:border-slate-400 bg-white hover:bg-slate-50 transition-colors px-3.5 py-1.5 rounded-lg shadow-sm">
+        <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+        <span>Volver al Inicio</span>
+      </a>
+    </div>
+  </header>
 
-  <!-- ============================================================
-       PRELOADER VECTORIAL INTERACTIVO — HummingX-BI
-       Un colibrí vectorizado vuela en el centro y aletea rápidamente.
-       Al terminar la carga, el colibrí realiza una transición de vuelo
-       dinámico y aterriza exactamente en la esquina superior izquierda,
-       fusionándose con el logo de la cabecera.
-  ============================================================ -->
-
-  <!-- Cursor magnético (solo desktop) -->
-  <div id="magnetic-cursor" aria-hidden="true"></div>
-
-
-  <!-- ============================================================
-       PÁGINA PRINCIPAL (oculta mientras carga el preloader)
-  ============================================================ -->
-  <div id="main-content" class="main-content" aria-hidden="true">
-
-    <!-- ========================
-         NAVEGACIÓN
-    ======================== -->
-    <header class="nav-header" id="navbar" role="banner">
-      <nav class="nav container" aria-label="Navegación principal">
-        <!-- Logo en la navbar -->
-        <a href="index.html#inicio" class="nav__logo" aria-label="HummingX - BI - Inicio">
-          <!-- Logo SVG oficial -->
-          <!-- Logo SVG oficial (Inyectado dinámicamente) -->
-          <div data-inject-svg data-src="/logo.svg" class="nav__logo-icon" aria-hidden="true"></div>
-          <span class="nav__logo-text">HUMMING<span class="accent-x">X</span>-<span
-              class="nav__logo-sub">BI</span></span>
-        </a>
-
-        <!-- Menú de navegación desktop -->
-        <ul class="nav__menu" role="list">
-          <li><a href="index.html#inicio" class="nav__link" aria-current="page">Inicio</a></li>
-          <li><a href="index.html#servicios" class="nav__link">Servicios</a></li>
-          <li><a href="index.html#soluciones" class="nav__link">Soluciones</a></li>
-          <li><a href="index.html#metodologia" class="nav__link">Metodología</a></li>
-          <li><a href="index.html#valores" class="nav__link">Valores</a></li>
-          <li><a href="index.html#equipo" class="nav__link">Equipo</a></li>
-          <li><a href="index.html#faq" class="nav__link">FAQs</a></li>
-        </ul>
-
-        <!-- Botón CTA en navbar -->
-        <a href="index.html#contacto" class="btn btn--nav" id="nav-cta-btn">Agenda una llamada</a>
-
-        <!-- Hamburger (mobile) -->
-        <button class="nav__hamburger" id="hamburger-btn" aria-label="Abrir menú" aria-expanded="false"
-          aria-controls="mobile-menu">
-          <span class="hamburger-line"></span>
-          <span class="hamburger-line"></span>
-          <span class="hamburger-line"></span>
-        </button>
-      </nav>
-
-      <!-- Menú móvil -->
-      <div class="mobile-menu" id="mobile-menu" role="dialog" aria-label="Menú móvil" aria-hidden="true">
-        <ul class="mobile-menu__list" role="list">
-          <li><a href="index.html#inicio" class="mobile-menu__link" data-close-menu>Inicio</a></li>
-          <li><a href="index.html#servicios" class="mobile-menu__link" data-close-menu>Servicios</a></li>
-          <li><a href="index.html#soluciones" class="mobile-menu__link" data-close-menu>Soluciones</a></li>
-          <li><a href="index.html#metodologia" class="mobile-menu__link" data-close-menu>Metodología</a></li>
-          <li><a href="index.html#valores" class="mobile-menu__link" data-close-menu>Valores</a></li>
-          <li><a href="index.html#equipo" class="mobile-menu__link" data-close-menu>Equipo</a></li>
-          <li><a href="index.html#faq" class="mobile-menu__link" data-close-menu>FAQs</a></li>
-          <li><a href="index.html#contacto" class="btn btn--primary mobile-menu__cta" data-close-menu>Agenda una llamada</a>
-          </li>
-        </ul>
+  <!-- Cuerpo Principal del Documento (Diseño Editorial Formal, Sin Cards) -->
+  <main class="flex-1 max-w-3xl w-full mx-auto px-6 py-12 sm:py-16">
+    
+    <!-- Encabezado del Documento Legal -->
+    <header class="border-b border-slate-200 pb-8 mb-10">
+      <p class="text-[11px] font-mono font-semibold uppercase tracking-widest text-slate-500 mb-2">
+        Documento Institucional • Marco Jurídico de Privacidad
+      </p>
+      <h1 class="font-display text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-4">
+        Aviso de Privacidad
+      </h1>
+      <div class="text-xs text-slate-600 space-y-1 font-mono">
+        <p><strong>Entidad Responsable:</strong> HummingX BI — Consultoría e Ingeniería de Software</p>
+        <p><strong>Marco Normativo:</strong> Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP) y su Reglamento</p>
+        <p><strong>Fecha de Emisión y Última Actualización:</strong> Septiembre de 2026 • Ciudad de México, México</p>
       </div>
     </header>
-    <!-- FIN: NAVEGACIÓN -->
 
+    <!-- Contenido en Texto Corrido y Artículos Numerados Formales (Cero Cards) -->
+    <article class="space-y-10 text-[15px] sm:text-base leading-relaxed text-slate-700">
 
-    <!-- =======
-    <!-- CONTENIDO LEGAL -->
-    <main class="legal-page container" style="margin-top: 120px; padding-bottom: 80px;">
-      <!-- BORRADOR — pendiente de revisión por asesoría legal antes de publicación oficial. -->
-      <h1>Aviso de Privacidad</h1>
-      <span class="legal-date">Última actualización: 19 de Junio de 2026</span>
+      <!-- Cláusula 1 -->
+      <section class="space-y-3">
+        <h2 class="font-display font-bold text-lg text-slate-900">
+          1. Identidad y Domicilio del Responsable
+        </h2>
+        <p>
+          <strong class="text-slate-900">HummingX BI</strong> (en lo sucesivo identificado como "el Responsable" o "la Firma"), con centro principal de operaciones y servicios tecnológicos en la Ciudad de México y zona conurbada del Estado de México, México, hace constar mediante este acto que es la entidad responsable del uso, almacenamiento, tratamiento y protección de sus datos personales, en estricto apego a los principios de licitud, consentimiento, información, calidad, finalidad, lealtad, proporcionalidad y responsabilidad contemplados en la <em>Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP)</em> y demás disposiciones reglamentarias aplicables.
+        </p>
+      </section>
 
-      <h2>Identidad y Domicilio del Responsable</h2>
-      <p><strong>HummingX BI</strong> (en adelante "el Responsable" o "Nosotros"), con zona de operación principal en la Ciudad de México (CDMX) y Estado de México, México; es el responsable del uso, protección y tratamiento de sus datos personales, en estricto apego a la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP) y su Reglamento.</p>
+      <!-- Cláusula 2 -->
+      <section class="space-y-3">
+        <h2 class="font-display font-bold text-lg text-slate-900">
+          2. Datos Personales Sujetos a Tratamiento
+        </h2>
+        <p>
+          Para el desarrollo de las actividades de diagnóstico técnico, cotización comercial, relación contractual y prestación de servicios de software e ingeniería de datos, el Responsable recaba de manera directa y lícita los siguientes datos personales:
+        </p>
+        <ul class="list-disc list-outside pl-6 space-y-1.5 text-slate-700">
+          <li><strong>Datos de Identificación y Contacto:</strong> Nombre completo del representante o titular de la consulta.</li>
+          <li><strong>Datos de Localización y Comunicación:</strong> Dirección de correo electrónico corporativo o personal, número telefónico fijo o móvil, y canal institucional de mensajería (WhatsApp Business).</li>
+          <li><strong>Datos Corporativos y Organizacionales:</strong> Nombre o razón social de la empresa, institución o proyecto comercial al que representa, cargo o posición dentro de la estructura empresarial.</li>
+          <li><strong>Información Técnica y de Proyecto:</strong> Requerimientos operativos, alcances tecnológicos, arquitecturas preliminares y necesidades de consultoría descritas en nuestras sesiones o solicitudes de diagnóstico.</li>
+        </ul>
+        <div class="border-l-2 border-slate-900 pl-4 py-1.5 my-3 text-sm text-slate-600 bg-slate-50">
+          <strong>Manifestación expresa sobre datos sensibles:</strong> HummingX BI no solicita ni somete a tratamiento, bajo ninguna circunstancia, datos catalogados por la ley como sensibles (aquellos que puedan revelar origen racial, estado de salud presente o futuro, información genética, creencias religiosas, filosóficas o morales, afiliación sindical, opiniones políticas o preferencia sexual).
+        </div>
+      </section>
 
-      <h2>Datos Personales Recabados</h2>
-      <p>Para llevar a cabo las finalidades descritas en el presente aviso, recabaremos de manera directa a través de nuestros formularios de contacto, vía correo electrónico o WhatsApp Business, los siguientes datos personales:</p>
-      <ul>
-        <li>Nombre completo.</li>
-        <li>Correo electrónico.</li>
-        <li>Número de teléfono / celular.</li>
-        <li>Nombre de la empresa que representa o en la que labora.</li>
-        <li>Contenido del mensaje, requerimientos y/o detalles de su proyecto.</li>
-      </ul>
-      <p><em>HummingX BI no recaba bajo ninguna circunstancia datos personales catalogados como sensibles.</em></p>
-
-      <h2>Finalidades del Tratamiento</h2>
-      <p>Los datos personales recabados serán utilizados para las siguientes finalidades:</p>
-      <p><strong>Finalidades Primarias</strong> (necesarias para la relación jurídica y de servicio):</p>
-      <ul>
-        <li>Dar seguimiento a sus solicitudes de información, contacto o cotización.</li>
-        <li>Proveer los servicios contratados relacionados con desarrollo de software, automatización, IA e inteligencia de negocios.</li>
-        <li>Gestión administrativa, facturación y mantenimiento de la relación comercial.</li>
-      </ul>
-      <p><strong>Finalidades Secundarias</strong> (no necesarias para el servicio, pero de utilidad para mejorar su experiencia):</p>
-      <ul>
-        <li>Envío de material de marketing, newsletters y contenido de valor sobre tecnología y negocios.</li>
-        <li>Invitaciones a eventos exclusivos o webinars.</li>
-        <li>Aplicación de encuestas de calidad y satisfacción del servicio.</li>
-      </ul>
-
-      <h2>Mecanismo para Negativa de Finalidades Secundarias (Opt-out)</h2>
-      <p>Si usted no desea que sus datos personales sean tratados para las Finalidades Secundarias, puede manifestar su negativa desde este momento enviando un correo a <strong>contacto@hummingxbi.com</strong>. La negativa para el uso de sus datos personales para estas finalidades secundarias no será motivo para que le neguemos los servicios principales que solicita o contrata con nosotros.</p>
-
-      <h2>Transferencias de Datos a Terceros</h2>
-      <p>Sus datos personales no serán vendidos ni transferidos a terceros con fines de comercialización. Únicamente realizamos transferencias de información a proveedores tecnológicos de estricta confianza (ej. plataformas de hosting, sistemas de CRM, WhatsApp Business/Meta y herramientas de analítica web) que operan bajo rigurosas políticas de privacidad, de manera exclusiva para poder brindarle nuestros servicios, administrar nuestra plataforma técnica o atender su comunicación, tal como lo exige el desarrollo de nuestra operación comercial.</p>
-
-      <h2>Derechos ARCO (Acceso, Rectificación, Cancelación u Oposición)</h2>
-      <p>Usted tiene derecho a conocer qué datos personales tenemos de usted, para qué los utilizamos y las condiciones del uso que les damos (Acceso). Es su derecho solicitar la corrección de su información en caso de estar desactualizada, ser inexacta o incompleta (Rectificación); que la eliminemos de nuestros registros o bases de datos (Cancelación); así como oponerse al uso de sus datos para fines específicos (Oposición).</p>
-      <p>Para el ejercicio de cualquiera de los derechos ARCO, usted deberá presentar la solicitud respectiva a través del correo electrónico <strong>contacto@hummingxbi.com</strong>. La solicitud deberá incluir su nombre completo, documento de identificación oficial y la descripción clara de los datos sobre los que busca ejercer algún derecho. Le daremos respuesta oficial en un plazo no mayor a 20 días hábiles.</p>
-
-      <h2>Uso de Cookies y Tecnologías de Rastreo</h2>
-      <p>Le informamos que en nuestro sitio web (hummingxbi.com) utilizamos cookies y analíticas web básicas estrictamente necesarias para el correcto funcionamiento del sitio, la medición del tráfico técnico y el rendimiento del servidor. No utilizamos tecnologías invasivas para monitorear su comportamiento de navegación cruzada ni perfilar a los usuarios con fines publicitarios de terceros.</p>
-
-      <h2>Cambios al Aviso de Privacidad</h2>
-      <p>El presente aviso de privacidad puede sufrir modificaciones, cambios o actualizaciones derivadas de nuevos requerimientos legales, de nuestras propias necesidades operativas o de cambios en nuestro modelo de negocio. Toda modificación a este aviso será publicada en esta misma página web.</p>
-    </main>
-    <!-- FIN: CONTENIDO LEGAL -->
-
-
-    <footer class="footer" role="contentinfo">
-      <div class="container">
-        <div class="footer__layout">
-          <!-- Columna 1: Marca + Tagline + Redes -->
-          <div class="footer__brand">
-            <span class="footer__logo">HUMMING<span class="accent-x">X</span>-<span
-                class="footer__logo-sub">BI</span></span>
-            <p class="footer__tagline">Consultoría AI-Native. Ingeniería de Software de Alta Precisión.</p>
-            <div class="footer__socials" style="display: flex; gap: var(--space-4); margin-top: var(--space-4); font-size: var(--text-sm); font-weight: 500;">
-              <a href="https://wa.me/525575084267" target="_blank" rel="noopener">WhatsApp</a>
-              <a href="https://www.instagram.com/hummingx.bi" target="_blank" rel="noopener">Instagram</a>
-              <a href="https://www.facebook.com/profile.php?id=61590401354021" target="_blank" rel="noopener">Facebook</a>
-            </div>
-          </div>
-
-          <!-- Columna 2: Servicios -->
-          <nav class="footer__nav" aria-label="Servicios footer">
-            <h4 class="footer__nav-title">Servicios</h4>
-            <ul role="list">
-              <li><a href="index.html#servicios">Software a Medida</a></li>
-              <li><a href="index.html#servicios">Business Intelligence</a></li>
-              <li><a href="index.html#servicios">Automatización IA</a></li>
-              <li><a href="index.html#servicios">E-commerce & Plataformas</a></li>
-            </ul>
-          </nav>
-
-          <!-- Columna 3: Explora -->
-          <nav class="footer__nav" aria-label="Explora footer">
-            <h4 class="footer__nav-title">Explora</h4>
-            <ul role="list">
-              <li><a href="index.html#inicio">Inicio</a></li>
-              <li><a href="index.html#soluciones">Soluciones</a></li>
-              <li><a href="index.html#metodologia">Metodología</a></li>
-              <li><a href="index.html#valores">Valores</a></li>
-              <li><a href="index.html#equipo">Equipo</a></li>
-              <li><a href="index.html#faq">FAQs</a></li>
-            </ul>
-          </nav>
-
-          <!-- Columna 4: Empresa + Contacto -->
-          <div class="footer__contact">
-            <h4 class="footer__nav-title">Empresa</h4>
-            <a href="mailto:colibrixbi@gmail.com" class="footer__contact-link">colibrixbi@gmail.com</a>
-            <p style="font-size: var(--text-sm); color: var(--color-text-secondary); margin-top: var(--space-2);">
-              Lun a Vie 9AM – 7PM (CDMX)
-            </p>
-            <div style="margin-top: var(--space-4);">
-              <a href="index.html#contacto" class="btn btn--primary">Agenda una llamada</a>
-            </div>
-          </div>
+      <!-- Cláusula 3 -->
+      <section class="space-y-4">
+        <h2 class="font-display font-bold text-lg text-slate-900">
+          3. Finalidades del Tratamiento de Datos
+        </h2>
+        <p>
+          Los datos personales recabados son tratados conforme a la siguiente categorización de finalidades:
+        </p>
+        
+        <div class="space-y-2">
+          <h3 class="font-semibold text-slate-900 text-sm uppercase tracking-wide">
+            A. Finalidades Primarias (Necesarias e indispensables para la relación jurídica o de servicio):
+          </h3>
+          <ul class="list-disc list-outside pl-6 space-y-1 text-slate-700">
+            <li>Verificación de identidad y seguimiento puntual a solicitudes de contacto, diagnóstico inicial o cotización de proyectos.</li>
+            <li>Elaboración de propuestas técnicas, planes de trabajo, acuerdos de confidencialidad (NDA) y contratos de prestación de servicios profesionales.</li>
+            <li>Prestación, entrega, despliegue y mantenimiento de soluciones de software, arquitecturas cloud, sistemas de Business Intelligence y automatizaciones contratadas.</li>
+            <li>Gestión de cobranza, facturación electrónica (CFDI) y cumplimiento estricto de obligaciones fiscales y contables.</li>
+          </ul>
         </div>
 
-        <!-- Bottom bar -->
-        <div class="footer__bottom" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-4);">
-          <p>&copy; 2026 HummingX-BI. Todos los derechos reservados.</p>
-          <div class="footer__bottom-links" style="display: flex; gap: var(--space-6); font-size: var(--text-sm); font-weight: 500;">
-            <a href="aviso-de-privacidad.html">Aviso de Privacidad</a>
-            <a href="terminos-y-condiciones.html">Términos y Condiciones</a>
-          </div>
+        <div class="space-y-2 pt-2">
+          <h3 class="font-semibold text-slate-900 text-sm uppercase tracking-wide">
+            B. Finalidades Secundarias (Adicionales y accesorias):
+          </h3>
+          <ul class="list-disc list-outside pl-6 space-y-1 text-slate-700">
+            <li>Envío de publicaciones informativas, boletines tecnológicos sobre inteligencia de negocios y mejores prácticas de ingeniería.</li>
+            <li>Notificaciones sobre nuevas funcionalidades, esquemas de colaboración o eventos técnicos organizados por HummingX BI.</li>
+            <li>Encuestas de satisfacción con el propósito exclusivo de evaluar la calidad de nuestros servicios y procesos de atención.</li>
+          </ul>
         </div>
+      </section>
+
+      <!-- Cláusula 4 -->
+      <section class="space-y-3">
+        <h2 class="font-display font-bold text-lg text-slate-900">
+          4. Negativa al Tratamiento para Finalidades Secundarias
+        </h2>
+        <p>
+          En caso de que el titular no desee que sus datos personales sean utilizados para las finalidades secundarias antes señaladas, podrá manifestar su negativa en cualquier momento mediante escrito libre enviado a la cuenta institucional de correo: <a href="mailto:hummingxbi@gmail.com" class="text-slate-900 font-semibold underline">hummingxbi@gmail.com</a>.
+        </p>
+        <p class="text-sm text-slate-600">
+          La negativa para el uso de sus datos personales para estas finalidades accesorias no será, en ningún momento ni circunstancia, motivo para que le suspendamos o neguemos los servicios principales, diagnósticos o contratos que formalice con la Firma.
+        </p>
+      </section>
+
+      <!-- Cláusula 5 -->
+      <section class="space-y-3">
+        <h2 class="font-display font-bold text-lg text-slate-900">
+          5. Transferencia y Remisión de Datos a Terceros
+        </h2>
+        <p>
+          HummingX BI no vende, renta, transfiere ni comercializa datos personales con terceros para fines comerciales o publicitarios. Los datos únicamente podrán ser remitidos a prestadores de servicios de infraestructura tecnológica indispensable (tales como servidores de alojamiento en la nube, bases de datos cifradas y plataformas institucionales de comunicación corporativa), quienes actúan en calidad de encargados y asumen los mismos compromisos de confidencialidad y resguardo previstos en el presente aviso.
+        </p>
+      </section>
+
+      <!-- Cláusula 6 -->
+      <section class="space-y-3">
+        <h2 class="font-display font-bold text-lg text-slate-900">
+          6. Medios y Procedimiento para Ejercer los Derechos ARCO
+        </h2>
+        <p>
+          Usted o su representante legal debidamente acreditado tiene derecho a ejercer en todo momento los derechos de <strong>Acceso, Rectificación, Cancelación y Oposición (Derechos ARCO)</strong> respecto al tratamiento de sus datos personales:
+        </p>
+        <ul class="list-disc list-outside pl-6 space-y-1.5 text-slate-700">
+          <li><strong>Acceso:</strong> Conocer con precisión qué datos personales suyos obran en nuestros registros y el uso específico que se les da.</li>
+          <li><strong>Rectificación:</strong> Solicitar la corrección o actualización de su información en caso de que sea inexacta, desactualizada o incompleta.</li>
+          <li><strong>Cancelación:</strong> Solicitar que sus datos sean eliminados de nuestros sistemas cuando considere que no están siendo tratados conforme a la ley.</li>
+          <li><strong>Oposición:</strong> Oponerse al tratamiento de sus datos personales para fines o situaciones particulares.</li>
+        </ul>
+        <div class="border-t border-b border-slate-200 py-3 my-2 text-sm text-slate-700 space-y-1">
+          <p><strong>Procedimiento formal:</strong> Envíe su solicitud formal al buzón <a href="mailto:hummingxbi@gmail.com" class="text-slate-900 font-semibold underline">hummingxbi@gmail.com</a> acompañada de:</p>
+          <ol class="list-decimal list-outside pl-6 space-y-0.5 text-slate-600">
+            <li>Nombre del titular y domicilio o correo electrónico para comunicarle la respuesta.</li>
+            <li>Documentos oficiales que acrediten la identidad o representación legal correspondiente.</li>
+            <li>Descripción puntual de los datos sobre los que busca ejercer alguno de los derechos ARCO.</li>
+          </ol>
+          <p class="text-slate-600 pt-1">El plazo máximo de respuesta será de <strong>20 (veinte) días hábiles</strong> a partir de la recepción formal de la solicitud.</p>
+        </div>
+      </section>
+
+      <!-- Cláusula 7 -->
+      <section class="space-y-3">
+        <h2 class="font-display font-bold text-lg text-slate-900">
+          7. Uso de Tecnologías de Navegación y Cookies
+        </h2>
+        <p>
+          El portal web emplea cookies y registros de sesión de carácter exclusivamente técnico para asegurar la navegación segura, el rendimiento del sitio y la correcta disponibilidad de las páginas. No se aplican mecanismos de rastreo intrusivo de hábitos de consumo de terceros ni perfiles publicitarios conductuales.
+        </p>
+      </section>
+
+      <!-- Cláusula 8 -->
+      <section class="space-y-3">
+        <h2 class="font-display font-bold text-lg text-slate-900">
+          8. Medidas de Seguridad de la Información
+        </h2>
+        <p>
+          HummingX BI implementa y conserva medidas de seguridad administrativas, técnicas y físicas rigurosas para proteger los datos personales contra daño, pérdida, alteración, destrucción o el uso, acceso o tratamiento no autorizado, empleando protocolos de cifrado de tráfico (SSL/TLS), entornos de alojamiento blindados y estrictas políticas internas de confidencialidad para todo nuestro personal de ingeniería y consultoría.
+        </p>
+      </section>
+
+      <!-- Cláusula 9 -->
+      <section class="space-y-3">
+        <h2 class="font-display font-bold text-lg text-slate-900">
+          9. Modificaciones al Presente Aviso de Privacidad
+        </h2>
+        <p>
+          El presente aviso de privacidad podrá ser modificado o actualizado en cualquier momento derivado de novedades legislativas, jurisprudenciales, requerimientos internos o cambios en nuestro modelo de servicios tecnológicos. Cualquier modificación será publicada directamente en este mismo portal web para su consulta pública inmediata.
+        </p>
+      </section>
+
+      <!-- Cláusula 10 -->
+      <section class="space-y-3 pt-6 border-t border-slate-200">
+        <h2 class="font-display font-bold text-lg text-slate-900">
+          10. Datos de Contacto y Atención Jurídica
+        </h2>
+        <p>
+          Para cualquier duda, solicitud o manifestación concerniente a este Aviso de Privacidad y el tratamiento de sus datos personales, ponemos a su disposición nuestro canal oficial:
+        </p>
+        <div class="text-sm text-slate-700 space-y-1 font-mono">
+          <p>• <strong>Buzón de Atención Legal:</strong> <a href="mailto:hummingxbi@gmail.com" class="text-slate-900 font-semibold underline">hummingxbi@gmail.com</a></p>
+          <p>• <strong>Firma:</strong> HummingX BI (Consultoría e Ingeniería de Software)</p>
+          <p>• <strong>Jurisdicción Operativa:</strong> Ciudad de México y Estado de México, México.</p>
+        </div>
+      </section>
+
+    </article>
+
+  </main>
+
+  <!-- Footer Formal en Blanco / Gris Claro -->
+  <footer class="w-full bg-slate-50 border-t border-slate-200 text-slate-600 text-xs py-8">
+    <div class="max-w-4xl mx-auto px-6 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+      <p>&copy; 2026 HummingX BI. Todos los derechos reservados.</p>
+      <div class="flex items-center gap-6">
+        <a href="aviso-de-privacidad.html" class="font-semibold text-slate-900 underline">Aviso de Privacidad</a>
+        <a href="terminos-y-condiciones.html" class="hover:text-slate-900 transition-colors">Términos y Condiciones</a>
+        <a href="index.html#contacto" class="hover:text-slate-900 transition-colors">Contacto</a>
       </div>
-    </footer>
-    <!-- FIN: FOOTER -->
+    </div>
+  </footer>
 
-  </div>
-  <!-- FIN: main-content -->
-
-  <!-- ========================
-       SCRIPTS
-       main.js gestiona la lógica principal de la app y la animación
-       de vuelo del colibrí (preloader).
-  ======================= -->
-  <!-- Lógica principal de la app (orquestador modular ES) -->
-  <script type="module" src="/src/js/main.js"></script>
 </body>
-
 </html>

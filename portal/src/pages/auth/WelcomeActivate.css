@@ -1,0 +1,313 @@
+.welcome-root {
+  background: #040810;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Ocultar la barra de scroll para una experiencia más inmersiva */
+html.hide-scrollbar-global::-webkit-scrollbar,
+html.hide-scrollbar-global body::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+}
+html.hide-scrollbar-global,
+html.hide-scrollbar-global body {
+  -ms-overflow-style: none !important;  /* IE and Edge */
+  scrollbar-width: none !important;  /* Firefox */
+}
+
+/* ══ SCROLL CONTAINER ══ */
+.welcome-root .scroll-track {
+  height: 650vh;
+  position: relative;
+}
+
+/* ══ FIXED VIEWPORT ══ */
+.welcome-root .stage {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* ══ AMBIENT LIGHTS ══ */
+.welcome-root .ambient {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+@keyframes lightBreathe {
+  0%, 100% { opacity: 0.2; }
+  50%      { opacity: 0.4; }
+}
+
+.welcome-root .light {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.3;
+  animation: lightBreathe 8s infinite ease-in-out;
+}
+.welcome-root .light-purple { width: 700px; height: 700px; background: #7B2FBE; bottom: -150px; left: -150px; animation-delay: 0s; }
+.welcome-root .light-cyan   { width: 600px; height: 600px; background: #00BCD4; top: -100px; right: -100px; animation-delay: 4s; }
+.welcome-root .light-blue   { width: 500px; height: 500px; background: #1565C0; top: 50%; left: 50%; transform: translate(-50%,-50%); animation-delay: 2s; }
+
+/* ══ PARTICLE GRID ══ */
+.welcome-root .particles {
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ══ SECTION PANELS ══ */
+.welcome-root .panel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 40px;
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+.welcome-root .panel.active { opacity: 1; pointer-events: auto; }
+
+/* ══ HERO TEXT ══ */
+.welcome-root .hero-greeting {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(2.5rem, 7vw, 6rem);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: #fff;
+  overflow: hidden;
+}
+.welcome-root .hero-greeting .word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.welcome-root .hero-greeting .word.shown {
+  opacity: 1;
+  transform: translateY(0);
+}
+.welcome-root .hero-greeting .brand-name {
+  background: linear-gradient(135deg, #00BCD4, #7B2FBE);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.welcome-root .hero-sub {
+  margin-top: 20px;
+  font-size: clamp(1rem, 2.5vw, 1.3rem);
+  color: rgba(255,255,255,0.55);
+  font-weight: 300;
+  max-width: 520px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s ease 0.5s, transform 0.8s ease 0.5s;
+}
+.welcome-root .hero-sub.shown { opacity: 1; transform: translateY(0); }
+
+.welcome-root .scroll-hint {
+  position: absolute;
+  bottom: 8vh;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  animation: fadeIn 1s ease 1.5s forwards;
+}
+.welcome-root .scroll-hint span {
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+}
+.welcome-root .scroll-arrow {
+  width: 24px;
+  height: 24px;
+  border-right: 2px solid rgba(255,255,255,0.3);
+  border-bottom: 2px solid rgba(255,255,255,0.3);
+  transform: rotate(45deg);
+  animation: scroll-float 2s ease-in-out infinite;
+}
+
+@keyframes scroll-float {
+  0%, 100% { transform: rotate(45deg) translateY(0); opacity: 0.5; }
+  50%      { transform: rotate(45deg) translateY(6px); opacity: 0.9; }
+}
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+
+/* ══ MIDDLE GREETING ══ */
+.welcome-root .middle-greeting {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: #fff;
+  overflow: hidden;
+  max-width: 900px;
+  text-align: center;
+}
+.welcome-root .middle-greeting .word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.welcome-root .middle-greeting .word.shown {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ══ FINAL PLACE PANEL ══ */
+.welcome-root .place-text {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(2.5rem, 7vw, 5.5rem);
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.1;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 1s ease, transform 1s ease;
+}
+.welcome-root .place-text.shown { opacity: 1; transform: translateY(0); }
+
+.welcome-root .place-sub {
+  font-size: 1.1rem;
+  color: rgba(255,255,255,0.4);
+  margin-top: 16px;
+  opacity: 0;
+  transition: opacity 1s ease 0.4s;
+}
+.welcome-root .place-sub.shown { opacity: 1; }
+
+/* ══ FINAL SPLASH ══ */
+.welcome-root #final-splash {
+  position: fixed;
+  inset: 0;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1s ease;
+}
+.welcome-root #final-splash.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.welcome-root .splash-logo {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 32px;
+  opacity: 0;
+  transform: scale(0.7);
+  transition: opacity 0.8s ease 0.3s, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s;
+}
+.welcome-root #final-splash.active .splash-logo { opacity: 1; transform: scale(1); }
+
+.welcome-root .splash-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(2rem, 6vw, 4rem);
+  font-weight: 900;
+  background: linear-gradient(135deg, #fff 20%, #00BCD4 60%, #7B2FBE 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.9s ease 0.7s, transform 0.9s ease 0.7s;
+  margin-bottom: 16px;
+}
+.welcome-root #final-splash.active .splash-title { opacity: 1; transform: translateY(0); }
+
+.welcome-root .splash-sub {
+  font-size: 1rem;
+  color: rgba(255,255,255,0.6);
+  opacity: 0;
+  transition: opacity 0.8s ease 1.3s;
+  margin-bottom: 32px;
+}
+.welcome-root #final-splash.active .splash-sub { opacity: 1; }
+
+/* Page-exit wipe */
+.welcome-root #exit-overlay {
+  position: fixed;
+  inset: 0;
+  background: #040810;
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.8s ease;
+}
+.welcome-root #exit-overlay.active { opacity: 1; pointer-events: auto; }
+
+/* Colors for animated words */
+.text-cyan-400 { color: #22d3ee !important; }
+.text-purple-400 { color: #c084fc !important; }
+.text-blue-400 { color: #60a5fa !important; }
+
+/* ══ GLOBAL SCROLL HINT ══ */
+.global-scroll-hint {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+  z-index: 100;
+  pointer-events: none;
+}
+.global-scroll-hint.visible {
+  opacity: 1;
+  visibility: visible;
+}
+.global-scroll-hint span {
+  animation: pulse-opacity 2s infinite;
+}
+.global-scroll-hint .scroll-arrow {
+  width: 20px;
+  height: 20px;
+  border-right: 2px solid rgba(255, 255, 255, 0.4);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+  transform: rotate(45deg);
+  animation: scroll-bounce 2s infinite;
+}

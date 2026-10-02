@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: hummingxbi-api
+    runtime: node
+    rootDir: api
+    buildCommand: npm install && npx prisma generate
+    startCommand: node index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      - key: DATABASE_URL
+        sync: false   # Set this manually in Render dashboard (keep secret)
+      - key: JWT_SECRET
+        sync: false   # Set this manually in Render dashboard
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: EMAIL_USER
+        sync: false   # Set this manually in Render dashboard
+      - key: EMAIL_PASS
+        sync: false   # Set this manually in Render dashboard
+      - key: FRONTEND_URL
+        value: https://portal.hummingxbi.com

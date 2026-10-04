@@ -119,8 +119,14 @@ app.use((err, _req, res, _next) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`\n🚀 HummingX Portal API running on http://localhost:${PORT}`);
-  console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`   Frontend: ${process.env.FRONTEND_URL || 'http://localhost:5177'}\n`);
-});
+// Export the app for Vercel Serverless Functions
+export default app;
+
+// Only start the server locally if not running in a serverless environment
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`\n🚀 HummingX Portal API running on http://localhost:${PORT}`);
+    console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`   Frontend: ${process.env.FRONTEND_URL || 'http://localhost:5177'}\n`);
+  });
+}

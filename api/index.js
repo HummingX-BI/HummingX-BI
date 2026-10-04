@@ -3,16 +3,16 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 
-const authRoutes = require('./src/routes/auth');
-const projectRoutes = require('./src/routes/projects');
-const adminRoutes = require('./src/routes/admin');
-const referralRoutes = require('./src/routes/referrals');
-const paymentRoutes = require('./src/routes/payments');
+const authRoutes = require('./_src/routes/auth');
+const projectRoutes = require('./_src/routes/projects');
+const adminRoutes = require('./_src/routes/admin');
+const referralRoutes = require('./_src/routes/referrals');
+const paymentRoutes = require('./_src/routes/payments');
 
 const {
   globalApiLimiter,
   sanitizeBody,
-} = require('./src/middleware/security');
+} = require('./_src/middleware/security');
 
 const app = express();
 const PORT = process.env.PORT || 4000;

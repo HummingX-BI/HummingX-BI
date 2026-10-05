@@ -57,23 +57,25 @@ export default function Layout({ children, customBreadcrumbLabel, fullWidth = fa
     { target: '#tour-milestone', title: 'Siguiente Hito', content: 'El siguiente gran objetivo a cumplir en la ruta de tu proyecto.', placement: 'top' },
     { target: '#tour-credits', title: 'Créditos HX', content: 'Acumula créditos que podrás canjear por nuevos módulos o servicios.', placement: 'top' },
     { target: '#tour-referrals', title: 'Referidos', content: 'La cantidad de empresas que nos has recomendado. ¡Invita a más para ganar créditos!', placement: 'top' },
+    { target: '#tour-level', title: 'Tu Nivel HummingX', content: 'Aquí puedes ver tu nivel actual de cliente, tus beneficios acumulados y lo que necesitas para subir de categoría.', placement: 'top' },
     { target: '#tour-activity', title: 'Actividad Reciente', content: 'Un resumen de las últimas actualizaciones, entregas y mensajes de tu proyecto.', placement: 'top' },
     { target: '#tour-recommendations', title: 'Recomendaciones', content: 'Sugerencias para escalar tu negocio digital o aprovechar al máximo tus créditos disponibles.', placement: 'top' },
     { target: '.tour-step-project', title: 'Mi Proyecto', content: 'Aquí puedes ver los detalles a fondo. En el siguiente paso te llevaremos ahí automáticamente.', placement: 'right' },
     { target: '#tour-project-timeline', title: 'Ruta de trabajo', content: 'En esta sección podrás ver toda la metodología y los pasos que seguiremos hasta lanzar tu proyecto.', placement: 'bottom' },
     { target: '#tour-active-stage', title: 'Detalles de la etapa', content: 'Te mantendremos al tanto de qué estamos haciendo exactamente y si necesitamos que revises algo.', placement: 'top' },
+    { target: '#tour-next-step', title: 'Próximo Paso', content: 'Aquí verás el hito o etapa inmediatamente posterior y lo que viene en el proceso de tu proyecto.', placement: 'top' },
     { target: '#entregables', title: 'Entregables (Documentos)', content: 'Aquí podrás descargar contratos, cotizaciones, manuales y cualquier documento relacionado a tu proyecto.', placement: 'top' },
-    { target: '#tour-bitacora', title: 'Bitácora de Desarrollo', content: 'Una línea de tiempo transparente con todas las actividades, notas y actualizaciones que nuestro equipo va realizando día a día.', placement: 'top' },
+    { target: '#tour-bitacora', title: 'Bitácora de Desarrollo', content: 'El registro cronológico detallado con todas las actividades, notas y avances que nuestro equipo va realizando día a día.', placement: 'top' },
     { target: '#tour-coming-soon', title: 'Mis Referidos', content: '¡Esta sección estará disponible muy pronto! Aquí podrás recomendarnos y ganar recompensas.', placement: 'top' },
     { target: '.tour-step-support', title: 'Soporte 24/7', content: 'Si tienes cualquier duda, usa este botón para mandarnos mensaje directo por WhatsApp. ¡Eso es todo, disfruta tu portal!', placement: 'right' },
   ];
 
   const handleIndexChange = (i) => {
-    if (i <= 10) {
+    if (i <= 11) {
       if (location.pathname !== '/dashboard') navigate('/dashboard');
-    } else if (i >= 11 && i <= 14) {
+    } else if (i >= 12 && i <= 16) {
       if (location.pathname !== '/project') navigate('/project');
-    } else if (i >= 15) {
+    } else if (i >= 17) {
       if (location.pathname !== '/referrals') navigate('/referrals');
     }
     tour.setIndex(i);

@@ -394,7 +394,7 @@ export default function ProjectPage() {
           </div>
 
           {/* Next Step */}
-          <div className="card" style={{ padding: '24px', background: '#F9FAFB' }}>
+          <div id="tour-next-step" className="card" style={{ padding: '24px', background: '#F9FAFB' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '14px' }}>
               <Clock size={14} color="#6B7280" />
               <span style={{ fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>

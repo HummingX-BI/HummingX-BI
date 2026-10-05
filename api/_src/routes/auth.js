@@ -204,8 +204,6 @@ router.post('/activate', tokenActionLimiter, async (req, res) => {
       data: {
         passwordHash,
         invitationAccepted: true,
-        invitationToken: null,     // SECURITY: Consume the token immediately
-        invitationExpires: null,
       }
     });
 
@@ -224,6 +222,7 @@ router.post('/activate', tokenActionLimiter, async (req, res) => {
         email: user.email,
         role: user.role,
         companyName: user.companyName,
+        logoUrl: user.logoUrl,
         level: user.level,
       }
     });

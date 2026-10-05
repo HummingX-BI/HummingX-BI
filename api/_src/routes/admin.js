@@ -94,7 +94,7 @@ router.post('/clients', authenticate, requireAdmin, adminLimiter, async (req, re
           clientId: user.id,
           name: projectName,
           currentPhase: 1,
-          progressPercent: 0,
+          progressPercent: 10,
           status: 'active'
         }
       });
@@ -102,7 +102,7 @@ router.post('/clients', authenticate, requireAdmin, adminLimiter, async (req, re
         data: {
           projectId: project.id,
           authorId: req.user.id,
-          description: 'Proyecto creado. ¡Bienvenido a bordo!',
+          description: 'Fase 1: Análisis iniciada. Recopilando requerimientos y objetivos del proyecto.',
           type: 'milestone'
         }
       });
@@ -268,7 +268,7 @@ router.post('/projects', authenticate, requireAdmin, async (req, res) => {
         description,
         internalNotes,
         currentPhase: 1,
-        progressPercent: 0,
+        progressPercent: 10,
         status: 'active',
         ...(estimatedDelivery && { estimatedDelivery: new Date(estimatedDelivery) }),
       }
@@ -279,7 +279,7 @@ router.post('/projects', authenticate, requireAdmin, async (req, res) => {
       data: {
         projectId: project.id,
         authorId: req.user.id,
-        description: 'Proyecto creado. ¡Bienvenido a bordo!',
+        description: 'Fase 1: Análisis iniciada. Definiendo alcance y objetivos.',
         type: 'milestone',
       }
     });

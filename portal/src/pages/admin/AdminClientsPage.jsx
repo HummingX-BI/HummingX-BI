@@ -19,6 +19,7 @@ export default function AdminClientsPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [deletingClientId, setDeletingClientId] = useState(null);
+  const [createdReminder, setCreatedReminder] = useState(null);
 
   const handleDeleteClient = async (clientId, clientName) => {
     if (!window.confirm(`¿Estás seguro de eliminar al cliente "${clientName}" y todos sus proyectos, actividades y pagos? Esta acción no se puede deshacer.`)) {
@@ -83,10 +84,17 @@ export default function AdminClientsPage() {
     setSavingClient(true);
     setErrorMsg('');
     try {
-      await api.post('/admin/clients', newClientData);
+      const res = await api.post('/admin/clients', newClientData);
       closeModal();
-      setNewClientData({ name: '', email: '', companyName: '', phone: '', projectName: '' });
+      setNewClientData({ name: '', email: '', companyName: '', logoUrl: '', phone: '', projectName: '' });
       fetchClients();
+      if (res.data?.id) {
+        setCreatedReminder({
+          id: res.data.id,
+          name: res.data.name,
+          companyName: res.data.companyName || res.data.name,
+        });
+      }
     } catch (err) {
       setErrorMsg(err.response?.data?.error || 'Error al crear el cliente.');
     } finally { setSavingClient(false); }
@@ -137,6 +145,52 @@ export default function AdminClientsPage() {
             <Plus size={16} /> Nuevo Cliente
           </button>
         </div>
+
+        {/* Post-Creation Admin Reminder Banner */}
+        {createdReminder && (
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(0, 196, 204, 0.08) 0%, rgba(14, 116, 144, 0.05) 100%)',
+            border: '1px solid #00C4CC',
+            borderRadius: '12px',
+            padding: '18px 24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '16px',
+            boxShadow: '0 4px 12px rgba(0, 196, 204, 0.08)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: '1 1 320px' }}>
+              <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'linear-gradient(135deg, #00C4CC 0%, #0E7490 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <CheckCircle2 size={24} />
+              </div>
+              <div>
+                <h4 style={{ margin: '0 0 4px', fontSize: '15px', fontWeight: 700, color: '#111827' }}>
+                  ¡Cliente "{createdReminder.companyName}" creado con éxito! 🚀
+                </h4>
+                <p style={{ margin: 0, fontSize: '13px', color: '#4B5563', lineHeight: '1.5' }}>
+                  <strong>Recordatorio para el Admin:</strong> Su proyecto se inició automáticamente en etapa de <strong>Análisis (10%)</strong>. Recuerda configurar su <strong>Plan de Pagos</strong> en su perfil para que en su portal no aparezca "Por definir".
+                </p>
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Link
+                to={`/admin/clients/${createdReminder.id}`}
+                className="btn-primary"
+                style={{ padding: '8px 16px', fontSize: '13px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+              >
+                Configurar Pagos y Proyecto →
+              </Link>
+              <button
+                onClick={() => setCreatedReminder(null)}
+                style={{ background: 'transparent', border: 'none', color: '#9CA3AF', cursor: 'pointer', padding: '6px', display: 'flex', alignItems: 'center' }}
+                title="Cerrar recordatorio"
+              >
+                <X size={18} />
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* 5 KPI Cards */}
         {loading ? (

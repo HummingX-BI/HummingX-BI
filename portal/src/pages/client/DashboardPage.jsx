@@ -376,13 +376,15 @@ export default function DashboardPage() {
                     Próximo Pago
                   </div>
                   <div className="stat-value" style={{ fontSize: nextP ? '26px' : '20px' }}>
-                    {nextP ? nextP.amount : '¡Todo pagado!'}
+                    {projectPayments.length === 0 ? 'Por definir' : nextP ? nextP.amount : '¡Todo cubierto!'}
                   </div>
-                  <div style={{ fontSize: '12.5px', color: '#00C4CC', fontWeight: 600, marginTop: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    {nextP && nextP.startTime ? (
+                  <div style={{ fontSize: '12.5px', color: projectPayments.length === 0 ? '#6B7280' : '#00C4CC', fontWeight: 600, marginTop: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    {projectPayments.length === 0 ? (
+                      <span>Plan en configuración</span>
+                    ) : nextP && nextP.startTime ? (
                       <>Vence el {nextP.startTime.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })} <ArrowRight size={12} /></>
                     ) : (
-                      <>Listo, has cumplido tu pago <Check size={12} /></>
+                      <>Al corriente con tus pagos <Check size={12} /></>
                     )}
                   </div>
                 </div>
@@ -546,7 +548,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Membership Level Card */}
-            <div className="card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', height: '280px', boxSizing: 'border-box' }}>
+            <div id="tour-level" className="card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', height: '280px', boxSizing: 'border-box' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', margin: 0 }}>
                   Tu Nivel HummingX

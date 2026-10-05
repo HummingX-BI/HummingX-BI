@@ -347,13 +347,35 @@ export default function ActivatePage() {
 
           {error && (
             <div style={{
-              display: 'flex', alignItems: 'center', gap: '8px',
-              padding: '12px 16px', borderRadius: '10px',
+              display: 'flex', flexDirection: 'column', gap: '10px',
+              padding: '14px 16px', borderRadius: '10px',
               background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)',
               marginBottom: '20px',
             }}>
-              <AlertCircle size={16} color="#ef4444" />
-              <span style={{ fontSize: '13px', color: '#fca5a5' }}>{error}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <AlertCircle size={16} color="#ef4444" style={{ flexShrink: 0 }} />
+                <span style={{ fontSize: '13px', color: '#fca5a5' }}>{error}</span>
+              </div>
+              {(error.toLowerCase().includes('activada') || error.toLowerCase().includes('inicia sesión') || error.toLowerCase().includes('expirado')) && (
+                <button
+                  type="button"
+                  onClick={() => navigate('/login')}
+                  style={{
+                    background: '#00C4CC',
+                    color: '#0b0b0e',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '8px 14px',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    alignSelf: 'flex-start',
+                    marginTop: '2px'
+                  }}
+                >
+                  Ir a Iniciar Sesión →
+                </button>
+              )}
             </div>
           )}
 

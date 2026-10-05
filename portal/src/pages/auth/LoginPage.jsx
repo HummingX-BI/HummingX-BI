@@ -21,7 +21,14 @@ export default function LoginPage() {
       const user = await login(form.email, form.password);
       navigate(user.role === 'admin' ? '/admin' : '/dashboard', { replace: true });
     } catch (err) {
-      setError(err.response?.data?.error || 'Error al iniciar sesión. Verifica tus credenciales.');
+      const apiError = err.response?.data?.error;
+      let errorMsg = 'Error al iniciar sesión. Verifica tus credenciales.';
+      if (typeof apiError === 'string') {
+        errorMsg = apiError;
+      } else if (apiError && typeof apiError === 'object' && apiError.message) {
+        errorMsg = apiError.message;
+      }
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -85,7 +92,9 @@ export default function LoginPage() {
               marginBottom: '20px',
             }}>
               <AlertCircle size={16} color="#ef4444" />
-              <span style={{ fontSize: '13px', color: '#fca5a5' }}>{error}</span>
+              <span style={{ fontSize: '13px', color: '#fca5a5' }}>
+                {typeof error === 'object' ? error.message || JSON.stringify(error) : String(error)}
+              </span>
             </div>
           )}
 

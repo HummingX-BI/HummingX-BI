@@ -78,32 +78,29 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // ─── Global rate limiting ─────────────────────────────────────────────────────
-app.use('/auth', globalApiLimiter);
-app.use('/admin', globalApiLimiter);
-app.use('/projects', globalApiLimiter);
-app.use('/referrals', globalApiLimiter);
-app.use('/payments', globalApiLimiter);
+const apiRouter = express.Router();
+apiRouter.use('/auth', globalApiLimiter);
+apiRouter.use('/admin', globalApiLimiter);
+apiRouter.use('/projects', globalApiLimiter);
+apiRouter.use('/referrals', globalApiLimiter);
+apiRouter.use('/payments', globalApiLimiter);
 
 // ─── Input sanitization (all routes) ─────────────────────────────────────────
-app.use(sanitizeBody);
-
-// ─── Request logging ─────────────────────────────────────────────────────────
-if (process.env.NODE_ENV !== 'production') {
-  app.use((req, _res, next) => {
-    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
-    next();
-  });
-}
+apiRouter.use(sanitizeBody);
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
-app.use('/auth', authRoutes);
-app.use('/projects', projectRoutes);
-app.use('/admin', adminRoutes);
-app.use('/referrals', referralRoutes);
-app.use('/payments', paymentRoutes);
+apiRouter.use('/auth', authRoutes);
+apiRouter.use('/projects', projectRoutes);
+apiRouter.use('/admin', adminRoutes);
+apiRouter.use('/referrals', referralRoutes);
+apiRouter.use('/payments', paymentRoutes);
 
 // ─── Health check (no auth needed, no sensitive data) ────────────────────────
-app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+apiRouter.get('/health', (_req, res) => res.json({ status: 'ok' }));
+
+// ─── Mount all routes at both / and /api to handle Vercel routing ────────────
+app.use('/api', apiRouter);
+app.use('/', apiRouter);
 
 // ─── 404 handler ─────────────────────────────────────────────────────────────
 app.use((_req, res) => res.status(404).json({ error: 'Ruta no encontrada.' }));

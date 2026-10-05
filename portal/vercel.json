@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://hummingx-8ub3jjsb3-humming-x-bi1.vercel.app/api/:path*"
+      "destination": "https://hummingxbi.com/api/:path*"
     },
     {
       "source": "/(.*)",

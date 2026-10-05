@@ -184,7 +184,7 @@ router.get('/clients/:id', authenticate, requireAdmin, async (req, res) => {
             id: true, name: true, currentPhase: true, progressPercent: true,
             status: true, estimatedDelivery: true, createdAt: true, designStatus: true,
             quoteLink: true, contractLink: true, previewUrl: true,
-            activities: { orderBy: { createdAt: 'desc' }, take: 10 },
+            activities: { orderBy: { createdAt: 'desc' }, take: 50 },
             payments: {
               orderBy: { dueDate: 'asc' },
               select: {

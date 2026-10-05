@@ -390,7 +390,7 @@ export default function DashboardPage() {
                 </div>
 
                 {activeProject.currentPhase === 6 ? (
-                  <div id="tour-milestone" className="stat-card">
+                  <div id="tour-milestone" className="stat-card" style={{ cursor: 'pointer' }} onClick={() => navigate('/payments')}>
                     <div className="stat-label">
                       <div className="stat-icon-badge" style={{ background: '#EEF2FF', color: '#4F46E5' }}>
                         <Calendar size={16} />
@@ -398,10 +398,14 @@ export default function DashboardPage() {
                       Próxima Anualidad
                     </div>
                     <div className="stat-value" style={{ fontSize: '20px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {nextAnnuity ? nextAnnuity.amount : 'Sin anualidad'}
+                      {nextAnnuity ? nextAnnuity.amount : annuityPayments.length === 0 ? 'Por definir' : 'Al corriente'}
                     </div>
                     <div style={{ fontSize: '12.5px', color: '#6B7280', fontWeight: 500 }}>
-                      {nextAnnuity && nextAnnuity.startTime ? `Vence el ${nextAnnuity.startTime.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}` : 'No hay anualidad pendiente'}
+                      {nextAnnuity && nextAnnuity.startTime 
+                        ? `Vence el ${nextAnnuity.startTime.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}` 
+                        : annuityPayments.length === 0 
+                          ? 'Sin anualidad programada' 
+                          : 'Todas las anualidades cubiertas'}
                     </div>
                   </div>
                 ) : (
@@ -549,30 +553,30 @@ export default function DashboardPage() {
 
             {/* Membership Level Card */}
             <div id="tour-level" className="card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', height: '280px', boxSizing: 'border-box' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', margin: 0 }}>
                   Tu Nivel HummingX
                 </h3>
               </div>
               
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-                <div style={{ width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', width: '100%', boxSizing: 'border-box' }}>
+                <div style={{ width: '64px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
                   <img src={membership.img} alt={membership.title} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                 </div>
                 
-                <div style={{ fontSize: '16px', fontWeight: 800, color: '#111827', marginBottom: '4px' }}>{membership.title}</div>
+                <div style={{ fontSize: '15px', fontWeight: 800, color: '#111827', marginBottom: '4px' }}>{membership.title}</div>
                 
                 {membership.next > 0 ? (
-                  <div style={{ width: '100%', marginTop: '16px', background: '#F9FAFB', border: '1px solid #F3F4F6', borderRadius: '8px', padding: '12px' }}>
-                    <div style={{ fontSize: '12px', color: '#374151', marginBottom: '8px' }}>
+                  <div style={{ width: '100%', marginTop: '10px', background: '#F9FAFB', border: '1px solid #F3F4F6', borderRadius: '8px', padding: '10px 12px', boxSizing: 'border-box' }}>
+                    <div style={{ fontSize: '11.5px', color: '#374151', marginBottom: '6px' }}>
                       Faltan <strong>{membership.next}</strong> referidos para <strong>{membership.nextTitle}</strong>.
                     </div>
                     <div style={{ width: '100%', height: '6px', background: '#E5E7EB', borderRadius: '99px', overflow: 'hidden' }}>
-                      <div style={{ width: `${((membership.nextTitle === 'HummingX VIP' ? convertedCount - 5 : convertedCount) / 5) * 100}%`, height: '100%', background: membership.color, borderRadius: '99px' }}></div>
+                      <div style={{ width: `${Math.min(100, Math.max(0, ((membership.nextTitle === 'HummingX VIP' ? convertedCount - 5 : convertedCount) / 5) * 100))}%`, height: '100%', background: membership.color, borderRadius: '99px' }}></div>
                     </div>
                   </div>
                 ) : (
-                  <div style={{ width: '100%', marginTop: '16px', background: '#F9FAFB', border: '1px solid #F3F4F6', borderRadius: '8px', padding: '12px' }}>
+                  <div style={{ width: '100%', marginTop: '10px', background: '#F9FAFB', border: '1px solid #F3F4F6', borderRadius: '8px', padding: '10px 12px', boxSizing: 'border-box' }}>
                     <div style={{ fontSize: '12px', color: '#374151', fontWeight: 600 }}>
                       ¡Felicidades! Tienes el nivel VIP.
                     </div>

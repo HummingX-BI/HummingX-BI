@@ -13,7 +13,7 @@ router.get('/my', authenticate, async (req, res) => {
       include: {
         activities: {
           orderBy: { createdAt: 'desc' },
-          take: 5,
+          take: 50,
         }
       }
     });

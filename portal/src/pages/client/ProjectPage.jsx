@@ -353,10 +353,8 @@ export default function ProjectPage() {
                 ¡Hemos terminado al 100% con tu proyecto!
               </h2>
               <p style={{ fontSize: '16px', color: '#D1D5DB', margin: '0 auto 24px', maxWidth: '600px', lineHeight: 1.6 }}>
-              Tu proyecto está completamente desplegado y activo. Nos encantó trabajar contigo y esperamos que a ti también. Para cualquier proyecto adicional, no dudes en contactarnos.
-              <br /><br />
-              Recuerda que tienes puntos HummingX disponibles en tu cuenta. Puedes usarlos en cualquier momento, ¡solo escríbenos por WhatsApp y dinos en qué te gustaría usarlos!
-            </p>
+                Tu proyecto está completamente desplegado y activo. Nos encantó trabajar contigo y esperamos que a ti también. Para cualquier proyecto adicional, no dudes en contactarnos.
+              </p>
             <a href="https://wa.me/525575084267" target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', textDecoration: 'none', background: '#00C4CC', color: '#111827', border: 'none', padding: '12px 24px', fontSize: '15px', fontWeight: 700, borderRadius: '8px' }}>
               <MessageCircle size={18} /> Contactar a Soporte
             </a>

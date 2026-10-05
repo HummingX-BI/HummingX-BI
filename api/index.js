@@ -121,7 +121,7 @@ app.use((err, _req, res, _next) => {
 });
 
 // Export the app for Vercel Serverless Functions
-export default app;
+module.exports = app;
 
 // Only start the server locally if not running in a serverless environment
 if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {

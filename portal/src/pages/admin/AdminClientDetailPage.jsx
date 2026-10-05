@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import api from '../../lib/api';
@@ -1063,7 +1064,7 @@ export default function AdminClientDetailPage() {
       </div>
 
       {/* New Project Modal */}
-      {showProjectModal && (
+      {showProjectModal && createPortal(
         <div className="modal-overlay">
           <div className="modal-content">
             <button onClick={() => setShowProjectModal(false)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', cursor: 'pointer', color: '#6B7280' }}>
@@ -1087,11 +1088,12 @@ export default function AdminClientDetailPage() {
               </button>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Payment Create / Edit Modal */}
-      {showPaymentModal && (
+      {showPaymentModal && createPortal(
         <div className="modal-overlay">
           <div className="modal-content" style={{ maxWidth: '480px' }}>
             <button 
@@ -1184,11 +1186,12 @@ export default function AdminClientDetailPage() {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Plan Wizard Modal */}
-      {showPlanModal && (
+      {showPlanModal && createPortal(
         <div className="modal-overlay">
           <div className="modal-content" style={{ maxWidth: '680px', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
             <button 
@@ -1453,7 +1456,8 @@ export default function AdminClientDetailPage() {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </Layout>
   );

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { SkeletonTableRow } from '../../components/Skeleton';
@@ -355,7 +356,7 @@ export default function AdminClientsPage() {
       </div>
 
       {/* New Client Modal */}
-      {showModal && (
+      {showModal && createPortal(
         <div className={`modal-overlay${closingModal ? ' closing' : ''}`} onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}>
           <div className="modal-content">
             <button onClick={closeModal} style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', cursor: 'pointer', color: '#6B7280', transition: 'color 150ms, transform 150ms' }} onMouseEnter={e => { e.currentTarget.style.color = '#111827'; e.currentTarget.style.transform = 'scale(1.1)'; }} onMouseLeave={e => { e.currentTarget.style.color = '#6B7280'; e.currentTarget.style.transform = 'scale(1)'; }}>
@@ -426,7 +427,8 @@ export default function AdminClientsPage() {
               </button>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </Layout>
   );

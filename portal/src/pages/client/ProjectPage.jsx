@@ -34,7 +34,7 @@ const ROADMAP_BASE = [
 ];
 
 export default function ProjectPage() {
-  const { user } = useAuth();
+  const { user, isImpersonating } = useAuth();
   const location = useLocation();
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -160,30 +160,49 @@ export default function ProjectPage() {
                           Cambios listos, por favor revisa de nuevo.
                         </div>
                       )}
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                        <button 
-                          onClick={async () => {
-                            setDesignApproved(true);
-                            await api.put(`/projects/${project.id}/design-status`, { designStatus: 'approved' }).catch(console.error);
-                            setProject(prev => ({ ...prev, designStatus: 'approved' }));
-                          }}
-                          style={{ background: '#00C4CC', color: '#111827', border: 'none', padding: '8px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
-                        >
-                          <CheckCircle2 size={14} /> Aprobar diseño
-                        </button>
-                        <a 
-                          href="https://wa.me/525575084267?text=Hola,%20me%20gustar%C3%ADa%20solicitar%20algunas%20modificaciones%20al%20dise%C3%B1o%20de%20mi%20proyecto." 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          onClick={async () => {
-                            await api.put(`/projects/${project.id}/design-status`, { designStatus: 'modifications_requested' }).catch(console.error);
-                            setProject(prev => ({ ...prev, designStatus: 'modifications_requested' }));
-                          }}
-                          style={{ background: 'transparent', color: '#374151', border: '1px solid #D1D5DB', padding: '8px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}
-                        >
-                          Solicitar modificaciones
-                        </a>
-                      </div>
+                      {isImpersonating ? (
+                        <div style={{
+                          background: '#EFF6FF',
+                          border: '1px solid #BFDBFE',
+                          padding: '10px 14px',
+                          borderRadius: '8px',
+                          fontSize: '12.5px',
+                          color: '#1E40AF',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px'
+                        }}>
+                          <span style={{ fontSize: '15px' }}>🔒</span>
+                          <span>
+                            <strong>Modo Solo Lectura:</strong> Los botones de aprobación están desactivados mientras estés en modo admin para no alterar el estado del cliente.
+                          </span>
+                        </div>
+                      ) : (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                          <button 
+                            onClick={async () => {
+                              setDesignApproved(true);
+                              await api.put(`/projects/${project.id}/design-status`, { designStatus: 'approved' }).catch(console.error);
+                              setProject(prev => ({ ...prev, designStatus: 'approved' }));
+                            }}
+                            style={{ background: '#00C4CC', color: '#111827', border: 'none', padding: '8px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                          >
+                            <CheckCircle2 size={14} /> Aprobar diseño
+                          </button>
+                          <a 
+                            href="https://wa.me/525575084267?text=Hola,%20me%20gustar%C3%ADa%20solicitar%20algunas%20modificaciones%20al%20dise%C3%B1o%20de%20mi%20proyecto." 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            onClick={async () => {
+                              await api.put(`/projects/${project.id}/design-status`, { designStatus: 'modifications_requested' }).catch(console.error);
+                              setProject(prev => ({ ...prev, designStatus: 'modifications_requested' }));
+                            }}
+                            style={{ background: 'transparent', color: '#374151', border: '1px solid #D1D5DB', padding: '8px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}
+                          >
+                            Solicitar modificaciones
+                          </a>
+                        </div>
+                      )}
                     </>
                   )}
                 </div>

@@ -113,7 +113,7 @@ export default function Layout({ children, customBreadcrumbLabel, fullWidth = fa
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#00C4CC' }} />
               <span>
-                <strong>Modo Administrador:</strong> Estás visualizando el portal como <strong>{user?.companyName || user?.name || user?.email}</strong>
+                <strong>Modo Administrador (Solo Lectura):</strong> Estás visualizando el portal como <strong>{user?.companyName || user?.name || user?.email}</strong>
               </span>
             </div>
             <button

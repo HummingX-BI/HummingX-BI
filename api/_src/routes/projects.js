@@ -26,6 +26,10 @@ router.get('/my', authenticate, async (req, res) => {
 // PUT /projects/:id/design-status — Client updates design status
 router.put('/:id/design-status', authenticate, async (req, res) => {
   try {
+    if (req.user.impersonatedBy) {
+      return res.status(403).json({ error: 'Acción bloqueada: Estás en modo de visualización de administrador (solo lectura).' });
+    }
+
     const { designStatus } = req.body;
     
     if (!['approved', 'modifications_requested'].includes(designStatus)) {

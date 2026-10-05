@@ -1389,73 +1389,72 @@ textarea.hx-input {
   .stats-grid-3 { gap: 20px; }
 }
 
-/* ─── Flame Progress Effect ─── */
-.flame-icon {
+/* ─── Stage Change Card Overlay ─── */
+.stage-announcement-overlay {
   position: absolute;
-  top: -20px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 15px;
-  line-height: 1;
+  inset: 0;
+  background: #ffffff;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 36px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  animation: stageOverlayFadeOut 3.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   pointer-events: none;
-  animation: flameBounce 1s infinite ease-in-out alternate;
-  filter: drop-shadow(0 0 6px rgba(255, 120, 0, 0.85));
-  z-index: 10;
+  overflow: hidden;
 }
 
-@keyframes flameBounce {
+.stage-announcement-text {
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  font-size: 26px;
+  font-weight: 800;
+  color: #111827;
+  letter-spacing: -0.025em;
+  white-space: nowrap;
+  animation: stageTextSlideAcross 3.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stage-announcement-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #00C4CC;
+  flex-shrink: 0;
+}
+
+@keyframes stageTextSlideAcross {
   0% {
-    transform: translateX(-50%) translateY(0) scale(1) rotate(-3deg);
-    filter: drop-shadow(0 0 4px rgba(255, 120, 0, 0.7));
+    opacity: 0;
+    transform: translateX(-50px);
   }
-  50% {
-    transform: translateX(-50%) translateY(-4px) scale(1.2) rotate(3deg);
-    filter: drop-shadow(0 0 10px rgba(255, 60, 0, 0.95));
+  20% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  75% {
+    opacity: 1;
+    transform: translateX(0);
   }
   100% {
-    transform: translateX(-50%) translateY(-1px) scale(1.05) rotate(-1deg);
-    filter: drop-shadow(0 0 7px rgba(255, 140, 0, 0.8));
-  }
-}
-
-.progress-tick.flame-head {
-  background: linear-gradient(180deg, #FF6B00 0%, #00C4CC 100%) !important;
-  box-shadow: 0 0 12px rgba(255, 107, 0, 0.85) !important;
-  animation: flameTickGlow 0.9s infinite alternate;
-}
-
-@keyframes flameTickGlow {
-  0% { box-shadow: 0 0 6px rgba(255, 107, 0, 0.5); }
-  100% { box-shadow: 0 0 14px rgba(255, 60, 0, 0.95); }
-}
-
-/* ─── Stage Celebration Marquee & Card ─── */
-@keyframes celebrationSlideIn {
-  from {
     opacity: 0;
-    transform: translateY(-12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+    transform: translateX(40px);
   }
 }
 
-@keyframes marqueeSlideAcross {
+@keyframes stageOverlayFadeOut {
   0% {
-    transform: translateX(-60%);
-    opacity: 0;
-  }
-  15% {
-    transform: translateX(0%);
     opacity: 1;
   }
-  85% {
-    transform: translateX(0%);
+  80% {
     opacity: 1;
   }
   100% {
-    transform: translateX(60%);
     opacity: 0;
+    visibility: hidden;
   }
 }

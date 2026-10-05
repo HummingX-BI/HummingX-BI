@@ -353,7 +353,7 @@ export default function DashboardPage() {
               </div>
               <span style={{ fontSize: '32px', fontWeight: 800, color: '#00C4CC' }}>{activeProject.progressPercent}%</span>
             </div>
-            <ProgressTicks value={activeProject.progressPercent} showFlame={true} />
+            <ProgressTicks value={activeProject.progressPercent} />
           </div>
         </div>
 

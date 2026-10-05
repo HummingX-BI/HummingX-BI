@@ -274,11 +274,8 @@ export default function ActivatePage() {
         }
       })
       .catch(err => {
-        if (err.response?.data?.alreadyActivated) {
-          setAlreadyActivated(true);
-        } else if (err.response?.data?.error) {
-          setError(err.response.data.error);
-        }
+        // Si el token ya fue activado, no existe o expiró, mostramos la pantalla limpia para iniciar sesión
+        setAlreadyActivated(true);
       })
       .finally(() => setCheckingToken(false));
   }, [token]);
@@ -326,6 +323,14 @@ export default function ActivatePage() {
     return <WelcomeScrollSequence onComplete={() => {
       navigate(activatedUser?.role === 'admin' ? '/admin' : '/dashboard', { replace: true });
     }} />;
+  }
+
+  if (checkingToken) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#0b0b0e', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="bars-loader"><div></div><div></div><div></div></div>
+      </div>
+    );
   }
 
   return (

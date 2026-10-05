@@ -112,183 +112,158 @@ export default function ProjectPage() {
     <Layout>
       <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
-        {/* Hero / Project Header Section */}
-        <div id="tour-project-header" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        {/* Hero / Project Header */}
+        <div id="tour-project-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'stretch', gap: '24px', flexWrap: 'wrap' }}>
           
-          {/* Fila Superior: Tarjeta del Proyecto (izq) + Vista Previa (der) */}
-          {(() => {
-            const hasPreview = (project?.currentPhase === 3 || project?.currentPhase === 6) && !!project?.previewUrl;
-            return (
-              <div style={{ display: 'flex', justifyContent: hasPreview ? 'space-between' : 'center', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
-                
-                {/* Card Izquierda: Proyecto con título, descripción y botones de aprobación a la medida y centrado */}
-                <div 
-                  className="card" 
-                  style={{ 
-                    flex: hasPreview ? '1 1 320px' : '0 1 520px', 
-                    maxWidth: hasPreview ? '460px' : '560px',
-                    width: '100%',
-                    height: 'fit-content',
-                    alignSelf: 'center',
-                    padding: '20px 24px', 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    alignItems: 'center',
-                    textAlign: 'center',
-                    boxSizing: 'border-box'
-                  }}
-                >
-                  <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
-                      {project?.currentPhase !== 6 && (
-                        <span className="badge badge-cyan" style={{ fontSize: '11px', padding: '3px 8px' }}>En ejecución</span>
+          {/* Card Izquierda: Proyecto y Avance */}
+          <div className="card" style={{ flex: '1 1 360px', padding: '28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minWidth: '280px' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                {project?.currentPhase !== 6 && (
+                  <span className="badge badge-cyan">En ejecución</span>
+                )}
+                <span style={{ fontSize: '12px', color: '#9CA3AF' }}>
+                  {project?.clientName || user?.companyName || user?.name || 'Cliente'} · Proyecto Digital
+                </span>
+              </div>
+              <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#111827', margin: '0 0 10px 0' }}>
+                {project?.name || 'Sin título'}
+              </h1>
+              {project?.description && (
+                <p style={{ fontSize: '14px', color: '#6B7280', lineHeight: '1.6', margin: '0 0 20px 0' }}>
+                  {project?.description}
+                </p>
+              )}
+              
+              {/* Approve Buttons (solo durante la fase 3 de Revisión) */}
+              {(project?.currentPhase === 3 && (project?.designStatus === 'pending' || project?.designStatus === 'modifications_resolved' || project?.designStatus === 'modifications_requested' || project?.designStatus === 'approved' || designApproved)) && (
+                <div style={{ marginTop: '16px', background: '#F9FAFB', border: '1px solid #E5E7EB', padding: '16px', borderRadius: '12px' }}>
+                  <p style={{ fontSize: '13px', color: '#4B5563', margin: '0 0 12px 0', lineHeight: 1.5 }}>
+                    Por favor revisa el diseño en el enlace de la derecha. Si tienes comentarios, solicítalos. Si todo está perfecto, aprueba el diseño para avanzar a Desarrollo.
+                  </p>
+                  
+                  {project.designStatus === 'approved' || designApproved ? (
+                    <div style={{ padding: '10px 14px', background: '#D1FAE5', color: '#065F46', borderRadius: '8px', fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <CheckCircle2 size={16} color="#059669" />
+                      Diseño aprobado. Preparando desarrollo.
+                    </div>
+                  ) : project.designStatus === 'modifications_requested' ? (
+                    <div style={{ padding: '10px 14px', background: '#FEF3C7', color: '#92400E', borderRadius: '8px', fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Clock size={16} color="#D97706" />
+                      Modificaciones solicitadas.
+                    </div>
+                  ) : (
+                    <>
+                      {project.designStatus === 'modifications_resolved' && (
+                        <div style={{ padding: '10px 14px', background: '#E0E7FF', color: '#3730A3', borderRadius: '8px', fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                          <CheckCircle2 size={16} color="#4338CA" />
+                          Cambios listos, por favor revisa de nuevo.
+                        </div>
                       )}
-                      <span style={{ fontSize: '12px', color: '#9CA3AF' }}>
-                        {project?.clientName || user?.companyName || user?.name || 'Cliente'} · Proyecto Digital
-                      </span>
-                    </div>
-                    <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#111827', margin: '0 0 8px 0', lineHeight: 1.3 }}>
-                      {project?.name || 'Sin título'}
-                    </h1>
-                    {project?.description && (
-                      <p style={{ fontSize: '13.5px', color: '#6B7280', lineHeight: '1.5', margin: '0', maxWidth: '440px' }}>
-                        {project?.description}
-                      </p>
-                    )}
-                    
-                    {/* Approve Buttons (solo durante la fase 3 de Revisión) */}
-                    {(project?.currentPhase === 3 && (project?.designStatus === 'pending' || project?.designStatus === 'modifications_resolved' || project?.designStatus === 'modifications_requested' || project?.designStatus === 'approved' || designApproved)) && (
-                      <div style={{ marginTop: '16px', background: '#F9FAFB', border: '1px solid #E5E7EB', padding: '14px 16px', borderRadius: '12px', width: '100%', boxSizing: 'border-box' }}>
-                        <p style={{ fontSize: '12.5px', color: '#4B5563', margin: '0 0 10px 0', lineHeight: 1.4, textAlign: 'center' }}>
-                          Por favor revisa el diseño en el enlace de la derecha. Si tienes comentarios, solicítalos. Si todo está perfecto, aprueba el diseño para avanzar a Desarrollo.
-                        </p>
-                        
-                        {project.designStatus === 'approved' || designApproved ? (
-                          <div style={{ padding: '8px 12px', background: '#D1FAE5', color: '#065F46', borderRadius: '8px', fontSize: '12.5px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                            <CheckCircle2 size={16} color="#059669" />
-                            Diseño aprobado. Preparando desarrollo.
-                          </div>
-                        ) : project.designStatus === 'modifications_requested' ? (
-                          <div style={{ padding: '8px 12px', background: '#FEF3C7', color: '#92400E', borderRadius: '8px', fontSize: '12.5px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                            <Clock size={16} color="#D97706" />
-                            Modificaciones solicitadas.
-                          </div>
-                        ) : (
-                          <>
-                            {project.designStatus === 'modifications_resolved' && (
-                              <div style={{ padding: '8px 12px', background: '#E0E7FF', color: '#3730A3', borderRadius: '8px', fontSize: '12.5px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '10px' }}>
-                              <CheckCircle2 size={16} color="#4338CA" />
-                              Cambios listos, por favor revisa de nuevo.
-                            </div>
-                            )}
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
-                              <button 
-                                onClick={async () => {
-                                  setDesignApproved(true);
-                                  await api.put(`/projects/${project.id}/design-status`, { designStatus: 'approved' }).catch(console.error);
-                                  setProject(prev => ({ ...prev, designStatus: 'approved' }));
-                                }}
-                                style={{ background: '#00C4CC', color: '#111827', border: 'none', padding: '8px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
-                              >
-                                <CheckCircle2 size={14} /> Aprobar diseño
-                              </button>
-                              <a 
-                                href="https://wa.me/525575084267?text=Hola,%20me%20gustar%C3%ADa%20solicitar%20algunas%20modificaciones%20al%20dise%C3%B1o%20de%20mi%20proyecto." 
-                                target="_blank" 
-                                rel="noopener noreferrer" 
-                                onClick={async () => {
-                                  await api.put(`/projects/${project.id}/design-status`, { designStatus: 'modifications_requested' }).catch(console.error);
-                                  setProject(prev => ({ ...prev, designStatus: 'modifications_requested' }));
-                                }}
-                                style={{ background: 'transparent', color: '#374151', border: '1px solid #D1D5DB', padding: '8px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}
-                              >
-                                Solicitar modificaciones
-                              </a>
-                            </div>
-                          </>
-                        )}
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                        <button 
+                          onClick={async () => {
+                            setDesignApproved(true);
+                            await api.put(`/projects/${project.id}/design-status`, { designStatus: 'approved' }).catch(console.error);
+                            setProject(prev => ({ ...prev, designStatus: 'approved' }));
+                          }}
+                          style={{ background: '#00C4CC', color: '#111827', border: 'none', padding: '8px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                        >
+                          <CheckCircle2 size={14} /> Aprobar diseño
+                        </button>
+                        <a 
+                          href="https://wa.me/525575084267?text=Hola,%20me%20gustar%C3%ADa%20solicitar%20algunas%20modificaciones%20al%20dise%C3%B1o%20de%20mi%20proyecto." 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          onClick={async () => {
+                            await api.put(`/projects/${project.id}/design-status`, { designStatus: 'modifications_requested' }).catch(console.error);
+                            setProject(prev => ({ ...prev, designStatus: 'modifications_requested' }));
+                          }}
+                          style={{ background: 'transparent', color: '#374151', border: '1px solid #D1D5DB', padding: '8px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}
+                        >
+                          Solicitar modificaciones
+                        </a>
                       </div>
-                    )}
-                  </div>
+                    </>
+                  )}
                 </div>
-
-                {/* Lado Derecho: solo en fase 3 (Revisión) o fase 6 (Activo / Completado) si tiene previewUrl */}
-                {hasPreview && (
-                  <div ref={revisionRef} style={{ flex: '1 1 420px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px', minWidth: '300px' }}>
-                    <div className="browser-mockup" style={{ width: '100%', maxWidth: '480px' }}>
-                      <div className="browser-mockup-header">
-                        <div className="browser-mockup-dots">
-                          <span className="browser-mockup-dot red"></span>
-                          <span className="browser-mockup-dot yellow"></span>
-                          <span className="browser-mockup-dot green"></span>
-                        </div>
-                        <div className="browser-mockup-address">
-                          <ExternalLink size={10} style={{ opacity: 0.6 }} />
-                          <span>{project.previewUrl.replace(/^https?:\/\//, '')}</span>
-                        </div>
-                      </div>
-                      <div className="browser-mockup-body" style={{ height: '260px' }}>
-                        <iframe 
-                          src={project.previewUrl} 
-                          title="Vista previa del sitio"
-                        />
-                      </div>
-                    </div>
-                    <a 
-                      href={project.previewUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="btn-primary" 
-                      style={{ textDecoration: 'none', justifyContent: 'center', width: '100%', maxWidth: '480px', fontSize: '13.5px', padding: '10px 16px' }}
-                    >
-                      {project.currentPhase === 6 ? 'Ver sitio web' : 'Ver diseño completo'} <ExternalLink size={15} style={{ marginLeft: '6px' }} />
-                    </a>
-                  </div>
-                )}
-
-              </div>
-            );
-          })()}
-
-          {/* Abajo de esas dos: Barra de Progreso a todo el ancho */}
-          <div 
-            className="card"
-            style={{ 
-              background: '#FFFFFF', 
-              padding: '24px 28px', 
-              position: 'relative',
-              overflow: 'hidden',
-              width: '100%',
-              boxSizing: 'border-box'
-            }}
-          >
-            {/* Overlay blanco centrado con pausa en medio */}
-            {celebrationActive && (
-              <div className="stage-announcement-overlay">
-                <div className="stage-announcement-text">
-                  <span className="stage-announcement-dot" />
-                  <span>{PHASE_TITLES[currentPhaseNum] || 'Entramos a una nueva etapa'}</span>
-                </div>
-              </div>
-            )}
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>Avance general del proyecto</span>
-                {currentPhaseNum <= 5 ? (
-                  <span style={{ fontSize: '12px', color: '#6B7280', background: '#E5E7EB', padding: '2px 8px', borderRadius: '99px' }}>
-                    Fase {currentPhaseNum} de 5
-                  </span>
-                ) : (
-                  <span style={{ fontSize: '12px', color: '#059669', background: '#D1FAE5', padding: '2px 8px', borderRadius: '99px' }}>
-                    Completado
-                  </span>
-                )}
-              </div>
-              <span style={{ fontSize: '26px', fontWeight: 800, color: '#00C4CC' }}>{progress}%</span>
+              )}
             </div>
-            <ProgressTicks value={progress} />
+
+            {/* Progress Bar (mitad izquierda) */}
+            <div 
+              style={{ 
+                background: '#F9FAFB', 
+                padding: '20px 24px', 
+                borderRadius: '12px', 
+                border: '1px solid #E5E7EB', 
+                marginTop: '16px',
+                position: 'relative',
+                overflow: 'hidden'
+              }}
+            >
+              {/* Overlay blanco centrado con pausa en medio */}
+              {celebrationActive && (
+                <div className="stage-announcement-overlay">
+                  <div className="stage-announcement-text">
+                    <span className="stage-announcement-dot" />
+                    <span>{PHASE_TITLES[currentPhaseNum] || 'Entramos a una nueva etapa'}</span>
+                  </div>
+                </div>
+              )}
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>Avance general del proyecto</span>
+                  {currentPhaseNum <= 5 ? (
+                    <span style={{ fontSize: '12px', color: '#6B7280', background: '#E5E7EB', padding: '2px 8px', borderRadius: '99px' }}>
+                      Fase {currentPhaseNum} de 5
+                    </span>
+                  ) : (
+                    <span style={{ fontSize: '12px', color: '#059669', background: '#D1FAE5', padding: '2px 8px', borderRadius: '99px' }}>
+                      Completado
+                    </span>
+                  )}
+                </div>
+                <span style={{ fontSize: '26px', fontWeight: 800, color: '#00C4CC' }}>{progress}%</span>
+              </div>
+              <ProgressTicks value={progress} />
+            </div>
           </div>
+
+          {/* Lado Derecho: solo en fase 3 (Revisión) o fase 6 (Activo / Completado) si tiene previewUrl */}
+          {(project?.currentPhase === 3 || project?.currentPhase === 6) && project?.previewUrl && (
+            <div ref={revisionRef} style={{ flex: '1 1 440px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px', minWidth: '300px' }}>
+              <div className="browser-mockup" style={{ width: '100%', maxWidth: '480px' }}>
+                <div className="browser-mockup-header">
+                  <div className="browser-mockup-dots">
+                    <span className="browser-mockup-dot red"></span>
+                    <span className="browser-mockup-dot yellow"></span>
+                    <span className="browser-mockup-dot green"></span>
+                  </div>
+                  <div className="browser-mockup-address">
+                    <ExternalLink size={10} style={{ opacity: 0.6 }} />
+                    <span>{project.previewUrl.replace(/^https?:\/\//, '')}</span>
+                  </div>
+                </div>
+                <div className="browser-mockup-body" style={{ height: '260px' }}>
+                  <iframe 
+                    src={project.previewUrl} 
+                    title="Vista previa del sitio"
+                  />
+                </div>
+              </div>
+              <a 
+                href={project.previewUrl} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="btn-primary" 
+                style={{ textDecoration: 'none', justifyContent: 'center', width: '100%', maxWidth: '480px', fontSize: '13.5px', padding: '10px 16px' }}
+              >
+                {project.currentPhase === 6 ? 'Ver sitio web' : 'Ver diseño completo'} <ExternalLink size={15} style={{ marginLeft: '6px' }} />
+              </a>
+            </div>
+          )}
 
         </div>
 

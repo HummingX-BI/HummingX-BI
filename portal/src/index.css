@@ -1398,7 +1398,7 @@ textarea.hx-input {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 36px;
+  padding: 0 16px;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
   animation: stageOverlayFadeOut 3.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -1408,21 +1408,21 @@ textarea.hx-input {
 
 .stage-announcement-text {
   font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
-  font-size: 26px;
+  font-size: clamp(16px, 2vw, 21px);
   font-weight: 800;
   color: #111827;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.02em;
   white-space: nowrap;
   animation: stageTextSlideAcross 3.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .stage-announcement-dot {
-  width: 10px;
-  height: 10px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   background: #00C4CC;
   flex-shrink: 0;
@@ -1431,7 +1431,7 @@ textarea.hx-input {
 @keyframes stageTextSlideAcross {
   0% {
     opacity: 0;
-    transform: translateX(-70px) scale(0.96);
+    transform: translateX(-50px) scale(0.96);
   }
   20% {
     opacity: 1;
@@ -1443,7 +1443,7 @@ textarea.hx-input {
   }
   100% {
     opacity: 0;
-    transform: translateX(70px) scale(0.98);
+    transform: translateX(50px) scale(0.98);
   }
 }
 

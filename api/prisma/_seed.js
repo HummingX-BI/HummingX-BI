@@ -1,6 +1,6 @@
 require('dotenv').config();
 const bcrypt = require('bcryptjs');
-const prisma = require('../src/lib/prisma');
+const prisma = require('../_src/lib/prisma');
 
 async function seed() {
   console.log('🌱 Seeding database...\n');
@@ -9,11 +9,11 @@ async function seed() {
   const passwordHash = await bcrypt.hash('HummingX2024!', 12);
 
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@hummingxbi.com' },
+    where: { email: 'sysadmin.hx@hummingxbi.com' },
     update: {},
     create: {
       name: 'Admin HummingX',
-      email: 'admin@hummingxbi.com',
+      email: 'sysadmin.hx@hummingxbi.com',
       passwordHash,
       role: 'admin',
       companyName: 'HummingX BI',

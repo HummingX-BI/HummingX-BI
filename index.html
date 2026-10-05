@@ -267,11 +267,11 @@
 <div class="absolute inset-0 z-0 pointer-events-none">
 <!-- Subtle gradient backdrop -->
 <div class="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(10,88,163,0.18),rgba(11,11,14,0))]"></div>
-<!-- Luz rosa / violeta bottom-left -->
-<div class="hero-glow-pink absolute -bottom-24 -left-24 w-[650px] h-[650px] bg-[#4B1D6F]/35 blur-[150px] rounded-full pointer-events-none"></div>
-<!-- Luz azul / cyan top-right más potente y nítida -->
-<div class="hero-glow-blue absolute -top-16 -right-16 w-[700px] h-[700px] bg-[#00C4CC]/30 blur-[140px] rounded-full pointer-events-none"></div>
-<div class="hero-glow-blue absolute top-0 right-0 w-[500px] h-[500px] bg-[#0A58A3]/45 blur-[110px] rounded-full pointer-events-none"></div>
+<!-- Luz rosa / violeta en la parte inferior en mobile, y abajo-izquierda en desktop -->
+<div class="hero-glow-pink absolute -bottom-20 -left-10 sm:-bottom-24 sm:-left-24 w-[400px] h-[400px] sm:w-[650px] sm:h-[650px] bg-[#4B1D6F]/60 sm:bg-[#4B1D6F]/35 blur-[120px] sm:blur-[150px] rounded-full pointer-events-none"></div>
+<!-- Luz azul / cyan en la parte superior -->
+<div class="hero-glow-blue absolute -top-24 -right-10 sm:-top-16 sm:-right-16 w-[500px] h-[500px] sm:w-[700px] sm:h-[700px] bg-[#00C4CC]/40 sm:bg-[#00C4CC]/30 blur-[120px] sm:blur-[140px] rounded-full pointer-events-none"></div>
+<div class="hero-glow-blue absolute -top-10 -right-5 sm:top-0 sm:right-0 w-[400px] h-[400px] sm:w-[500px] sm:h-[500px] bg-[#0A58A3]/50 sm:bg-[#0A58A3]/45 blur-[100px] sm:blur-[110px] rounded-full pointer-events-none"></div>
 <!-- Very subtle grid texture -->
 <div class="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]"></div>
 </div>
@@ -951,7 +951,7 @@
 <div class="bg-white/[0.03] hover:bg-white/[0.05] border border-white/10 rounded-2xl p-6 transition-all flex items-center justify-between gap-4">
 <div class="flex items-center gap-4">
 <div class="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
-<img src="./src/member-icon.jpg" alt="Member" class="w-full h-full object-cover"/>
+<img src="./src/member-icon.png" alt="Member" class="w-full h-full object-cover"/>
 </div>
 <div>
 <div class="flex items-center gap-2">
@@ -997,7 +997,7 @@
 </div>
 <div class="px-6 py-4 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between text-xs text-white/70">
 <span>¿Tienes un proyecto con nosotros?</span>
-<a class="text-cyan-glow font-semibold hover:underline flex items-center gap-1" href="https://hummingx-portal.vercel.app/login">
+<a class="text-cyan-glow font-semibold hover:underline flex items-center gap-1" href="https://portal.hummingxbi.com/login" target="_blank" rel="noopener noreferrer">
 <span>Ingresa al Portal</span>
 <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
 </a>

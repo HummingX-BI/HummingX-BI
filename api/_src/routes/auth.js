@@ -294,10 +294,10 @@ router.post('/forgot-password', forgotPasswordLimiter, async (req, res) => {
       return res.json({ message: 'Si existe una cuenta con ese correo, recibirás un enlace.' });
     }
 
-    // Per-account rate limiting: 1 email every 15 minutes (separate from IP limit)
+    // Per-account rate limiting: 1 email every 60 seconds (prevents spam abuse while allowing quick re-tests)
     if (user.lastPasswordResetReq) {
       const diffMs = Date.now() - new Date(user.lastPasswordResetReq).getTime();
-      if (diffMs < 15 * 60 * 1000) {
+      if (diffMs < 60 * 1000) {
         // SECURITY: Still return 200 to avoid confirming account existence via 429
         return res.json({ message: 'Si existe una cuenta con ese correo, recibirás un enlace.' });
       }
@@ -307,7 +307,6 @@ router.post('/forgot-password', forgotPasswordLimiter, async (req, res) => {
     const expires = new Date(Date.now() + 1 * 60 * 60 * 1000); // 1 hour
 
     // SECURITY: Store the raw token (not hashed) for now since lookup requires it.
-    // For extra security in future, store only the hash and send raw in email.
     await prisma.user.update({
       where: { id: user.id },
       data: {
@@ -317,28 +316,23 @@ router.post('/forgot-password', forgotPasswordLimiter, async (req, res) => {
       }
     });
 
-    // SECURITY FIX — Host Poisoning: Build reset link from env var, NEVER from req.headers.host
-    const frontendUrl = process.env.FRONTEND_URL;
-    if (!frontendUrl) {
-      console.error('[SECURITY] FRONTEND_URL env var is not set! Aborting reset email.');
-      return res.json({ message: 'Si existe una cuenta con ese correo, recibirás un enlace.' });
-    }
+    // SECURITY: Build reset link from env var with safe production fallback, never from host headers
+    const frontendUrl = (process.env.FRONTEND_URL || 'https://portal.hummingxbi.com').replace(/\/+$/, '');
     const resetLink = `${frontendUrl}/reset-password/${rawToken}`;
 
-    // Send email asynchronously — don't let email failures block the response
-    setImmediate(async () => {
-      try {
-        await transporter.sendMail({
-          from: `"HummingX BI" <${process.env.EMAIL_USER}>`,
-          to: user.email,  // SECURITY: Send to DB email, NOT the user-supplied email
-          subject: 'Recuperación de contraseña - HummingX BI',
-          html: buildResetEmail(user.name, resetLink),
-        });
-      } catch (emailErr) {
-        // Log but don't throw — user already got the generic success response
-        console.error('[AUTH] Error sending reset email:', emailErr.message);
-      }
-    });
+    // On serverless (Vercel), we MUST await the email send before returning the response,
+    // otherwise the function freezes the event loop immediately and the email is dropped.
+    try {
+      await transporter.sendMail({
+        from: `"HummingX BI" <${process.env.EMAIL_USER}>`,
+        to: user.email,  // SECURITY: Send to DB email, NOT the user-supplied email
+        subject: 'Recuperación de contraseña - HummingX BI',
+        html: buildResetEmail(user.name, resetLink),
+      });
+      console.log(`[AUTH] Reset email successfully sent to: ${user.email}`);
+    } catch (emailErr) {
+      console.error('[AUTH] Error sending reset email:', emailErr.message);
+    }
 
     res.json({ message: 'Si existe una cuenta con ese correo, recibirás un enlace.' });
   } catch (err) {

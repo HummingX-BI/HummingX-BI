@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
@@ -46,6 +46,7 @@ export default function AdminClientDetailPage() {
   const [projectData, setProjectData] = useState({});
   const [savingProject, setSavingProject] = useState(false);
   const [projectMsg, setProjectMsg] = useState('');
+  const [initialProjectData, setInitialProjectData] = useState(null);
   const [newActivity, setNewActivity] = useState('');
   const [addingActivity, setAddingActivity] = useState(false);
   const [showProjectModal, setShowProjectModal] = useState(false);
@@ -99,7 +100,7 @@ export default function AdminClientDetailPage() {
         if (proj) {
           setActiveProject(proj);
           setPayments(proj.payments || []);
-          setProjectData({ 
+          const pData = { 
             name: proj.name, 
             description: proj.description || '', 
             currentPhase: proj.currentPhase, 
@@ -109,10 +110,13 @@ export default function AdminClientDetailPage() {
             contractLink: proj.contractLink || '',
             previewUrl: proj.previewUrl || '',
             designStatus: proj.designStatus || 'pending_review'
-          });
+          };
+          setProjectData(pData);
+          setInitialProjectData(pData);
         } else {
           setActiveProject(null);
           setPayments([]);
+          setInitialProjectData(null);
         }
       })
       .catch(console.error)
@@ -199,6 +203,7 @@ export default function AdminClientDetailPage() {
       d.estimatedDelivery = d.estimatedDelivery ? new Date(d.estimatedDelivery).toISOString() : null;
       await api.put(`/admin/projects/${activeProject.id}`, d);
       setProjectMsg({ type: 'success', text: 'Proyecto actualizado correctamente.' });
+      setInitialProjectData({ ...projectData });
       setTimeout(() => setProjectMsg(null), 3000);
       fetchClient();
     } catch { 
@@ -206,6 +211,31 @@ export default function AdminClientDetailPage() {
     }
     finally { setSavingProject(false); }
   };
+
+  const isProjectDirty = useMemo(() => {
+    if (!initialProjectData || !projectData) return false;
+    return (
+      projectData.name !== initialProjectData.name ||
+      (projectData.description || '') !== (initialProjectData.description || '') ||
+      projectData.currentPhase !== initialProjectData.currentPhase ||
+      projectData.progressPercent !== initialProjectData.progressPercent ||
+      (projectData.estimatedDelivery || '') !== (initialProjectData.estimatedDelivery || '') ||
+      (projectData.quoteLink || '') !== (initialProjectData.quoteLink || '') ||
+      (projectData.contractLink || '') !== (initialProjectData.contractLink || '') ||
+      (projectData.previewUrl || '') !== (initialProjectData.previewUrl || '')
+    );
+  }, [projectData, initialProjectData]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (isProjectDirty) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isProjectDirty]);
 
   const handleCreateProject = async (e) => {
     e.preventDefault();
@@ -757,9 +787,55 @@ export default function AdminClientDetailPage() {
                           {projectMsg.text}
                         </div>
                       )}
+
+                      {isProjectDirty && (
+                        <div style={{
+                          padding: '12px 14px',
+                          background: '#FEF2F2',
+                          border: '1px solid #FCA5A5',
+                          borderRadius: '8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '10px',
+                          color: '#991B1B',
+                          fontSize: '13px',
+                          fontWeight: 600
+                        }}>
+                          <AlertCircle size={18} color="#DC2626" style={{ flexShrink: 0 }} />
+                          <span>Modificaste datos del proyecto. Haz clic en <strong>"Guardar Cambios Pendientes"</strong> para aplicarlos.</span>
+                        </div>
+                      )}
+
                       <div>
-                        <button type="submit" className="btn-primary" disabled={savingProject} style={{ padding: '10px 20px' }}>
-                          <Save size={16} /> {savingProject ? 'Actualizando...' : 'Actualizar Proyecto'}
+                        <button 
+                          type="submit" 
+                          disabled={savingProject} 
+                          style={{ 
+                            padding: '11px 22px',
+                            fontSize: '13.5px',
+                            fontWeight: 700,
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            border: 'none',
+                            color: '#FFFFFF',
+                            background: isProjectDirty 
+                              ? 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)' 
+                              : '#00C4CC',
+                            boxShadow: isProjectDirty 
+                              ? '0 4px 14px rgba(239, 68, 68, 0.45)' 
+                              : '0 4px 14px rgba(0, 196, 204, 0.25)',
+                            transition: 'all 0.2s ease',
+                          }}
+                        >
+                          <Save size={16} /> 
+                          {savingProject 
+                            ? 'Actualizando...' 
+                            : isProjectDirty 
+                              ? '● Guardar Cambios Pendientes' 
+                              : 'Actualizar Proyecto'}
                         </button>
                       </div>
                     </div>
@@ -1458,6 +1534,51 @@ export default function AdminClientDetailPage() {
           </div>
         </div>,
         document.body
+      )}
+      {/* Floating Sticky Reminder if project has unsaved changes */}
+      {isProjectDirty && (
+        <div style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          zIndex: 9999,
+          background: '#111827',
+          color: '#FFFFFF',
+          padding: '12px 18px',
+          borderRadius: '12px',
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(239, 68, 68, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '14px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#EF4444', display: 'inline-block', boxShadow: '0 0 8px #EF4444' }}></span>
+            <span style={{ fontSize: '13px', fontWeight: 600 }}>
+              Tienes cambios sin guardar en el proyecto
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={handleUpdateProject}
+            disabled={savingProject}
+            style={{
+              background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
+              color: '#FFFFFF',
+              border: 'none',
+              padding: '8px 14px',
+              borderRadius: '8px',
+              fontSize: '12.5px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              boxShadow: '0 4px 10px rgba(239, 68, 68, 0.4)'
+            }}
+          >
+            <Save size={14} /> {savingProject ? 'Guardando...' : 'Guardar ahora'}
+          </button>
+        </div>
       )}
     </Layout>
   );

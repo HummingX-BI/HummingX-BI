@@ -64,7 +64,7 @@ export default function ProjectPage() {
           if (!localStorage.getItem(storageKey)) {
             localStorage.setItem(storageKey, 'true');
             setCelebrationActive(true);
-            setTimeout(() => setCelebrationActive(false), 3300);
+            setTimeout(() => setCelebrationActive(false), 3900);
           }
         }
       })

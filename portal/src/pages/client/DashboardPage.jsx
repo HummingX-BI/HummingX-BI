@@ -201,7 +201,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Main Project Card - HIGHEST PRIORITY */}
-        <div id="tour-active-project" className="card" style={{ padding: '32px', borderTop: '4px solid #00C4CC' }}>
+        <div id="tour-active-project" className="card responsive-card-p" style={{ padding: '32px', borderTop: '4px solid #00C4CC' }}>
           <div className="project-card-header">
             <div style={{ flex: '1 1 300px', maxWidth: '600px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
@@ -312,13 +312,13 @@ export default function DashboardPage() {
             )}
           </div>
           {activeProject.currentPhase === 6 && (
-            <div style={{ position: 'relative', overflow: 'hidden', width: '100%', padding: '32px 40px', background: '#0b0b0e', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', marginBottom: '24px', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '40px', color: '#fff', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.2)' }}>
+            <div className="completion-banner" style={{ position: 'relative', overflow: 'hidden', width: '100%', padding: '32px 40px', background: '#0b0b0e', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', marginBottom: '24px', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '40px', color: '#fff', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.2)' }}>
               
               <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '280px', height: '280px', background: 'rgba(0,196,204,0.15)', borderRadius: '50%', filter: 'blur(48px)', pointerEvents: 'none', zIndex: 0 }}></div>
               <div style={{ position: 'absolute', bottom: '-40px', left: '-40px', width: '280px', height: '280px', background: 'rgba(75,29,111,0.25)', borderRadius: '50%', filter: 'blur(48px)', pointerEvents: 'none', zIndex: 0 }}></div>
 
-              <div style={{ flexShrink: 0, width: 160, height: 160, position: 'relative', zIndex: 1 }}>
-                <Player autoplay loop speed={0.25} src={trophyAnimation} style={{ width: '160px', height: '160px' }} />
+              <div className="trophy-col" style={{ flexShrink: 0, width: 160, height: 160, position: 'relative', zIndex: 1 }}>
+                <Player autoplay loop speed={0.25} src={trophyAnimation} style={{ width: '100%', height: '100%' }} />
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left', maxWidth: '600px', position: 'relative', zIndex: 1 }}>
@@ -455,7 +455,7 @@ export default function DashboardPage() {
         <div className="stats-grid-2" style={{ alignItems: 'flex-start' }}>
 
           {/* Activity Log */}
-          <div id="tour-activity" className="card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', height: '280px', boxSizing: 'border-box' }}>
+          <div id="tour-activity" className="card card-auto-mobile responsive-card-p" style={{ padding: '24px', display: 'flex', flexDirection: 'column', height: '280px', boxSizing: 'border-box' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', margin: 0 }}>
                 Actividad reciente
@@ -505,10 +505,11 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+          {/* Subgrid: Recomendaciones + Nivel (Derecha) */}
+          <div className="dashboard-subgrid" style={{ display: 'grid', gap: '24px' }}>
             
             {/* Recomendaciones Card */}
-            <div id="tour-recommendations" className="card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', height: '280px', boxSizing: 'border-box' }}>
+            <div id="tour-recommendations" className="card card-auto-mobile responsive-card-p" style={{ padding: '24px', display: 'flex', flexDirection: 'column', height: '280px', boxSizing: 'border-box' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', margin: 0 }}>
                   Recomendaciones
@@ -552,7 +553,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Membership Level Card */}
-            <div id="tour-level" className="card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', height: '280px', boxSizing: 'border-box' }}>
+            <div id="tour-level" className="card card-auto-mobile responsive-card-p" style={{ padding: '24px', display: 'flex', flexDirection: 'column', height: '280px', boxSizing: 'border-box' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', margin: 0 }}>
                   Tu Nivel HummingX

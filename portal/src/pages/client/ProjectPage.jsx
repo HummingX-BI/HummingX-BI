@@ -113,10 +113,10 @@ export default function ProjectPage() {
       <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
         {/* Hero / Project Header */}
-        <div id="tour-project-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'stretch', gap: '24px', flexWrap: 'wrap' }}>
+        <div id="tour-project-header" className="project-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'stretch', gap: '24px', flexWrap: 'wrap' }}>
           
           {/* Card Izquierda: Proyecto y Avance */}
-          <div className="card" style={{ flex: '1 1 360px', padding: '28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minWidth: '280px' }}>
+          <div className="card project-hero-left responsive-card-p" style={{ flex: '1 1 360px', padding: '28px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minWidth: '280px' }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
                 {project?.currentPhase !== 6 && (
@@ -252,7 +252,7 @@ export default function ProjectPage() {
 
           {/* Lado Derecho: solo en fase 3 (Revisión) o fase 6 (Activo / Completado) si tiene previewUrl */}
           {(project?.currentPhase === 3 || project?.currentPhase === 6) && project?.previewUrl && (
-            <div ref={revisionRef} style={{ flex: '1 1 440px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px', minWidth: '300px' }}>
+            <div ref={revisionRef} className="project-preview-column project-hero-preview" style={{ flex: '1 1 440px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px', minWidth: '300px' }}>
               <div className="browser-mockup" style={{ width: '100%', maxWidth: '480px' }}>
                 <div className="browser-mockup-header">
                   <div className="browser-mockup-dots">
@@ -287,7 +287,7 @@ export default function ProjectPage() {
         </div>
 
         {/* Timeline Stepper */}
-        <div id="tour-project-timeline" className="card" style={{ padding: '28px' }}>
+        <div id="tour-project-timeline" className="card responsive-card-p" style={{ padding: '28px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
             <div>
               <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', margin: '0 0 4px' }}>Ruta de trabajo</h2>
@@ -356,7 +356,7 @@ export default function ProjectPage() {
 
         {/* Completion Banner */}
         {project?.currentPhase === 6 && (
-          <div className="card fade-in-up" style={{ position: 'relative', overflow: 'hidden', width: '100%', marginBottom: '24px', padding: '40px', textAlign: 'center', background: '#0b0b0e', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', alignItems: 'center', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.2)' }}>
+          <div className="completion-banner fade-in-up" style={{ position: 'relative', overflow: 'hidden', width: '100%', marginBottom: '24px', padding: '40px', textAlign: 'center', background: '#0b0b0e', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', alignItems: 'center', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.2)' }}>
             
             <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '280px', height: '280px', background: 'rgba(0,196,204,0.15)', borderRadius: '50%', filter: 'blur(48px)', pointerEvents: 'none', zIndex: 0 }}></div>
             <div style={{ position: 'absolute', bottom: '-40px', left: '-40px', width: '280px', height: '280px', background: 'rgba(75,29,111,0.25)', borderRadius: '50%', filter: 'blur(48px)', pointerEvents: 'none', zIndex: 0 }}></div>
@@ -378,10 +378,10 @@ export default function ProjectPage() {
 
         {/* Two Detail Cards */}
         {project?.currentPhase !== 6 && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div className="responsive-grid-2" style={{ display: 'grid', gap: '16px' }}>
             
             {/* Active Stage */}
-          <div id="tour-active-stage" className="card" style={{ padding: '24px', borderTop: '3px solid #00C4CC', display: 'flex', flexDirection: 'column' }}>
+          <div id="tour-active-stage" className="card responsive-card-p" style={{ padding: '24px', borderTop: '3px solid #00C4CC', display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
               <Construction size={16} color="#0E7490" />
               <span style={{ fontSize: '12px', fontWeight: 600, color: '#0E7490', textTransform: 'uppercase' }}>
@@ -450,7 +450,7 @@ export default function ProjectPage() {
           </div>
 
           {/* Next Step */}
-          <div id="tour-next-step" className="card" style={{ padding: '24px', background: '#F9FAFB' }}>
+          <div id="tour-next-step" className="card responsive-card-p" style={{ padding: '24px', background: '#F9FAFB' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '14px' }}>
               <Clock size={14} color="#6B7280" />
               <span style={{ fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>
@@ -529,7 +529,7 @@ export default function ProjectPage() {
         )}
 
         {/* Deliverables */}
-        <div id="entregables" className="card" style={{ padding: '28px' }}>
+        <div id="entregables" className="card responsive-card-p" style={{ padding: '28px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             <div>
               <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', margin: '0 0 4px' }}>Entregables importantes</h2>
@@ -537,7 +537,7 @@ export default function ProjectPage() {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+          <div className="responsive-grid-2" style={{ display: 'grid', gap: '16px' }}>
             {[
               { 
                 title: 'Cotización de Servicios', 
@@ -590,7 +590,7 @@ export default function ProjectPage() {
 
         {/* Bitácora / Activities (Horizontal Full Width) */}
         {project?.activities && project.activities.length > 0 && (
-          <div id="tour-bitacora" className="card" style={{ padding: '28px', marginTop: '8px' }}>
+          <div id="tour-bitacora" className="card responsive-card-p" style={{ padding: '28px', marginTop: '8px' }}>
             <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Activity size={16} color="#6B7280" /> Bitácora de Desarrollo
             </h3>

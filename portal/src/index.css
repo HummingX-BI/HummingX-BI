@@ -1300,6 +1300,8 @@ textarea.hx-input {
 .stats-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .stats-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
 .stats-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.responsive-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.dashboard-subgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 
 /* ─── Tablet (max-width: 1024px) ───────────────────────────── */
 @media (max-width: 1024px) {
@@ -1345,10 +1347,53 @@ textarea.hx-input {
     padding: 20px 16px !important;
   }
 
-  /* Stat card grids collapse */
+  /* Responsive client portal grids and cards */
   .stats-grid-3 { grid-template-columns: repeat(2, 1fr); }
   .stats-grid-4 { grid-template-columns: 1fr; }
   .stats-grid-2 { grid-template-columns: 1fr; }
+  .responsive-grid-2 { grid-template-columns: 1fr !important; gap: 16px !important; }
+  .dashboard-subgrid { grid-template-columns: 1fr !important; gap: 16px !important; }
+
+  /* Cards hug content naturally on mobile, eliminating elongated/stretched appearance */
+  .card-auto-mobile {
+    height: auto !important;
+    min-height: auto !important;
+  }
+  .responsive-card-p {
+    padding: 20px 16px !important;
+  }
+
+  .project-hero-left {
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    justify-content: flex-start !important;
+    gap: 16px !important;
+  }
+  .project-hero-preview {
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  .browser-mockup-body {
+    height: 200px !important;
+  }
+
+  .completion-banner {
+    flex-direction: column !important;
+    text-align: center !important;
+    padding: 24px 16px !important;
+    gap: 20px !important;
+  }
+  .completion-banner > div:last-child {
+    align-items: center !important;
+    text-align: center !important;
+  }
+  .completion-banner .trophy-col {
+    width: 120px !important;
+    height: 120px !important;
+  }
 
   /* Table: hide less important columns */
   .hx-table th:nth-child(2),
@@ -1368,7 +1413,7 @@ textarea.hx-input {
   }
 
   /* Post-it cards in single column */
-  .post-it-wrapper { min-width: 140px; }
+  .post-it-wrapper { min-width: 160px; }
 }
 
 /* ─── Small phone (max-width: 480px) ──────────────────────── */
@@ -1377,6 +1422,8 @@ textarea.hx-input {
 
   .topbar { padding: 10px 12px !important; }
   .page-enter { padding: 16px 12px !important; }
+  .progress-ticks { gap: 2px !important; }
+  .stat-card { padding: 18px 16px !important; }
 
   /* Breadcrumb: show only current */
   .breadcrumb > span:not(:last-child) { display: none; }

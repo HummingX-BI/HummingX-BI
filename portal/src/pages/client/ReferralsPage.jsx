@@ -19,30 +19,30 @@ export default function ReferralsPage() {
           </p>
         </div>
         {/* Coming Soon Card */}
-        <div id="tour-coming-soon" className="card" style={{ 
-          padding: '40px 32px 80px 32px', 
+        <div id="tour-coming-soon" className="card responsive-card-p card-auto-mobile" style={{ 
+          padding: '40px 32px 60px 32px', 
           display: 'flex', 
           flexDirection: 'column', 
           alignItems: 'center', 
           textAlign: 'center',
           background: 'linear-gradient(180deg, #FFFFFF 0%, #F9FAFB 100%)',
-          minHeight: '450px',
+          minHeight: '400px',
           justifyContent: 'center',
           border: '1px solid #E5E7EB'
         }}>
           
-          <div style={{ marginTop: '-40px', marginBottom: '0px', width: 360, height: 360 }}>
+          <div style={{ marginTop: '-20px', marginBottom: '0px', width: 'min(300px, 80vw)', height: 'min(300px, 80vw)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Player
               autoplay
               loop
               src={officeAnimation}
-              style={{ height: '360px', width: '360px' }}
+              style={{ height: '100%', width: '100%' }}
             />
           </div>
 
           <h2 style={{ 
             fontFamily: "'Plus Jakarta Sans', sans-serif",
-            fontSize: '32px', 
+            fontSize: 'clamp(22px, 5vw, 32px)', 
             fontWeight: 800, 
             background: 'linear-gradient(135deg, #111827 0%, #0E7490 100%)',
             WebkitBackgroundClip: 'text',

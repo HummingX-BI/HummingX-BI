@@ -102,7 +102,7 @@ router.post('/clients', authenticate, requireAdmin, adminLimiter, async (req, re
         data: {
           projectId: project.id,
           authorId: req.user.id,
-          description: 'Fase 1: Análisis iniciada. Recopilando requerimientos y objetivos del proyecto.',
+          description: '¡Bienvenido a bordo! Fase 1: Análisis iniciada. Recopilando requerimientos y objetivos del proyecto.',
           type: 'milestone'
         }
       });
@@ -279,7 +279,7 @@ router.post('/projects', authenticate, requireAdmin, async (req, res) => {
       data: {
         projectId: project.id,
         authorId: req.user.id,
-        description: 'Fase 1: Análisis iniciada. Definiendo alcance y objetivos.',
+        description: '¡Bienvenido a bordo! Fase 1: Análisis iniciada. Definiendo alcance y objetivos.',
         type: 'milestone',
       }
     });
@@ -357,7 +357,7 @@ router.put('/projects/:id', authenticate, requireAdmin, async (req, res) => {
         data: {
           projectId: req.params.id,
           authorId: req.user.id,
-          description: emailSuccess ? 'El equipo resolvió las modificaciones solicitadas. Correo de notificación enviado exitosamente.' : 'El equipo resolvió las modificaciones solicitadas. Error al enviar el correo automático de notificación.',
+          description: 'El equipo resolvió las modificaciones solicitadas. La nueva versión del diseño está lista para su revisión.',
           type: 'update',
         }
       });

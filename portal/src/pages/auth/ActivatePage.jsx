@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import api from '../../lib/api';
 import { Eye, EyeOff, Lock, CheckCircle, AlertCircle, ArrowRight } from 'lucide-react';
 import { WelcomeAudio } from '../../lib/welcomeAudio';
 import './WelcomeActivate.css';
@@ -258,6 +259,29 @@ export default function ActivatePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [activatedUser, setActivatedUser] = useState(null);
+  const [alreadyActivated, setAlreadyActivated] = useState(false);
+  const [checkingToken, setCheckingToken] = useState(token !== 'test');
+
+  useEffect(() => {
+    if (!token || token === 'test') {
+      setCheckingToken(false);
+      return;
+    }
+    api.get(`/auth/verify-invitation/${token}`)
+      .then(res => {
+        if (res.data?.alreadyActivated) {
+          setAlreadyActivated(true);
+        }
+      })
+      .catch(err => {
+        if (err.response?.data?.alreadyActivated) {
+          setAlreadyActivated(true);
+        } else if (err.response?.data?.error) {
+          setError(err.response.data.error);
+        }
+      })
+      .finally(() => setCheckingToken(false));
+  }, [token]);
 
   const passwordStrength = (pwd) => {
     if (pwd.length === 0) return { score: 0, label: '', color: 'transparent' };
@@ -289,7 +313,11 @@ export default function ActivatePage() {
       setActivatedUser(user);
       setStep('welcome');
     } catch (err) {
-      setError(err.response?.data?.error || 'El enlace de activación es inválido o ha expirado.');
+      if (err.response?.data?.alreadyActivated || err.response?.data?.error?.includes('ya fue activada') || err.response?.data?.error?.includes('creado tu contraseña')) {
+        setAlreadyActivated(true);
+      } else {
+        setError(err.response?.data?.error || 'El enlace de activación es inválido o ha expirado.');
+      }
       setLoading(false);
     }
   };
@@ -300,7 +328,6 @@ export default function ActivatePage() {
     }} />;
   }
 
-  // Estilo idéntico a LoginPage
   return (
     <div style={{
       minHeight: '100vh',
@@ -328,7 +355,7 @@ export default function ActivatePage() {
           backdropFilter: 'blur(16px)', 
           border: '1px solid rgba(255,255,255,0.08)' 
         }}>
-          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '28px' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '14px', marginBottom: '12px' }}>
               <img src={logoSrc} alt="HummingX BI" style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
               <div style={{ textAlign: 'left' }}>
@@ -340,104 +367,163 @@ export default function ActivatePage() {
                 </div>
               </div>
             </div>
-            <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)', marginTop: '12px' }}>
-              Crea tu contraseña para activar tu cuenta
-            </p>
+            {!alreadyActivated && (
+              <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)', marginTop: '12px' }}>
+                Crea tu contraseña para activar tu cuenta
+              </p>
+            )}
           </div>
 
-          {error && (
-            <div style={{
-              display: 'flex', flexDirection: 'column', gap: '10px',
-              padding: '14px 16px', borderRadius: '10px',
-              background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)',
-              marginBottom: '20px',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <AlertCircle size={16} color="#ef4444" style={{ flexShrink: 0 }} />
-                <span style={{ fontSize: '13px', color: '#fca5a5' }}>{error}</span>
+          {alreadyActivated ? (
+            <div style={{ textAlign: 'center', padding: '10px 0 16px' }}>
+              <div style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '50%',
+                background: 'rgba(0, 196, 204, 0.12)',
+                border: '1px solid rgba(0, 196, 204, 0.4)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '20px',
+                color: '#00C4CC',
+                boxShadow: '0 0 24px rgba(0, 196, 204, 0.2)'
+              }}>
+                <CheckCircle size={32} />
               </div>
-              {(error.toLowerCase().includes('activada') || error.toLowerCase().includes('inicia sesión') || error.toLowerCase().includes('expirado')) && (
+              <h3 style={{ fontSize: '20px', fontWeight: 700, color: '#fff', margin: '0 0 10px' }}>
+                ¡Ya creaste tu contraseña!
+              </h3>
+              <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.7)', lineHeight: '1.6', margin: '0 0 28px' }}>
+                Tu cuenta ya se encuentra activa. Puedes ingresar a tu portal de clientes con tu correo y contraseña.
+              </p>
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
                 <button
                   type="button"
                   onClick={() => navigate('/login')}
                   style={{
+                    padding: '13px 36px',
+                    fontSize: '14px',
+                    fontWeight: 700,
+                    borderRadius: '50px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    cursor: 'pointer',
                     background: '#00C4CC',
                     color: '#0b0b0e',
                     border: 'none',
-                    borderRadius: '6px',
-                    padding: '8px 14px',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    alignSelf: 'flex-start',
-                    marginTop: '2px'
+                    boxShadow: '0 4px 18px rgba(0, 196, 204, 0.35)',
+                    transition: 'all 0.2s ease',
                   }}
+                  onMouseEnter={(e) => e.target.style.transform = 'scale(1.02)'}
+                  onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
                 >
                   Ir a Iniciar Sesión →
                 </button>
-              )}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.6)', marginBottom: '8px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-                Nueva contraseña
-              </label>
-              <div style={{ position: 'relative' }}>
-                <Lock size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)', pointerEvents: 'none' }} />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  className="hx-input"
-                  style={{ paddingLeft: '42px', paddingRight: '42px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', width: '100%', padding: '12px 14px 12px 42px', borderRadius: '8px', outline: 'none' }}
-                  placeholder="Mínimo 8 caracteres"
-                  value={form.password}
-                  onChange={(e) => setForm(f => ({ ...f, password: e.target.value }))}
-                />
-                <button type="button" onClick={() => setShowPassword(!showPassword)}
-                  style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', padding: 0 }}>
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
               </div>
-
-              {form.password && (
-                <div style={{ marginTop: '8px' }}>
-                  <div style={{ display: 'flex', gap: '4px', marginBottom: '4px' }}>
-                    {[1,2,3,4].map(i => (
-                      <div key={i} style={{ flex: 1, height: '3px', borderRadius: '2px', background: i <= strength.score ? strength.color : 'rgba(255,255,255,0.08)', transition: 'background 0.3s' }} />
-                    ))}
+            </div>
+          ) : (
+            <>
+              {error && (
+                <div style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
+                  padding: '14px 16px', borderRadius: '10px',
+                  background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)',
+                  marginBottom: '20px', textAlign: 'center'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <AlertCircle size={16} color="#ef4444" style={{ flexShrink: 0 }} />
+                    <span style={{ fontSize: '13px', color: '#fca5a5' }}>{error}</span>
                   </div>
-                  <span style={{ fontSize: '11px', color: strength.color }}>{strength.label}</span>
+                  {(error.toLowerCase().includes('activada') || error.toLowerCase().includes('inicia sesión') || error.toLowerCase().includes('expirado') || error.toLowerCase().includes('inválido')) && (
+                    <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                      <button
+                        type="button"
+                        onClick={() => navigate('/login')}
+                        style={{
+                          background: '#00C4CC',
+                          color: '#0b0b0e',
+                          border: 'none',
+                          borderRadius: '50px',
+                          padding: '10px 24px',
+                          fontSize: '13px',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}
+                      >
+                        Ir a Iniciar Sesión →
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
-            </div>
 
-            <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.6)', marginBottom: '8px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-                Confirmar contraseña
-              </label>
-              <div style={{ position: 'relative' }}>
-                <Lock size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)', pointerEvents: 'none' }} />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  className="hx-input"
-                  style={{ paddingLeft: '42px', paddingRight: '42px', background: 'rgba(0,0,0,0.3)', color: 'white', width: '100%', padding: '12px 14px 12px 42px', borderRadius: '8px', outline: 'none', borderColor: form.confirm && form.confirm !== form.password ? 'rgba(239,68,68,0.5)' : form.confirm && form.confirm === form.password ? 'rgba(34,197,94,0.5)' : 'rgba(255,255,255,0.1)' }}
-                  placeholder="Repite tu contraseña"
-                  value={form.confirm}
-                  onChange={(e) => setForm(f => ({ ...f, confirm: e.target.value }))}
-                />
-                {form.confirm && form.confirm === form.password && (
-                  <CheckCircle size={16} color="#22c55e" style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)' }} />
-                )}
-              </div>
-            </div>
+              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.6)', marginBottom: '8px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                    Nueva contraseña
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <Lock size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)', pointerEvents: 'none' }} />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      className="hx-input"
+                      style={{ paddingLeft: '42px', paddingRight: '42px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', width: '100%', padding: '12px 14px 12px 42px', borderRadius: '8px', outline: 'none' }}
+                      placeholder="Mínimo 8 caracteres"
+                      value={form.password}
+                      onChange={(e) => setForm(f => ({ ...f, password: e.target.value }))}
+                    />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)}
+                      style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', padding: 0 }}>
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
 
-            <button type="submit" disabled={loading} style={{ width: '100%', padding: '14px', background: 'white', color: 'black', border: 'none', borderRadius: '50px', fontSize: '14px', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, marginTop: '16px', transition: 'all 0.2s', boxShadow: '0 4px 15px rgba(255, 255, 255, 0.1)' }}>
-              {loading ? 'Activando...' : 'Activar Cuenta'}
-            </button>
-          </form>
+                  {form.password && (
+                    <div style={{ marginTop: '8px' }}>
+                      <div style={{ display: 'flex', gap: '4px', marginBottom: '4px' }}>
+                        {[1,2,3,4].map(i => (
+                          <div key={i} style={{ flex: 1, height: '3px', borderRadius: '2px', background: i <= strength.score ? strength.color : 'rgba(255,255,255,0.08)', transition: 'background 0.3s' }} />
+                        ))}
+                      </div>
+                      <span style={{ fontSize: '11px', color: strength.color }}>{strength.label}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.6)', marginBottom: '8px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                    Confirmar contraseña
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <Lock size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)', pointerEvents: 'none' }} />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      className="hx-input"
+                      style={{ paddingLeft: '42px', paddingRight: '42px', background: 'rgba(0,0,0,0.3)', color: 'white', width: '100%', padding: '12px 14px 12px 42px', borderRadius: '8px', outline: 'none', borderColor: form.confirm && form.confirm !== form.password ? 'rgba(239,68,68,0.5)' : form.confirm && form.confirm === form.password ? 'rgba(34,197,94,0.5)' : 'rgba(255,255,255,0.1)' }}
+                      placeholder="Repite tu contraseña"
+                      value={form.confirm}
+                      onChange={(e) => setForm(f => ({ ...f, confirm: e.target.value }))}
+                    />
+                    {form.confirm && form.confirm === form.password && (
+                      <CheckCircle size={16} color="#22c55e" style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)' }} />
+                    )}
+                  </div>
+                </div>
+
+                <button type="submit" disabled={loading} style={{ width: '100%', padding: '14px', background: 'white', color: 'black', border: 'none', borderRadius: '50px', fontSize: '14px', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, marginTop: '16px', transition: 'all 0.2s', boxShadow: '0 4px 15px rgba(255, 255, 255, 0.1)' }}>
+                  {loading ? 'Activando...' : 'Activar Cuenta'}
+                </button>
+              </form>
+            </>
+          )}
         </div>
       </div>
     </div>

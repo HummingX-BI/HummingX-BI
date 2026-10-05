@@ -644,7 +644,7 @@ function EventCard({
             <div className="flex items-start justify-between gap-2.5">
               <div className="flex items-center gap-2.5 min-w-0">
                 {event.logo && (
-                  <div className="h-9 w-9 rounded-lg overflow-hidden border border-gray-200 bg-white flex items-center justify-center flex-shrink-0 shadow-xs p-1">
+                  <div className="h-9 w-9 rounded-lg flex items-center justify-center flex-shrink-0 p-0">
                     <img src={event.logo} alt="Logo" className="max-w-full max-h-full object-contain" />
                   </div>
                 )}

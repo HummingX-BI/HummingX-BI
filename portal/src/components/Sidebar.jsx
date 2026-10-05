@@ -241,9 +241,8 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
                   alt={user.companyName || user.name}
                   style={{
                     width: '36px', height: '36px', borderRadius: '8px',
-                    objectFit: 'contain', background: '#fff',
-                    border: '1px solid rgba(255,255,255,0.15)',
-                    padding: '2px', flexShrink: 0,
+                    objectFit: 'contain', background: 'transparent',
+                    border: 'none', padding: 0, flexShrink: 0,
                   }}
                 />
               ) : (

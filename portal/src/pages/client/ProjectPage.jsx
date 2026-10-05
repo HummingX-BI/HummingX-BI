@@ -5,7 +5,7 @@ import api from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import { 
   Check, Clock, Calendar, FileText, ExternalLink, 
-  ShieldCheck, Layers, MessageCircle, Construction, CheckCircle, Activity, CheckCircle2
+  ShieldCheck, Layers, MessageCircle, Construction, CheckCircle, Activity, CheckCircle2, X
 } from 'lucide-react';
 import ProgressTicks from '../../components/ProgressTicks';
 
@@ -15,6 +15,63 @@ const Pin = ({ className, style }) => (
     <path d="M16 3a1 1 0 0 1 .117 1.993l-.117 .007v4.764l1.894 3.789a1 1 0 0 1 .1 .331l.006 .116v2a1 1 0 0 1 -.883 .993l-.117 .007h-4v4a1 1 0 0 1 -1.993 .117l-.007 -.117v-4h-4a1 1 0 0 1 -.993 -.883l-.007 -.117v-2a1 1 0 0 1 .06 -.34l.046 -.107l1.894 -3.791v-4.762a1 1 0 0 1 -.117 -1.993l.117 -.007h8z" />
   </svg>
 );
+
+const PHASE_CELEBRATIONS = {
+  1: {
+    emoji: '🔍🏎️',
+    title: '¡Arrancamos motores! Estamos en la etapa de Análisis',
+    phrase: 'Pa’ la sed de claridad... ¡sentando las bases y requerimientos para que tu proyecto vuele!',
+    color: '#00C4CC',
+    bg: 'linear-gradient(135deg, rgba(0, 196, 204, 0.09) 0%, rgba(14, 116, 144, 0.04) 100%)',
+    border: '#00C4CC',
+    shadow: 'rgba(0, 196, 204, 0.15)'
+  },
+  2: {
+    emoji: '🎉🎨',
+    title: '¡Wuuuu! ¡Entramos a la etapa de Diseñoooo!',
+    phrase: 'Pa’ la sed de buen gusto... ¡se viene la magia visual y la estructura estética de tu plataforma!',
+    color: '#A855F7',
+    bg: 'linear-gradient(135deg, rgba(168, 85, 247, 0.10) 0%, rgba(236, 72, 153, 0.05) 100%)',
+    border: '#A855F7',
+    shadow: 'rgba(168, 85, 247, 0.18)'
+  },
+  3: {
+    emoji: '👀🔍',
+    title: '¡A echarle ojo clínico! Estamos en Revisión conjunta',
+    phrase: 'Pa’ la sed de perfección... ¡valida cada rincón de tus pantallas antes de pasar al código!',
+    color: '#3B82F6',
+    bg: 'linear-gradient(135deg, rgba(59, 130, 246, 0.10) 0%, rgba(99, 102, 241, 0.05) 100%)',
+    border: '#3B82F6',
+    shadow: 'rgba(59, 130, 246, 0.18)'
+  },
+  4: {
+    emoji: '💻🔥',
+    title: '¡Se viene lo mero chido! Dándole al Desarrollo con todo',
+    phrase: 'Pa’ la sed de tecnología... ¡nuestro equipo de ingeniería construyendo línea por línea tu solución!',
+    color: '#F97316',
+    bg: 'linear-gradient(135deg, rgba(249, 115, 22, 0.10) 0%, rgba(234, 88, 12, 0.05) 100%)',
+    border: '#F97316',
+    shadow: 'rgba(249, 115, 22, 0.18)'
+  },
+  5: {
+    emoji: '🚀🍻',
+    title: '¡Paaaa’ la sed de éxito! ¡Etapa de Lanzamiento!',
+    phrase: 'El gran momento llegó... ¡tu proyecto en vivo, desplegado y listo para conquistar el mercado!',
+    color: '#10B981',
+    bg: 'linear-gradient(135deg, rgba(16, 185, 129, 0.10) 0%, rgba(5, 150, 105, 0.05) 100%)',
+    border: '#10B981',
+    shadow: 'rgba(16, 185, 129, 0.18)'
+  },
+  6: {
+    emoji: '🏆👑',
+    title: '¡Misión cumplida! 100% Finalizado con honores',
+    phrase: 'Todo tu ecosistema digital funcionando al 100%. ¡A celebrar el crecimiento de tu empresa!',
+    color: '#EAB308',
+    bg: 'linear-gradient(135deg, rgba(234, 179, 8, 0.10) 0%, rgba(202, 138, 4, 0.05) 100%)',
+    border: '#EAB308',
+    shadow: 'rgba(234, 179, 8, 0.18)'
+  }
+};
 
 const ROADMAP_BASE = [
   { num: 1, title: 'Análisis', subtitle: 'Objetivos y alcance' },
@@ -30,6 +87,7 @@ export default function ProjectPage() {
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [designApproved, setDesignApproved] = useState(false);
+  const [celebrationActive, setCelebrationActive] = useState(false);
   
   const revisionRef = useRef(null);
 
@@ -48,12 +106,26 @@ export default function ProjectPage() {
       .then(res => {
         const active = res.data.find(p => p.status === 'active') || res.data[0];
         setProject(active || null);
+        if (active) {
+          const phase = active.currentPhase || 1;
+          const storageKey = `hx_celebrated_phase_${active.id}_${phase}`;
+          if (!sessionStorage.getItem(storageKey)) {
+            sessionStorage.setItem(storageKey, 'true');
+            setCelebrationActive(true);
+            setTimeout(() => setCelebrationActive(false), 8500);
+          }
+        }
       })
       .catch(() => {
         setProject(null);
       })
       .finally(() => setLoading(false));
   }, []);
+
+  const triggerCelebration = () => {
+    setCelebrationActive(true);
+    setTimeout(() => setCelebrationActive(false), 8500);
+  };
 
   if (loading) {
     return (
@@ -172,24 +244,115 @@ export default function ProjectPage() {
             </div>
 
             {/* Progress Bar (mitad izquierda) */}
-            <div style={{ background: '#F9FAFB', padding: '20px 24px', borderRadius: '12px', border: '1px solid #E5E7EB', marginTop: '16px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>Avance general del proyecto</span>
-                  {currentPhaseNum <= 5 ? (
-                    <span style={{ fontSize: '12px', color: '#6B7280', background: '#E5E7EB', padding: '2px 8px', borderRadius: '99px' }}>
-                      Fase {currentPhaseNum} de 5
-                    </span>
-                  ) : (
-                    <span style={{ fontSize: '12px', color: '#059669', background: '#D1FAE5', padding: '2px 8px', borderRadius: '99px' }}>
-                      Completado
-                    </span>
+            {(() => {
+              const activeCelebration = PHASE_CELEBRATIONS[currentPhaseNum] || PHASE_CELEBRATIONS[1];
+              return (
+                <div 
+                  style={{ 
+                    background: celebrationActive ? activeCelebration.bg : '#F9FAFB', 
+                    padding: '20px 24px', 
+                    borderRadius: '12px', 
+                    border: celebrationActive ? `2px solid ${activeCelebration.border}` : '1px solid #E5E7EB', 
+                    marginTop: '16px',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    transition: 'all 0.4s ease',
+                    boxShadow: celebrationActive ? `0 8px 24px ${activeCelebration.shadow}` : 'none'
+                  }}
+                >
+                  {/* Anuncio festivo coloquial que entra de arriba a abajo y corre de izquierda a derecha */}
+                  {celebrationActive && (
+                    <div style={{
+                      position: 'relative',
+                      marginBottom: '16px',
+                      padding: '14px 18px',
+                      borderRadius: '10px',
+                      background: 'rgba(255, 255, 255, 0.94)',
+                      backdropFilter: 'blur(8px)',
+                      border: `1.5px solid ${activeCelebration.border}`,
+                      overflow: 'hidden',
+                      animation: 'celebrationSlideIn 0.35s ease',
+                      boxShadow: '0 4px 14px rgba(0,0,0,0.06)'
+                    }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        animation: 'marqueeSlideAcross 8s ease-in-out'
+                      }}>
+                        <span style={{ fontSize: '26px', flexShrink: 0 }}>{activeCelebration.emoji}</span>
+                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                          <span style={{ fontSize: '15px', fontWeight: 800, color: '#111827', letterSpacing: '-0.01em' }}>
+                            {activeCelebration.title}
+                          </span>
+                          <span style={{ fontSize: '12.5px', fontWeight: 600, color: activeCelebration.color, marginTop: '2px' }}>
+                            {activeCelebration.phrase}
+                          </span>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setCelebrationActive(false)}
+                        style={{
+                          position: 'absolute',
+                          right: '8px',
+                          top: '8px',
+                          background: 'transparent',
+                          border: 'none',
+                          cursor: 'pointer',
+                          color: '#9CA3AF',
+                          padding: '4px',
+                          display: 'flex',
+                          alignItems: 'center'
+                        }}
+                        title="Cerrar aviso"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
                   )}
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>Avance general del proyecto</span>
+                      {currentPhaseNum <= 5 ? (
+                        <span style={{ fontSize: '12px', color: '#6B7280', background: '#E5E7EB', padding: '2px 8px', borderRadius: '99px' }}>
+                          Fase {currentPhaseNum} de 5
+                        </span>
+                      ) : (
+                        <span style={{ fontSize: '12px', color: '#059669', background: '#D1FAE5', padding: '2px 8px', borderRadius: '99px' }}>
+                          Completado
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={triggerCelebration}
+                        title="¡Ver animación de la etapa!"
+                        style={{
+                          background: celebrationActive ? 'rgba(255, 107, 0, 0.15)' : 'rgba(0,0,0,0.04)',
+                          border: 'none',
+                          borderRadius: '50px',
+                          padding: '3px 10px',
+                          fontSize: '12px',
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          color: '#EA580C',
+                          fontWeight: 700,
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        🔥 Celebrar etapa
+                      </button>
+                    </div>
+                    <span style={{ fontSize: '26px', fontWeight: 800, color: '#00C4CC' }}>{progress}%</span>
+                  </div>
+                  <ProgressTicks value={progress} showFlame={true} />
                 </div>
-                <span style={{ fontSize: '26px', fontWeight: 800, color: '#00C4CC' }}>{progress}%</span>
-              </div>
-              <ProgressTicks value={progress} />
-            </div>
+              );
+            })()}
           </div>
 
           {/* Lado Derecho: en la misma posición, sólo el frame y el botón (fuera de la card) */}

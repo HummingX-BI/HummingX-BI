@@ -518,7 +518,7 @@ export default function AdminClientDetailPage() {
             </button>
           </Link>
           {client.logoUrl ? (
-            <div style={{ width: '80px', height: '80px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#fff', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '80px', height: '80px', borderRadius: '8px', border: 'none', background: 'transparent', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <img src={client.logoUrl} alt="Logo" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
             </div>
           ) : (
@@ -591,7 +591,7 @@ export default function AdminClientDetailPage() {
                 ) : (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     {clientData.logoUrl ? (
-                      <img src={clientData.logoUrl} alt="Logo" style={{ width: '32px', height: '32px', borderRadius: '4px', objectFit: 'contain', background: '#fff', border: '1px solid #E5E7EB', padding: '2px' }} />
+                      <img src={clientData.logoUrl} alt="Logo" style={{ width: '36px', height: '36px', borderRadius: '4px', objectFit: 'contain', background: 'transparent', border: 'none', padding: 0 }} />
                     ) : (
                       <span style={{ fontSize: '13px', color: '#6B7280' }}>Sin logo</span>
                     )}

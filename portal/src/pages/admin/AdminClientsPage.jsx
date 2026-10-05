@@ -31,7 +31,7 @@ export default function AdminClientsPage() {
       setClients(prev => prev.filter(c => c.id !== clientId));
     } catch (err) {
       console.error('Error al eliminar cliente:', err);
-      alert('Error al eliminar cliente.');
+      alert(err.response?.data?.error || err.response?.data?.details || 'Error al eliminar cliente.');
     } finally {
       setDeletingClientId(null);
     }
@@ -343,7 +343,7 @@ export default function AdminClientsPage() {
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         {client.logoUrl ? (
-                          <img src={client.logoUrl} alt="Logo" style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'contain', background: '#fff', border: '1px solid #E5E7EB', padding: '2px' }} />
+                          <img src={client.logoUrl} alt="Logo" style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'contain', background: 'transparent', border: 'none', padding: 0 }} />
                         ) : (
                           <div className="avatar avatar-md" style={{ background: '#DBEAFE', color: '#1D4ED8', borderRadius: '8px', width: '40px', height: '40px' }}>
                             {(client.companyName || client.name).charAt(0).toUpperCase()}
@@ -444,7 +444,7 @@ export default function AdminClientsPage() {
                   </div>
                 ) : (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px', border: '1px solid #E5E7EB', borderRadius: '8px', background: '#F9FAFB' }}>
-                    <img src={newClientData.logoUrl} alt="Logo subido" style={{ width: '40px', height: '40px', objectFit: 'contain', background: '#fff', borderRadius: '4px', border: '1px solid #E5E7EB', padding: '2px' }} />
+                    <img src={newClientData.logoUrl} alt="Logo subido" style={{ width: '40px', height: '40px', objectFit: 'contain', background: 'transparent', borderRadius: '4px', border: 'none', padding: 0 }} />
                     <button type="button" onClick={() => setNewClientData({...newClientData, logoUrl: ''})} style={{ fontSize: '12px', color: '#EF4444', background: 'none', border: 'none', cursor: 'pointer' }}>
                       Quitar Logo
                     </button>

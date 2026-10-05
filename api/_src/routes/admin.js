@@ -564,26 +564,41 @@ router.delete('/clients/:id', authenticate, requireAdmin, async (req, res) => {
       return res.status(400).json({ error: 'No es posible eliminar a un usuario administrador.' });
     }
 
-    const projects = await prisma.project.findMany({ where: { clientId: id }, select: { id: true } });
-    const projectIds = projects.map(p => p.id);
+    await prisma.$transaction(async (tx) => {
+      // 1. Projects of this client
+      const projects = await tx.project.findMany({ where: { clientId: id }, select: { id: true } });
+      const projectIds = projects.map(p => p.id);
 
-    // Unlink author from activities
-    await prisma.projectActivity.updateMany({ where: { authorId: id }, data: { authorId: null } });
+      // 2. Delete all activities authored by this client OR attached to client's projects
+      await tx.projectActivity.deleteMany({
+        where: {
+          OR: [
+            { authorId: id },
+            ...(projectIds.length > 0 ? [{ projectId: { in: projectIds } }] : [])
+          ]
+        }
+      });
 
-    if (projectIds.length > 0) {
-      await prisma.payment.deleteMany({ where: { projectId: { in: projectIds } } });
-      await prisma.projectActivity.deleteMany({ where: { projectId: { in: projectIds } } });
-      await prisma.project.deleteMany({ where: { id: { in: projectIds } } });
-    }
+      // 3. Delete payments and projects
+      if (projectIds.length > 0) {
+        await tx.payment.deleteMany({ where: { projectId: { in: projectIds } } });
+        await tx.project.deleteMany({ where: { id: { in: projectIds } } });
+      }
 
-    await prisma.creditMovement.deleteMany({ where: { clientId: id } });
-    await prisma.referral.deleteMany({ where: { referrerId: id } });
-    await prisma.user.delete({ where: { id } });
+      // 4. Delete credit movements
+      await tx.creditMovement.deleteMany({ where: { clientId: id } });
+
+      // 5. Delete referrals
+      await tx.referral.deleteMany({ where: { referrerId: id } });
+
+      // 6. Delete user
+      await tx.user.delete({ where: { id } });
+    });
 
     res.json({ message: 'Cliente y datos asociados eliminados exitosamente.' });
   } catch (err) {
     console.error('Error al eliminar cliente:', err);
-    res.status(500).json({ error: 'Error al eliminar cliente.' });
+    res.status(500).json({ error: 'Error al eliminar cliente.', details: err.message });
   }
 });
 
@@ -605,26 +620,31 @@ router.post('/purge-clients', authenticate, requireAdmin, async (req, res) => {
     const clientIds = clients.map(c => c.id);
 
     if (clientIds.length > 0) {
-      const projects = await prisma.project.findMany({
-        where: { clientId: { in: clientIds } },
-        select: { id: true }
+      await prisma.$transaction(async (tx) => {
+        const projects = await tx.project.findMany({
+          where: { clientId: { in: clientIds } },
+          select: { id: true }
+        });
+        const projectIds = projects.map(p => p.id);
+
+        await tx.projectActivity.deleteMany({
+          where: {
+            OR: [
+              { authorId: { in: clientIds } },
+              ...(projectIds.length > 0 ? [{ projectId: { in: projectIds } }] : [])
+            ]
+          }
+        });
+
+        if (projectIds.length > 0) {
+          await tx.payment.deleteMany({ where: { projectId: { in: projectIds } } });
+          await tx.project.deleteMany({ where: { id: { in: projectIds } } });
+        }
+
+        await tx.creditMovement.deleteMany({ where: { clientId: { in: clientIds } } });
+        await tx.referral.deleteMany({ where: { referrerId: { in: clientIds } } });
+        await tx.user.deleteMany({ where: { id: { in: clientIds } } });
       });
-      const projectIds = projects.map(p => p.id);
-
-      await prisma.projectActivity.updateMany({
-        where: { authorId: { in: clientIds } },
-        data: { authorId: null }
-      });
-
-      if (projectIds.length > 0) {
-        await prisma.payment.deleteMany({ where: { projectId: { in: projectIds } } });
-        await prisma.projectActivity.deleteMany({ where: { projectId: { in: projectIds } } });
-        await prisma.project.deleteMany({ where: { id: { in: projectIds } } });
-      }
-
-      await prisma.creditMovement.deleteMany({ where: { clientId: { in: clientIds } } });
-      await prisma.referral.deleteMany({ where: { referrerId: { in: clientIds } } });
-      await prisma.user.deleteMany({ where: { id: { in: clientIds } } });
     }
 
     res.json({
@@ -633,7 +653,7 @@ router.post('/purge-clients', authenticate, requireAdmin, async (req, res) => {
     });
   } catch (err) {
     console.error('Error al purgar clientes:', err);
-    res.status(500).json({ error: 'Error al purgar datos de clientes.' });
+    res.status(500).json({ error: 'Error al purgar datos de clientes.', details: err.message });
   }
 });
 

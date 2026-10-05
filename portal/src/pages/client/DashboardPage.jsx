@@ -176,7 +176,7 @@ export default function DashboardPage() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             {user?.logoUrl ? (
-              <div style={{ width: '56px', height: '56px', borderRadius: '14px', background: '#fff', border: '1px solid #E5E7EB', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px', boxShadow: '0 4px 10px -2px rgba(0,0,0,0.06)' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '14px', background: 'transparent', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}>
                 <img src={user.logoUrl} alt="Logo de la empresa" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
               </div>
             ) : (
@@ -353,7 +353,7 @@ export default function DashboardPage() {
               </div>
               <span style={{ fontSize: '32px', fontWeight: 800, color: '#00C4CC' }}>{activeProject.progressPercent}%</span>
             </div>
-            <ProgressTicks value={activeProject.progressPercent} />
+            <ProgressTicks value={activeProject.progressPercent} showFlame={true} />
           </div>
         </div>
 

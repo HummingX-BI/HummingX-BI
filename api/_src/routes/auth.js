@@ -167,6 +167,46 @@ router.post('/invite', authenticate, async (req, res) => {
   }
 });
 
+// ─── GET /auth/verify-invitation/:token — Pre-check token status ─────────────
+router.get('/verify-invitation/:token', async (req, res) => {
+  try {
+    const { token } = req.params;
+    if (!token) {
+      return res.status(400).json({ valid: false, error: 'Token inválido.' });
+    }
+
+    const user = await prisma.user.findUnique({ where: { invitationToken: token } });
+    if (!user) {
+      return res.status(404).json({ valid: false, error: 'Enlace de activación inválido o expirado.' });
+    }
+
+    if (user.invitationAccepted) {
+      return res.json({
+        valid: false,
+        alreadyActivated: true,
+        companyName: user.companyName,
+        name: user.name,
+        email: user.email,
+        message: 'Esta cuenta ya fue activada. Ya has creado tu contraseña anteriormente.'
+      });
+    }
+
+    if (user.invitationExpires && user.invitationExpires < new Date()) {
+      return res.status(400).json({ valid: false, error: 'Este enlace de activación ha expirado.' });
+    }
+
+    return res.json({
+      valid: true,
+      name: user.name,
+      companyName: user.companyName,
+      email: user.email
+    });
+  } catch (err) {
+    console.error('Verify invitation error:', err);
+    res.status(500).json({ valid: false, error: 'Error al verificar enlace.' });
+  }
+});
+
 // ─── POST /auth/activate — Client sets their password ─────────────────────────
 // Rate limited: 10 per IP per 15 min
 router.post('/activate', tokenActionLimiter, async (req, res) => {
@@ -184,17 +224,19 @@ router.post('/activate', tokenActionLimiter, async (req, res) => {
 
     const user = await prisma.user.findUnique({ where: { invitationToken: token } });
 
-    // SECURITY: Same generic message whether token is bad or expired (timing-safe)
     if (!user) {
       return res.status(400).json({ error: 'Enlace de activación inválido o expirado.' });
     }
 
-    if (user.invitationExpires < new Date()) {
-      return res.status(400).json({ error: 'Enlace de activación inválido o expirado.' });
+    if (user.invitationAccepted) {
+      return res.status(400).json({ 
+        error: 'Ya has creado tu contraseña anteriormente. Inicia sesión para acceder a tu portal.',
+        alreadyActivated: true 
+      });
     }
 
-    if (user.invitationAccepted) {
-      return res.status(400).json({ error: 'Esta cuenta ya fue activada. Inicia sesión.' });
+    if (user.invitationExpires && user.invitationExpires < new Date()) {
+      return res.status(400).json({ error: 'Enlace de activación inválido o expirado.' });
     }
 
     const passwordHash = await bcrypt.hash(password, 12);

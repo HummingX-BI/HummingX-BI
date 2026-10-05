@@ -14,7 +14,7 @@ export function getToast() { return _globalToast; }
 export default function Layout({ children, customBreadcrumbLabel, fullWidth = false }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isImpersonating, stopImpersonating } = useAuth();
   const toast = useToast();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -42,11 +42,11 @@ export default function Layout({ children, customBreadcrumbLabel, fullWidth = fa
   const tour = useTour(tourStorageKey);
 
   useEffect(() => {
-    if (user && user.role !== 'admin' && !tour.seen() && !sessionStorage.getItem('hummingx_tour_started')) {
+    if (user && user.role !== 'admin' && !isImpersonating && !tour.seen() && !sessionStorage.getItem('hummingx_tour_started')) {
       sessionStorage.setItem('hummingx_tour_started', 'true');
       setTimeout(() => tour.start(), 1000);
     }
-  }, [user, tour.seen]);
+  }, [user, tour.seen, isImpersonating]);
 
   const tourSteps = [
     { target: 'body', title: 'Bienvenido', content: '¡Bienvenido a tu Portal de Clientes HummingX! Vamos a dar un rápido recorrido guiado para que sepas dónde encontrar todo. Haz clic en "Siguiente" para comenzar.', placement: 'center' },
@@ -95,6 +95,54 @@ export default function Layout({ children, customBreadcrumbLabel, fullWidth = fa
       <Sidebar mobileOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+        {/* Banner de Modo Administrador (Impersonación) */}
+        {isImpersonating && (
+          <div style={{
+            background: '#111827',
+            color: '#F9FAFB',
+            padding: '10px 24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            fontSize: '13px',
+            borderBottom: '2px solid #00C4CC',
+            zIndex: 9999,
+            position: 'sticky',
+            top: 0
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: '#00C4CC' }} />
+              <span>
+                <strong>Modo Administrador:</strong> Estás visualizando el portal como <strong>{user?.companyName || user?.name || user?.email}</strong>
+              </span>
+            </div>
+            <button
+              onClick={() => {
+                stopImpersonating();
+                navigate('/admin/clients');
+              }}
+              style={{
+                background: '#00C4CC',
+                color: '#111827',
+                border: 'none',
+                padding: '6px 14px',
+                borderRadius: '6px',
+                fontSize: '12px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                transition: 'opacity 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
+              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+            >
+              Volver al Panel Admin →
+            </button>
+          </div>
+        )}
+
         {/* Topbar */}
         <header className="topbar">
           {/* Hamburger — CSS shows it only on mobile */}

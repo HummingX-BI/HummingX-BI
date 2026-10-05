@@ -3,10 +3,11 @@ import { createPortal } from 'react-dom';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import api from '../../lib/api';
+import { useAuth } from '../../context/AuthContext';
 import { 
   ArrowLeft, User, Mail, Phone, Building, Save, FolderOpen, AlertCircle,
   ClipboardList, Paintbrush, Code2, Search, Rocket, CheckCircle, CheckCircle2, Activity,
-  Plus, Trash2, Calendar, X, Users, DollarSign, Clock, Edit2, Sparkles, Check
+  Plus, Trash2, Calendar, X, Users, DollarSign, Clock, Edit2, Sparkles, Check, Eye
 } from 'lucide-react';
 
 const PHASES = [
@@ -56,6 +57,22 @@ export default function AdminClientDetailPage() {
   
   // Referrals and Credits
   const [creditAmount, setCreditAmount] = useState('');
+  const { impersonate } = useAuth();
+  const [impersonating, setImpersonating] = useState(false);
+
+  const handleImpersonate = async () => {
+    if (!client) return;
+    setImpersonating(true);
+    try {
+      await impersonate(client.id);
+      navigate('/');
+    } catch (err) {
+      alert(err.response?.data?.error || 'Error al iniciar sesión como cliente.');
+    } finally {
+      setImpersonating(false);
+    }
+  };
+
   const [adjustingCredits, setAdjustingCredits] = useState(false);
 
   // Plan de Pagos por Cliente
@@ -567,7 +584,29 @@ export default function AdminClientDetailPage() {
             )}
             <p style={{ color: '#6B7280', fontSize: '13px', margin: 0 }}>Gestión de cuenta y proyecto activo</p>
           </div>
-          <div style={{ marginLeft: 'auto' }}>
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <button
+              type="button"
+              onClick={handleImpersonate}
+              disabled={impersonating}
+              title="Entrar al portal y verificar cómo lo ve este cliente"
+              className="btn-secondary"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 16px',
+                fontSize: '13px',
+                fontWeight: 600,
+                color: '#0284C7',
+                borderColor: '#BAE6FD',
+                background: '#F0F9FF',
+                cursor: impersonating ? 'not-allowed' : 'pointer',
+                borderRadius: '8px'
+              }}
+            >
+              <Eye size={16} /> Ver portal como este cliente
+            </button>
             <button
               type="button"
               onClick={handleDeleteThisClient}

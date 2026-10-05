@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const prisma = require('../lib/prisma');
 const { authenticate, requireAdmin } = require('../middleware/auth');
@@ -654,6 +655,47 @@ router.post('/purge-clients', authenticate, requireAdmin, async (req, res) => {
   } catch (err) {
     console.error('Error al purgar clientes:', err);
     res.status(500).json({ error: 'Error al purgar datos de clientes.', details: err.message });
+  }
+});
+
+// POST /admin/impersonate/:clientId — Impersonate a client user (admin only)
+router.post('/impersonate/:clientId', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { clientId } = req.params;
+    const client = await prisma.user.findUnique({
+      where: { id: clientId }
+    });
+
+    if (!client) {
+      return res.status(404).json({ error: 'Cliente no encontrado.' });
+    }
+
+    if (client.role !== 'client') {
+      return res.status(400).json({ error: 'Solo se puede visualizar el portal de usuarios con rol cliente.' });
+    }
+
+    const token = jwt.sign(
+      { id: client.id, email: client.email, role: client.role, impersonatedBy: req.user.id },
+      process.env.JWT_SECRET,
+      { expiresIn: '2h' }
+    );
+
+    res.json({
+      token,
+      user: {
+        id: client.id,
+        name: client.name,
+        email: client.email,
+        role: client.role,
+        companyName: client.companyName,
+        logoUrl: client.logoUrl,
+        level: client.level,
+        referralCode: client.referralCode,
+      }
+    });
+  } catch (err) {
+    console.error('Error al impersonar cliente:', err);
+    res.status(500).json({ error: 'Error al iniciar sesión como cliente.' });
   }
 });
 

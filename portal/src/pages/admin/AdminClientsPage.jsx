@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { SkeletonTableRow } from '../../components/Skeleton';
 import api from '../../lib/api';
-import { Search, Plus, Building2, ChevronRight, UserPlus, FileText, X, Users, FolderKanban, TrendingUp, CreditCard, Mail, AlertTriangle, CheckCircle2, Trash2 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { Search, Plus, Building2, ChevronRight, UserPlus, FileText, X, Users, FolderKanban, TrendingUp, CreditCard, Mail, AlertTriangle, CheckCircle2, Trash2, Eye } from 'lucide-react';
 
 export default function AdminClientsPage() {
+  const navigate = useNavigate();
+  const { impersonate } = useAuth();
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -19,7 +22,20 @@ export default function AdminClientsPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [deletingClientId, setDeletingClientId] = useState(null);
+  const [impersonatingClientId, setImpersonatingClientId] = useState(null);
   const [createdReminder, setCreatedReminder] = useState(null);
+
+  const handleImpersonate = async (clientId) => {
+    setImpersonatingClientId(clientId);
+    try {
+      await impersonate(clientId);
+      navigate('/');
+    } catch (err) {
+      alert(err.response?.data?.error || 'Error al iniciar sesión como cliente.');
+    } finally {
+      setImpersonatingClientId(null);
+    }
+  };
 
   const handleDeleteClient = async (clientId, clientName) => {
     if (!window.confirm(`¿Estás seguro de eliminar al cliente "${clientName}" y todos sus proyectos, actividades y pagos? Esta acción no se puede deshacer.`)) {
@@ -373,6 +389,26 @@ export default function AdminClientsPage() {
                     </td>
                     <td style={{ textAlign: 'right' }}>
                       <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                        <button
+                          type="button"
+                          onClick={() => handleImpersonate(client.id)}
+                          disabled={impersonatingClientId === client.id}
+                          title="Entrar al portal y verificar cómo lo ve este cliente"
+                          className="btn-secondary"
+                          style={{
+                            padding: '6px 12px',
+                            fontSize: '13px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            color: '#0284C7',
+                            borderColor: '#BAE6FD',
+                            background: '#F0F9FF',
+                            cursor: impersonatingClientId === client.id ? 'not-allowed' : 'pointer'
+                          }}
+                        >
+                          <Eye size={14} /> Ver portal
+                        </button>
                         <Link to={`/admin/clients/${client.id}`} style={{ textDecoration: 'none' }}>
                           <button className="btn-secondary" style={{ padding: '6px 14px', fontSize: '13px' }}>
                             Administrar <ChevronRight size={14} />

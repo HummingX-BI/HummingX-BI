@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import { SkeletonTableRow } from '../../components/Skeleton';
 import api from '../../lib/api';
-import { Search, Plus, Building2, ChevronRight, UserPlus, FileText, X, Users, FolderKanban, TrendingUp, CreditCard, Mail, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Search, Plus, Building2, ChevronRight, UserPlus, FileText, X, Users, FolderKanban, TrendingUp, CreditCard, Mail, AlertTriangle, CheckCircle2, Trash2 } from 'lucide-react';
 
 export default function AdminClientsPage() {
   const [clients, setClients] = useState([]);
@@ -17,6 +17,23 @@ export default function AdminClientsPage() {
   const [savingClient, setSavingClient] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [deletingClientId, setDeletingClientId] = useState(null);
+
+  const handleDeleteClient = async (clientId, clientName) => {
+    if (!window.confirm(`¿Estás seguro de eliminar al cliente "${clientName}" y todos sus proyectos, actividades y pagos? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+    setDeletingClientId(clientId);
+    try {
+      await api.delete(`/admin/clients/${clientId}`);
+      setClients(prev => prev.filter(c => c.id !== clientId));
+    } catch (err) {
+      console.error('Error al eliminar cliente:', err);
+      alert('Error al eliminar cliente.');
+    } finally {
+      setDeletingClientId(null);
+    }
+  };
 
   const closeModal = () => {
     setClosingModal(true);
@@ -300,11 +317,34 @@ export default function AdminClientsPage() {
                       </div>
                     </td>
                     <td style={{ textAlign: 'right' }}>
-                      <Link to={`/admin/clients/${client.id}`} style={{ textDecoration: 'none' }}>
-                        <button className="btn-secondary" style={{ padding: '6px 14px', fontSize: '13px' }}>
-                          Administrar <ChevronRight size={14} />
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                        <Link to={`/admin/clients/${client.id}`} style={{ textDecoration: 'none' }}>
+                          <button className="btn-secondary" style={{ padding: '6px 14px', fontSize: '13px' }}>
+                            Administrar <ChevronRight size={14} />
+                          </button>
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteClient(client.id, client.companyName || client.name)}
+                          disabled={deletingClientId === client.id}
+                          title="Eliminar cliente"
+                          style={{
+                            padding: '6px 10px',
+                            fontSize: '13px',
+                            background: '#FEE2E2',
+                            color: '#DC2626',
+                            border: '1px solid #FECACA',
+                            borderRadius: '8px',
+                            cursor: deletingClientId === client.id ? 'not-allowed' : 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            opacity: deletingClientId === client.id ? 0.5 : 1,
+                            transition: 'all 0.15s'
+                          }}
+                        >
+                          <Trash2 size={14} />
                         </button>
-                      </Link>
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import api from '../../lib/api';
 import { 
@@ -35,6 +35,7 @@ const formatSafeDate = (dateVal) => {
 
 export default function AdminClientDetailPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [clientData, setClientData] = useState({});
@@ -128,6 +129,19 @@ export default function AdminClientDetailPage() {
       fetchClient();
     } catch { setClientMsg('Error al guardar datos.'); }
     finally { setSavingClient(false); }
+  };
+
+  const handleDeleteThisClient = async () => {
+    if (!window.confirm(`¿Estás seguro de eliminar permanentemente a este cliente ("${client.companyName || client.name}") y todos sus proyectos, pagos y registros asociados?`)) {
+      return;
+    }
+    try {
+      await api.delete(`/admin/clients/${id}`);
+      navigate('/admin/clients');
+    } catch (err) {
+      console.error('Error deleting client:', err);
+      alert('Error al eliminar cliente.');
+    }
   };
 
   const handleLogoUpload = async (e) => {
@@ -521,6 +535,30 @@ export default function AdminClientDetailPage() {
               </p>
             )}
             <p style={{ color: '#6B7280', fontSize: '13px', margin: 0 }}>Gestión de cuenta y proyecto activo</p>
+          </div>
+          <div style={{ marginLeft: 'auto' }}>
+            <button
+              type="button"
+              onClick={handleDeleteThisClient}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 16px',
+                fontSize: '13px',
+                fontWeight: 600,
+                background: '#FEE2E2',
+                color: '#DC2626',
+                border: '1px solid #FECACA',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                transition: 'all 0.15s'
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = '#FCA5A5'}
+              onMouseLeave={e => e.currentTarget.style.background = '#FEE2E2'}
+            >
+              <Trash2 size={16} /> Eliminar Cliente
+            </button>
           </div>
         </div>
 

@@ -166,7 +166,7 @@ export default function AdminClientsPage() {
               </div>
               <div>
                 <h4 style={{ margin: '0 0 4px', fontSize: '15px', fontWeight: 700, color: '#111827' }}>
-                  ¡Cliente "{createdReminder.companyName}" creado con éxito! 🚀
+                  ¡Cliente "{createdReminder.companyName}" creado con éxito!
                 </h4>
                 <p style={{ margin: 0, fontSize: '13px', color: '#4B5563', lineHeight: '1.5' }}>
                   <strong>Recordatorio para el Admin:</strong> Su proyecto se inició automáticamente en etapa de <strong>Análisis (10%)</strong>. Recuerda configurar su <strong>Plan de Pagos</strong> en su perfil para que en su portal no aparezca "Por definir".

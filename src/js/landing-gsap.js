@@ -1,9 +1,8 @@
 /**
  * =========================================================================
  * HummingX BI — Módulos GSAP Seleccionados
- * 1. Física de Inclinación 3D en Tarjetas (3D Card Tilt Physics)
- * 2. Acordeón FAQ fluido (Animación pura de altura con GSAP)
- * 3. Menú Lateral de Navegación (Apertura suave y escalonada de enlaces)
+ * 1. Física de Inclinación 3D en Tarjetas (Servicios, Soluciones, Metodología, Afíliate)
+ * 2. Acordeón FAQ fluido (Animación de altura matemática pura con GSAP)
  * =========================================================================
  */
 
@@ -12,19 +11,19 @@ import gsap from 'gsap';
 export function initSelectedGsap() {
   setupCardTiltPhysics();
   setupFaqGsapAccordion();
-  setupLuxuryNavExperience();
 
-  console.log('✨ HummingX BI: Módulos GSAP activados (Física 3D, FAQ y Menú Lateral)');
+  console.log('✨ HummingX BI: GSAP activo en Física 3D y Acordeón FAQ');
 }
 
 /* =========================================================================
-   1. FÍSICA DE INCLINACIÓN 3D EN TARJETAS (3D Card Tilt Physics)
+   1. FÍSICA DE INCLINACIÓN 3D EN TARJETAS (Sin incluir Valores)
    ========================================================================= */
 function setupCardTiltPhysics() {
-  if (window.matchMedia('(pointer: coarse)').matches) return; // Omitir en pantallas táctiles
+  if (window.matchMedia('(pointer: coarse)').matches) return; // Omitir en táctiles
 
+  // Excluye explícitamente #valores
   const cards = document.querySelectorAll(
-    '#servicios .grid > div, #soluciones .grid > div, #metodologia .grid > div, #afiliate .grid > div, #valores .flex.flex-col > div'
+    '#servicios .grid > div, #soluciones .grid > div, #metodologia .grid > div, #afiliate .grid > div'
   );
 
   cards.forEach((card) => {
@@ -38,7 +37,6 @@ function setupCardTiltPhysics() {
       const centerX = rect.width / 2;
       const centerY = rect.height / 2;
 
-      // Cálculo angular según distancia al centro
       const rotateX = ((y - centerY) / centerY) * -5.5;
       const rotateY = ((x - centerX) / centerX) * 5.5;
 
@@ -59,7 +57,7 @@ function setupCardTiltPhysics() {
         rotateY: 0,
         scale: 1,
         duration: 0.65,
-        ease: 'power3.out',
+        ease: 'power2.out',
         overwrite: 'auto'
       });
     });
@@ -80,7 +78,6 @@ function setupFaqGsapAccordion() {
 
     if (!content) return;
 
-    // Asegurar estado inicial para animación fluida
     gsap.set(content, { height: 0, opacity: 0, overflow: 'hidden' });
     content.classList.remove('hidden');
 
@@ -88,7 +85,7 @@ function setupFaqGsapAccordion() {
       e.preventDefault();
       const isOpen = card.classList.contains('is-open');
 
-      // Cerrar otros acordeones abiertos
+      // Cerrar otros acordeones
       faqButtons.forEach((otherBtn) => {
         const otherCard = otherBtn.parentElement;
         const otherContent = otherCard.querySelector('div');
@@ -130,92 +127,7 @@ function setupFaqGsapAccordion() {
   });
 }
 
-/* =========================================================================
-   3. MENÚ LATERAL DE NAVEGACIÓN MEJORADO CON GSAP
-   ========================================================================= */
-function setupLuxuryNavExperience() {
-  const hamburger = document.getElementById('luxury-hamburger-btn');
-  const backdrop = document.getElementById('luxury-nav-backdrop');
-  const panel = document.getElementById('luxury-nav-panel');
-
-  if (!hamburger || !backdrop || !panel) return;
-
-  // Asegurar que el botón hamburguesa sea 100% visible de inmediato
-  hamburger.style.opacity = '1';
-  hamburger.style.visibility = 'visible';
-  hamburger.style.transform = 'translateY(0)';
-
-  let closeTimer = null;
-
-  window.toggleLuxuryMenu = function() {
-    const isClosed = panel.classList.contains('hidden') || panel.classList.contains('-translate-x-full');
-    const links = panel.querySelectorAll('nav a');
-
-    if (!isClosed) {
-      // Cerrar menú suavemente
-      panel.classList.add('-translate-x-full', 'opacity-0', 'pointer-events-none');
-      panel.classList.remove('translate-x-0', 'opacity-100', 'pointer-events-auto');
-      backdrop.classList.remove('opacity-100', 'pointer-events-auto');
-      backdrop.classList.add('opacity-0', 'pointer-events-none');
-      hamburger.classList.remove('is-open');
-      document.body.style.overflow = '';
-
-      clearTimeout(closeTimer);
-      closeTimer = setTimeout(() => {
-        backdrop.classList.add('hidden');
-        panel.classList.add('hidden');
-      }, 500);
-    } else {
-      // Abrir menú con cascada GSAP en los enlaces
-      clearTimeout(closeTimer);
-      backdrop.classList.remove('hidden');
-      panel.classList.remove('hidden');
-      void panel.offsetWidth; // Reflow
-
-      backdrop.classList.remove('opacity-0', 'pointer-events-none');
-      backdrop.classList.add('opacity-100', 'pointer-events-auto');
-      panel.classList.remove('-translate-x-full', 'opacity-0', 'pointer-events-none');
-      panel.classList.add('translate-x-0', 'opacity-100', 'pointer-events-auto');
-      hamburger.classList.add('is-open');
-      document.body.style.overflow = 'hidden';
-
-      // Animación en cascada de los enlaces de navegación
-      if (links.length) {
-        gsap.fromTo(links, 
-          { x: -30, opacity: 0 },
-          { x: 0, opacity: 1, duration: 0.45, stagger: 0.04, ease: 'power3.out', delay: 0.08 }
-        );
-      }
-    }
-  };
-
-  window.navigateToSection = function(targetId, e) {
-    if (e) e.preventDefault();
-    window.toggleLuxuryMenu();
-    const target = document.querySelector(targetId);
-    if (target) {
-      setTimeout(() => {
-        if (targetId === '#inicio') {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-          return;
-        }
-        const rect = target.getBoundingClientRect();
-        const targetY = rect.top + window.pageYOffset;
-        window.scrollTo({ top: targetY, behavior: 'smooth' });
-      }, 80);
-    }
-  };
-
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      if (panel && !panel.classList.contains('hidden') && !panel.classList.contains('-translate-x-full')) {
-        window.toggleLuxuryMenu();
-      }
-    }
-  });
-}
-
-// Iniciar automáticamente
+// Iniciar automáticamente cuando el DOM esté listo
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initSelectedGsap);
 } else {

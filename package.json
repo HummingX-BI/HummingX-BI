@@ -8,7 +8,8 @@
   "scripts": {
     "dev": "vite",
     "build": "npx prisma generate && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "postinstall": "prisma generate"
   },
   "devDependencies": {
     "vite": "^8.0.16"

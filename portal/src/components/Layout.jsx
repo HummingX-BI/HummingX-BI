@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Tour, useTour } from './ui/product-tour';
 import Sidebar from './Sidebar';
@@ -23,9 +23,14 @@ export default function Layout({ children, customBreadcrumbLabel, fullWidth = fa
 
   // Track route key to re-trigger page-enter animation on navigation & restore scroll top
   const [pageKey, setPageKey] = useState(location.pathname);
+  const mainContentRef = useRef(null);
+
   useEffect(() => {
     setPageKey(location.pathname);
     window.scrollTo(0, 0);
+    if (mainContentRef.current) {
+      mainContentRef.current.scrollTop = 0;
+    }
   }, [location.pathname]);
 
   // Lock body scroll when mobile sidebar drawer is open
@@ -189,7 +194,11 @@ export default function Layout({ children, customBreadcrumbLabel, fullWidth = fa
         </header>
 
         {/* Main Content — page-enter triggers fade-up on each route change */}
-        <main className="layout-main-content" style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', width: '100%', maxWidth: '100%' }}>
+        <main
+          ref={mainContentRef}
+          className="layout-main-content"
+          style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', width: '100%', maxWidth: '100%' }}
+        >
           <div
             key={pageKey}
             className="page-enter"

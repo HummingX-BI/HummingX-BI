@@ -90,7 +90,7 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
         }} />
       </>
 
-      <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, overflow: 'hidden' }}>
 
         {/* ── Logo Block ─────────────────────────────────────── */}
         <div style={{
@@ -99,6 +99,7 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
           display: 'flex',
           alignItems: 'center',
           gap: '12px',
+          flexShrink: 0,
         }}>
           <img
             src={logoSrc}
@@ -137,7 +138,7 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
         </div>
 
         {/* ── Nav Links ─────────────────────────────────────── */}
-        <nav className="client-nav" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px', padding: '12px 12px' }}>
+        <nav className="client-nav" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px', padding: '12px 12px', minHeight: 0, overflowY: 'auto', overflowX: 'hidden' }}>
           <div className="section-label">{isAdminRoute ? 'Gestión' : 'Navegación'}</div>
 
           {links.map(({ to, icon: Icon, label, isDev }) => (
@@ -225,7 +226,7 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
         </nav>
 
         {/* ── User Card + Logout ────────────────────────────── */}
-        <div style={{ padding: '12px 12px 16px' }}>
+        <div style={{ padding: '12px 12px 16px', flexShrink: 0, marginTop: 'auto' }}>
           {/* User info row */}
           {user && !isAdminRoute && (
             <div style={{

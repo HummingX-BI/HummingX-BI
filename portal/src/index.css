@@ -1455,12 +1455,79 @@ textarea.hx-input {
   }
 }
 
+/* ─── Desktop Layout Containment (min-width: 769px) ────────── */
+@media (min-width: 769px) {
+  html, body, #root {
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .layout-root {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+  }
+
+  aside.client-sidebar {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    position: sticky !important;
+    top: 0 !important;
+    align-self: flex-start !important;
+    flex-shrink: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .layout-main-wrapper {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-width: 0 !important;
+    flex: 1 !important;
+  }
+
+  .layout-main-content {
+    height: 100% !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+}
+
+.client-nav::-webkit-scrollbar {
+  width: 4px;
+}
+.client-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+.client-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 /* ─── Mobile (max-width: 768px) ────────────────────────────── */
 @media (max-width: 768px) {
   html, body, #root {
     height: auto !important;
     min-height: 100% !important;
     -webkit-overflow-scrolling: touch;
+  }
+
+  .layout-root {
+    height: auto !important;
+    min-height: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .layout-main-wrapper {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
   }
 
   .layout-main-content {

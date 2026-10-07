@@ -82,7 +82,7 @@ export default function Layout({ children, customBreadcrumbLabel, fullWidth = fa
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#F9FAFB' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#F9FAFB', width: '100%', maxWidth: '100vw', overflowX: 'hidden' }}>
       <Tour
         steps={tourSteps}
         open={tour.open}
@@ -94,16 +94,18 @@ export default function Layout({ children, customBreadcrumbLabel, fullWidth = fa
       />
       <Sidebar mobileOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, width: '100%', maxWidth: '100%', overflowX: 'hidden' }}>
         {/* Banner de Modo Administrador (Impersonación) */}
         {isImpersonating && (
           <div style={{
             background: '#111827',
             color: '#F9FAFB',
-            padding: '10px 24px',
+            padding: '10px 16px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '8px',
             fontSize: '13px',
             borderBottom: '2px solid #00C4CC',
             zIndex: 9999,
@@ -172,11 +174,11 @@ export default function Layout({ children, customBreadcrumbLabel, fullWidth = fa
         </header>
 
         {/* Main Content — page-enter triggers fade-up on each route change */}
-        <main style={{ flex: 1, overflowY: 'auto' }}>
+        <main style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', width: '100%', maxWidth: '100%' }}>
           <div
             key={pageKey}
             className="page-enter"
-            style={{ maxWidth: fullWidth ? 'none' : '100%', padding: '32px' }}
+            style={{ maxWidth: fullWidth ? 'none' : '100%', padding: '32px', width: '100%', boxSizing: 'border-box' }}
           >
             {children}
           </div>

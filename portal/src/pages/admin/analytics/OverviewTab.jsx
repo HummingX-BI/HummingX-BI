@@ -114,7 +114,7 @@ export default function OverviewTab({ range }) {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 360px), 1fr))', gap: '24px' }}>
         
         {/* Embudo de Activación */}
         <div className="card" style={{ padding: '24px' }}>

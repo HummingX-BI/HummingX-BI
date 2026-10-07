@@ -370,7 +370,7 @@ export default function AdminClientsPage() {
 
         {/* Client Table */}
         {loading ? (
-          <div className="card" style={{ overflow: 'hidden' }}>
+          <div className="card" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', maxWidth: '100%' }}>
             <table className="hx-table">
               <thead><tr><th>Cliente / Empresa</th><th>Contacto</th><th>Proyectos</th><th style={{ textAlign: 'right' }}>Acciones</th></tr></thead>
               <tbody>
@@ -387,7 +387,7 @@ export default function AdminClientsPage() {
             <p style={{ color: '#6B7280', fontSize: '14px' }}>Crea un nuevo cliente o ajusta los filtros de búsqueda.</p>
           </div>
         ) : (
-          <div className="card" style={{ overflow: 'hidden' }}>
+          <div className="card" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', maxWidth: '100%' }}>
             <table className="hx-table">
               <thead>
                 <tr>

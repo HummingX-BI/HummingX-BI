@@ -799,7 +799,7 @@ function MonthView({
   }
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white shadow-xs">
+    <div className="rounded-xl border border-gray-200 bg-white shadow-xs overflow-x-auto max-w-full">
       <div className="grid grid-cols-7 border-b">
         {["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"].map((day) => (
           <div key={day} className="border-r p-2 text-center text-xs font-semibold text-gray-700 last:border-r-0 sm:text-sm">

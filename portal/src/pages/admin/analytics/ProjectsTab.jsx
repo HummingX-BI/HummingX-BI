@@ -74,7 +74,7 @@ export default function ProjectsTab() {
       )}
 
       {/* Charts Row 1 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 360px), 1fr))', gap: '24px' }}>
         
         {/* Pie Chart */}
         <div className="card" style={{ padding: '24px' }}>
@@ -128,7 +128,7 @@ export default function ProjectsTab() {
       </div>
 
       {/* Charts Row 2 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 360px), 1fr))', gap: '24px' }}>
         
         {/* Area Chart: Progress */}
         <div className="card" style={{ padding: '24px' }}>

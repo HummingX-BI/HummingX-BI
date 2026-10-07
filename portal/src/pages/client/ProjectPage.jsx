@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { 
   Check, Clock, Calendar, FileText, ExternalLink, 
   ShieldCheck, Layers, MessageCircle, Construction, CheckCircle, Activity, CheckCircle2, X,
-  ChevronLeft, ChevronRight, MoveHorizontal
+  MoveHorizontal
 } from 'lucide-react';
 import ProgressTicks from '../../components/ProgressTicks';
 
@@ -43,17 +43,6 @@ export default function ProjectPage() {
   const [celebrationActive, setCelebrationActive] = useState(false);
   
   const revisionRef = useRef(null);
-  const timelineScrollRef = useRef(null);
-
-  const scrollTimeline = (direction) => {
-    if (timelineScrollRef.current) {
-      const scrollAmount = 260;
-      timelineScrollRef.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
-      });
-    }
-  };
 
   useEffect(() => {
     if (!loading && project && revisionRef.current) {
@@ -297,55 +286,17 @@ export default function ProjectPage() {
 
         {/* Timeline Stepper */}
         <div id="tour-project-timeline" className="card responsive-card-p" style={{ padding: '28px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', margin: 0 }}>Ruta de trabajo</h2>
-                <span className="timeline-scroll-indicator">
-                  <MoveHorizontal size={13} />
-                  <span>Desliza para ver más</span>
-                </span>
-              </div>
-              <p style={{ fontSize: '13px', color: '#6B7280', margin: '4px 0 0 0' }}>Desde la conceptualización hasta el lanzamiento.</p>
+              <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', margin: '0 0 4px' }}>Ruta de trabajo</h2>
+              <p style={{ fontSize: '13px', color: '#6B7280', margin: 0 }}>Desde la conceptualización hasta el lanzamiento.</p>
             </div>
-            
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span className="hide-on-mobile" style={{ fontSize: '11px', fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Metodología HummingX
-              </span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <button
-                  type="button"
-                  onClick={() => scrollTimeline('left')}
-                  title="Etapa anterior"
-                  aria-label="Ver etapa anterior"
-                  style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#4B5563', transition: 'all 0.15s' }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = '#F3F4F6'; e.currentTarget.style.borderColor = '#D1D5DB'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = '#FFFFFF'; e.currentTarget.style.borderColor = '#E5E7EB'; }}
-                >
-                  <ChevronLeft size={16} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => scrollTimeline('right')}
-                  title="Siguiente etapa"
-                  aria-label="Ver siguiente etapa"
-                  style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#4B5563', transition: 'all 0.15s' }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = '#F3F4F6'; e.currentTarget.style.borderColor = '#D1D5DB'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = '#FFFFFF'; e.currentTarget.style.borderColor = '#E5E7EB'; }}
-                >
-                  <ChevronRight size={16} />
-                </button>
-              </div>
-            </div>
+            <span style={{ fontSize: '11px', fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Metodología HummingX</span>
           </div>
 
           {/* Timeline Stepper (Post-its) */}
-          <div style={{ position: 'relative', marginTop: '16px', zIndex: 0 }}>
-            <div 
-              ref={timelineScrollRef}
-              className="timeline-scroll-track"
-            >
+          <div style={{ position: 'relative', marginTop: '24px', zIndex: 0 }}>
+            <div className="timeline-scroll-track">
               {ROADMAP_STEPS.map((step, idx) => {
                 const isDone = step.status === 'completed';
                 const isActive = step.status === 'active';
@@ -397,7 +348,7 @@ export default function ProjectPage() {
               })}
             </div>
 
-            <div className="mobile-scroll-hint" style={{ alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '12px', color: '#6B7280', marginTop: '8px', fontWeight: 500 }}>
+            <div className="timeline-scroll-hint">
               <MoveHorizontal size={14} color="#00C4CC" />
               <span>Desliza horizontalmente para ver las 5 etapas</span>
             </div>

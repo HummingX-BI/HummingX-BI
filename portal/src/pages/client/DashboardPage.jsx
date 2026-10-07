@@ -189,9 +189,6 @@ export default function DashboardPage() {
                 <h1 style={{ fontFamily: "'Nunito', sans-serif", fontSize: '26px', fontWeight: 800, color: '#111827', letterSpacing: '-0.02em', margin: 0 }}>
                   Bienvenido, {user?.name ? user.name.split(' ')[0] : 'Cliente'}
                 </h1>
-                <span className="badge badge-cyan" style={{ fontSize: '11px', fontWeight: 600, padding: '2px 8px' }}>
-                  En línea
-                </span>
               </div>
               <p style={{ fontSize: '13.5px', color: '#6B7280', margin: 0, textTransform: 'capitalize' }}>
                 {new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} · Resumen de operación
@@ -341,17 +338,17 @@ export default function DashboardPage() {
           )}
 
           {/* Big Progress Bar */}
-          <div id="tour-progress" style={{ background: '#F9FAFB', padding: '24px 28px', borderRadius: '12px', border: '1px solid #E5E7EB' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '15px', fontWeight: 600, color: '#111827' }}>Avance general del proyecto</span>
+          <div id="tour-progress" className="project-progress-box">
+            <div className="project-progress-header">
+              <div className="project-progress-info">
+                <span className="project-progress-title">Avance general del proyecto</span>
                 {activeProject.currentPhase <= 5 ? (
-                  <span style={{ fontSize: '13px', color: '#6B7280', background: '#E5E7EB', padding: '4px 10px', borderRadius: '99px' }}>Fase {activeProject.currentPhase} de 5</span>
+                  <span className="project-progress-badge">Fase {activeProject.currentPhase} de 5</span>
                 ) : (
-                  <span style={{ fontSize: '13px', color: '#059669', background: '#D1FAE5', padding: '4px 10px', borderRadius: '99px' }}>Completado</span>
+                  <span className="project-progress-badge completed">Completado</span>
                 )}
               </div>
-              <span style={{ fontSize: '32px', fontWeight: 800, color: '#00C4CC' }}>{activeProject.progressPercent}%</span>
+              <span className="project-progress-percent">{activeProject.progressPercent}%</span>
             </div>
             <ProgressTicks value={activeProject.progressPercent} />
           </div>

@@ -42,6 +42,7 @@ router.get('/clients', authenticate, requireAdmin, adminLimiter, async (req, res
     });
     res.json(clients);
   } catch (err) {
+    console.error('Error in /admin/clients:', err);
     res.status(500).json({ error: 'Error al cargar clientes.' });
   }
 });

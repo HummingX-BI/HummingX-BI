@@ -5,7 +5,8 @@ import api from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import { 
   Check, Clock, Calendar, FileText, ExternalLink, 
-  ShieldCheck, Layers, MessageCircle, Construction, CheckCircle, Activity, CheckCircle2, X
+  ShieldCheck, Layers, MessageCircle, Construction, CheckCircle, Activity, CheckCircle2, X,
+  ChevronLeft, ChevronRight, MoveHorizontal
 } from 'lucide-react';
 import ProgressTicks from '../../components/ProgressTicks';
 
@@ -42,6 +43,17 @@ export default function ProjectPage() {
   const [celebrationActive, setCelebrationActive] = useState(false);
   
   const revisionRef = useRef(null);
+  const timelineScrollRef = useRef(null);
+
+  const scrollTimeline = (direction) => {
+    if (timelineScrollRef.current) {
+      const scrollAmount = 260;
+      timelineScrollRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   useEffect(() => {
     if (!loading && project && revisionRef.current) {
@@ -211,11 +223,8 @@ export default function ProjectPage() {
 
             {/* Progress Bar (mitad izquierda) */}
             <div 
+              className="project-progress-box"
               style={{ 
-                background: '#F9FAFB', 
-                padding: '20px 24px', 
-                borderRadius: '12px', 
-                border: '1px solid #E5E7EB', 
                 marginTop: '16px',
                 position: 'relative',
                 overflow: 'hidden'
@@ -231,20 +240,20 @@ export default function ProjectPage() {
                 </div>
               )}
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>Avance general del proyecto</span>
+              <div className="project-progress-header">
+                <div className="project-progress-info">
+                  <span className="project-progress-title">Avance general del proyecto</span>
                   {currentPhaseNum <= 5 ? (
-                    <span style={{ fontSize: '12px', color: '#6B7280', background: '#E5E7EB', padding: '2px 8px', borderRadius: '99px' }}>
+                    <span className="project-progress-badge">
                       Fase {currentPhaseNum} de 5
                     </span>
                   ) : (
-                    <span style={{ fontSize: '12px', color: '#059669', background: '#D1FAE5', padding: '2px 8px', borderRadius: '99px' }}>
+                    <span className="project-progress-badge completed">
                       Completado
                     </span>
                   )}
                 </div>
-                <span style={{ fontSize: '26px', fontWeight: 800, color: '#00C4CC' }}>{progress}%</span>
+                <span className="project-progress-percent" style={{ fontSize: '26px' }}>{progress}%</span>
               </div>
               <ProgressTicks value={progress} />
             </div>
@@ -288,19 +297,55 @@ export default function ProjectPage() {
 
         {/* Timeline Stepper */}
         <div id="tour-project-timeline" className="card responsive-card-p" style={{ padding: '28px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
             <div>
-              <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', margin: '0 0 4px' }}>Ruta de trabajo</h2>
-              <p style={{ fontSize: '13px', color: '#6B7280', margin: 0 }}>Desde la conceptualización hasta el lanzamiento.</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', margin: 0 }}>Ruta de trabajo</h2>
+                <span className="timeline-scroll-indicator">
+                  <MoveHorizontal size={13} />
+                  <span>Desliza para ver más</span>
+                </span>
+              </div>
+              <p style={{ fontSize: '13px', color: '#6B7280', margin: '4px 0 0 0' }}>Desde la conceptualización hasta el lanzamiento.</p>
             </div>
-            <span style={{ fontSize: '11px', fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Metodología HummingX</span>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span className="hide-on-mobile" style={{ fontSize: '11px', fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Metodología HummingX
+              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <button
+                  type="button"
+                  onClick={() => scrollTimeline('left')}
+                  title="Etapa anterior"
+                  aria-label="Ver etapa anterior"
+                  style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#4B5563', transition: 'all 0.15s' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = '#F3F4F6'; e.currentTarget.style.borderColor = '#D1D5DB'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = '#FFFFFF'; e.currentTarget.style.borderColor = '#E5E7EB'; }}
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollTimeline('right')}
+                  title="Siguiente etapa"
+                  aria-label="Ver siguiente etapa"
+                  style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#4B5563', transition: 'all 0.15s' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = '#F3F4F6'; e.currentTarget.style.borderColor = '#D1D5DB'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = '#FFFFFF'; e.currentTarget.style.borderColor = '#E5E7EB'; }}
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Timeline Stepper (Post-its) */}
-          <div style={{ position: 'relative', marginTop: '24px', zIndex: 0 }}>
-
-
-            <div className="custom-scrollbar" style={{ display: 'flex', flexWrap: 'nowrap', overflowX: 'auto', gap: '12px', paddingBottom: '24px', paddingTop: '10px', position: 'relative', zIndex: 1, scrollSnapType: 'x mandatory' }}>
+          <div style={{ position: 'relative', marginTop: '16px', zIndex: 0 }}>
+            <div 
+              ref={timelineScrollRef}
+              className="timeline-scroll-track"
+            >
               {ROADMAP_STEPS.map((step, idx) => {
                 const isDone = step.status === 'completed';
                 const isActive = step.status === 'active';
@@ -350,6 +395,11 @@ export default function ProjectPage() {
                   </div>
                 );
               })}
+            </div>
+
+            <div className="mobile-scroll-hint" style={{ alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '12px', color: '#6B7280', marginTop: '8px', fontWeight: 500 }}>
+              <MoveHorizontal size={14} color="#00C4CC" />
+              <span>Desliza horizontalmente para ver las 5 etapas</span>
             </div>
           </div>
         </div>

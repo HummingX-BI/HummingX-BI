@@ -1506,3 +1506,152 @@ textarea.hx-input {
     visibility: hidden;
   }
 }
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE PROGRESS CARD & TIMELINE SCROLL STYLES
+   ═══════════════════════════════════════════════════════ */
+
+.project-progress-box {
+  background: #F9FAFB;
+  padding: 22px 24px;
+  border-radius: 12px;
+  border: 1px solid #E5E7EB;
+}
+
+.project-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  gap: 12px;
+}
+
+.project-progress-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.project-progress-title {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+}
+
+.project-progress-badge {
+  font-size: 12px;
+  font-weight: 500;
+  color: #4B5563;
+  background: #E5E7EB;
+  padding: 3px 10px;
+  border-radius: 99px;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  display: inline-flex;
+  align-items: center;
+  letter-spacing: -0.01em;
+}
+
+.project-progress-badge.completed {
+  color: #059669;
+  background: #D1FAE5;
+  font-weight: 600;
+}
+
+.project-progress-percent {
+  font-size: 30px;
+  font-weight: 800;
+  color: #00C4CC;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* Timeline horizontal scroll styles */
+.timeline-scroll-track {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 12px;
+  padding-bottom: 20px;
+  padding-top: 10px;
+  position: relative;
+  z-index: 1;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #CBD5E1 #F1F5F9;
+}
+
+.timeline-scroll-track::-webkit-scrollbar {
+  height: 6px;
+}
+
+.timeline-scroll-track::-webkit-scrollbar-track {
+  background: #F1F5F9;
+  border-radius: 99px;
+}
+
+.timeline-scroll-track::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 99px;
+}
+
+.timeline-scroll-track::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+.timeline-scroll-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #0891B2;
+  background: #ECFEFF;
+  border: 1px solid #CFFAFE;
+  padding: 3px 9px;
+  border-radius: 99px;
+  white-space: nowrap;
+}
+
+.mobile-scroll-hint {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .project-progress-box {
+    padding: 16px 14px !important;
+  }
+  
+  .project-progress-header {
+    align-items: flex-start;
+  }
+  
+  .project-progress-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  
+  .project-progress-title {
+    font-size: 13.5px;
+    white-space: normal;
+  }
+
+  .project-progress-percent {
+    font-size: 24px;
+    margin-top: 2px;
+  }
+
+  .mobile-scroll-hint {
+    display: flex !important;
+  }
+
+  .hide-on-mobile {
+    display: none !important;
+  }
+}
+
+

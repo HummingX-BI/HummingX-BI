@@ -21,9 +21,24 @@ export default function Layout({ children, customBreadcrumbLabel, fullWidth = fa
   // Register global toast instance
   useEffect(() => { _globalToast = toast; }, [toast]);
 
-  // Track route key to re-trigger page-enter animation on navigation
+  // Track route key to re-trigger page-enter animation on navigation & restore scroll top
   const [pageKey, setPageKey] = useState(location.pathname);
-  useEffect(() => { setPageKey(location.pathname); }, [location.pathname]);
+  useEffect(() => {
+    setPageKey(location.pathname);
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
+  // Lock body scroll when mobile sidebar drawer is open
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [sidebarOpen]);
 
   const isAdminRoute = location.pathname.startsWith('/admin');
 
@@ -82,7 +97,7 @@ export default function Layout({ children, customBreadcrumbLabel, fullWidth = fa
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#F9FAFB', width: '100%', maxWidth: '100vw', overflowX: 'hidden' }}>
+    <div className="layout-root" style={{ display: 'flex', minHeight: '100vh', background: '#F9FAFB', width: '100%', maxWidth: '100%' }}>
       <Tour
         steps={tourSteps}
         open={tour.open}
@@ -94,7 +109,7 @@ export default function Layout({ children, customBreadcrumbLabel, fullWidth = fa
       />
       <Sidebar mobileOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, width: '100%', maxWidth: '100%', overflowX: 'hidden' }}>
+      <div className="layout-main-wrapper" style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, width: '100%', maxWidth: '100%' }}>
         {/* Banner de Modo Administrador (Impersonación) */}
         {isImpersonating && (
           <div style={{
@@ -174,7 +189,7 @@ export default function Layout({ children, customBreadcrumbLabel, fullWidth = fa
         </header>
 
         {/* Main Content — page-enter triggers fade-up on each route change */}
-        <main style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', width: '100%', maxWidth: '100%' }}>
+        <main className="layout-main-content">
           <div
             key={pageKey}
             className="page-enter"

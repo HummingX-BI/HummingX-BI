@@ -462,7 +462,7 @@ export default function DashboardPage() {
               </Link>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0', flex: 1, overflowY: 'auto', paddingRight: '8px' }}>
+            <div className="dashboard-activity-list" style={{ display: 'flex', flexDirection: 'column', gap: '0', flex: 1, paddingRight: '8px' }}>
               {(!activeProject.activities || activeProject.activities.length === 0) ? (
                 <div style={{ padding: '20px 0', textAlign: 'center', color: '#6B7280', fontSize: '14px' }}>
                   Tu proyecto fue creado exitosamente. Estamos configurando tu entorno de trabajo.

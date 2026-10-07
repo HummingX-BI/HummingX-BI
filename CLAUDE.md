@@ -131,3 +131,16 @@ funcionando** antes de avanzar.
         `mockup-dashboard.png`, prueba social, micro-interacciones
 
 Trabaja SOLO la fase pedida. No te adelantes a fases siguientes.
+
+---
+
+## 8. Base de Datos (Prisma) y Despliegues en Vercel
+
+Cada vez que modifiques el archivo `prisma/schema.prisma`:
+1. **ANTES de hacer deploy a Vercel**: Debes sincronizar la base de datos de producción ejecutando:
+   ```bash
+   npx prisma db push
+   ```
+   *(Asegúrate de contar con las variables de entorno de producción correctas).*
+2. **Al desplegar a Vercel**: Usa siempre la bandera `--force` o `-f` (ej. `vercel --prod -f` o `npx vercel --prod -f --yes`) para limpiar el caché de compilación y asegurar que `@prisma/client` se regenere con el nuevo esquema.
+

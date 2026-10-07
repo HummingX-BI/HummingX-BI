@@ -8,6 +8,7 @@ const projectRoutes = require('./_src/routes/projects');
 const adminRoutes = require('./_src/routes/admin');
 const referralRoutes = require('./_src/routes/referrals');
 const paymentRoutes = require('./_src/routes/payments');
+const analyticsRoutes = require('./_src/routes/analytics');
 
 const {
   globalApiLimiter,
@@ -84,6 +85,7 @@ apiRouter.use('/admin', globalApiLimiter);
 apiRouter.use('/projects', globalApiLimiter);
 apiRouter.use('/referrals', globalApiLimiter);
 apiRouter.use('/payments', globalApiLimiter);
+apiRouter.use('/analytics', globalApiLimiter);
 
 // ─── Input sanitization (all routes) ─────────────────────────────────────────
 apiRouter.use(sanitizeBody);
@@ -94,6 +96,7 @@ apiRouter.use('/projects', projectRoutes);
 apiRouter.use('/admin', adminRoutes);
 apiRouter.use('/referrals', referralRoutes);
 apiRouter.use('/payments', paymentRoutes);
+apiRouter.use('/analytics', analyticsRoutes);
 
 // ─── Health check (no auth needed, no sensitive data) ────────────────────────
 apiRouter.get('/health', (_req, res) => res.json({ status: 'ok' }));

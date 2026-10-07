@@ -28,6 +28,38 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+// ─── Login Tracking Helper ───────────────────────────────────────────────────
+async function trackLogin(req, userId) {
+  // Impersonation doesn't count as a real client login
+  if (req.headers['x-impersonating'] === 'true') return;
+
+  const ip = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown';
+  const ua = req.headers['user-agent'] || '';
+  const deviceType = /Mobi|Android|iPhone/i.test(ua) ? 'mobile' : 'desktop';
+
+  try {
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: userId },
+        data: {
+          lastLoginAt: new Date(),
+          loginCount: { increment: 1 },
+        }
+      }),
+      prisma.loginEvent.create({
+        data: {
+          userId,
+          ip: ip.substring(0, 45), // IPv6 safe length
+          userAgent: ua.substring(0, 255),
+          deviceType,
+        }
+      })
+    ]);
+  } catch (err) {
+    console.error('[AUTH] trackLogin error:', err.message);
+  }
+}
+
 // ─── POST /auth/login ─────────────────────────────────────────────────────────
 // Rate limited: 10 attempts per IP per 15 min
 router.post('/login', loginLimiter, async (req, res) => {
@@ -45,9 +77,12 @@ router.post('/login', loginLimiter, async (req, res) => {
 
     const user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
 
-    // SECURITY: Don't reveal if account is inactive vs non-existent
-    if (!user || !user.active) {
+    if (!user) {
       return res.status(401).json({ error: 'Credenciales incorrectas.' });
+    }
+
+    if (!user.active) {
+      return res.status(403).json({ error: 'Tu cuenta ha sido deshabilitada temporalmente. Nuestro equipo está trabajando para mejorar tu experiencia. Si crees que esto es un error, por favor contacta a soporte.' });
     }
 
     if (!user.passwordHash) {
@@ -65,6 +100,8 @@ router.post('/login', loginLimiter, async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
+
+    await trackLogin(req, user.id);
 
     res.json({
       token,
@@ -93,11 +130,20 @@ router.get('/me', authenticate, async (req, res) => {
       select: {
         id: true, name: true, email: true, role: true,
         companyName: true, logoUrl: true, phone: true, level: true,
-        referralCode: true, createdAt: true,
+        referralCode: true, createdAt: true, lastLoginAt: true, active: true,
       }
     });
 
     if (!user) return res.status(404).json({ error: 'Usuario no encontrado.' });
+
+    // Register a "visit" if it's been more than 30 minutes since the last login/visit
+    if (req.headers['x-impersonating'] !== 'true') {
+      const thirtyMinsAgo = new Date(Date.now() - 30 * 60 * 1000);
+      if (!user.lastLoginAt || user.lastLoginAt < thirtyMinsAgo) {
+        trackLogin(req, user.id).catch(err => console.error('[AUTH] visit track err:', err.message));
+      }
+    }
+
     res.json(user);
   } catch (err) {
     res.status(500).json({ error: 'Error interno del servidor.' });
@@ -246,6 +292,7 @@ router.post('/activate', tokenActionLimiter, async (req, res) => {
       data: {
         passwordHash,
         invitationAccepted: true,
+        activatedAt: new Date(),
       }
     });
 
@@ -254,6 +301,8 @@ router.post('/activate', tokenActionLimiter, async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
+
+    await trackLogin(req, user.id);
 
     res.json({
       message: '¡Cuenta activada exitosamente!',

@@ -166,6 +166,18 @@ export default function AdminClientDetailPage() {
     }
   };
 
+  const handleToggleSuspend = async () => {
+    const action = client.active ? 'suspender temporalmente' : 'reactivar';
+    if (!window.confirm(`¿Estás seguro de ${action} el acceso de este cliente?`)) return;
+    
+    try {
+      await api.put(`/admin/clients/${id}/suspend`, { active: !client.active });
+      fetchClient();
+    } catch (err) {
+      alert('Error al cambiar el estado del cliente.');
+    }
+  };
+
   const handleLogoUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -574,7 +586,7 @@ export default function AdminClientDetailPage() {
             </div>
           )}
           <div>
-            <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#111827', margin: '0 0 2px' }}>
+            <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#111827', margin: '0 0 2px', display: 'flex', alignItems: 'center', gap: '12px' }}>
               {client.companyName || client.name}
             </h1>
             {client.companyName && client.companyName !== client.name && (
@@ -582,9 +594,41 @@ export default function AdminClientDetailPage() {
                 {client.name}
               </p>
             )}
-            <p style={{ color: '#6B7280', fontSize: '13px', margin: 0 }}>Gestión de cuenta y proyecto activo</p>
+            <p style={{ color: '#6B7280', fontSize: '13px', margin: 0 }}>
+              Gestión de cuenta y proyecto activo
+              {client.invitationAccepted && client.activatedAt && (
+                <span style={{ marginLeft: '8px', color: '#9CA3AF' }}>
+                  (Activado: {new Date(client.activatedAt).toLocaleDateString()})
+                </span>
+              )}
+            </p>
+            {client.loginCount !== undefined && (
+              <p style={{ color: '#4B5563', fontSize: '13px', margin: '4px 0 0 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: client.lastLoginAt && new Date() - new Date(client.lastLoginAt) < 7*24*60*60*1000 ? '#10B981' : '#9CA3AF' }}></span>
+                <strong>{client.loginCount}</strong> {client.loginCount === 1 ? 'visita' : 'visitas'}
+                {client.lastLoginAt && (
+                  <span style={{ color: '#9CA3AF' }}>
+                    • Último acceso: {new Date(client.lastLoginAt).toLocaleDateString()} a las {new Date(client.lastLoginAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                    {client.loginEvents?.[0]?.deviceType ? ` (${client.loginEvents[0].deviceType})` : ''}
+                  </span>
+                )}
+              </p>
+            )}
           </div>
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {(() => {
+              if (client.active === false) {
+                return <span style={{ padding: '6px 12px', borderRadius: '6px', background: '#FFEDD5', color: '#C2410C', fontSize: '13px', fontWeight: 600, display: 'inline-flex', alignItems: 'center' }}>Suspendido</span>;
+              }
+              if (client.invitationAccepted) {
+                return <span style={{ padding: '6px 12px', borderRadius: '6px', background: '#D1FAE5', color: '#065F46', fontSize: '13px', fontWeight: 600, display: 'inline-flex', alignItems: 'center' }}>Activo</span>;
+              }
+              const isExpired = client.invitationExpires && new Date(client.invitationExpires) < new Date();
+              if (isExpired) {
+                return <span style={{ padding: '6px 12px', borderRadius: '6px', background: '#FEE2E2', color: '#DC2626', fontSize: '13px', fontWeight: 600, display: 'inline-flex', alignItems: 'center' }}>Invitación Vencida</span>;
+              }
+              return <span style={{ padding: '6px 12px', borderRadius: '6px', background: '#FEF3C7', color: '#92400E', fontSize: '13px', fontWeight: 600, display: 'inline-flex', alignItems: 'center' }}>Invitación Enviada</span>;
+            })()}
             <button
               type="button"
               onClick={handleImpersonate}
@@ -606,28 +650,6 @@ export default function AdminClientDetailPage() {
               }}
             >
               <Eye size={16} /> Ver portal como este cliente
-            </button>
-            <button
-              type="button"
-              onClick={handleDeleteThisClient}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '8px 16px',
-                fontSize: '13px',
-                fontWeight: 600,
-                background: '#FEE2E2',
-                color: '#DC2626',
-                border: '1px solid #FECACA',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                transition: 'all 0.15s'
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = '#FCA5A5'}
-              onMouseLeave={e => e.currentTarget.style.background = '#FEE2E2'}
-            >
-              <Trash2 size={16} /> Eliminar Cliente
             </button>
           </div>
         </div>
@@ -1176,6 +1198,91 @@ export default function AdminClientDetailPage() {
             </div>
           </div>
         )}
+
+        {/* Danger Zone */}
+        <div className="card" style={{ padding: '28px', marginTop: '32px', border: '1px solid #FECACA' }}>
+          <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#DC2626', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <AlertCircle size={20} /> Zona de Peligro
+          </h3>
+          <p style={{ fontSize: '14px', color: '#4B5563', marginBottom: '24px' }}>
+            Acciones críticas que afectan el acceso y los datos de este cliente en el sistema. Ambas opciones requerirán una confirmación de seguridad antes de ejecutarse.
+          </p>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {/* Suspend Action */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: '#F9FAFB', borderRadius: '8px', border: '1px solid #E5E7EB', flexWrap: 'wrap', gap: '16px' }}>
+              <div style={{ flex: '1 1 300px' }}>
+                <h4 style={{ margin: '0 0 6px 0', fontSize: '15px', fontWeight: 600, color: '#111827' }}>
+                  {client.active ? 'Suspender Acceso del Cliente' : 'Reactivar Acceso del Cliente'}
+                </h4>
+                <p style={{ margin: 0, fontSize: '13.5px', color: '#6B7280', lineHeight: '1.5' }}>
+                  {client.active 
+                    ? 'Bloquea temporalmente el acceso del cliente a su portal. Útil en caso de impagos, comportamientos sospechosos o por mantenimiento. No elimina ninguno de sus datos ni proyectos.' 
+                    : 'Restaura el acceso del cliente a su portal de manera inmediata. El cliente podrá volver a iniciar sesión con sus mismas credenciales.'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleToggleSuspend}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '10px 20px',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  background: client.active ? '#FFFBEB' : '#ECFDF5',
+                  color: client.active ? '#D97706' : '#059669',
+                  border: `1px solid ${client.active ? '#FDE68A' : '#A7F3D0'}`,
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s',
+                  whiteSpace: 'nowrap'
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = client.active ? '#FEF3C7' : '#D1FAE5'}
+                onMouseLeave={e => e.currentTarget.style.background = client.active ? '#FFFBEB' : '#ECFDF5'}
+              >
+                {client.active ? <><AlertCircle size={18} /> Suspender Acceso</> : <><CheckCircle2 size={18} /> Reactivar Acceso</>}
+              </button>
+            </div>
+
+            {/* Delete Action */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: '#FEF2F2', borderRadius: '8px', border: '1px solid #FECACA', flexWrap: 'wrap', gap: '16px' }}>
+              <div style={{ flex: '1 1 300px' }}>
+                <h4 style={{ margin: '0 0 6px 0', fontSize: '15px', fontWeight: 600, color: '#991B1B' }}>
+                  Eliminar Cliente Permanentemente
+                </h4>
+                <p style={{ margin: 0, fontSize: '13.5px', color: '#B91C1C', lineHeight: '1.5' }}>
+                  Elimina permanentemente la cuenta de este cliente, incluyendo todos sus proyectos, planes de pago, referidos y bitácoras. Esta acción es <strong>absolutamente irreversible</strong>.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleDeleteThisClient}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '10px 20px',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  background: '#DC2626',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s',
+                  whiteSpace: 'nowrap',
+                  boxShadow: '0 2px 4px rgba(220, 38, 38, 0.2)'
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = '#B91C1C'}
+                onMouseLeave={e => e.currentTarget.style.background = '#DC2626'}
+              >
+                <Trash2 size={18} /> Eliminar Cliente
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* New Project Modal */}

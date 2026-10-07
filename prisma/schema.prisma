@@ -60,10 +60,15 @@ model User {
   invitationToken   String?   @unique
   invitationExpires DateTime?
   invitationAccepted Boolean  @default(false)
+  activatedAt       DateTime?
   
   resetToken           String?   @unique
   resetTokenExpires    DateTime?
   lastPasswordResetReq DateTime?
+
+  lastLoginAt          DateTime?
+  loginCount           Int       @default(0)
+  totalTimeSpent       Int       @default(0) // In seconds
 
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
@@ -73,8 +78,32 @@ model User {
   referralsMade     Referral[]         @relation("ReferralMaker")
   creditMovements   CreditMovement[]
   projectActivities ProjectActivity[]  @relation("ActivityAuthor")
+  loginEvents       LoginEvent[]
+  pageViews         PageView[]
 
   @@map("users")
+}
+
+model LoginEvent {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  ip         String?
+  userAgent  String?
+  deviceType String?
+
+  @@map("login_events")
+}
+
+model PageView {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  path      String
+  createdAt DateTime @default(now())
+
+  @@map("page_views")
 }
 
 model Project {

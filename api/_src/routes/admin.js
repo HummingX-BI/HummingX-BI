@@ -27,13 +27,17 @@ router.get('/clients', authenticate, requireAdmin, adminLimiter, async (req, res
       select: {
         id: true, name: true, email: true, companyName: true, logoUrl: true,
         phone: true, level: true, active: true, referralCode: true,
-        invitationAccepted: true, createdAt: true,
+        invitationAccepted: true, createdAt: true, activatedAt: true,
+        loginCount: true, lastLoginAt: true,
         projects: {
           select: { id: true, clientId: true, name: true, currentPhase: true, progressPercent: true, status: true, estimatedDelivery: true, updatedAt: true, createdAt: true, designStatus: true },
           orderBy: { updatedAt: 'desc' },
         },
         _count: { select: { referralsMade: true } },
-        creditMovements: { select: { amount: true } }
+        creditMovements: { select: { amount: true } },
+        totalTimeSpent: true,
+        loginEvents: { select: { createdAt: true } },
+        pageViews: { select: { path: true, createdAt: true } }
       }
     });
     res.json(clients);
@@ -178,7 +182,13 @@ router.get('/clients/:id', authenticate, requireAdmin, async (req, res) => {
       select: {
         id: true, name: true, email: true, companyName: true, logoUrl: true,
         phone: true, level: true, active: true, referralCode: true,
-        invitationAccepted: true, createdAt: true, role: true,
+        invitationAccepted: true, createdAt: true, activatedAt: true, role: true,
+        loginCount: true, lastLoginAt: true, totalTimeSpent: true,
+        pageViews: { orderBy: { createdAt: 'desc' }, take: 50 },
+        loginEvents: {
+          orderBy: { createdAt: 'desc' },
+          take: 5
+        },
         projects: {
           orderBy: { updatedAt: 'desc' },
           select: {
@@ -218,6 +228,21 @@ router.get('/clients/:id', authenticate, requireAdmin, async (req, res) => {
     res.json({ ...client, totalCredits });
   } catch (err) {
     res.status(500).json({ error: 'Error al cargar el cliente.' });
+  }
+});
+
+// PUT /admin/clients/:id/suspend — Suspend or reactivate client access
+router.put('/clients/:id/suspend', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { active } = req.body;
+    const updatedUser = await prisma.user.update({
+      where: { id: req.params.id },
+      data: { active }
+    });
+    res.json({ success: true, active: updatedUser.active });
+  } catch (err) {
+    console.error('Error toggling suspension:', err);
+    res.status(500).json({ error: 'Error al cambiar estado' });
   }
 });
 
@@ -449,6 +474,83 @@ router.put('/projects/:id', authenticate, requireAdmin, async (req, res) => {
   }
 });
 
+// POST /admin/clients/:id/resend-invitation — Resend invitation
+router.post('/clients/:id/resend-invitation', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const client = await prisma.user.findUnique({ where: { id } });
+    
+    if (!client) {
+      return res.status(404).json({ error: 'Cliente no encontrado.' });
+    }
+    
+    if (client.invitationAccepted) {
+      return res.status(400).json({ error: 'El cliente ya activó su cuenta.' });
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 72 * 60 * 60 * 1000);
+
+    await prisma.user.update({
+      where: { id },
+      data: {
+        invitationToken: token,
+        invitationExpires: expires,
+      }
+    });
+
+    const activationLink = `${process.env.FRONTEND_URL}/activate/${token}`;
+    
+    // Send Email
+    let emailSent = true;
+    try {
+      await transporter.sendMail({
+        from: `"HummingX BI" <${process.env.EMAIL_USER}>`,
+        to: client.email,
+        subject: '¡Recordatorio: Activa tu cuenta en HummingX BI!',
+        html: `
+          <div style="font-family: 'Arial', sans-serif; max-width: 600px; margin: 0 auto; background: #f9fafb; padding: 40px 20px;">
+            <div style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); border: 1px solid #e5e7eb;">
+              <div style="background: linear-gradient(135deg, #0b0b0e 0%, #1a1a24 100%); padding: 40px 20px; text-align: center;">
+                <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.02em;">
+                  HummingX <span style="color: #00C4CC;">BI</span>
+                </h1>
+                <p style="color: rgba(255,255,255,0.6); font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em; margin: 8px 0 0 0;">
+                  Portal de Clientes
+                </p>
+              </div>
+              <div style="padding: 40px 32px;">
+                <p style="font-size: 16px; color: #374151; margin-top: 0;">Hola <strong>${client.name}</strong>,</p>
+                <p style="font-size: 16px; color: #4B5563; line-height: 1.6;">Te recordamos que se ha creado tu cuenta en nuestro <strong>Portal de Clientes Exclusivo</strong>. Aquí podrás revisar el progreso de tus proyectos en tiempo real.</p>
+                <p style="font-size: 16px; color: #4B5563; line-height: 1.6;">Tu invitación anterior ha expirado o está pendiente de ser aceptada. Haz clic en el siguiente botón para establecer tu contraseña y activar tu cuenta:</p>
+                <div style="text-align: center; margin: 40px 0;">
+                  <a href="${activationLink}" style="background: linear-gradient(135deg, #00C4CC 0%, #0E7490 100%); color: #ffffff; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 6px -1px rgba(0, 196, 204, 0.3);">
+                    Activar mi Portal
+                  </a>
+                </div>
+                <p style="font-size: 14px; color: #9CA3AF; margin-top: 32px; text-align: center;">
+                  El equipo de HummingX BI.
+                </p>
+              </div>
+            </div>
+          </div>
+        `
+      });
+      console.log(`📧 Resend email sent successfully to ${client.email}`);
+    } catch (emailErr) {
+      console.error('Error sending resend email:', emailErr);
+      emailSent = false;
+    }
+
+    res.json({
+      message: emailSent ? 'Invitación reenviada exitosamente.' : 'El enlace fue generado, pero hubo un error enviando el correo.'
+    });
+  } catch (err) {
+    console.error('Resend invitation error:', err);
+    res.status(500).json({ error: 'Error al reenviar la invitación.' });
+  }
+});
+
 // POST /admin/projects/:id/activities — Add activity
 router.post('/projects/:id/activities', authenticate, requireAdmin, async (req, res) => {
   try {
@@ -551,6 +653,7 @@ router.put('/referrals/:id', authenticate, requireAdmin, async (req, res) => {
     res.status(500).json({ error: 'Error al actualizar referido.' });
   }
 });
+
 
 // DELETE /admin/clients/:id — Delete a client and all associated resources
 router.delete('/clients/:id', authenticate, requireAdmin, async (req, res) => {
@@ -696,6 +799,170 @@ router.post('/impersonate/:clientId', authenticate, requireAdmin, async (req, re
   } catch (err) {
     console.error('Error al impersonar cliente:', err);
     res.status(500).json({ error: 'Error al iniciar sesión como cliente.' });
+  }
+});
+
+// --- ANALYTICS ENDPOINTS ---
+
+router.get('/analytics/overview', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const range = parseInt(req.query.range || '30', 10);
+    const dateLimit = new Date();
+    dateLimit.setDate(dateLimit.getDate() - range);
+
+    const clients = await prisma.user.findMany({
+      where: { role: 'client' },
+      select: {
+        id: true, invitationAccepted: true, activatedAt: true, lastLoginAt: true, totalTimeSpent: true, loginCount: true, createdAt: true,
+        loginEvents: {
+          where: { createdAt: { gte: dateLimit } },
+          select: { createdAt: true }
+        },
+        projects: {
+          select: { status: true, currentPhase: true, estimatedDelivery: true, designStatus: true }
+        }
+      }
+    });
+
+    const activeProjects = clients.flatMap(c => c.projects).filter(p => p.status === 'active' && p.currentPhase < 6);
+    const totalClients = clients.length;
+    const activatedClients = clients.filter(c => c.invitationAccepted).length;
+    const pendingClients = totalClients - activatedClients;
+    const active7d = clients.filter(c => c.lastLoginAt && (new Date() - new Date(c.lastLoginAt)) / (1000 * 60 * 60 * 24) <= 7).length;
+    const avgTime = activatedClients > 0 ? Math.round((clients.reduce((acc, c) => acc + c.totalTimeSpent, 0) / activatedClients) / 60) : 0;
+    
+    const overdueProjects = activeProjects.filter(p => p.estimatedDelivery && new Date(p.estimatedDelivery) < new Date()).length;
+
+    // Login events per day
+    const loginsPerDayMap = {};
+    for (let i = range - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      loginsPerDayMap[d.toISOString().split('T')[0]] = 0;
+    }
+
+    clients.forEach(c => {
+      c.loginEvents.forEach(evt => {
+        const dateStr = new Date(evt.createdAt).toISOString().split('T')[0];
+        if (loginsPerDayMap[dateStr] !== undefined) {
+          loginsPerDayMap[dateStr]++;
+        }
+      });
+    });
+
+    const loginsChartData = Object.entries(loginsPerDayMap).map(([date, count]) => {
+      const d = new Date(date);
+      // add timezone offset to avoid previous day bug
+      d.setMinutes(d.getMinutes() + d.getTimezoneOffset());
+      return {
+        date: d.toLocaleDateString('es-ES', { month: 'short', day: 'numeric' }),
+        accesos: count
+      };
+    });
+
+    res.json({
+      kpis: { totalClients, activatedClients, pendingClients, active7d, avgTime, overdueProjects },
+      funnel: { invited: totalClients, activated: activatedClients, returned: clients.filter(c => c.loginCount > 1).length, active7d },
+      loginsChartData,
+      alerts: {
+        unactivated3d: clients.filter(c => !c.invitationAccepted && (new Date() - new Date(c.createdAt)) / (1000 * 60 * 60 * 24) > 3).length,
+        inactive14d: clients.filter(c => c.invitationAccepted && c.lastLoginAt && (new Date() - new Date(c.lastLoginAt)) / (1000 * 60 * 60 * 24) > 14).length,
+        stuckProjects: activeProjects.filter(p => p.currentPhase === 3).length
+      }
+    });
+  } catch (err) {
+    console.error('Analytics overview error:', err);
+    res.status(500).json({ error: 'Error loading overview' });
+  }
+});
+
+router.get('/analytics/projects', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const clients = await prisma.user.findMany({
+      where: { role: 'client' },
+      select: {
+        id: true, companyName: true, name: true,
+        projects: {
+          where: { status: 'active', currentPhase: { lt: 6 } },
+          select: { id: true, name: true, currentPhase: true, progressPercent: true, estimatedDelivery: true, createdAt: true, updatedAt: true, designStatus: true }
+        }
+      }
+    });
+    const activeProjects = clients.flatMap(c => c.projects.map(p => ({ ...p, clientId: c.id, clientName: c.companyName || c.name })));
+    res.json(activeProjects);
+  } catch (err) {
+    res.status(500).json({ error: 'Error loading projects analytics' });
+  }
+});
+
+router.get('/analytics/behavior', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const range = parseInt(req.query.range || '30', 10);
+    const dateLimit = new Date();
+    dateLimit.setDate(dateLimit.getDate() - range);
+
+    const users = await prisma.user.findMany({
+      where: { role: 'client', invitationAccepted: true },
+      select: {
+        id: true, name: true, companyName: true, totalTimeSpent: true, loginCount: true, activatedAt: true,
+        pageViews: { where: { createdAt: { gte: dateLimit } }, select: { path: true } },
+        loginEvents: { where: { createdAt: { gte: dateLimit } }, select: { deviceType: true, createdAt: true } }
+      }
+    });
+
+    const sectionCounts = { 'Inicio': 0, 'Mi Proyecto': 0, 'Plan de Pagos': 0, 'Mis Referidos': 0, 'Soporte': 0 };
+    const deviceCounts = { desktop: 0, mobile: 0, unknown: 0 };
+    const heatmap = Array(7).fill().map(() => Array(24).fill(0));
+    let retained = 0;
+    
+    users.forEach(u => {
+      u.pageViews.forEach(pv => {
+        let section = 'Otro';
+        if (pv.path === '/dashboard' || pv.path === '/') section = 'Inicio';
+        else if (pv.path.includes('/project')) section = 'Mi Proyecto';
+        else if (pv.path.includes('/pagos')) section = 'Plan de Pagos';
+        else if (pv.path.includes('/referrals')) section = 'Mis Referidos';
+        else if (pv.path.includes('/support')) section = 'Soporte';
+        
+        if (section !== 'Otro') {
+          sectionCounts[section] = (sectionCounts[section] || 0) + 1;
+        }
+      });
+
+      u.loginEvents.forEach(evt => {
+        const type = evt.deviceType ? evt.deviceType.toLowerCase() : 'unknown';
+        if (type.includes('mobile')) deviceCounts.mobile++;
+        else if (type.includes('desktop') || type.includes('mac') || type.includes('windows')) deviceCounts.desktop++;
+        else deviceCounts.desktop++; // fallback to desktop for unknown if mostly web
+
+        const d = new Date(evt.createdAt);
+        heatmap[d.getDay()][d.getHours()]++;
+      });
+
+      if (u.activatedAt && u.loginEvents.length > 0) {
+        const act = new Date(u.activatedAt);
+        const hasLoginAfter7d = u.loginEvents.some(evt => (new Date(evt.createdAt) - act) / (1000 * 60 * 60 * 24) >= 7);
+        if (hasLoginAfter7d) retained++;
+      }
+    });
+
+    const sections = Object.entries(sectionCounts).map(([name, count]) => ({ name, count })).sort((a,b) => b.count - a.count);
+    const ranking = users.map(u => ({
+      id: u.id, name: u.companyName || u.name, time: u.totalTimeSpent, logins: u.loginCount
+    })).sort((a,b) => b.time - a.time);
+
+    res.json({
+      sections,
+      devices: [
+        { name: 'Escritorio', count: deviceCounts.desktop },
+        { name: 'Móvil', count: deviceCounts.mobile }
+      ].filter(d => d.count > 0),
+      heatmap,
+      retention: users.length ? Math.round((retained / users.length) * 100) : 0,
+      ranking: ranking.slice(0, 10)
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Error loading behavior analytics' });
   }
 });
 

@@ -10,6 +10,9 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  if (localStorage.getItem('hx_is_impersonating') === 'true') {
+    config.headers['x-impersonating'] = 'true';
+  }
   return config;
 });
 

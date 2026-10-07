@@ -24,6 +24,20 @@ export default function AdminClientsPage() {
   const [deletingClientId, setDeletingClientId] = useState(null);
   const [impersonatingClientId, setImpersonatingClientId] = useState(null);
   const [createdReminder, setCreatedReminder] = useState(null);
+  const [resendingId, setResendingId] = useState(null);
+
+  const handleResendInvitation = async (clientId) => {
+    setResendingId(clientId);
+    try {
+      const res = await api.post(`/admin/clients/${clientId}/resend-invitation`);
+      alert(res.data.message || 'Invitación reenviada');
+      fetchClients();
+    } catch (err) {
+      alert(err.response?.data?.error || 'Error al reenviar invitación');
+    } finally {
+      setResendingId(null);
+    }
+  };
 
   const handleImpersonate = async (clientId) => {
     setImpersonatingClientId(clientId);
@@ -143,6 +157,13 @@ export default function AdminClientsPage() {
     }))
   );
 
+  const now = new Date();
+  const inactiveAlertClients = clients.filter(c => {
+    if (c.invitationAccepted) return false;
+    const daysSinceCreation = (now - new Date(c.createdAt)) / (1000 * 60 * 60 * 24);
+    return daysSinceCreation > 3;
+  });
+
   return (
     <Layout>
       <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -204,6 +225,29 @@ export default function AdminClientsPage() {
               >
                 <X size={18} />
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* Unactivated Clients Alert */}
+        {inactiveAlertClients.length > 0 && (
+          <div style={{
+            background: '#FEF2F2',
+            border: '1px solid #FECACA',
+            borderRadius: '12px',
+            padding: '16px 20px',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '12px'
+          }}>
+            <AlertTriangle size={20} color="#DC2626" style={{ marginTop: '2px' }} />
+            <div>
+              <h4 style={{ margin: '0 0 4px', fontSize: '14px', fontWeight: 700, color: '#991B1B' }}>
+                Clientes inactivos detectados
+              </h4>
+              <p style={{ margin: 0, fontSize: '13px', color: '#B91C1C', lineHeight: '1.5' }}>
+                Hay {inactiveAlertClients.length} cliente(s) que no han activado su cuenta en más de 3 días.
+              </p>
             </div>
           </div>
         )}
@@ -349,6 +393,7 @@ export default function AdminClientsPage() {
                 <tr>
                   <th>Cliente / Empresa</th>
                   <th>Contacto</th>
+                  <th>Estado</th>
                   <th>Proyectos</th>
                   <th style={{ textAlign: 'right' }}>Acciones</th>
                 </tr>
@@ -380,6 +425,34 @@ export default function AdminClientsPage() {
                       <div style={{ fontSize: '12px', color: '#9CA3AF' }}>{client.phone || 'Sin teléfono'}</div>
                     </td>
                     <td>
+                      {(() => {
+                        if (client.active === false) {
+                          return (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
+                              <span style={{ padding: '4px 8px', borderRadius: '4px', background: '#FFEDD5', color: '#C2410C', fontSize: '12px', fontWeight: 600, whiteSpace: 'nowrap' }}>Suspendido</span>
+                            </div>
+                          );
+                        }
+                        if (client.invitationAccepted) {
+                          return (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
+                              <span style={{ padding: '4px 8px', borderRadius: '4px', background: '#D1FAE5', color: '#065F46', fontSize: '12px', fontWeight: 600, whiteSpace: 'nowrap' }}>Activo</span>
+                              {client.activatedAt && (
+                                <span style={{ fontSize: '11px', color: '#6B7280', whiteSpace: 'nowrap' }}>
+                                  {new Date(client.activatedAt).toLocaleDateString()} {new Date(client.activatedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        }
+                        const isExpired = client.invitationExpires && new Date(client.invitationExpires) < new Date();
+                        if (isExpired) {
+                          return <span style={{ padding: '4px 8px', borderRadius: '4px', background: '#FEE2E2', color: '#DC2626', fontSize: '12px', fontWeight: 600, whiteSpace: 'nowrap' }}>Invitación Vencida</span>;
+                        }
+                        return <span style={{ padding: '4px 8px', borderRadius: '4px', background: '#FEF3C7', color: '#92400E', fontSize: '12px', fontWeight: 600, whiteSpace: 'nowrap' }}>Invitación Enviada</span>;
+                      })()}
+                    </td>
+                    <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <FileText size={14} color="#9CA3AF" />
                         <span style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>
@@ -389,6 +462,18 @@ export default function AdminClientsPage() {
                     </td>
                     <td style={{ textAlign: 'right' }}>
                       <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                        {!client.invitationAccepted && (
+                          <button
+                            type="button"
+                            onClick={() => handleResendInvitation(client.id)}
+                            disabled={resendingId === client.id}
+                            title="Reenviar invitación"
+                            className="btn-secondary"
+                            style={{ padding: '6px 10px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px', opacity: resendingId === client.id ? 0.5 : 1 }}
+                          >
+                            <Mail size={14} /> {resendingId === client.id ? '...' : 'Reenviar'}
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={() => handleImpersonate(client.id)}

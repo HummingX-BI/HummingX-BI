@@ -570,52 +570,54 @@ export default function AdminClientDetailPage() {
       <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <Link to="/admin/clients" style={{ textDecoration: 'none' }}>
-            <button className="btn-secondary" style={{ padding: '8px', borderRadius: '8px' }}>
-              <ArrowLeft size={18} />
-            </button>
-          </Link>
-          {client.logoUrl ? (
-            <div style={{ width: '80px', height: '80px', borderRadius: '8px', border: 'none', background: 'transparent', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <img src={client.logoUrl} alt="Logo" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-            </div>
-          ) : (
-            <div style={{ width: '80px', height: '80px', borderRadius: '8px', background: '#DBEAFE', color: '#1D4ED8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', fontWeight: 700 }}>
-              {(client.companyName || client.name).charAt(0).toUpperCase()}
-            </div>
-          )}
-          <div>
-            <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#111827', margin: '0 0 2px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-              {client.companyName || client.name}
-            </h1>
-            {client.companyName && client.companyName !== client.name && (
-              <p style={{ color: '#4B5563', fontSize: '15px', margin: '0 0 2px', fontWeight: 500 }}>
-                {client.name}
-              </p>
+        <div className="admin-detail-header">
+          <div className="admin-detail-header-info">
+            <Link to="/admin/clients" style={{ textDecoration: 'none' }}>
+              <button className="btn-secondary" style={{ padding: '8px', borderRadius: '8px' }}>
+                <ArrowLeft size={18} />
+              </button>
+            </Link>
+            {client.logoUrl ? (
+              <div style={{ width: '64px', height: '64px', borderRadius: '8px', border: 'none', background: 'transparent', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <img src={client.logoUrl} alt="Logo" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+              </div>
+            ) : (
+              <div style={{ width: '64px', height: '64px', borderRadius: '8px', background: '#DBEAFE', color: '#1D4ED8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', fontWeight: 700, flexShrink: 0 }}>
+                {(client.companyName || client.name).charAt(0).toUpperCase()}
+              </div>
             )}
-            <p style={{ color: '#6B7280', fontSize: '13px', margin: 0 }}>
-              Gestión de cuenta y proyecto activo
-              {client.invitationAccepted && client.activatedAt && (
-                <span style={{ marginLeft: '8px', color: '#9CA3AF' }}>
-                  (Activado: {new Date(client.activatedAt).toLocaleDateString()})
-                </span>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <h1 style={{ fontSize: 'clamp(20px, 4vw, 24px)', fontWeight: 700, color: '#111827', margin: '0 0 2px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                {client.companyName || client.name}
+              </h1>
+              {client.companyName && client.companyName !== client.name && (
+                <p style={{ color: '#4B5563', fontSize: '15px', margin: '0 0 2px', fontWeight: 500 }}>
+                  {client.name}
+                </p>
               )}
-            </p>
-            {client.loginCount !== undefined && (
-              <p style={{ color: '#4B5563', fontSize: '13px', margin: '4px 0 0 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: client.lastLoginAt && new Date() - new Date(client.lastLoginAt) < 7*24*60*60*1000 ? '#10B981' : '#9CA3AF' }}></span>
-                <strong>{client.loginCount}</strong> {client.loginCount === 1 ? 'visita' : 'visitas'}
-                {client.lastLoginAt && (
-                  <span style={{ color: '#9CA3AF' }}>
-                    • Último acceso: {new Date(client.lastLoginAt).toLocaleDateString()} a las {new Date(client.lastLoginAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                    {client.loginEvents?.[0]?.deviceType ? ` (${client.loginEvents[0].deviceType})` : ''}
+              <p style={{ color: '#6B7280', fontSize: '13px', margin: 0 }}>
+                Gestión de cuenta y proyecto activo
+                {client.invitationAccepted && client.activatedAt && (
+                  <span style={{ marginLeft: '8px', color: '#9CA3AF' }}>
+                    (Activado: {new Date(client.activatedAt).toLocaleDateString()})
                   </span>
                 )}
               </p>
-            )}
+              {client.loginCount !== undefined && (
+                <p style={{ color: '#4B5563', fontSize: '13px', margin: '4px 0 0 0', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: client.lastLoginAt && new Date() - new Date(client.lastLoginAt) < 7*24*60*60*1000 ? '#10B981' : '#9CA3AF' }}></span>
+                  <strong>{client.loginCount}</strong> {client.loginCount === 1 ? 'visita' : 'visitas'}
+                  {client.lastLoginAt && (
+                    <span style={{ color: '#9CA3AF' }}>
+                      • Último acceso: {new Date(client.lastLoginAt).toLocaleDateString()} a las {new Date(client.lastLoginAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                      {client.loginEvents?.[0]?.deviceType ? ` (${client.loginEvents[0].deviceType})` : ''}
+                    </span>
+                  )}
+                </p>
+              )}
+            </div>
           </div>
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div className="admin-detail-header-actions">
             {(() => {
               if (client.active === false) {
                 return <span style={{ padding: '6px 12px', borderRadius: '6px', background: '#FFEDD5', color: '#C2410C', fontSize: '13px', fontWeight: 600, display: 'inline-flex', alignItems: 'center' }}>Suspendido</span>;
@@ -654,10 +656,10 @@ export default function AdminClientDetailPage() {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', alignItems: 'start' }}>
+        <div className="admin-detail-grid-3">
 
           {/* Client Details Form */}
-          <div className="card" style={{ padding: '28px' }}>
+          <div className="card responsive-card-p" style={{ padding: '28px' }}>
             <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <User size={16} color="#6B7280" /> Datos del Cliente
             </h3>
@@ -733,7 +735,7 @@ export default function AdminClientDetailPage() {
           </div>
 
           {/* Project Control */}
-          <div className="card" style={{ padding: '28px' }}>
+          <div className="card responsive-card-p" style={{ padding: '28px' }}>
             <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Activity size={16} color="#6B7280" /> Control de Proyecto
             </h3>
@@ -781,7 +783,7 @@ export default function AdminClientDetailPage() {
                       <input type="text" className="hx-input" value={projectData.name} onChange={e => setProjectData({...projectData, name: e.target.value})} required />
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div className="admin-form-row-2">
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                         <label style={{ fontSize: '13px', fontWeight: 500, color: '#374151' }}>Avance (%)</label>
                         <input type="number" min="0" max="100" className="hx-input" value={projectData.progressPercent} onChange={e => setProjectData({...projectData, progressPercent: parseInt(e.target.value)})} />
@@ -795,7 +797,7 @@ export default function AdminClientDetailPage() {
                       </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div className="admin-form-row-2">
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                         <label style={{ fontSize: '13px', fontWeight: 500, color: '#374151' }}>Enlace Cotización (Drive)</label>
                         <input type="url" className="hx-input" placeholder="https://docs.google.com/..." value={projectData.quoteLink || ''} onChange={e => setProjectData({...projectData, quoteLink: e.target.value})} />
@@ -812,7 +814,7 @@ export default function AdminClientDetailPage() {
                     {/* Phase Selector */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                       <label style={{ fontSize: '13px', fontWeight: 500, color: '#374151' }}>Fase Actual</label>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+                      <div className="admin-phase-grid">
                         {PHASES.map(phase => (
                           <button
                             type="button"
@@ -908,7 +910,7 @@ export default function AdminClientDetailPage() {
             </div>
 
           {/* Referrals & Credits Control */}
-          <div className="card" style={{ padding: '28px' }}>
+          <div className="card responsive-card-p" style={{ padding: '28px' }}>
             <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Users size={16} color="#6B7280" /> Desempeño y Referidos
             </h3>
@@ -963,8 +965,8 @@ export default function AdminClientDetailPage() {
         </div>
 
         {/* Plan de Pagos Card (Full Width) */}
-        <div className="card" style={{ padding: '28px', marginTop: '4px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
+        <div className="card responsive-card-p" style={{ padding: '28px', marginTop: '4px' }}>
+          <div className="admin-payments-header">
             <div>
               <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#111827', margin: '0 0 4px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <DollarSign size={20} color="#00C4CC" /> Plan de Pagos del Cliente
@@ -974,8 +976,8 @@ export default function AdminClientDetailPage() {
               </p>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-              <div style={{ display: 'flex', gap: '16px', background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '10px', padding: '8px 16px' }}>
+            <div className="admin-payments-header-actions">
+              <div className="admin-payments-kpis">
                 <div>
                   <div style={{ fontSize: '11px', color: '#6B7280', fontWeight: 500 }}>Total Proyecto</div>
                   <div style={{ fontSize: '15px', fontWeight: 700, color: '#111827' }}>
@@ -1076,8 +1078,8 @@ export default function AdminClientDetailPage() {
               </div>
             </div>
           ) : (
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <div className="table-responsive-container">
+              <table style={{ width: '100%', minWidth: '600px', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid #E5E7EB', color: '#6B7280', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     <th style={{ padding: '12px 14px', fontWeight: 600 }}>Concepto / Título</th>
@@ -1175,7 +1177,7 @@ export default function AdminClientDetailPage() {
 
         {/* Bitácora / Activities for Admin (Horizontal Full Width) */}
         {activeProject && activeProject.activities && activeProject.activities.length > 0 && (
-          <div className="card" style={{ padding: '28px', marginTop: '8px' }}>
+          <div className="card responsive-card-p" style={{ padding: '28px', marginTop: '8px' }}>
             <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Activity size={16} color="#6B7280" /> Bitácora Reciente
             </h3>
@@ -1200,7 +1202,7 @@ export default function AdminClientDetailPage() {
         )}
 
         {/* Danger Zone */}
-        <div className="card" style={{ padding: '28px', marginTop: '32px', border: '1px solid #FECACA' }}>
+        <div className="card responsive-card-p" style={{ padding: '28px', marginTop: '32px', border: '1px solid #FECACA' }}>
           <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#DC2626', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <AlertCircle size={20} /> Zona de Peligro
           </h3>
@@ -1210,7 +1212,7 @@ export default function AdminClientDetailPage() {
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {/* Suspend Action */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: '#F9FAFB', borderRadius: '8px', border: '1px solid #E5E7EB', flexWrap: 'wrap', gap: '16px' }}>
+            <div className="admin-danger-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: '#F9FAFB', borderRadius: '8px', border: '1px solid #E5E7EB', flexWrap: 'wrap', gap: '16px' }}>
               <div style={{ flex: '1 1 300px' }}>
                 <h4 style={{ margin: '0 0 6px 0', fontSize: '15px', fontWeight: 600, color: '#111827' }}>
                   {client.active ? 'Suspender Acceso del Cliente' : 'Reactivar Acceso del Cliente'}
@@ -1247,7 +1249,7 @@ export default function AdminClientDetailPage() {
             </div>
 
             {/* Delete Action */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: '#FEF2F2', borderRadius: '8px', border: '1px solid #FECACA', flexWrap: 'wrap', gap: '16px' }}>
+            <div className="admin-danger-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: '#FEF2F2', borderRadius: '8px', border: '1px solid #FECACA', flexWrap: 'wrap', gap: '16px' }}>
               <div style={{ flex: '1 1 300px' }}>
                 <h4 style={{ margin: '0 0 6px 0', fontSize: '15px', fontWeight: 600, color: '#991B1B' }}>
                   Eliminar Cliente Permanentemente
@@ -1439,7 +1441,7 @@ export default function AdminClientDetailPage() {
 
             <form onSubmit={handleSavePlan} style={{ display: 'flex', flexDirection: 'column', gap: '16px', overflowY: 'auto', paddingRight: '4px', marginTop: '10px' }}>
               {/* Parameters Row */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.3fr', gap: '14px', background: '#F9FAFB', padding: '16px', borderRadius: '10px', border: '1px solid #E5E7EB' }}>
+              <div className="admin-plan-params-row">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   <label style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>
                     Monto Total del Proyecto (MXN) *
@@ -1683,20 +1685,7 @@ export default function AdminClientDetailPage() {
       )}
       {/* Floating Sticky Reminder if project has unsaved changes */}
       {isProjectDirty && (
-        <div style={{
-          position: 'fixed',
-          bottom: '24px',
-          right: '24px',
-          zIndex: 9999,
-          background: '#111827',
-          color: '#FFFFFF',
-          padding: '12px 18px',
-          borderRadius: '12px',
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(239, 68, 68, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '14px',
-        }}>
+        <div className="admin-floating-dirty-bar">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#EF4444', display: 'inline-block', boxShadow: '0 0 8px #EF4444' }}></span>
             <span style={{ fontSize: '13px', fontWeight: 600 }}>

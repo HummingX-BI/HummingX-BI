@@ -97,7 +97,7 @@ export default function Layout({ children, customBreadcrumbLabel, fullWidth = fa
   };
 
   return (
-    <div className="layout-root" style={{ display: 'flex', minHeight: '100vh', background: '#F9FAFB', width: '100%', maxWidth: '100%' }}>
+    <div className="layout-root" style={{ display: 'flex', minHeight: '100vh', background: '#F9FAFB', width: '100%', maxWidth: '100vw', overflowX: 'hidden' }}>
       <Tour
         steps={tourSteps}
         open={tour.open}
@@ -109,7 +109,7 @@ export default function Layout({ children, customBreadcrumbLabel, fullWidth = fa
       />
       <Sidebar mobileOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      <div className="layout-main-wrapper" style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, width: '100%', maxWidth: '100%' }}>
+      <div className="layout-main-wrapper" style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, width: '100%', maxWidth: '100%', overflowX: 'hidden' }}>
         {/* Banner de Modo Administrador (Impersonación) */}
         {isImpersonating && (
           <div style={{
@@ -189,7 +189,7 @@ export default function Layout({ children, customBreadcrumbLabel, fullWidth = fa
         </header>
 
         {/* Main Content — page-enter triggers fade-up on each route change */}
-        <main className="layout-main-content">
+        <main className="layout-main-content" style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', width: '100%', maxWidth: '100%' }}>
           <div
             key={pageKey}
             className="page-enter"

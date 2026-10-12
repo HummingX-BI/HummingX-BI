@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2F1C12"/>
+      <stop offset="100%" stop-color="#140A06"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCD34D"/>
+      <stop offset="50%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#B45309"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background Circle -->
+  <circle cx="100" cy="100" r="92" fill="url(#bgGrad)" stroke="url(#goldGrad)" stroke-width="4"/>
+  <circle cx="100" cy="100" r="84" fill="none" stroke="rgba(245, 158, 11, 0.25)" stroke-width="1.5" stroke-dasharray="4 3"/>
+
+  <!-- Coffee Steam / Waves -->
+  <path d="M92 48 Q97 40 92 34" stroke="url(#goldGrad)" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.8"/>
+  <path d="M100 46 Q105 38 100 32" stroke="url(#goldGrad)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M108 48 Q113 40 108 34" stroke="url(#goldGrad)" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.8"/>
+
+  <!-- Monogram T -->
+  <text x="100" y="122" 
+        text-anchor="middle" 
+        font-family="'Playfair Display', 'Georgia', serif" 
+        font-size="74" 
+        font-weight="bold" 
+        fill="url(#goldGrad)" 
+        letter-spacing="2">T</text>
+
+  <!-- Arc / Subtitle -->
+  <text x="100" y="152" 
+        text-anchor="middle" 
+        font-family="'Inter', sans-serif" 
+        font-size="11" 
+        font-weight="700" 
+        fill="#FDE68A" 
+        letter-spacing="4">TAHARA</text>
+  
+  <text x="100" y="165" 
+        text-anchor="middle" 
+        font-family="'Inter', sans-serif" 
+        font-size="8" 
+        font-weight="500" 
+        fill="#D97706" 
+        letter-spacing="2">CAFÉ &amp; BISTRO</text>
+</svg>

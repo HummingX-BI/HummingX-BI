@@ -241,12 +241,6 @@ export default function ReferralsPage() {
         {/* ── Header ─────────────────────────────────────── */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 10px', background: '#F0FDFA', border: '1px solid #CCFBF1', borderRadius: '9999px', marginBottom: '8px' }}>
-              <Sparkles size={13} color="#00C4CC" />
-              <span style={{ fontSize: '11.5px', fontWeight: 600, color: '#0E7490', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Programa de Afiliados & Recomendaciones
-              </span>
-            </div>
             <h1 style={{ fontSize: '28px', fontWeight: 800, color: '#111827', margin: '0 0 6px', letterSpacing: '-0.025em', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
               Mis Referidos & Créditos HX
             </h1>

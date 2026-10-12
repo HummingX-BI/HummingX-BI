@@ -1,0 +1,14 @@
+{
+  "name": "qr-generator",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Generador de códigos QR para tarjetas NFC de HummingX BI",
+  "scripts": {
+    "generate": "node generar.mjs"
+  },
+  "dependencies": {
+    "jsqr": "^1.4.0",
+    "pngjs": "^7.0.0",
+    "qrcode": "^1.5.4"
+  }
+}

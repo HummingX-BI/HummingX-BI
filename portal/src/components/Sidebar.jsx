@@ -47,7 +47,7 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
     { to: '/dashboard', icon: LayoutDashboard, label: 'Inicio' },
     { to: '/project',   icon: FolderKanban,   label: 'Mi Proyecto' },
     { to: '/pagos',     icon: Calendar,       label: 'Plan de Pagos' },
-    { to: '/referrals', icon: Users,           label: 'Mis Referidos', isDev: true },
+    { to: '/referrals', icon: Users,           label: 'Mis Referidos' },
   ];
 
   const adminLinks = [

@@ -309,9 +309,18 @@ export default function AdminClientDetailPage() {
 
   const handleUpdateReferral = async (referralId, newStatus) => {
     try {
-      await api.put(`/admin/referrals/${referralId}`, { status: newStatus });
+      let creditAmount = 1500;
+      if (newStatus === 'converted') {
+        const inputAmount = window.prompt('Monto de Créditos HX a acreditar al cliente por este proyecto:', '1500');
+        if (inputAmount === null) return; // cancelado por usuario
+        creditAmount = parseInt(inputAmount) || 1500;
+      }
+      await api.put(`/admin/referrals/${referralId}`, { status: newStatus, creditAmount });
       fetchClient();
-    } catch (err) { console.error('Error updating referral', err); }
+    } catch (err) { 
+      console.error('Error updating referral', err); 
+      alert('Error al actualizar el estado del referido.');
+    }
   };
 
   const handleDeleteActivity = async (activityId) => {
@@ -935,26 +944,41 @@ export default function AdminClientDetailPage() {
             </form>
 
             <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#374151', margin: '0 0 12px' }}>Lista de Referidos</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {(!client.referralsMade || client.referralsMade.length === 0) ? (
                 <p style={{ fontSize: '13px', color: '#9CA3AF', margin: 0 }}>No ha recomendado a nadie aún.</p>
               ) : (
                 client.referralsMade.map(ref => (
-                  <div key={ref.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: '#F9FAFB', borderRadius: '8px', border: '1px solid #F3F4F6' }}>
-                    <div>
-                      <span style={{ fontSize: '13px', fontWeight: 500, color: '#111827', display: 'block' }}>{ref.companyName}</span>
-                      <span style={{ fontSize: '11px', color: '#6B7280' }}>{ref.contactName || 'Sin contacto'}</span>
+                  <div key={ref.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', padding: '12px 14px', background: '#F9FAFB', borderRadius: '10px', border: '1px solid #E5E7EB' }}>
+                    <div style={{ flex: 1 }}>
+                      <span style={{ fontSize: '13.5px', fontWeight: 700, color: '#111827', display: 'block' }}>{ref.companyName}</span>
+                      <div style={{ fontSize: '11.5px', color: '#4B5563', display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '2px' }}>
+                        {ref.contactName && <span style={{ fontWeight: 500 }}>{ref.contactName}</span>}
+                        {ref.contactPhone && <span>• Tel: {ref.contactPhone}</span>}
+                        {ref.contactEmail && <span>• {ref.contactEmail}</span>}
+                      </div>
+                      {ref.notes && (
+                        <div style={{ fontSize: '11.5px', color: '#4B5563', fontStyle: 'italic', marginTop: '4px', background: '#FFFFFF', padding: '4px 8px', borderRadius: '6px', border: '1px solid #E5E7EB' }}>
+                          "{ref.notes}"
+                        </div>
+                      )}
+                      {ref.creditsGenerated > 0 && (
+                        <span style={{ display: 'inline-block', marginTop: '6px', fontSize: '11px', fontWeight: 700, color: '#047857', background: '#ECFDF5', border: '1px solid #A7F3D0', padding: '2px 8px', borderRadius: '6px' }}>
+                          +${ref.creditsGenerated.toLocaleString()} HX acreditados
+                        </span>
+                      )}
                     </div>
                     <select 
                       className="hx-input" 
-                      style={{ padding: '4px 8px', fontSize: '11px', height: 'auto', width: 'auto' }}
+                      style={{ padding: '6px 10px', fontSize: '11.5px', height: 'auto', width: 'auto', fontWeight: 600, flexShrink: 0 }}
                       value={ref.status}
                       onChange={(e) => handleUpdateReferral(ref.id, e.target.value)}
                     >
                       <option value="registered">Registrado</option>
                       <option value="contacted">Contactado</option>
                       <option value="negotiating">En Negociación</option>
-                      <option value="converted">Convertido</option>
+                      <option value="converted">Convertido (Acreditar)</option>
+                      <option value="inactive">Inactivo</option>
                     </select>
                   </div>
                 ))

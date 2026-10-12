@@ -214,7 +214,20 @@ router.get('/clients/:id', authenticate, requireAdmin, async (req, res) => {
             }
           }
         },
-        referralsMade: { orderBy: { createdAt: 'desc' }, select: { id: true, companyName: true, status: true, createdAt: true } },
+        referralsMade: { 
+          orderBy: { createdAt: 'desc' }, 
+          select: { 
+            id: true, 
+            companyName: true, 
+            contactName: true, 
+            contactEmail: true, 
+            contactPhone: true, 
+            status: true, 
+            creditsGenerated: true, 
+            notes: true, 
+            createdAt: true 
+          } 
+        },
         creditMovements: { orderBy: { createdAt: 'desc' }, select: { id: true, amount: true, type: true, description: true, createdAt: true } },
       }
     });
@@ -622,20 +635,15 @@ router.put('/referrals/:id', authenticate, requireAdmin, async (req, res) => {
 
     // If converted, generate credits automatically
     if (status === 'converted' && referral.status !== 'converted' && updated.creditsGenerated === 0) {
-      const creditAmount = 1500; // Fixed amount for referrals
+      const creditAmount = req.body.creditAmount ? parseInt(req.body.creditAmount) : 1500; // Fixed or custom amount
       
       await prisma.$transaction([
-        // Add credits to the user's total
-        prisma.user.update({
-          where: { id: referral.referrerId },
-          data: { totalCredits: { increment: creditAmount } }
-        }),
-        // Register the movement
+        // Register the credit movement
         prisma.creditMovement.create({
           data: {
             clientId: referral.referrerId,
             amount: creditAmount,
-            type: 'earned',
+            type: 'referral_converted',
             description: `Bono por recomendación exitosa: ${referral.companyName}`
           }
         }),
@@ -651,6 +659,7 @@ router.put('/referrals/:id', authenticate, requireAdmin, async (req, res) => {
 
     res.json(updated);
   } catch (err) {
+    console.error('[ADMIN] Error al actualizar referido:', err);
     res.status(500).json({ error: 'Error al actualizar referido.' });
   }
 });

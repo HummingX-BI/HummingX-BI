@@ -206,7 +206,7 @@ export default function ReferralsPage() {
         bg: '#F5F3FF',
         border: '#DDD6FE',
         gradient: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
-        img: '/vip-icon.jpg',
+        img: '/vip-icon.png',
         desc: 'Máximo nivel de socio con atención y beneficios prioritarios.',
         nextLevel: null,
         needed: 0,
@@ -226,7 +226,7 @@ export default function ReferralsPage() {
         bg: '#F0FDFA',
         border: '#CCFBF1',
         gradient: 'linear-gradient(135deg, #00C4CC 0%, #0284C7 100%)',
-        img: '/partner-icon.jpg',
+        img: '/partner-icon.png',
         desc: 'Socio preferente con bonificaciones activas.',
         nextLevel: 'HummingX VIP',
         needed,
@@ -617,55 +617,6 @@ export default function ReferralsPage() {
 
         </div>
 
-        {/* ── Métricas Visuales Rápidas & Mini Stepper ─────────────────────── */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '12px',
-          background: '#FFFFFF',
-          padding: '14px 20px',
-          borderRadius: '14px',
-          border: '1px solid #E5E7EB',
-        }}>
-          {/* Quick Metrics Chips */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '8px', background: '#F9FAFB', border: '1px solid #E5E7EB' }}>
-              <span style={{ fontSize: '12px', color: '#6B7280' }}>Total Recomendadas:</span>
-              <strong style={{ fontSize: '13px', color: '#111827' }}>{totalCount}</strong>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '8px', background: '#FFFBEB', border: '1px solid #FEF3C7' }}>
-              <span style={{ fontSize: '12px', color: '#92400E' }}>En Negociación:</span>
-              <strong style={{ fontSize: '13px', color: '#B45309' }}>{inProgressCount}</strong>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '8px', background: '#ECFDF5', border: '1px solid #A7F3D0' }}>
-              <span style={{ fontSize: '12px', color: '#065F46' }}>Concretadas:</span>
-              <strong style={{ fontSize: '13px', color: '#047857' }}>{convertedCount}</strong>
-            </div>
-          </div>
-
-          {/* Mini Stepper Chips */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', color: '#64748B', fontWeight: 500, flexWrap: 'wrap' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#111827', color: '#FFFFFF', fontSize: '10px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>1</span>
-              Comparte link
-            </span>
-            <span>→</span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#00C4CC', color: '#FFFFFF', fontSize: '10px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>2</span>
-              Cotizamos proyecto
-            </span>
-            <span>→</span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#059669', color: '#FFFFFF', fontSize: '10px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>3</span>
-              Recibes créditos HX
-            </span>
-          </div>
-        </div>
-
         {/* ── Main Section: Tabs & Data Table ─────────────────────────────────────── */}
         <div className="card" style={{
           padding: '24px',
@@ -1054,6 +1005,144 @@ export default function ReferralsPage() {
 
         </div>
 
+        {/* ── ¿Cómo Funciona el Programa de Socios? (3 Pasos Explicados) ────────── */}
+        <div className="card" style={{
+          padding: '24px 28px',
+          borderRadius: '16px',
+          border: '1px solid #E5E7EB',
+          background: '#FFFFFF',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.02)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: '#F0FDFA', border: '1px solid #CCFBF1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Sparkles size={16} color="#00C4CC" />
+              </div>
+              <div>
+                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#111827', margin: 0 }}>
+                  ¿Cómo funciona el programa de recomendación?
+                </h3>
+                <span style={{ fontSize: '12px', color: '#6B7280' }}>
+                  Convierte tu red y conexiones comerciales en valor tangible para el crecimiento de tu empresa
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+            {/* Paso 1 */}
+            <div style={{
+              padding: '20px',
+              borderRadius: '14px',
+              background: '#F9FAFB',
+              border: '1px solid #F3F4F6',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+            }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                  <div style={{
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '50%',
+                    background: '#111827',
+                    color: '#FFFFFF',
+                    fontSize: '12px',
+                    fontWeight: 800,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}>
+                    1
+                  </div>
+                  <h4 style={{ margin: 0, fontSize: '14.5px', fontWeight: 700, color: '#111827' }}>
+                    Comparte tu link o recomienda
+                  </h4>
+                </div>
+                <p style={{ margin: 0, fontSize: '12.5px', color: '#6B7280', lineHeight: 1.6 }}>
+                  Envía tu enlace personalizado o registra los datos de empresas, colegas o socios que requieran desarrollo de software, automatización o inteligencia de negocios.
+                </p>
+              </div>
+            </div>
+
+            {/* Paso 2 */}
+            <div style={{
+              padding: '20px',
+              borderRadius: '14px',
+              background: '#F0FDFA',
+              border: '1px solid #CCFBF1',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+            }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                  <div style={{
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '50%',
+                    background: '#00C4CC',
+                    color: '#FFFFFF',
+                    fontSize: '12px',
+                    fontWeight: 800,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}>
+                    2
+                  </div>
+                  <h4 style={{ margin: 0, fontSize: '14.5px', fontWeight: 700, color: '#0F766E' }}>
+                    Cotizamos y diseñamos la solución
+                  </h4>
+                </div>
+                <p style={{ margin: 0, fontSize: '12.5px', color: '#4B5563', lineHeight: 1.6 }}>
+                  Nuestro equipo directivo y técnico realiza un diagnóstico especializado con tu referido, define los requerimientos y formula una propuesta formal de arquitectura.
+                </p>
+              </div>
+            </div>
+
+            {/* Paso 3 */}
+            <div style={{
+              padding: '20px',
+              borderRadius: '14px',
+              background: '#ECFDF5',
+              border: '1px solid #A7F3D0',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+            }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                  <div style={{
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '50%',
+                    background: '#059669',
+                    color: '#FFFFFF',
+                    fontSize: '12px',
+                    fontWeight: 800,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}>
+                    3
+                  </div>
+                  <h4 style={{ margin: 0, fontSize: '14.5px', fontWeight: 700, color: '#047857' }}>
+                    Recibes Créditos HX
+                  </h4>
+                </div>
+                <p style={{ margin: 0, fontSize: '12.5px', color: '#4B5563', lineHeight: 1.6 }}>
+                  Una vez formalizado el proyecto, se acreditan automáticamente los Créditos HX correspondientes a tu balance para aplicar en mejoras, nuevas funciones o consultoría en tu sistema.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       {/* ── Modal: Recomendar una Empresa ─────────────────────────────────────── */}
@@ -1401,7 +1490,7 @@ export default function ReferralsPage() {
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
                         <img
-                          src="/partner-icon.jpg"
+                          src="/partner-icon.png"
                           alt="Partner"
                           style={{ width: '40px', height: '40px', objectFit: 'contain' }}
                         />
@@ -1455,7 +1544,7 @@ export default function ReferralsPage() {
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
                         <img
-                          src="/vip-icon.jpg"
+                          src="/vip-icon.png"
                           alt="VIP"
                           style={{ width: '40px', height: '40px', objectFit: 'contain' }}
                         />

@@ -4,6 +4,9 @@ import Layout from '../../components/Layout';
 import api from '../../lib/api';
 import QRCode from 'qrcode';
 import JSZip from 'jszip';
+import Confetti from 'react-confetti';
+import { Player } from '@lottiefiles/react-lottie-player';
+import trophyAnimation from '../../assets/lottie/Trophy.json';
 import {
   QrCode,
   Smartphone,
@@ -127,6 +130,10 @@ export default function AdminNfcCardsPage() {
   const [formError, setFormError] = useState('');
   const [copiedId, setCopiedId] = useState(null);
 
+  // Celebration Modal State (Serpentina / Confetti para el cierre con el cliente)
+  const [showCelebrationModal, setShowCelebrationModal] = useState(false);
+  const [celebratedCard, setCelebratedCard] = useState(null);
+
   // Form State
   const [form, setForm] = useState({
     code: '',
@@ -186,6 +193,22 @@ export default function AdminNfcCardsPage() {
       type: card.type || 'google_reviews',
       targetUrl: card.targetUrl,
       active: card.active,
+      notes: card.notes || '',
+    });
+    setFormError('');
+    setShowModal(true);
+  };
+
+  const openConfigureCardModal = (card) => {
+    setEditingCard(card);
+    const num = parseInt(card.code, 10);
+    const defaultType = card.type || (num >= 11 && num <= 15 ? 'instagram' : 'google_reviews');
+    setForm({
+      code: card.code,
+      clientName: card.clientName && !card.clientName.includes('Disponible') ? card.clientName : '',
+      type: defaultType,
+      targetUrl: card.targetUrl && card.targetUrl !== 'https://hummingxbi.com' ? card.targetUrl : '',
+      active: true,
       notes: card.notes || '',
     });
     setFormError('');
@@ -319,15 +342,29 @@ export default function AdminNfcCardsPage() {
     setSubmitting(true);
     setFormError('');
     try {
+      let savedCardData = null;
       if (editingCard) {
-        await api.put(`/admin/nfc-cards/${editingCard.id}`, form);
+        const res = await api.put(`/admin/nfc-cards/${editingCard.id}`, form);
+        savedCardData = res.data;
         showNotification(`Tarjeta #${form.code} actualizada correctamente.`);
       } else {
-        await api.post('/admin/nfc-cards', form);
+        const res = await api.post('/admin/nfc-cards', form);
+        savedCardData = res.data;
         showNotification(`Tarjeta #${form.code} configurada y activada.`);
       }
       closeModal();
       fetchCards();
+
+      // Lanzar pantalla de celebración con serpentina para mostrársela al dueño del negocio
+      if (form.active && form.clientName.trim() && !form.clientName.includes('Disponible')) {
+        setCelebratedCard({
+          code: form.code,
+          clientName: form.clientName,
+          type: form.type,
+          targetUrl: form.targetUrl,
+        });
+        setShowCelebrationModal(true);
+      }
     } catch (err) {
       setFormError(err.response?.data?.error || 'Error al guardar tarjeta.');
     } finally {
@@ -829,22 +866,42 @@ export default function AdminNfcCardsPage() {
                       <span style={{ fontSize: '11.5px', color: '#64748B' }}>escaneos</span>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <button
-                        onClick={() => openQrPreview(card)}
-                        className="btn-secondary"
-                        style={{
-                          fontSize: '12px',
-                          padding: '6px 10px',
-                          borderRadius: '8px',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '5px',
-                        }}
-                      >
-                        <QrCode size={13} color="#00C4CC" />
-                        Ver QR
-                      </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                      {(!card.active || card.clientName.includes('Disponible')) ? (
+                        <button
+                          onClick={() => openConfigureCardModal(card)}
+                          className="btn-accent"
+                          style={{
+                            fontSize: '12px',
+                            padding: '6px 12px',
+                            borderRadius: '8px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            fontWeight: 700,
+                            boxShadow: '0 2px 8px rgba(0, 196, 204, 0.25)',
+                          }}
+                        >
+                          <Sparkles size={13} />
+                          Vincular en el Lugar
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => openQrPreview(card)}
+                          className="btn-secondary"
+                          style={{
+                            fontSize: '12px',
+                            padding: '6px 10px',
+                            borderRadius: '8px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                          }}
+                        >
+                          <QrCode size={13} color="#00C4CC" />
+                          Ver QR
+                        </button>
+                      )}
 
                       <button
                         onClick={() => downloadQrSvg(card)}
@@ -1378,6 +1435,172 @@ export default function AdminNfcCardsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ── Modal: Celebración con Serpentina / Confetti al vincular tarjeta ── */}
+      {showCelebrationModal && celebratedCard && createPortal(
+        <div
+          className="modal-overlay"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.78)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 99999,
+            padding: '20px',
+          }}
+        >
+          <Confetti
+            width={typeof window !== 'undefined' ? window.innerWidth : 400}
+            height={typeof window !== 'undefined' ? window.innerHeight : 400}
+            recycle={false}
+            numberOfPieces={400}
+            gravity={0.24}
+            colors={['#00C4CC', '#2563EB', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#F43F5E']}
+          />
+
+          <div
+            className="modal-content fade-in-up"
+            style={{
+              maxWidth: '520px',
+              width: '100%',
+              background: '#FFFFFF',
+              borderRadius: '24px',
+              padding: '36px 30px 30px',
+              textAlign: 'center',
+              position: 'relative',
+              boxShadow: '0 25px 60px -15px rgba(0, 196, 204, 0.35), 0 0 0 1px rgba(0,0,0,0.06)',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Background Glow */}
+            <div style={{ position: 'absolute', top: '-60px', left: '50%', transform: 'translateX(-50%)', width: '260px', height: '260px', background: 'radial-gradient(circle, rgba(0,196,204,0.18) 0%, rgba(255,255,255,0) 70%)', pointerEvents: 'none' }} />
+
+            {/* Close Button */}
+            <button
+              onClick={() => setShowCelebrationModal(false)}
+              style={{ position: 'absolute', top: '18px', right: '18px', background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8', padding: '6px' }}
+            >
+              <X size={20} />
+            </button>
+
+            {/* Lottie Trophy Animation */}
+            <div style={{ width: '130px', height: '130px', margin: '-10px auto 8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Player
+                autoplay
+                loop={false}
+                src={trophyAnimation}
+                style={{ height: '130px', width: '130px' }}
+              />
+            </div>
+
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#ECFDF5', border: '1px solid #A7F3D0', padding: '4px 14px', borderRadius: '9999px', color: '#047857', fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>
+              <CheckCircle2 size={14} color="#10B981" />
+              ¡Tarjeta #{celebratedCard.code} Vinculada con Éxito!
+            </div>
+
+            <h2 style={{ fontSize: '26px', fontWeight: 800, color: '#111827', margin: '0 0 6px', letterSpacing: '-0.025em', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              {celebratedCard.clientName}
+            </h2>
+
+            <p style={{ fontSize: '14px', color: '#4B5563', margin: '0 0 20px', lineHeight: 1.5 }}>
+              La tarjeta física y su código QR ya están activos y listos para colocar en el mostrador o mesa del negocio.
+            </p>
+
+            {/* Details Box */}
+            <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '16px', padding: '16px', marginBottom: '22px', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '12px', color: '#64748B', fontWeight: 600 }}>Acción Vinculada:</span>
+                <span style={{ fontSize: '12.5px', fontWeight: 700, color: CARD_TYPES[celebratedCard.type]?.color || '#111827' }}>
+                  {CARD_TYPES[celebratedCard.type]?.label}
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '12px', color: '#64748B', fontWeight: 600 }}>Enlace Físico Chip/QR:</span>
+                <code style={{ fontSize: '12px', fontWeight: 700, color: '#0F172A', background: '#FFFFFF', padding: '2px 8px', borderRadius: '6px', border: '1px solid #CBD5E1' }}>
+                  hummingxbi.com/t/{celebratedCard.code}
+                </code>
+              </div>
+
+              <div>
+                <span style={{ fontSize: '12px', color: '#64748B', fontWeight: 600, display: 'block', marginBottom: '3px' }}>Destino Configurado:</span>
+                <span style={{ fontSize: '12px', color: '#0284C7', fontWeight: 500, wordBreak: 'break-all', display: 'block' }}>
+                  {celebratedCard.targetUrl}
+                </span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <a
+                href={`https://hummingxbi.com/t/${celebratedCard.code}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-accent"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  fontSize: '15px',
+                  padding: '13px 20px',
+                  borderRadius: '12px',
+                  fontWeight: 700,
+                  boxShadow: '0 8px 24px rgba(0, 196, 204, 0.35)',
+                  textDecoration: 'none',
+                }}
+              >
+                <ExternalLink size={18} />
+                Demostrar Redirección en Vivo Ahora
+              </a>
+
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button
+                  onClick={() => {
+                    const cardObj = cards.find(c => c.code === celebratedCard.code) || celebratedCard;
+                    setShowCelebrationModal(false);
+                    openQrPreview(cardObj);
+                  }}
+                  className="btn-secondary"
+                  style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    fontSize: '13px',
+                    padding: '10px 14px',
+                    borderRadius: '10px',
+                    fontWeight: 600,
+                  }}
+                >
+                  <QrCode size={15} color="#00C4CC" />
+                  Ver Código QR
+                </button>
+
+                <button
+                  onClick={() => setShowCelebrationModal(false)}
+                  className="btn-secondary"
+                  style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    fontSize: '13px',
+                    padding: '10px 14px',
+                    borderRadius: '10px',
+                    fontWeight: 600,
+                  }}
+                >
+                  Listo / Finalizar
+                </button>
+              </div>
+            </div>
           </div>
         </div>,
         document.body

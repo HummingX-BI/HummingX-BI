@@ -94,7 +94,7 @@ export default function Layout({ children, customBreadcrumbLabel, fullWidth = fa
     { target: '#tour-bitacora', title: 'Bitácora de Desarrollo', content: 'El registro cronológico detallado con todas las actividades, notas y avances que nuestro equipo va realizando día a día.', placement: 'top' },
     { target: '#tour-referrals-balance', title: 'Mis Referidos & Créditos HX', content: 'Aquí puedes consultar tu saldo acumulado de Créditos HX, canjeables por horas de consultoría y mejoras en tu sistema.', placement: 'top' },
     { target: '#tour-referrals-tier', title: 'Tu Nivel de Socio', content: 'Conforme recomiendes y se concreten nuevos proyectos, subirás de Member a Partner o VIP, desbloqueando mayores recompensas.', placement: 'top' },
-    { target: '#tour-referrals-link', title: 'Tu Enlace de Socio', content: 'Copia tu enlace único o registra directamente a una empresa. Si formalizan proyecto, ganarás créditos automáticamente.', placement: 'top' },
+    { target: '#tour-referrals-code', title: 'Tu Código de Socio', content: 'Comparte tu código único con directores o empresarios. Al contactarnos por WhatsApp o llamada con tu código, quedarán vinculados a tu cuenta para otorgarte créditos.', placement: 'top' },
     { target: '.tour-step-support', title: 'Soporte 24/7', content: 'Si tienes cualquier duda, usa este botón para mandarnos mensaje directo por WhatsApp. ¡Eso es todo, disfruta tu portal!', placement: 'right' },
   ];
 

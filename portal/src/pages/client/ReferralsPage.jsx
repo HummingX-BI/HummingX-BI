@@ -128,9 +128,21 @@ export default function ReferralsPage() {
     fetchReferralData();
   }, []);
 
+  const [copiedCode, setCopiedCode] = useState(false);
+
+  const displayCode = referralCode
+    ? (referralCode.toUpperCase().startsWith('HX-') ? referralCode.toUpperCase() : `HX-${referralCode.toUpperCase()}`)
+    : 'HX-SOCIO';
+
   const referralLink = referralCode 
     ? `https://hummingxbi.com/ref/${referralCode}` 
     : 'https://hummingxbi.com/afiliate';
+
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(displayCode);
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2500);
+  };
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(referralLink);
@@ -139,7 +151,7 @@ export default function ReferralsPage() {
   };
 
   const handleShareWhatsApp = () => {
-    const text = `Hola! Te comparto la información de HummingX BI, la firma que desarrolla soluciones de tecnología, software e inteligencia de negocios a la medida. Puedes revisar su propuesta aquí: ${referralLink}`;
+    const text = `¡Hola! Te recomiendo al equipo de HummingX BI para soluciones de desarrollo de software, plataformas e inteligencia de negocios a la medida.\n\nPuedes escribirles directo por WhatsApp mencionando mi código de socio *${displayCode}* para que te apliquen atención prioritaria y beneficios especiales:\nhttps://wa.me/525575084267?text=Hola%20HummingX%20BI%2C%20vengo%20recomendado%20con%20el%20c%C3%B3digo%20de%20socio%20${encodeURIComponent(displayCode)}`;
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -507,8 +519,8 @@ export default function ReferralsPage() {
             </div>
           </div>
 
-          {/* Card 3: Tu Enlace Único de Referido */}
-          <div id="tour-referrals-link" className="card" style={{
+          {/* Card 3: Tu Código de Socio */}
+          <div id="tour-referrals-code" className="card tour-referrals-link" style={{
             padding: '24px',
             borderRadius: '16px',
             border: '1px solid #E5E7EB',
@@ -521,78 +533,81 @@ export default function ReferralsPage() {
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
                 <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: '#F5F3FF', border: '1px solid #EDE9FE', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Share2 size={18} color="#6D28D9" />
+                  <Award size={18} color="#6D28D9" />
                 </div>
                 <div>
-                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#374151', display: 'block' }}>Tu Enlace de Socio</span>
-                  <span style={{ fontSize: '11px', color: '#6B7280' }}>Comparte con directores y empresarios</span>
+                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#374151', display: 'block' }}>Tu Código de Socio</span>
+                  <span style={{ fontSize: '11px', color: '#6B7280' }}>Compártelo al recomendarnos</span>
                 </div>
               </div>
 
               <p style={{ fontSize: '12.5px', color: '#6B7280', margin: '0 0 14px', lineHeight: 1.5 }}>
-                Cualquier empresa que agende o contacte mediante tu enlace quedará enlazada automáticamente a tu cuenta.
+                Comparte este código con directores o empresarios. Al contactarnos por WhatsApp o llamada y mencionarlo, quedarán enlazados a tu cuenta y recibirás tus Créditos HX.
               </p>
 
-              {/* Link Box */}
+              {/* Code Display Box */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
+                justifyContent: 'space-between',
                 gap: '8px',
-                background: '#F9FAFB',
-                border: '1px solid #E5E7EB',
-                borderRadius: '10px',
-                padding: '8px 12px',
-                marginBottom: '14px',
+                background: 'linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%)',
+                border: '1px solid #E2E8F0',
+                borderRadius: '12px',
+                padding: '10px 14px',
+                marginBottom: '12px',
               }}>
-                <input
-                  type="text"
-                  readOnly
-                  value={referralLink}
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    fontSize: '12.5px',
-                    color: '#374151',
-                    fontFamily: 'monospace',
-                    fontWeight: 600,
-                    width: '100%',
-                    outline: 'none',
-                  }}
-                />
+                <div>
+                  <span style={{ fontSize: '10px', fontWeight: 700, color: '#64748B', display: 'block', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Código de Socio</span>
+                  <span style={{ fontSize: '18px', fontWeight: 800, color: '#111827', fontFamily: 'monospace', letterSpacing: '0.05em' }}>
+                    {displayCode}
+                  </span>
+                </div>
+
                 <button
-                  onClick={handleCopyLink}
+                  onClick={handleCopyCode}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '4px',
-                    padding: '6px 10px',
-                    borderRadius: '6px',
+                    gap: '5px',
+                    padding: '7px 12px',
+                    borderRadius: '8px',
                     border: 'none',
-                    background: copied ? '#ECFDF5' : '#111827',
-                    color: copied ? '#047857' : '#FFFFFF',
-                    fontSize: '11.5px',
+                    background: copiedCode ? '#ECFDF5' : '#111827',
+                    color: copiedCode ? '#047857' : '#FFFFFF',
+                    fontSize: '12px',
                     fontWeight: 600,
                     cursor: 'pointer',
                     flexShrink: 0,
                     transition: 'all 0.15s ease',
                   }}
                 >
-                  {copied ? (
+                  {copiedCode ? (
                     <>
-                      <Check size={12} color="#047857" />
+                      <Check size={13} color="#047857" />
                       Copiado
                     </>
                   ) : (
                     <>
-                      <Copy size={12} />
-                      Copiar
+                      <Copy size={13} />
+                      Copiar Código
                     </>
                   )}
                 </button>
               </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '11.5px', color: '#6B7280', padding: '0 4px' }}>
+                <span>O enlace web directo:</span>
+                <button
+                  onClick={handleCopyLink}
+                  style={{ background: 'none', border: 'none', color: copied ? '#059669' : '#0284C7', cursor: 'pointer', fontWeight: 600, fontSize: '11.5px', padding: 0 }}
+                >
+                  {copied ? '¡Enlace copiado!' : 'Copiar link web'}
+                </button>
+              </div>
             </div>
 
-            <div style={{ paddingTop: '10px', borderTop: '1px solid #F3F4F6' }}>
+            <div style={{ paddingTop: '12px', borderTop: '1px solid #F3F4F6', marginTop: '10px' }}>
               <button
                 onClick={handleShareWhatsApp}
                 className="btn-secondary"
@@ -612,7 +627,7 @@ export default function ReferralsPage() {
                 }}
               >
                 <MessageCircle size={15} color="#25D366" />
-                Compartir enlace por WhatsApp
+                Compartir por WhatsApp con mi Código
               </button>
             </div>
           </div>

@@ -194,18 +194,18 @@ export default function ReferralsPage() {
   const inProgressCount = useMemo(() => referrals.filter(r => ['registered', 'contacted', 'negotiating'].includes(r.status)).length, [referrals]);
   const totalCount = referrals.length;
 
-  // Membership Tier
+  // Membership Tier (Member = Gris, Partner = Azulito/Cyan, VIP = Moradito)
   const userTier = useMemo(() => {
     const effLevel = Math.max(userLevel || 1, convertedCount >= 10 ? 3 : convertedCount >= 5 ? 2 : 1);
     if (effLevel >= 3) {
       return {
         level: 3,
         title: 'HummingX VIP',
-        badge: 'Nivel 3 · VIP',
-        color: '#7C3AED',
+        badge: 'Nivel 3',
+        color: '#8B5CF6',
         bg: '#F5F3FF',
         border: '#DDD6FE',
-        gradient: 'linear-gradient(135deg, #7C3AED 0%, #A855F7 100%)',
+        gradient: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
         img: '/vip-icon.jpg',
         desc: 'Máximo nivel de socio con atención y beneficios prioritarios.',
         nextLevel: null,
@@ -221,14 +221,14 @@ export default function ReferralsPage() {
       return {
         level: 2,
         title: 'HummingX Partner',
-        badge: 'Nivel 2 · Partner',
-        color: '#D97706',
-        bg: '#FFFBEB',
-        border: '#FDE68A',
-        gradient: 'linear-gradient(135deg, #D97706 0%, #F59E0B 100%)',
+        badge: 'Nivel 2',
+        color: '#00C4CC',
+        bg: '#F0FDFA',
+        border: '#CCFBF1',
+        gradient: 'linear-gradient(135deg, #00C4CC 0%, #0284C7 100%)',
         img: '/partner-icon.jpg',
         desc: 'Socio preferente con bonificaciones activas.',
-        nextLevel: 'Nivel 3 · VIP',
+        nextLevel: 'HummingX VIP',
         needed,
         progressPercent: Math.max(0, progressPercent),
         targetCount: 10,
@@ -240,14 +240,14 @@ export default function ReferralsPage() {
     return {
       level: 1,
       title: 'HummingX Member',
-      badge: 'Nivel 1 · Member',
-      color: '#0284C7',
-      bg: '#F0F9FF',
-      border: '#BAE6FD',
-      gradient: 'linear-gradient(135deg, #0284C7 0%, #00C4CC 100%)',
+      badge: 'Nivel 1',
+      color: '#4B5563',
+      bg: '#F9FAFB',
+      border: '#E5E7EB',
+      gradient: 'linear-gradient(135deg, #6B7280 0%, #4B5563 100%)',
       img: '/member-icon.png',
       desc: 'Socio activo. Refiere más para ascender a Partner.',
-      nextLevel: 'Nivel 2 · Partner',
+      nextLevel: 'HummingX Partner',
       needed,
       progressPercent,
       targetCount: 5,
@@ -317,64 +317,30 @@ export default function ReferralsPage() {
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-            {/* Membership Level Badge */}
-            <div
-              onClick={() => setShowTierModal(true)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                padding: '6px 14px',
-                borderRadius: '9999px',
-                background: userTier.bg,
-                border: `1px solid ${userTier.border}`,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-              }}
-              title="Haz clic para ver beneficios de tu nivel"
-            >
-              <img
-                src={userTier.img}
-                alt={userTier.title}
-                style={{ width: '26px', height: '26px', borderRadius: '50%', objectFit: 'cover' }}
-              />
-              <div>
-                <span style={{ fontSize: '12.5px', fontWeight: 800, color: userTier.color, display: 'block', lineHeight: 1.1 }}>
-                  {userTier.title}
-                </span>
-                <span style={{ fontSize: '10.5px', color: '#6B7280', fontWeight: 600 }}>
-                  Nivel {userTier.level} Activo · Ver beneficios
-                </span>
-              </div>
-            </div>
-
-            <button
-              onClick={() => setShowModal(true)}
-              className="btn-accent"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '11px 20px',
-                borderRadius: '10px',
-                fontWeight: 600,
-                fontSize: '13.5px',
-                boxShadow: '0 4px 14px rgba(0, 196, 204, 0.25)',
-                transition: 'all 0.2s ease',
-              }}
-            >
-              <Plus size={16} />
-              Recomendar una Empresa
-            </button>
-          </div>
+          <button
+            onClick={() => setShowModal(true)}
+            className="btn-accent"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '11px 22px',
+              borderRadius: '10px',
+              fontWeight: 600,
+              fontSize: '13.5px',
+              boxShadow: '0 4px 14px rgba(0, 196, 204, 0.25)',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            <Plus size={16} />
+            Recomendar una Empresa
+          </button>
         </div>
 
-        {/* ── Top Hero Metrics Grid ─────────────────────────────────────── */}
+        {/* ── Top Hero Cards Grid ─────────────────────────────────────── */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(310px, 1fr))', gap: '20px' }}>
           
-          {/* Card 1: Balance de Créditos HX */}
+          {/* Card 1: Saldo de Créditos HX */}
           <div className="card" style={{
             padding: '24px',
             borderRadius: '16px',
@@ -414,7 +380,7 @@ export default function ReferralsPage() {
               </p>
             </div>
 
-            <div style={{ paddingTop: '14px', borderTop: '1px solid #F3F4F6', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ paddingTop: '14px', borderTop: '1px solid #F3F4F6' }}>
               <button
                 onClick={handleContactFounderForCredits}
                 className="btn-secondary"
@@ -439,7 +405,107 @@ export default function ReferralsPage() {
             </div>
           </div>
 
-          {/* Card 2: Tu Enlace Único de Referido */}
+          {/* Card 2: Tu Nivel HummingX (Estilo Dashboard / Landing Page) */}
+          <div className="card" style={{
+            padding: '24px',
+            borderRadius: '16px',
+            border: '1px solid #E5E7EB',
+            background: '#FFFFFF',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            boxShadow: '0 4px 20px -2px rgba(0,0,0,0.04)',
+          }}>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#111827', margin: 0 }}>
+                  Tu Nivel HummingX
+                </h3>
+                <button
+                  onClick={() => setShowTierModal(true)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#00C4CC',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    padding: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                  }}
+                >
+                  Ver beneficios <ChevronRight size={13} />
+                </button>
+              </div>
+
+              {/* Insignia central sin marco, exactamente como en el dashboard y landing */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', margin: '4px 0 10px' }}>
+                <div style={{ width: '64px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px' }}>
+                  <img src={userTier.img} alt={userTier.title} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                  <span style={{ fontSize: '16px', fontWeight: 800, color: '#111827' }}>
+                    {userTier.title}
+                  </span>
+                  <span style={{
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    padding: '2px 8px',
+                    borderRadius: '6px',
+                    background: userTier.bg,
+                    color: userTier.color,
+                    border: `1px solid ${userTier.border}`,
+                    fontFamily: 'monospace',
+                  }}>
+                    {userTier.badge}
+                  </span>
+                </div>
+              </div>
+
+              {/* Progress Box */}
+              {userTier.needed > 0 ? (
+                <div style={{ background: '#F8FAFC', border: '1px solid #F1F5F9', borderRadius: '10px', padding: '10px 12px', marginTop: '6px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <span style={{ fontSize: '11.5px', color: '#374151' }}>
+                      Faltan <strong>{userTier.needed}</strong> referidos para <strong>{userTier.nextLevel}</strong>
+                    </span>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: userTier.color }}>
+                      {convertedCount} / {userTier.targetCount}
+                    </span>
+                  </div>
+                  <div style={{ width: '100%', height: '6px', background: '#E2E8F0', borderRadius: '99px', overflow: 'hidden' }}>
+                    <div
+                      style={{
+                        width: `${userTier.progressPercent}%`,
+                        height: '100%',
+                        background: userTier.color,
+                        borderRadius: '99px',
+                        transition: 'width 0.4s ease',
+                      }}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div style={{ background: '#F5F3FF', border: '1px solid #DDD6FE', borderRadius: '10px', padding: '10px 12px', textAlign: 'center', marginTop: '6px' }}>
+                  <span style={{ fontSize: '12px', color: '#6D28D9', fontWeight: 700 }}>
+                    ¡Felicidades! Cuentas con el nivel VIP de socio.
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div style={{ paddingTop: '12px', borderTop: '1px solid #F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: '11.5px', color: '#6B7280', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <ShieldCheck size={14} color="#00C4CC" />
+                {userTier.perk}
+              </span>
+            </div>
+          </div>
+
+          {/* Card 3: Tu Enlace Único de Referido */}
           <div className="card" style={{
             padding: '24px',
             borderRadius: '16px',
@@ -524,13 +590,14 @@ export default function ReferralsPage() {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', paddingTop: '10px', borderTop: '1px solid #F3F4F6' }}>
+            <div style={{ paddingTop: '10px', borderTop: '1px solid #F3F4F6' }}>
               <button
                 onClick={handleShareWhatsApp}
                 className="btn-secondary"
                 style={{
-                  fontSize: '12px',
-                  padding: '8px 12px',
+                  width: '100%',
+                  fontSize: '12.5px',
+                  padding: '9px 14px',
                   borderRadius: '8px',
                   fontWeight: 600,
                   display: 'flex',
@@ -539,256 +606,63 @@ export default function ReferralsPage() {
                   gap: '6px',
                   border: '1px solid #E5E7EB',
                   background: '#F9FAFB',
+                  color: '#111827',
                 }}
               >
-                <MessageCircle size={14} color="#25D366" />
-                WhatsApp
-              </button>
-              <button
-                onClick={() => setShowModal(true)}
-                className="btn-secondary"
-                style={{
-                  fontSize: '12px',
-                  padding: '8px 12px',
-                  borderRadius: '8px',
-                  fontWeight: 600,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                  border: '1px solid #E5E7EB',
-                  background: '#F9FAFB',
-                }}
-              >
-                <Plus size={14} color="#00C4CC" />
-                Ingresar Datos
-              </button>
-            </div>
-          </div>
-
-          {/* Card 3: Nivel de Socio & Desempeño */}
-          <div className="card" style={{
-            padding: '24px',
-            borderRadius: '16px',
-            border: '1px solid #E5E7EB',
-            background: '#FFFFFF',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            boxShadow: '0 4px 20px -2px rgba(0,0,0,0.04)',
-          }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <img
-                    src={userTier.img}
-                    alt={userTier.title}
-                    style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: `2px solid ${userTier.border}` }}
-                  />
-                  <div>
-                    <span style={{ fontSize: '13px', fontWeight: 700, color: '#111827', display: 'block' }}>Tu Nivel de Socio</span>
-                    <span style={{ fontSize: '11.5px', fontWeight: 700, color: userTier.color }}>{userTier.title}</span>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setShowTierModal(true)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    padding: '4px 10px',
-                    borderRadius: '8px',
-                    background: userTier.bg,
-                    border: `1px solid ${userTier.border}`,
-                    color: userTier.color,
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                  }}
-                >
-                  <Crown size={12} />
-                  {userTier.badge}
-                </button>
-              </div>
-
-              {/* Progress bar towards next level */}
-              <div style={{ background: '#F8FAFC', padding: '12px 14px', borderRadius: '12px', border: '1px solid #F1F5F9', marginBottom: '14px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                  <span style={{ fontSize: '11.5px', fontWeight: 600, color: '#374151' }}>
-                    {userTier.nextLevel ? `Progreso a ${userTier.nextLevel}` : 'Máximo Nivel Desbloqueado'}
-                  </span>
-                  <span style={{ fontSize: '11.5px', fontWeight: 700, color: userTier.color }}>
-                    {convertedCount} / {userTier.targetCount}
-                  </span>
-                </div>
-                <div style={{ width: '100%', height: '7px', background: '#E2E8F0', borderRadius: '9999px', overflow: 'hidden' }}>
-                  <div
-                    style={{
-                      width: `${userTier.progressPercent}%`,
-                      height: '100%',
-                      background: userTier.gradient,
-                      borderRadius: '9999px',
-                      transition: 'width 0.4s ease',
-                    }}
-                  />
-                </div>
-                <span style={{ fontSize: '10.5px', color: '#6B7280', display: 'block', marginTop: '6px' }}>
-                  {userTier.nextLevel
-                    ? `Te faltan ${userTier.needed} proyectos concretados para ascender.`
-                    : 'Cuentas con todos los privilegios directivos.'}
-                </span>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '14px' }}>
-                <div style={{ padding: '10px 8px', background: '#F9FAFB', borderRadius: '10px', border: '1px solid #F3F4F6', textAlign: 'center' }}>
-                  <span style={{ fontSize: '18px', fontWeight: 800, color: '#111827', display: 'block' }}>{totalCount}</span>
-                  <span style={{ fontSize: '10.5px', color: '#6B7280', fontWeight: 500 }}>Total</span>
-                </div>
-
-                <div style={{ padding: '10px 8px', background: '#FFFBEB', borderRadius: '10px', border: '1px solid #FEF3C7', textAlign: 'center' }}>
-                  <span style={{ fontSize: '18px', fontWeight: 800, color: '#B45309', display: 'block' }}>{inProgressCount}</span>
-                  <span style={{ fontSize: '10.5px', color: '#92400E', fontWeight: 500 }}>En Proceso</span>
-                </div>
-
-                <div style={{ padding: '10px 8px', background: '#ECFDF5', borderRadius: '10px', border: '1px solid #A7F3D0', textAlign: 'center' }}>
-                  <span style={{ fontSize: '18px', fontWeight: 800, color: '#047857', display: 'block' }}>{convertedCount}</span>
-                  <span style={{ fontSize: '10.5px', color: '#065F46', fontWeight: 500 }}>Concretadas</span>
-                </div>
-              </div>
-            </div>
-
-            <div style={{ paddingTop: '10px', borderTop: '1px solid #F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <ShieldCheck size={14} color="#00C4CC" style={{ flexShrink: 0 }} />
-                <span style={{ fontSize: '11px', color: '#6B7280' }}>
-                  Confidencialidad garantizada
-                </span>
-              </div>
-              <button
-                onClick={() => setShowTierModal(true)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#00C4CC',
-                  fontSize: '11.5px',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  padding: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '3px',
-                }}
-              >
-                Ver niveles <ChevronRight size={13} />
+                <MessageCircle size={15} color="#25D366" />
+                Compartir enlace por WhatsApp
               </button>
             </div>
           </div>
 
         </div>
 
-        {/* ── Mecanismo de 3 Pasos (Visual Step Roadmap) ─────────────────────────────────────── */}
-        <div className="card" style={{
-          padding: '28px 24px',
-          borderRadius: '16px',
-          border: '1px solid #E5E7EB',
+        {/* ── Métricas Visuales Rápidas & Mini Stepper ─────────────────────── */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '12px',
           background: '#FFFFFF',
+          padding: '14px 20px',
+          borderRadius: '14px',
+          border: '1px solid #E5E7EB',
         }}>
-          <div style={{ marginBottom: '20px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', margin: '0 0 4px', letterSpacing: '-0.01em' }}>
-              ¿Cómo funciona el Programa de Recomendaciones?
-            </h3>
-            <p style={{ fontSize: '13px', color: '#6B7280', margin: 0 }}>
-              Un proceso transparente y profesional diseñado para generar valor mutuo sin fricciones.
-            </p>
+          {/* Quick Metrics Chips */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '8px', background: '#F9FAFB', border: '1px solid #E5E7EB' }}>
+              <span style={{ fontSize: '12px', color: '#6B7280' }}>Total Recomendadas:</span>
+              <strong style={{ fontSize: '13px', color: '#111827' }}>{totalCount}</strong>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '8px', background: '#FFFBEB', border: '1px solid #FEF3C7' }}>
+              <span style={{ fontSize: '12px', color: '#92400E' }}>En Negociación:</span>
+              <strong style={{ fontSize: '13px', color: '#B45309' }}>{inProgressCount}</strong>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '8px', background: '#ECFDF5', border: '1px solid #A7F3D0' }}>
+              <span style={{ fontSize: '12px', color: '#065F46' }}>Concretadas:</span>
+              <strong style={{ fontSize: '13px', color: '#047857' }}>{convertedCount}</strong>
+            </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
-            
-            {/* Step 1 */}
-            <div style={{
-              padding: '18px 20px',
-              borderRadius: '12px',
-              border: '1px solid #E5E7EB',
-              background: '#F9FAFB',
-              position: 'relative',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                <span style={{
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: '6px',
-                  background: '#111827',
-                  color: '#FFFFFF',
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}>1</span>
-                <span style={{ fontSize: '14px', fontWeight: 700, color: '#111827' }}>Recomiendas</span>
-              </div>
-              <p style={{ fontSize: '12.5px', color: '#6B7280', margin: 0, lineHeight: 1.6 }}>
-                Comparte tu enlace exclusivo o registra directamente el nombre del contacto o empresa que requiere consultoría o software.
-              </p>
-            </div>
-
-            {/* Step 2 */}
-            <div style={{
-              padding: '18px 20px',
-              borderRadius: '12px',
-              border: '1px solid #E5E7EB',
-              background: '#F9FAFB',
-              position: 'relative',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                <span style={{
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: '6px',
-                  background: '#00C4CC',
-                  color: '#FFFFFF',
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}>2</span>
-                <span style={{ fontSize: '14px', fontWeight: 700, color: '#111827' }}>Evaluamos y Cotizamos</span>
-              </div>
-              <p style={{ fontSize: '12.5px', color: '#6B7280', margin: 0, lineHeight: 1.6 }}>
-                El equipo de ingeniería de HummingX BI analiza sus requerimientos técnicos y elabora una solución a la medida con estricta confidencialidad.
-              </p>
-            </div>
-
-            {/* Step 3 */}
-            <div style={{
-              padding: '18px 20px',
-              borderRadius: '12px',
-              border: '1px solid #E5E7EB',
-              background: '#F9FAFB',
-              position: 'relative',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                <span style={{
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: '6px',
-                  background: '#059669',
-                  color: '#FFFFFF',
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}>3</span>
-                <span style={{ fontSize: '14px', fontWeight: 700, color: '#111827' }}>Recibes Créditos HX</span>
-              </div>
-              <p style={{ fontSize: '12.5px', color: '#6B7280', margin: 0, lineHeight: 1.6 }}>
-                Al concretarse el contrato, se acreditan los Créditos HX correspondientes a tu balance para aplicar en tu propio ecosistema tecnológico.
-              </p>
-            </div>
-
+          {/* Mini Stepper Chips */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', color: '#64748B', fontWeight: 500, flexWrap: 'wrap' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#111827', color: '#FFFFFF', fontSize: '10px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>1</span>
+              Comparte link
+            </span>
+            <span>→</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#00C4CC', color: '#FFFFFF', fontSize: '10px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>2</span>
+              Cotizamos proyecto
+            </span>
+            <span>→</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#059669', color: '#FFFFFF', fontSize: '10px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>3</span>
+              Recibes créditos HX
+            </span>
           </div>
         </div>
 
@@ -1443,8 +1317,8 @@ export default function ReferralsPage() {
                     style={{
                       padding: '18px',
                       borderRadius: '14px',
-                      border: userTier.level === 1 ? '2px solid #0284C7' : '1px solid #E5E7EB',
-                      background: userTier.level === 1 ? '#F0F9FF' : '#FFFFFF',
+                      border: userTier.level === 1 ? '2px solid #4B5563' : '1px solid #E5E7EB',
+                      background: userTier.level === 1 ? '#F9FAFB' : '#FFFFFF',
                       position: 'relative',
                       display: 'flex',
                       flexDirection: 'column',
@@ -1459,7 +1333,7 @@ export default function ReferralsPage() {
                           right: '12px',
                           padding: '2px 8px',
                           borderRadius: '9999px',
-                          background: '#0284C7',
+                          background: '#4B5563',
                           color: '#FFFFFF',
                           fontSize: '10px',
                           fontWeight: 800,
@@ -1471,11 +1345,11 @@ export default function ReferralsPage() {
                       </span>
                     )}
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
                         <img
                           src="/member-icon.png"
                           alt="Member"
-                          style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }}
+                          style={{ width: '40px', height: '40px', objectFit: 'contain' }}
                         />
                         <div>
                           <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: '#111827' }}>
@@ -1497,8 +1371,8 @@ export default function ReferralsPage() {
                     style={{
                       padding: '18px',
                       borderRadius: '14px',
-                      border: userTier.level === 2 ? '2px solid #D97706' : '1px solid #E5E7EB',
-                      background: userTier.level === 2 ? '#FFFBEB' : '#FFFFFF',
+                      border: userTier.level === 2 ? '2px solid #00C4CC' : '1px solid #E5E7EB',
+                      background: userTier.level === 2 ? '#F0FDFA' : '#FFFFFF',
                       position: 'relative',
                       display: 'flex',
                       flexDirection: 'column',
@@ -1513,7 +1387,7 @@ export default function ReferralsPage() {
                           right: '12px',
                           padding: '2px 8px',
                           borderRadius: '9999px',
-                          background: '#D97706',
+                          background: '#00C4CC',
                           color: '#FFFFFF',
                           fontSize: '10px',
                           fontWeight: 800,
@@ -1525,11 +1399,11 @@ export default function ReferralsPage() {
                       </span>
                     )}
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
                         <img
                           src="/partner-icon.jpg"
                           alt="Partner"
-                          style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }}
+                          style={{ width: '40px', height: '40px', objectFit: 'contain' }}
                         />
                         <div>
                           <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: '#111827' }}>
@@ -1551,7 +1425,7 @@ export default function ReferralsPage() {
                     style={{
                       padding: '18px',
                       borderRadius: '14px',
-                      border: userTier.level === 3 ? '2px solid #7C3AED' : '1px solid #E5E7EB',
+                      border: userTier.level === 3 ? '2px solid #8B5CF6' : '1px solid #E5E7EB',
                       background: userTier.level === 3 ? '#F5F3FF' : '#FFFFFF',
                       position: 'relative',
                       display: 'flex',
@@ -1567,7 +1441,7 @@ export default function ReferralsPage() {
                           right: '12px',
                           padding: '2px 8px',
                           borderRadius: '9999px',
-                          background: '#7C3AED',
+                          background: '#8B5CF6',
                           color: '#FFFFFF',
                           fontSize: '10px',
                           fontWeight: 800,
@@ -1579,11 +1453,11 @@ export default function ReferralsPage() {
                       </span>
                     )}
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
                         <img
                           src="/vip-icon.jpg"
                           alt="VIP"
-                          style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }}
+                          style={{ width: '40px', height: '40px', objectFit: 'contain' }}
                         />
                         <div>
                           <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: '#111827' }}>

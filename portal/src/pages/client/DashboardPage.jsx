@@ -112,9 +112,9 @@ export default function DashboardPage() {
   const clientName = user?.companyName || user?.name || 'Cliente';
 
   const getMembershipLevel = (converted) => {
-    if (converted >= 10) return { title: 'HummingX VIP', img: '/vip-icon.jpg', next: 0, nextTitle: 'Máximo nivel', color: '#8b5cf6', bg: 'transparent' };
-    if (converted >= 5) return { title: 'HummingX Partner', img: '/partner-icon.jpg', next: 10 - converted, nextTitle: 'HummingX VIP', color: '#f59e0b', bg: 'transparent' };
-    return { title: 'HummingX Member', img: '/member-icon.png', next: 5 - converted, nextTitle: 'HummingX Partner', color: '#0ea5e9', bg: 'transparent' };
+    if (converted >= 10) return { title: 'HummingX VIP', img: '/vip-icon.jpg', next: 0, nextTitle: 'Máximo nivel', color: '#8B5CF6', bg: 'transparent' };
+    if (converted >= 5) return { title: 'HummingX Partner', img: '/partner-icon.jpg', next: 10 - converted, nextTitle: 'HummingX VIP', color: '#00C4CC', bg: 'transparent' };
+    return { title: 'HummingX Member', img: '/member-icon.png', next: 5 - converted, nextTitle: 'HummingX Partner', color: '#6B7280', bg: 'transparent' };
   };
 
   const membership = getMembershipLevel(convertedCount);

@@ -92,7 +92,9 @@ export default function Layout({ children, customBreadcrumbLabel, fullWidth = fa
     { target: '#tour-next-step', title: 'Próximo Paso', content: 'Aquí verás el hito o etapa inmediatamente posterior y lo que viene en el proceso de tu proyecto.', placement: 'top' },
     { target: '#entregables', title: 'Entregables (Documentos)', content: 'Aquí podrás descargar contratos, cotizaciones, manuales y cualquier documento relacionado a tu proyecto.', placement: 'top' },
     { target: '#tour-bitacora', title: 'Bitácora de Desarrollo', content: 'El registro cronológico detallado con todas las actividades, notas y avances que nuestro equipo va realizando día a día.', placement: 'top' },
-    { target: '#tour-coming-soon', title: 'Mis Referidos', content: '¡Esta sección estará disponible muy pronto! Aquí podrás recomendarnos y ganar recompensas.', placement: 'top' },
+    { target: '#tour-referrals-balance', title: 'Mis Referidos & Créditos HX', content: 'Aquí puedes consultar tu saldo acumulado de Créditos HX, canjeables por horas de consultoría y mejoras en tu sistema.', placement: 'top' },
+    { target: '#tour-referrals-tier', title: 'Tu Nivel de Socio', content: 'Conforme recomiendes y se concreten nuevos proyectos, subirás de Member a Partner o VIP, desbloqueando mayores recompensas.', placement: 'top' },
+    { target: '#tour-referrals-link', title: 'Tu Enlace de Socio', content: 'Copia tu enlace único o registra directamente a una empresa. Si formalizan proyecto, ganarás créditos automáticamente.', placement: 'top' },
     { target: '.tour-step-support', title: 'Soporte 24/7', content: 'Si tienes cualquier duda, usa este botón para mandarnos mensaje directo por WhatsApp. ¡Eso es todo, disfruta tu portal!', placement: 'right' },
   ];
 
@@ -101,7 +103,7 @@ export default function Layout({ children, customBreadcrumbLabel, fullWidth = fa
       if (location.pathname !== '/dashboard') navigate('/dashboard');
     } else if (i >= 12 && i <= 16) {
       if (location.pathname !== '/project') navigate('/project');
-    } else if (i >= 17) {
+    } else if (i >= 17 && i <= 19) {
       if (location.pathname !== '/referrals') navigate('/referrals');
     }
     tour.setIndex(i);

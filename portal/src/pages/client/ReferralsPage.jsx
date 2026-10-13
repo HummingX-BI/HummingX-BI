@@ -343,7 +343,7 @@ export default function ReferralsPage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(310px, 1fr))', gap: '20px' }}>
           
           {/* Card 1: Saldo de Créditos HX */}
-          <div className="card" style={{
+          <div id="tour-referrals-balance" className="card" style={{
             padding: '24px',
             borderRadius: '16px',
             border: '1px solid #E5E7EB',
@@ -408,7 +408,7 @@ export default function ReferralsPage() {
           </div>
 
           {/* Card 2: Tu Nivel HummingX (Estilo Dashboard / Landing Page) */}
-          <div className="card" style={{
+          <div id="tour-referrals-tier" className="card" style={{
             padding: '24px',
             borderRadius: '16px',
             border: '1px solid #E5E7EB',
@@ -508,7 +508,7 @@ export default function ReferralsPage() {
           </div>
 
           {/* Card 3: Tu Enlace Único de Referido */}
-          <div className="card" style={{
+          <div id="tour-referrals-link" className="card" style={{
             padding: '24px',
             borderRadius: '16px',
             border: '1px solid #E5E7EB',

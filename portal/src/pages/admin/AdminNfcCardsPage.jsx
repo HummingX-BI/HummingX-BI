@@ -260,18 +260,18 @@ export default function AdminNfcCardsPage() {
       }
 
       if (batchForm.downloadZip) {
-        setBatchProgress({ text: 'Iniciando generación de códigos vectoriales...', percent: 25 });
+        setBatchProgress({ text: 'Iniciando generación de códigos vectoriales SVG sin margen...', percent: 25 });
         const zip = new JSZip();
-        const csvRows = [['codigo', 'url', 'svg', 'png', 'svg_margen', 'png_margen']];
+        const csvRows = [['codigo', 'url', 'archivo_svg']];
 
         for (let i = start; i <= end; i++) {
           const code = String(i).padStart(3, '0');
           const url = `https://hummingxbi.com/t/${code}`;
           const currentIdx = i - start + 1;
           const pct = Math.round(25 + (currentIdx / count) * 65);
-          setBatchProgress({ text: `Generando QR #${code} (${currentIdx} de ${count})...`, percent: pct });
+          setBatchProgress({ text: `Generando QR #${code} sin margen (${currentIdx} de ${count})...`, percent: pct });
 
-          // SVG sin margen
+          // SVG sin margen (código vectorial puro solicitado para tarjetas físicas)
           const svgContent = await QRCode.toString(url, {
             type: 'svg',
             margin: 0,
@@ -280,44 +280,17 @@ export default function AdminNfcCardsPage() {
           });
           zip.file(`qr_${code}.svg`, svgContent);
 
-          // PNG sin margen
-          const pngDataUrl = await QRCode.toDataURL(url, {
-            margin: 0,
-            scale: 20,
-            errorCorrectionLevel: 'Q',
-            color: { dark: '#000000', light: '#FFFFFF' },
-          });
-          zip.file(`qr_${code}.png`, pngDataUrl.split(',')[1], { base64: true });
-
-          // SVG con margen
-          const svgMargenContent = await QRCode.toString(url, {
-            type: 'svg',
-            margin: 4,
-            errorCorrectionLevel: 'Q',
-            color: { dark: '#000000', light: '#FFFFFF' },
-          });
-          zip.file(`qr_${code}_margen.svg`, svgMargenContent);
-
-          // PNG con margen
-          const pngMargenDataUrl = await QRCode.toDataURL(url, {
-            margin: 4,
-            scale: 20,
-            errorCorrectionLevel: 'Q',
-            color: { dark: '#000000', light: '#FFFFFF' },
-          });
-          zip.file(`qr_${code}_margen.png`, pngMargenDataUrl.split(',')[1], { base64: true });
-
-          csvRows.push([code, url, `qr_${code}.svg`, `qr_${code}.png`, `qr_${code}_margen.svg`, `qr_${code}_margen.png`]);
+          csvRows.push([code, url, `qr_${code}.svg`]);
         }
 
         const csvContent = csvRows.map(r => r.join(',')).join('\n') + '\n';
         zip.file('indice.csv', csvContent);
 
-        setBatchProgress({ text: 'Comprimiendo archivo ZIP...', percent: 95 });
+        setBatchProgress({ text: 'Comprimiendo archivo ZIP de códigos SVG sin margen...', percent: 95 });
         const blob = await zip.generateAsync({ type: 'blob' });
         const downloadLink = document.createElement('a');
         downloadLink.href = URL.createObjectURL(blob);
-        downloadLink.download = `HummingX_QRs_Lote_${String(start).padStart(3, '0')}_a_${String(end).padStart(3, '0')}.zip`;
+        downloadLink.download = `HummingX_QRs_SinMargen_Lote_${String(start).padStart(3, '0')}_a_${String(end).padStart(3, '0')}.zip`;
         document.body.appendChild(downloadLink);
         downloadLink.click();
         document.body.removeChild(downloadLink);
@@ -414,6 +387,31 @@ export default function AdminNfcCardsPage() {
     a.href = qrModalDataUrl;
     a.download = `QR_HummingX_${activeCardForQr.code}_${activeCardForQr.clientName.replace(/\s+/g, '_')}.png`;
     a.click();
+  };
+
+  const downloadQrSvg = async (cardToDownload) => {
+    const targetCard = cardToDownload || activeCardForQr;
+    if (!targetCard) return;
+    try {
+      const url = `https://hummingxbi.com/t/${targetCard.code}`;
+      const svgContent = await QRCode.toString(url, {
+        type: 'svg',
+        margin: 0,
+        errorCorrectionLevel: 'Q',
+        color: { dark: '#000000', light: '#FFFFFF' },
+      });
+      const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `qr_${targetCard.code}.svg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(a.href);
+      showNotification(`Código QR sin margen (qr_${targetCard.code}.svg) descargado.`);
+    } catch (err) {
+      console.error('Error al generar SVG sin margen:', err);
+    }
   };
 
   // Filtered Cards
@@ -849,6 +847,15 @@ export default function AdminNfcCardsPage() {
                       </button>
 
                       <button
+                        onClick={() => downloadQrSvg(card)}
+                        className="btn-secondary"
+                        style={{ padding: '6px 8px', borderRadius: '8px' }}
+                        title="Descargar código QR sin margen (.svg)"
+                      >
+                        <Download size={13} color="#00C4CC" />
+                      </button>
+
+                      <button
                         onClick={() => openEditModal(card)}
                         className="btn-secondary"
                         style={{ padding: '6px 8px', borderRadius: '8px' }}
@@ -1077,20 +1084,37 @@ export default function AdminNfcCardsPage() {
               </code>
             </div>
 
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
               <button
-                onClick={downloadQrImage}
-                className="btn-primary"
+                onClick={() => downloadQrSvg(activeCardForQr)}
+                className="btn-accent"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '8px',
                   fontSize: '13px',
                   padding: '9px 16px',
+                  fontWeight: 600,
+                  boxShadow: '0 4px 12px rgba(0, 196, 204, 0.25)',
                 }}
               >
                 <Download size={15} />
-                Descargar PNG de Imprenta
+                Descargar SVG sin margen (.svg)
+              </button>
+
+              <button
+                onClick={downloadQrImage}
+                className="btn-secondary"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '13px',
+                  padding: '9px 14px',
+                }}
+              >
+                <Download size={14} />
+                Descargar PNG
               </button>
 
               <a

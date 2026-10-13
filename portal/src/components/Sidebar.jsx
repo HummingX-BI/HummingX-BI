@@ -59,10 +59,10 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
     { to: '/admin/clients',     icon: Users,        label: 'Clientes Activos' },
     { to: '/admin/prospects',   icon: Briefcase,    label: 'CRM Prospectos' },
     { to: '/admin/citas',       icon: CalendarDays, label: 'Agenda de Citas' },
-    { to: '/admin/tareas',      icon: CheckSquare,  label: 'Tareas' },
     { to: '/admin/finanzas',    icon: DollarSign,   label: 'Finanzas & Flujo' },
-    { to: '/admin/tarjetas-qr', icon: QrCode,       label: 'Tarjetas QR & NFC' },
     { to: '/admin/pagos',       icon: Calendar,     label: 'Calendario de Pagos' },
+    { to: '/admin/tareas',      icon: CheckSquare,  label: 'Tareas' },
+    { to: '/admin/tarjetas-qr', icon: QrCode,       label: 'Tarjetas QR & NFC' },
     { to: '/admin/analytics',   icon: BarChart3,    label: 'Control & Analíticas' },
   ];
 

@@ -1612,6 +1612,74 @@ router.post('/nfc-cards', authenticate, requireAdmin, async (req, res) => {
   }
 });
 
+// POST /admin/nfc-cards/batch — Generar lote de tarjetas QR/NFC en la base de datos
+router.post('/nfc-cards/batch', authenticate, requireAdmin, async (req, res) => {
+  try {
+    let { desde, hasta, cantidad, note, defaultUrl, type } = req.body;
+
+    const allCards = await prisma.nfcCard.findMany({ select: { code: true } });
+    const existingSet = new Set(allCards.map(c => c.code));
+
+    let maxNum = 15; // Mínimo 15 de base
+    for (const c of allCards) {
+      const n = parseInt(c.code, 10);
+      if (!isNaN(n) && n > maxNum) maxNum = n;
+    }
+
+    const startNum = desde !== undefined && desde !== null ? parseInt(desde, 10) : (maxNum + 1);
+    let endNum;
+    if (hasta !== undefined && hasta !== null) {
+      endNum = parseInt(hasta, 10);
+    } else if (cantidad !== undefined && cantidad !== null) {
+      endNum = startNum + parseInt(cantidad, 10) - 1;
+    } else {
+      endNum = startNum + 9; // 10 por defecto
+    }
+
+    if (isNaN(startNum) || isNaN(endNum) || startNum > endNum) {
+      return res.status(400).json({ error: 'Rango de numeración no válido.' });
+    }
+
+    if ((endNum - startNum + 1) > 100) {
+      return res.status(400).json({ error: 'El tamaño máximo por lote es de 100 tarjetas a la vez.' });
+    }
+
+    const toCreate = [];
+    const skipped = [];
+    for (let i = startNum; i <= endNum; i++) {
+      const code = String(i).padStart(3, '0');
+      if (existingSet.has(code)) {
+        skipped.push(code);
+        continue;
+      }
+      toCreate.push({
+        code,
+        clientName: 'Disponible para asignar',
+        type: type || 'google_reviews',
+        targetUrl: defaultUrl || 'https://hummingxbi.com',
+        active: false,
+        notes: note ? String(note).trim() : `Lote generado (#${String(startNum).padStart(3, '0')} - #${String(endNum).padStart(3, '0')})`,
+      });
+    }
+
+    if (toCreate.length > 0) {
+      await prisma.nfcCard.createMany({ data: toCreate });
+    }
+
+    res.status(201).json({
+      createdCount: toCreate.length,
+      skippedCount: skipped.length,
+      startCode: String(startNum).padStart(3, '0'),
+      endCode: String(endNum).padStart(3, '0'),
+      createdCodes: toCreate.map(c => c.code),
+      skippedCodes: skipped,
+    });
+  } catch (err) {
+    console.error('[ADMIN] Error in POST /admin/nfc-cards/batch:', err);
+    res.status(500).json({ error: 'Error al generar lote de tarjetas.' });
+  }
+});
+
 // PUT /admin/nfc-cards/:id — Actualizar tarjeta
 router.put('/nfc-cards/:id', authenticate, requireAdmin, async (req, res) => {
   try {

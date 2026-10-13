@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import Layout from '../../components/Layout';
 import api from '../../lib/api';
 import QRCode from 'qrcode';
+import JSZip from 'jszip';
 import {
   QrCode,
   Smartphone,
@@ -27,6 +28,9 @@ import {
   Layers,
   Sparkles,
   Eye,
+  Terminal,
+  Package,
+  Loader2,
 } from 'lucide-react';
 
 function InstagramIcon({ size = 18, color = 'currentColor', ...props }) {
@@ -197,6 +201,141 @@ export default function AdminNfcCardsPage() {
     }, 180);
   };
 
+  // Batch Generation State
+  const [showBatchModal, setShowBatchModal] = useState(false);
+  const [closingBatchModal, setClosingBatchModal] = useState(false);
+  const [batchForm, setBatchForm] = useState({
+    startCode: '017',
+    count: 10,
+    type: 'google_reviews',
+    downloadZip: true,
+    syncDb: true,
+  });
+  const [batchProgress, setBatchProgress] = useState(null);
+
+  const openBatchModal = () => {
+    setBatchForm({
+      startCode: metrics.nextSuggestedCode || '017',
+      count: 10,
+      type: 'google_reviews',
+      downloadZip: true,
+      syncDb: true,
+    });
+    setFormError('');
+    setShowBatchModal(true);
+  };
+
+  const closeBatchModal = () => {
+    if (batchProgress) return;
+    setClosingBatchModal(true);
+    setTimeout(() => {
+      setShowBatchModal(false);
+      setClosingBatchModal(false);
+      setBatchProgress(null);
+    }, 180);
+  };
+
+  const handleGenerateBatch = async (e) => {
+    e.preventDefault();
+    const start = parseInt(batchForm.startCode, 10);
+    const count = parseInt(batchForm.count, 10);
+    if (isNaN(start) || start <= 0 || isNaN(count) || count <= 0) {
+      setFormError('Por favor introduce un número inicial y cantidad válidos.');
+      return;
+    }
+    const end = start + count - 1;
+
+    setSubmitting(true);
+    setFormError('');
+
+    try {
+      if (batchForm.syncDb) {
+        setBatchProgress({ text: 'Registrando lote en la base de datos...', percent: 15 });
+        await api.post('/admin/nfc-cards/batch', {
+          desde: start,
+          hasta: end,
+          cantidad: count,
+          type: batchForm.type,
+        });
+      }
+
+      if (batchForm.downloadZip) {
+        setBatchProgress({ text: 'Iniciando generación de códigos vectoriales...', percent: 25 });
+        const zip = new JSZip();
+        const csvRows = [['codigo', 'url', 'svg', 'png', 'svg_margen', 'png_margen']];
+
+        for (let i = start; i <= end; i++) {
+          const code = String(i).padStart(3, '0');
+          const url = `https://hummingxbi.com/t/${code}`;
+          const currentIdx = i - start + 1;
+          const pct = Math.round(25 + (currentIdx / count) * 65);
+          setBatchProgress({ text: `Generando QR #${code} (${currentIdx} de ${count})...`, percent: pct });
+
+          // SVG sin margen
+          const svgContent = await QRCode.toString(url, {
+            type: 'svg',
+            margin: 0,
+            errorCorrectionLevel: 'Q',
+            color: { dark: '#000000', light: '#FFFFFF' },
+          });
+          zip.file(`qr_${code}.svg`, svgContent);
+
+          // PNG sin margen
+          const pngDataUrl = await QRCode.toDataURL(url, {
+            margin: 0,
+            scale: 20,
+            errorCorrectionLevel: 'Q',
+            color: { dark: '#000000', light: '#FFFFFF' },
+          });
+          zip.file(`qr_${code}.png`, pngDataUrl.split(',')[1], { base64: true });
+
+          // SVG con margen
+          const svgMargenContent = await QRCode.toString(url, {
+            type: 'svg',
+            margin: 4,
+            errorCorrectionLevel: 'Q',
+            color: { dark: '#000000', light: '#FFFFFF' },
+          });
+          zip.file(`qr_${code}_margen.svg`, svgMargenContent);
+
+          // PNG con margen
+          const pngMargenDataUrl = await QRCode.toDataURL(url, {
+            margin: 4,
+            scale: 20,
+            errorCorrectionLevel: 'Q',
+            color: { dark: '#000000', light: '#FFFFFF' },
+          });
+          zip.file(`qr_${code}_margen.png`, pngMargenDataUrl.split(',')[1], { base64: true });
+
+          csvRows.push([code, url, `qr_${code}.svg`, `qr_${code}.png`, `qr_${code}_margen.svg`, `qr_${code}_margen.png`]);
+        }
+
+        const csvContent = csvRows.map(r => r.join(',')).join('\n') + '\n';
+        zip.file('indice.csv', csvContent);
+
+        setBatchProgress({ text: 'Comprimiendo archivo ZIP...', percent: 95 });
+        const blob = await zip.generateAsync({ type: 'blob' });
+        const downloadLink = document.createElement('a');
+        downloadLink.href = URL.createObjectURL(blob);
+        downloadLink.download = `HummingX_QRs_Lote_${String(start).padStart(3, '0')}_a_${String(end).padStart(3, '0')}.zip`;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        URL.revokeObjectURL(downloadLink.href);
+      }
+
+      await fetchCards();
+      showNotification(`¡Lote de ${count} códigos QR generado (#${String(start).padStart(3, '0')} a #${String(end).padStart(3, '0')}) con éxito!`);
+      closeBatchModal();
+    } catch (err) {
+      console.error('Error al generar lote:', err);
+      setFormError(err.response?.data?.error || 'Error al generar el lote de códigos QR.');
+    } finally {
+      setSubmitting(false);
+      setBatchProgress(null);
+    }
+  };
+
   const handleSaveCard = async (e) => {
     e.preventDefault();
     if (!form.code.trim() || !form.clientName.trim() || !form.targetUrl.trim()) {
@@ -357,22 +496,46 @@ export default function AdminNfcCardsPage() {
             </p>
           </div>
 
-          <button
-            onClick={openNewModal}
-            className="btn-primary"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '10px 18px',
-              borderRadius: '10px',
-              fontWeight: 600,
-              fontSize: '13.5px',
-            }}
-          >
-            <Plus size={16} />
-            Configurar Nueva Tarjeta
-          </button>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <button
+              onClick={openBatchModal}
+              className="btn-secondary"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 16px',
+                borderRadius: '10px',
+                fontWeight: 600,
+                fontSize: '13.5px',
+                background: '#FFFFFF',
+                border: '1px solid #D1D5DB',
+                color: '#374151',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              <Layers size={16} color="#00C4CC" />
+              Generar Lote QR
+            </button>
+
+            <button
+              onClick={openNewModal}
+              className="btn-primary"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 18px',
+                borderRadius: '10px',
+                fontWeight: 600,
+                fontSize: '13.5px',
+              }}
+            >
+              <Plus size={16} />
+              Configurar Nueva Tarjeta
+            </button>
+          </div>
         </div>
 
         {/* ── Top Metrics Bar ─────────────────────────────────────── */}
@@ -948,6 +1111,249 @@ export default function AdminNfcCardsPage() {
                 Probar
               </a>
             </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ── Modal: Generador de Lote de Códigos QR ────────────────────────── */}
+      {showBatchModal && createPortal(
+        <div
+          className={`modal-overlay${closingBatchModal ? ' closing' : ''}`}
+          onClick={(e) => { if (e.target === e.currentTarget) closeBatchModal(); }}
+        >
+          <div className="modal-content" style={{ maxWidth: '580px', width: '100%', borderRadius: '16px', padding: '32px' }}>
+            <button
+              onClick={closeBatchModal}
+              disabled={!!batchProgress}
+              style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', cursor: batchProgress ? 'not-allowed' : 'pointer', color: '#6B7280' }}
+            >
+              <X size={20} />
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(0, 196, 204, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00C4CC' }}>
+                <Layers size={18} />
+              </div>
+              <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#111827', margin: 0, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                Generador de Lotes QR
+              </h2>
+            </div>
+            <p style={{ fontSize: '13px', color: '#6B7280', margin: '0 0 16px' }}>
+              Genera la siguiente tanda de tarjetas físicas continuando la numeración sin sobreescribir las existentes.
+            </p>
+
+            {/* Status Card: Current inventory & Next suggested code */}
+            <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '12px 16px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+              <div>
+                <span style={{ fontSize: '11px', color: '#64748B', display: 'block', fontWeight: 500 }}>Existencia actual en sistema</span>
+                <strong style={{ fontSize: '14px', color: '#0F172A' }}>{metrics.totalCards} tarjetas registradas</strong>
+              </div>
+              <div>
+                <span style={{ fontSize: '11px', color: '#64748B', display: 'block', fontWeight: 500 }}>Continuar a partir de</span>
+                <span style={{ fontSize: '14px', fontWeight: 800, color: '#7C3AED', fontFamily: 'monospace' }}>#{metrics.nextSuggestedCode}</span>
+              </div>
+            </div>
+
+            {formError && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '8px', color: '#B91C1C', fontSize: '12.5px', marginBottom: '16px' }}>
+                <AlertCircle size={15} />
+                <span>{formError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleGenerateBatch} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* Range settings */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' }}>
+                    Número Inicial *
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    required
+                    className="hx-input"
+                    value={batchForm.startCode}
+                    onChange={(e) => setBatchForm({ ...batchForm, startCode: e.target.value })}
+                    style={{ fontFamily: 'monospace', fontWeight: 700 }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' }}>
+                    Cantidad de Códigos *
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    required
+                    className="hx-input"
+                    value={batchForm.count}
+                    onChange={(e) => setBatchForm({ ...batchForm, count: e.target.value })}
+                    style={{ fontFamily: 'monospace', fontWeight: 700 }}
+                  />
+                </div>
+              </div>
+
+              {/* Quick count buttons */}
+              <div>
+                <span style={{ fontSize: '11px', color: '#6B7280', display: 'block', marginBottom: '6px' }}>Cantidades rápidas:</span>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  {[5, 10, 15, 25, 50].map((qty) => (
+                    <button
+                      key={qty}
+                      type="button"
+                      onClick={() => setBatchForm({ ...batchForm, count: qty })}
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        border: batchForm.count === qty ? '1px solid #00C4CC' : '1px solid #E5E7EB',
+                        background: batchForm.count === qty ? 'rgba(0, 196, 204, 0.1)' : '#FFFFFF',
+                        color: batchForm.count === qty ? '#007A80' : '#4B5563',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      +{qty} tarjetas
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Live resulting preview badge */}
+              {(() => {
+                const s = parseInt(batchForm.startCode, 10) || 1;
+                const c = parseInt(batchForm.count, 10) || 1;
+                const e = s + c - 1;
+                return (
+                  <div style={{ background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: '10px', padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <CheckCircle2 size={16} color="#059669" />
+                      <span style={{ fontSize: '12.5px', color: '#065F46', fontWeight: 600 }}>
+                        Lote resultante: #{String(s).padStart(3, '0')} a #{String(e).padStart(3, '0')}
+                      </span>
+                    </div>
+                    <span style={{ fontSize: '12px', color: '#047857', fontWeight: 700 }}>
+                      Total: {c} tarjetas
+                    </span>
+                  </div>
+                );
+              })()}
+
+              {/* Default action type */}
+              <div>
+                <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' }}>
+                  Tipo de Acción por Defecto
+                </label>
+                <select
+                  value={batchForm.type}
+                  onChange={(e) => setBatchForm({ ...batchForm, type: e.target.value })}
+                  className="hx-input"
+                >
+                  {Object.entries(CARD_TYPES).map(([key, val]) => (
+                    <option key={key} value={key}>{val.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Options checkboxes */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: '#F9FAFB', padding: '12px 14px', borderRadius: '10px', border: '1px solid #E5E7EB' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '12.5px', color: '#374151', fontWeight: 500 }}>
+                  <input
+                    type="checkbox"
+                    checked={batchForm.syncDb}
+                    onChange={(e) => setBatchForm({ ...batchForm, syncDb: e.target.checked })}
+                    style={{ accentColor: '#00C4CC' }}
+                  />
+                  <span>Registrar tarjetas en la base de datos como <strong>"Disponibles para asignar"</strong></span>
+                </label>
+
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '12.5px', color: '#374151', fontWeight: 500 }}>
+                  <input
+                    type="checkbox"
+                    checked={batchForm.downloadZip}
+                    onChange={(e) => setBatchForm({ ...batchForm, downloadZip: e.target.checked })}
+                    style={{ accentColor: '#00C4CC' }}
+                  />
+                  <span>Descargar paquete ZIP con todos los archivos (PNG + SVG + CSV para imprenta)</span>
+                </label>
+              </div>
+
+              {/* Progress bar if generating */}
+              {batchProgress && (
+                <div style={{ background: '#F0FDFA', border: '1px solid #99F6E4', borderRadius: '10px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', fontWeight: 600, color: '#0F766E' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Loader2 size={14} className="spin" />
+                      {batchProgress.text}
+                    </span>
+                    <span>{batchProgress.percent}%</span>
+                  </div>
+                  <div style={{ width: '100%', height: '6px', background: '#CCFBF1', borderRadius: '9999px', overflow: 'hidden' }}>
+                    <div
+                      style={{
+                        width: `${batchProgress.percent}%`,
+                        height: '100%',
+                        background: 'linear-gradient(90deg, #00C4CC 0%, #0284C7 100%)',
+                        transition: 'width 0.2s ease',
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* CLI Command Tip */}
+              <div style={{ background: '#1E293B', color: '#E2E8F0', padding: '10px 14px', borderRadius: '10px', fontSize: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px', color: '#94A3B8', fontWeight: 600 }}>
+                  <Terminal size={13} />
+                  <span>O desde tu terminal ejecutando:</span>
+                </div>
+                <code style={{ fontFamily: 'monospace', color: '#38BDF8', fontSize: '11.5px', wordBreak: 'break-all' }}>
+                  npm run generate-qr -- --desde {batchForm.startCode || metrics.nextSuggestedCode} --cantidad {batchForm.count || 10}
+                </code>
+              </div>
+
+              {/* Submit Buttons */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '6px' }}>
+                <button
+                  type="button"
+                  disabled={submitting}
+                  onClick={closeBatchModal}
+                  className="btn-secondary"
+                  style={{ padding: '9px 18px', fontSize: '13px' }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="btn-primary"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '9px 20px',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                  }}
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 size={15} className="spin" />
+                      Generando Lote...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles size={15} />
+                      Generar Lote de {batchForm.count || 10} Tarjetas
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>,
         document.body

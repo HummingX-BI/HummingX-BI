@@ -9,6 +9,7 @@
     "dev": "vite",
     "build": "npx prisma generate && vite build",
     "preview": "vite preview",
+    "generate-qr": "node tools/qr-generator/generar.mjs",
     "postinstall": "prisma generate"
   },
   "devDependencies": {

@@ -40,12 +40,22 @@ router.get('/my', authenticate, async (req, res) => {
       });
     }
 
+    // Dynamic level based on converted referrals count
+    const convertedCount = referrals.filter(r => r.status === 'converted').length;
+    const dynamicLevel = convertedCount >= 10 ? 3 : convertedCount >= 5 ? 2 : 1;
+    if (user && user.level !== dynamicLevel) {
+      await prisma.user.update({
+        where: { id: req.user.id },
+        data: { level: dynamicLevel },
+      });
+    }
+
     res.json({
       referrals,
       creditMovements,
       totalCredits,
       referralCode,
-      level: user?.level || 1,
+      level: dynamicLevel,
     });
   } catch (err) {
     console.error('[REFERRALS] Error en GET /referrals/my:', err);
@@ -73,6 +83,31 @@ router.post('/', authenticate, async (req, res) => {
         status: 'registered',
       },
     });
+
+    // Also register in CRM Prospects so it appears directly in the admin CRM
+    try {
+      const referrer = await prisma.user.findUnique({
+        where: { id: req.user.id },
+        select: { companyName: true, name: true },
+      });
+      const referrerName = referrer?.companyName || referrer?.name || 'Cliente';
+
+      await prisma.prospect.create({
+        data: {
+          companyName: companyName.trim(),
+          contactName: contactName?.trim() || null,
+          email: contactEmail?.trim() || null,
+          phone: contactPhone?.trim() || null,
+          source: `Referido por ${referrerName}`,
+          notes: notes?.trim() 
+            ? `[Recomendado por socio: ${referrerName}] ${notes.trim()}` 
+            : `Recomendado por socio: ${referrerName}`,
+          status: 'lead',
+        },
+      });
+    } catch (crmErr) {
+      console.warn('[REFERRALS] No se pudo crear prospecto en CRM automáticamente:', crmErr.message);
+    }
 
     res.status(201).json(referral);
   } catch (err) {

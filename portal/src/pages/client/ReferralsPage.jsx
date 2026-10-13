@@ -145,7 +145,7 @@ export default function ReferralsPage() {
 
   const handleContactFounderForCredits = () => {
     const clientName = user?.companyName || user?.name || 'Cliente';
-    const text = `Hola equipo fundador de HummingX BI, soy ${clientName}. Me gustaría consultar cómo aplicar mis $${totalCredits.toLocaleString('es-MX')} Créditos HX en la siguiente fase o mejoras de mi proyecto.`;
+    const text = `Hola equipo de HummingX BI, soy ${clientName}. Me gustaría consultar cómo aplicar mis $${totalCredits.toLocaleString('es-MX')} Créditos HX en la siguiente fase o mejoras de mi proyecto.`;
     window.open(`https://wa.me/5215579975762?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -194,10 +194,12 @@ export default function ReferralsPage() {
   const inProgressCount = useMemo(() => referrals.filter(r => ['registered', 'contacted', 'negotiating'].includes(r.status)).length, [referrals]);
   const totalCount = referrals.length;
 
-  // Membership Tier (Member = Gris, Partner = Azulito/Cyan, VIP = Moradito)
+  // Membership Tier basado estrictamente en empresas cerradas (converted):
+  // 0 a 4 empresas cerradas: Member (Gris #4B5563)
+  // 5 a 9 empresas cerradas: Partner (Azulito/Cyan #00C4CC)
+  // 10+ empresas cerradas: VIP (Moradito #8B5CF6)
   const userTier = useMemo(() => {
-    const effLevel = Math.max(userLevel || 1, convertedCount >= 10 ? 3 : convertedCount >= 5 ? 2 : 1);
-    if (effLevel >= 3) {
+    if (convertedCount >= 10) {
       return {
         level: 3,
         title: 'HummingX VIP',
@@ -215,7 +217,7 @@ export default function ReferralsPage() {
         perk: '$3,500 HX Créditos por cada referido concretado + Atención directiva 24/7',
       };
     }
-    if (effLevel >= 2) {
+    if (convertedCount >= 5) {
       const needed = Math.max(0, 10 - convertedCount);
       const progressPercent = Math.min(100, Math.round(((convertedCount - 5) / 5) * 100));
       return {
@@ -246,14 +248,14 @@ export default function ReferralsPage() {
       border: '#E5E7EB',
       gradient: 'linear-gradient(135deg, #6B7280 0%, #4B5563 100%)',
       img: '/member-icon.png',
-      desc: 'Socio activo. Refiere más para ascender a Partner.',
+      desc: 'Socio activo. Concreta más recomendaciones para ascender a Partner.',
       nextLevel: 'HummingX Partner',
       needed,
       progressPercent,
       targetCount: 5,
       perk: '$1,500 HX Créditos por cada referido concretado',
     };
-  }, [userLevel, convertedCount]);
+  }, [convertedCount]);
 
   // Filtered referrals
   const filteredReferrals = useMemo(() => {
@@ -376,7 +378,7 @@ export default function ReferralsPage() {
               </div>
 
               <p style={{ fontSize: '12.5px', color: '#6B7280', margin: '0 0 16px', lineHeight: 1.5 }}>
-                Tus créditos se aplican directamente en horas de consultoría, nuevas funciones o mantenimiento en conjunto con los fundadores.
+                Tus créditos se aplican directamente en horas de consultoría, nuevas funciones o mantenimiento en conjunto con el equipo de HummingX BI.
               </p>
             </div>
 
@@ -400,7 +402,7 @@ export default function ReferralsPage() {
                 }}
               >
                 <MessageCircle size={14} color="#00C4CC" />
-                Coordinar canje con fundadores
+                Coordinar canje con el equipo de HummingX BI
               </button>
             </div>
           </div>
@@ -1331,10 +1333,10 @@ export default function ReferralsPage() {
                 background: '#FFFFFF',
                 borderRadius: '20px',
                 width: '100%',
-                maxWidth: '720px',
-                maxHeight: '90vh',
+                maxWidth: '960px',
+                maxHeight: '92vh',
                 overflowY: 'auto',
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                boxShadow: '0 25px 60px -12px rgba(0, 0, 0, 0.35)',
                 border: '1px solid #E5E7EB',
                 animation: closingTierModal ? 'scaleDown 0.2s ease forwards' : 'scaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards',
               }}
@@ -1343,7 +1345,7 @@ export default function ReferralsPage() {
               {/* Header */}
               <div
                 style={{
-                  padding: '24px',
+                  padding: '24px 28px',
                   borderBottom: '1px solid #F3F4F6',
                   display: 'flex',
                   alignItems: 'center',
@@ -1351,12 +1353,12 @@ export default function ReferralsPage() {
                   background: 'linear-gradient(135deg, #F8FAFC 0%, #FFFFFF 100%)',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                   <div
                     style={{
-                      width: '42px',
-                      height: '42px',
-                      borderRadius: '12px',
+                      width: '46px',
+                      height: '46px',
+                      borderRadius: '14px',
                       background: '#F0FDFA',
                       border: '1px solid #CCFBF1',
                       display: 'flex',
@@ -1365,14 +1367,14 @@ export default function ReferralsPage() {
                       color: '#00C4CC',
                     }}
                   >
-                    <Crown size={22} />
+                    <Crown size={24} />
                   </div>
                   <div>
-                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#111827' }}>
+                    <h3 style={{ margin: 0, fontSize: '20px', fontWeight: 800, color: '#111827', letterSpacing: '-0.02em', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                       Niveles de Reconocimiento HummingX
                     </h3>
-                    <span style={{ fontSize: '12.5px', color: '#6B7280' }}>
-                      Asciende de categoría conforme tus recomendaciones se concreten en proyectos
+                    <span style={{ fontSize: '13px', color: '#6B7280' }}>
+                      Asciende de categoría conforme tus recomendaciones se concreten en proyectos cerrados
                     </span>
                   </div>
                 </div>
@@ -1389,65 +1391,71 @@ export default function ReferralsPage() {
                     border: 'none',
                     color: '#9CA3AF',
                     cursor: 'pointer',
-                    padding: '6px',
+                    padding: '8px',
                     borderRadius: '8px',
                   }}
                 >
-                  <X size={20} />
+                  <X size={22} />
                 </button>
               </div>
 
               {/* Tiers Grid */}
-              <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
+              <div style={{ padding: '28px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(270px, 1fr))', gap: '20px' }}>
                   
                   {/* Tier 1: Member */}
                   <div
                     style={{
-                      padding: '18px',
-                      borderRadius: '14px',
-                      border: userTier.level === 1 ? '2px solid #4B5563' : '1px solid #E5E7EB',
+                      padding: '24px 20px',
+                      borderRadius: '16px',
+                      border: userTier.level === 1 ? '2.5px solid #4B5563' : '1px solid #E5E7EB',
                       background: userTier.level === 1 ? '#F9FAFB' : '#FFFFFF',
+                      boxShadow: userTier.level === 1 ? '0 10px 25px -5px rgba(75, 85, 99, 0.15)' : 'none',
                       position: 'relative',
                       display: 'flex',
                       flexDirection: 'column',
                       justifyContent: 'space-between',
+                      transition: 'all 0.2s ease',
                     }}
                   >
                     {userTier.level === 1 && (
                       <span
                         style={{
                           position: 'absolute',
-                          top: '-10px',
-                          right: '12px',
-                          padding: '2px 8px',
+                          top: '-11px',
+                          right: '16px',
+                          padding: '3px 10px',
                           borderRadius: '9999px',
                           background: '#4B5563',
                           color: '#FFFFFF',
-                          fontSize: '10px',
+                          fontSize: '10.5px',
                           fontWeight: 800,
                           letterSpacing: '0.04em',
                           textTransform: 'uppercase',
                         }}
                       >
-                        Tu Nivel Actual
+                        ★ Tu Nivel Actual
                       </span>
                     )}
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                        <img
-                          src="/member-icon.png"
-                          alt="Member"
-                          style={{ width: '40px', height: '40px', objectFit: 'contain' }}
-                        />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '14px' }}>
+                        <div style={{ width: '56px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <img
+                            src="/member-icon.png"
+                            alt="Member"
+                            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                          />
+                        </div>
                         <div>
-                          <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: '#111827' }}>
+                          <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#111827' }}>
                             Nivel 1 · Member
                           </h4>
-                          <span style={{ fontSize: '11px', color: '#6B7280' }}>0 a 4 empresas cerradas</span>
+                          <span style={{ fontSize: '12px', color: '#6B7280', fontWeight: 500 }}>
+                            0 a 4 empresas cerradas
+                          </span>
                         </div>
                       </div>
-                      <ul style={{ margin: '12px 0 0', paddingLeft: '16px', fontSize: '12px', color: '#4B5563', lineHeight: 1.6 }}>
+                      <ul style={{ margin: '14px 0 0', paddingLeft: '18px', fontSize: '13px', color: '#4B5563', lineHeight: 1.7 }}>
                         <li><strong>$1,500 HX Créditos</strong> por proyecto concretado.</li>
                         <li>Enlace y código de socio personalizado.</li>
                         <li>Acceso al portal de métricas en tiempo real.</li>
@@ -1458,53 +1466,59 @@ export default function ReferralsPage() {
                   {/* Tier 2: Partner */}
                   <div
                     style={{
-                      padding: '18px',
-                      borderRadius: '14px',
-                      border: userTier.level === 2 ? '2px solid #00C4CC' : '1px solid #E5E7EB',
+                      padding: '24px 20px',
+                      borderRadius: '16px',
+                      border: userTier.level === 2 ? '2.5px solid #00C4CC' : '1px solid #E5E7EB',
                       background: userTier.level === 2 ? '#F0FDFA' : '#FFFFFF',
+                      boxShadow: userTier.level === 2 ? '0 10px 25px -5px rgba(0, 196, 204, 0.2)' : 'none',
                       position: 'relative',
                       display: 'flex',
                       flexDirection: 'column',
                       justifyContent: 'space-between',
+                      transition: 'all 0.2s ease',
                     }}
                   >
                     {userTier.level === 2 && (
                       <span
                         style={{
                           position: 'absolute',
-                          top: '-10px',
-                          right: '12px',
-                          padding: '2px 8px',
+                          top: '-11px',
+                          right: '16px',
+                          padding: '3px 10px',
                           borderRadius: '9999px',
                           background: '#00C4CC',
                           color: '#FFFFFF',
-                          fontSize: '10px',
+                          fontSize: '10.5px',
                           fontWeight: 800,
                           letterSpacing: '0.04em',
                           textTransform: 'uppercase',
                         }}
                       >
-                        Tu Nivel Actual
+                        ★ Tu Nivel Actual
                       </span>
                     )}
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                        <img
-                          src="/partner-icon.png"
-                          alt="Partner"
-                          style={{ width: '40px', height: '40px', objectFit: 'contain' }}
-                        />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '14px' }}>
+                        <div style={{ width: '56px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <img
+                            src="/partner-icon.png"
+                            alt="Partner"
+                            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                          />
+                        </div>
                         <div>
-                          <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: '#111827' }}>
+                          <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#111827' }}>
                             Nivel 2 · Partner
                           </h4>
-                          <span style={{ fontSize: '11px', color: '#6B7280' }}>5 a 9 empresas cerradas</span>
+                          <span style={{ fontSize: '12px', color: '#0F766E', fontWeight: 600 }}>
+                            5 a 9 empresas cerradas
+                          </span>
                         </div>
                       </div>
-                      <ul style={{ margin: '12px 0 0', paddingLeft: '16px', fontSize: '12px', color: '#4B5563', lineHeight: 1.6 }}>
+                      <ul style={{ margin: '14px 0 0', paddingLeft: '18px', fontSize: '13px', color: '#4B5563', lineHeight: 1.7 }}>
                         <li><strong>$2,500 HX Créditos</strong> por proyecto concretado.</li>
-                        <li>Sesión trimestral de optimización de BI con fundadores.</li>
-                        <li>Acceso beta anticipado a nuevos módulos.</li>
+                        <li>Sesión trimestral de optimización de BI con el equipo directivo.</li>
+                        <li>Acceso beta anticipado a nuevos módulos de analítica.</li>
                       </ul>
                     </div>
                   </div>
@@ -1512,52 +1526,58 @@ export default function ReferralsPage() {
                   {/* Tier 3: VIP */}
                   <div
                     style={{
-                      padding: '18px',
-                      borderRadius: '14px',
-                      border: userTier.level === 3 ? '2px solid #8B5CF6' : '1px solid #E5E7EB',
+                      padding: '24px 20px',
+                      borderRadius: '16px',
+                      border: userTier.level === 3 ? '2.5px solid #8B5CF6' : '1px solid #E5E7EB',
                       background: userTier.level === 3 ? '#F5F3FF' : '#FFFFFF',
+                      boxShadow: userTier.level === 3 ? '0 10px 25px -5px rgba(139, 92, 246, 0.2)' : 'none',
                       position: 'relative',
                       display: 'flex',
                       flexDirection: 'column',
                       justifyContent: 'space-between',
+                      transition: 'all 0.2s ease',
                     }}
                   >
                     {userTier.level === 3 && (
                       <span
                         style={{
                           position: 'absolute',
-                          top: '-10px',
-                          right: '12px',
-                          padding: '2px 8px',
+                          top: '-11px',
+                          right: '16px',
+                          padding: '3px 10px',
                           borderRadius: '9999px',
                           background: '#8B5CF6',
                           color: '#FFFFFF',
-                          fontSize: '10px',
+                          fontSize: '10.5px',
                           fontWeight: 800,
                           letterSpacing: '0.04em',
                           textTransform: 'uppercase',
                         }}
                       >
-                        Tu Nivel Actual
+                        ★ Tu Nivel Actual
                       </span>
                     )}
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                        <img
-                          src="/vip-icon.png"
-                          alt="VIP"
-                          style={{ width: '40px', height: '40px', objectFit: 'contain' }}
-                        />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '14px' }}>
+                        <div style={{ width: '56px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <img
+                            src="/vip-icon.png"
+                            alt="VIP"
+                            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                          />
+                        </div>
                         <div>
-                          <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: '#111827' }}>
+                          <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#111827' }}>
                             Nivel 3 · VIP
                           </h4>
-                          <span style={{ fontSize: '11px', color: '#6B7280' }}>10+ empresas cerradas</span>
+                          <span style={{ fontSize: '12px', color: '#6D28D9', fontWeight: 600 }}>
+                            10+ empresas cerradas
+                          </span>
                         </div>
                       </div>
-                      <ul style={{ margin: '12px 0 0', paddingLeft: '16px', fontSize: '12px', color: '#4B5563', lineHeight: 1.6 }}>
+                      <ul style={{ margin: '14px 0 0', paddingLeft: '18px', fontSize: '13px', color: '#4B5563', lineHeight: 1.7 }}>
                         <li><strong>$3,500 HX Créditos</strong> por proyecto concretado.</li>
-                        <li>Canal prioritario 24/7 directo con directivos.</li>
+                        <li>Canal prioritario 24/7 directo con directivos y soporte clave.</li>
                         <li>Créditos transferibles para desarrollos a medida.</li>
                       </ul>
                     </div>

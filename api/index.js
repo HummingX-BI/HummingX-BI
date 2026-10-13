@@ -109,6 +109,17 @@ app.use('/', apiRouter);
 app.get('/t/:code', require('./t'));
 apiRouter.get('/t/:code', require('./t'));
 
+// ─── Referral Link Redirection (/ref/:code) ─────────────────────────────
+const handleReferralRedirect = (req, res) => {
+  const code = req.params.code || req.query.code;
+  if (!code) return res.redirect('/');
+  res.redirect(`/?ref=${encodeURIComponent(code)}`);
+};
+app.get('/ref/:code', handleReferralRedirect);
+apiRouter.get('/ref/:code', handleReferralRedirect);
+app.get('/ref', handleReferralRedirect);
+apiRouter.get('/ref', handleReferralRedirect);
+
 // ─── 404 handler ─────────────────────────────────────────────────────────────
 app.use((_req, res) => res.status(404).json({ error: 'Ruta no encontrada.' }));
 

@@ -15,6 +15,20 @@ export const SendButtonsModule = (() => {
     mas_150k: 'Más de $150,000 MXN',
   };
 
+  function getReferralCode() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const codeFromUrl = params.get('ref') || params.get('refCode');
+      if (codeFromUrl) {
+        localStorage.setItem('hx_referral_code', codeFromUrl);
+        return codeFromUrl;
+      }
+      return localStorage.getItem('hx_referral_code') || '';
+    } catch {
+      return '';
+    }
+  }
+
   function buildMessage(data) {
     const lines = [
       `*Nueva solicitud — ${CONFIG.COMPANY_NAME}*`,
@@ -30,6 +44,11 @@ export const SendButtonsModule = (() => {
 
     if (data.mensaje) {
       lines.push('', `*Desafío / Mensaje:*`, data.mensaje);
+    }
+
+    const refCode = getReferralCode();
+    if (refCode) {
+      lines.push('', `*Recomendado por socio (Código):* ${refCode}`);
     }
 
     lines.push('', '---', 'Enviado desde hummingxbi.com');

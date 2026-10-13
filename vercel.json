@@ -5,6 +5,10 @@
       "destination": "/api/t?code=:code"
     },
     {
+      "source": "/ref/:code",
+      "destination": "/api/ref?code=:code"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/index"
     }

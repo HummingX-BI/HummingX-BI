@@ -56,6 +56,39 @@ function InstagramIcon({ size = 18, color = 'currentColor', ...props }) {
   );
 }
 
+export function cleanPlaceId(input) {
+  if (!input) return '';
+  let str = String(input).trim();
+  const match = str.match(/place_?id=([a-zA-Z0-9_\-]+)/i);
+  if (match && match[1]) {
+    return match[1].trim();
+  }
+  if (str.includes('writereview?placeid=')) {
+    return str.split('writereview?placeid=')[1].split('&')[0].trim();
+  }
+  return str.replace(/['"\s]/g, '');
+}
+
+export function buildGoogleReviewUrl(placeId) {
+  const cleaned = cleanPlaceId(placeId);
+  if (!cleaned) return '';
+  return `https://search.google.com/local/writereview?placeid=${cleaned}`;
+}
+
+export function cleanInstagramHandle(input) {
+  if (!input) return '';
+  let str = String(input).trim();
+  str = str.replace(/^https?:\/\/(www\.)?instagram\.com\//i, '');
+  str = str.split('?')[0].split('/')[0].replace(/^@+/, '').trim();
+  return str;
+}
+
+export function buildInstagramUrl(handle) {
+  const cleaned = cleanInstagramHandle(handle);
+  if (!cleaned) return '';
+  return `https://www.instagram.com/${cleaned}/`;
+}
+
 const CARD_TYPES = {
   google_reviews: {
     label: 'Reseñas de Google',
@@ -63,8 +96,8 @@ const CARD_TYPES = {
     color: '#D97706',
     bg: '#FEF3C7',
     border: '#FDE68A',
-    placeholder: 'https://maps.app.goo.gl/... o https://g.page/r/.../review',
-    hint: 'Abre la ficha de Google Maps de tu negocio, dale en "Solicitar reseñas" y pega el link aquí.',
+    placeholder: 'Ej. ChIJd34kTQD90YURJqg9LdnTMiA',
+    hint: 'Ingresa el Place ID del negocio. El panel construirá el link directo de calificación de 5 estrellas.',
   },
   instagram: {
     label: 'Seguidores Instagram',
@@ -72,8 +105,8 @@ const CARD_TYPES = {
     color: '#9333EA',
     bg: '#F3E8FF',
     border: '#E9D5FF',
-    placeholder: 'https://instagram.com/tu_negocio',
-    hint: 'Pega el perfil de Instagram del negocio para que lo sigan al instante.',
+    placeholder: 'Ej. kikiselcamaron (sin @)',
+    hint: 'Escribe solo el usuario de Instagram (sin @). El panel agregará la URL completa automáticamente.',
   },
   whatsapp: {
     label: 'WhatsApp Directo',
@@ -91,7 +124,7 @@ const CARD_TYPES = {
     bg: '#FFEDD5',
     border: '#FED7AA',
     placeholder: 'https://menu.tunegocio.com o link de Google Drive al PDF',
-    hint: 'Ideal para restaurantes, cafeterías o catálogos de productos.',
+    hint: 'Ideal para restaurantes, cafeterías o catlogos de productos.',
   },
   website: {
     label: 'Enlace Web Personalizado',
@@ -144,6 +177,21 @@ export default function AdminNfcCardsPage() {
     notes: '',
   });
 
+  // Dedicated inputs for Google Place ID and Instagram Handle
+  const [placeIdInput, setPlaceIdInput] = useState('');
+  const [instagramHandleInput, setInstagramHandleInput] = useState('');
+
+  // Computed final URL preview
+  const computedFinalUrl = useMemo(() => {
+    if (form.type === 'google_reviews') {
+      return buildGoogleReviewUrl(placeIdInput);
+    }
+    if (form.type === 'instagram') {
+      return buildInstagramUrl(instagramHandleInput);
+    }
+    return form.targetUrl?.trim() || '';
+  }, [form.type, form.targetUrl, placeIdInput, instagramHandleInput]);
+
   const fetchCards = async () => {
     try {
       const res = await api.get('/admin/nfc-cards');
@@ -181,20 +229,33 @@ export default function AdminNfcCardsPage() {
       active: true,
       notes: '',
     });
+    setPlaceIdInput('');
+    setInstagramHandleInput('');
     setFormError('');
     setShowModal(true);
   };
 
   const openEditModal = (card) => {
     setEditingCard(card);
+    const cardType = card.type || 'google_reviews';
     setForm({
       code: card.code,
       clientName: card.clientName,
-      type: card.type || 'google_reviews',
+      type: cardType,
       targetUrl: card.targetUrl,
       active: card.active,
       notes: card.notes || '',
     });
+    if (cardType === 'google_reviews') {
+      setPlaceIdInput(cleanPlaceId(card.targetUrl));
+      setInstagramHandleInput('');
+    } else if (cardType === 'instagram') {
+      setInstagramHandleInput(cleanInstagramHandle(card.targetUrl));
+      setPlaceIdInput('');
+    } else {
+      setPlaceIdInput('');
+      setInstagramHandleInput('');
+    }
     setFormError('');
     setShowModal(true);
   };
@@ -203,14 +264,25 @@ export default function AdminNfcCardsPage() {
     setEditingCard(card);
     const num = parseInt(card.code, 10);
     const defaultType = card.type || (num >= 11 && num <= 15 ? 'instagram' : 'google_reviews');
+    const isGenericUrl = !card.targetUrl || card.targetUrl === 'https://hummingxbi.com';
     setForm({
       code: card.code,
       clientName: card.clientName && !card.clientName.includes('Disponible') ? card.clientName : '',
       type: defaultType,
-      targetUrl: card.targetUrl && card.targetUrl !== 'https://hummingxbi.com' ? card.targetUrl : '',
+      targetUrl: isGenericUrl ? '' : card.targetUrl,
       active: true,
       notes: card.notes || '',
     });
+    if (defaultType === 'google_reviews') {
+      setPlaceIdInput(isGenericUrl ? '' : cleanPlaceId(card.targetUrl));
+      setInstagramHandleInput('');
+    } else if (defaultType === 'instagram') {
+      setInstagramHandleInput(isGenericUrl ? '' : cleanInstagramHandle(card.targetUrl));
+      setPlaceIdInput('');
+    } else {
+      setPlaceIdInput('');
+      setInstagramHandleInput('');
+    }
     setFormError('');
     setShowModal(true);
   };
@@ -221,6 +293,8 @@ export default function AdminNfcCardsPage() {
       setShowModal(false);
       setClosingModal(false);
       setEditingCard(null);
+      setPlaceIdInput('');
+      setInstagramHandleInput('');
     }, 180);
   };
 
@@ -334,21 +408,53 @@ export default function AdminNfcCardsPage() {
 
   const handleSaveCard = async (e) => {
     e.preventDefault();
-    if (!form.code.trim() || !form.clientName.trim() || !form.targetUrl.trim()) {
-      setFormError('El número de tarjeta, cliente y enlace de destino son obligatorios.');
+
+    let finalTargetUrl = '';
+    if (form.type === 'google_reviews') {
+      const cleaned = cleanPlaceId(placeIdInput);
+      if (!cleaned) {
+        setFormError('Por favor ingresa el Place ID del negocio en Google (ej. ChIJd34kTQD90YURJqg9LdnTMiA).');
+        return;
+      }
+      finalTargetUrl = `https://search.google.com/local/writereview?placeid=${cleaned}`;
+    } else if (form.type === 'instagram') {
+      const cleaned = cleanInstagramHandle(instagramHandleInput);
+      if (!cleaned) {
+        setFormError('Por favor ingresa el usuario de Instagram (sin @).');
+        return;
+      }
+      finalTargetUrl = `https://www.instagram.com/${cleaned}/`;
+    } else {
+      finalTargetUrl = form.targetUrl?.trim() || '';
+      if (!finalTargetUrl) {
+        setFormError('El enlace de destino es obligatorio.');
+        return;
+      }
+      if (!/^https?:\/\//i.test(finalTargetUrl)) {
+        finalTargetUrl = 'https://' + finalTargetUrl;
+      }
+    }
+
+    if (!form.code.trim() || !form.clientName.trim() || !finalTargetUrl) {
+      setFormError('El número de tarjeta, cliente y destino son obligatorios.');
       return;
     }
+
+    const payload = {
+      ...form,
+      targetUrl: finalTargetUrl,
+    };
 
     setSubmitting(true);
     setFormError('');
     try {
       let savedCardData = null;
       if (editingCard) {
-        const res = await api.put(`/admin/nfc-cards/${editingCard.id}`, form);
+        const res = await api.put(`/admin/nfc-cards/${editingCard.id}`, payload);
         savedCardData = res.data;
         showNotification(`Tarjeta #${form.code} actualizada correctamente.`);
       } else {
-        const res = await api.post('/admin/nfc-cards', form);
+        const res = await api.post('/admin/nfc-cards', payload);
         savedCardData = res.data;
         showNotification(`Tarjeta #${form.code} configurada y activada.`);
       }
@@ -361,7 +467,7 @@ export default function AdminNfcCardsPage() {
           code: form.code,
           clientName: form.clientName,
           type: form.type,
-          targetUrl: form.targetUrl,
+          targetUrl: finalTargetUrl,
         });
         setShowCelebrationModal(true);
       }
@@ -1018,19 +1124,162 @@ export default function AdminNfcCardsPage() {
                 </span>
               </div>
 
-              <div>
-                <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' }}>
-                  Enlace de Destino (URL) *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder={CARD_TYPES[form.type]?.placeholder || 'https://...'}
-                  className="hx-input"
-                  value={form.targetUrl}
-                  onChange={(e) => setForm({ ...form, targetUrl: e.target.value })}
-                />
-              </div>
+              {/* ── Dynamic Field by Card Type ── */}
+              {form.type === 'google_reviews' ? (
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap', gap: '6px' }}>
+                    <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', margin: 0 }}>
+                      Place ID del negocio en Google *
+                    </label>
+                    <a
+                      href="https://developers.google.com/maps/documentation/javascript/examples/places-placeid-finder"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        fontSize: '11.5px',
+                        fontWeight: 600,
+                        color: '#0284C7',
+                        textDecoration: 'none',
+                        background: '#F0F9FF',
+                        border: '1px solid #BAE6FD',
+                        padding: '3px 9px',
+                        borderRadius: '7px',
+                        transition: 'all 0.15s ease',
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = '#E0F2FE'; e.currentTarget.style.borderColor = '#7DD3FC'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = '#F0F9FF'; e.currentTarget.style.borderColor = '#BAE6FD'; }}
+                      title="Abrir buscador oficial de Place IDs de Google en nueva pestaña"
+                    >
+                      <span>🔍 Buscar Place ID en Google</span>
+                      <ExternalLink size={11} />
+                    </a>
+                  </div>
+
+                  <input
+                    type="text"
+                    required
+                    placeholder="Ej. ChIJd34kTQD90YURJqg9LdnTMiA"
+                    className="hx-input"
+                    style={{ fontFamily: 'monospace', fontWeight: 600, fontSize: '13px' }}
+                    value={placeIdInput}
+                    onChange={(e) => setPlaceIdInput(e.target.value)}
+                  />
+
+                  {/* Live preview box */}
+                  {cleanPlaceId(placeIdInput) && (
+                    <div style={{ marginTop: '8px', padding: '10px 12px', background: '#FEF3C7', border: '1px solid #FDE68A', borderRadius: '10px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginBottom: '5px' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#92400E', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          Enlace final generado:
+                        </span>
+                        <a
+                          href={computedFinalUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            fontSize: '11.5px',
+                            fontWeight: 700,
+                            color: '#B45309',
+                            textDecoration: 'none',
+                            background: '#FFFFFF',
+                            border: '1px solid #FCD34D',
+                            padding: '2px 8px',
+                            borderRadius: '6px',
+                          }}
+                        >
+                          Probar enlace <ExternalLink size={11} />
+                        </a>
+                      </div>
+                      <code style={{ fontSize: '11.5px', color: '#78350F', wordBreak: 'break-all', display: 'block', fontWeight: 600 }}>
+                        {computedFinalUrl}
+                      </code>
+                      <span style={{ fontSize: '11px', color: '#A16207', display: 'block', marginTop: '4px' }}>
+                        Al escanear, abrirá directamente el cuadro de calificación de 5 estrellas en Google.
+                      </span>
+                    </div>
+                  )}
+                </div>
+              ) : form.type === 'instagram' ? (
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', margin: 0 }}>
+                      Usuario de Instagram *
+                    </label>
+                    <span style={{ fontSize: '11px', color: '#9333EA', fontWeight: 600 }}>
+                      Sin @ ni enlaces largos
+                    </span>
+                  </div>
+
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <span style={{ position: 'absolute', left: '12px', color: '#9CA3AF', fontWeight: 700, fontSize: '14px', pointerEvents: 'none' }}>
+                      @
+                    </span>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ej. kikiselcamaron (sin @)"
+                      className="hx-input"
+                      style={{ paddingLeft: '28px', fontWeight: 600 }}
+                      value={instagramHandleInput}
+                      onChange={(e) => setInstagramHandleInput(e.target.value)}
+                    />
+                  </div>
+
+                  {/* Live preview box */}
+                  {cleanInstagramHandle(instagramHandleInput) && (
+                    <div style={{ marginTop: '8px', padding: '10px 12px', background: '#FAF5FF', border: '1px solid #E9D5FF', borderRadius: '10px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginBottom: '5px' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#7E22CE', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                          Perfil que se abrirá:
+                        </span>
+                        <a
+                          href={computedFinalUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            fontSize: '11.5px',
+                            fontWeight: 700,
+                            color: '#9333EA',
+                            textDecoration: 'none',
+                            background: '#FFFFFF',
+                            border: '1px solid #D8B4FE',
+                            padding: '2px 8px',
+                            borderRadius: '6px',
+                          }}
+                        >
+                          Probar perfil <ExternalLink size={11} />
+                        </a>
+                      </div>
+                      <code style={{ fontSize: '12px', color: '#581C87', wordBreak: 'break-all', display: 'block', fontWeight: 600 }}>
+                        {computedFinalUrl}
+                      </code>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div>
+                  <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' }}>
+                    Enlace de Destino (URL) *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder={CARD_TYPES[form.type]?.placeholder || 'https://...'}
+                    className="hx-input"
+                    value={form.targetUrl}
+                    onChange={(e) => setForm({ ...form, targetUrl: e.target.value })}
+                  />
+                </div>
+              )}
 
               <div>
                 <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' }}>

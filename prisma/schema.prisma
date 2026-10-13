@@ -357,3 +357,19 @@ model TeamTask {
   @@map("team_tasks")
 }
 
+// ─── HUMMINGX CORE: PROYECTOS HISTÓRICOS Y CONTROL FINANCIERO ─
+
+model HistoricalDeal {
+  id          String   @id @default(cuid())
+  clientName  String   // Nombre del cliente o empresa
+  projectName String   // Proyecto o servicio realizado
+  amount      Float    // Monto cobrado en MXN
+  closedAt    DateTime @default(now()) // Fecha de cierre/cobro
+  category    String?  // BI & Dashboards, Web App, Automatización, Consultoría
+  notes       String?  // Entregables o notas de valor
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("historical_deals")
+}
+

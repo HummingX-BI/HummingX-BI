@@ -28,6 +28,8 @@ import {
   Sparkles,
   Link as LinkIcon,
   Layers,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 
 const STAGE_CONFIG = {
@@ -55,6 +57,17 @@ export default function AdminProspectsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [expandedStageFilter, setExpandedStageFilter] = useState(false);
+  const [expandedDocsIds, setExpandedDocsIds] = useState(new Set());
+
+  const toggleDocs = (id) => {
+    setExpandedDocsIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   // Modal states
   const [showProspectModal, setShowProspectModal] = useState(false);
@@ -388,19 +401,67 @@ export default function AdminProspectsPage() {
         </div>
 
         {/* ── Filters & Search ─────────────────────────────────────── */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '10px', padding: '8px 14px', width: '280px' }}>
-            <Search size={15} color="#9CA3AF" />
-            <input
-              type="text"
-              placeholder="Buscar por empresa o contacto..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{ border: 'none', outline: 'none', fontSize: '13px', width: '100%', background: 'transparent' }}
-            />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '10px', padding: '8px 14px', width: '280px' }}>
+              <Search size={15} color="#9CA3AF" />
+              <input
+                type="text"
+                placeholder="Buscar por empresa o contacto..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{ border: 'none', outline: 'none', fontSize: '13px', width: '100%', background: 'transparent' }}
+              />
+            </div>
+
+            {/* Single filter pill with breakdown toggle */}
+            <button
+              onClick={() => setExpandedStageFilter(!expandedStageFilter)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 16px',
+                borderRadius: '10px',
+                fontSize: '13px',
+                fontWeight: 600,
+                border: '1px solid #E5E7EB',
+                background: statusFilter !== 'all' ? '#111827' : '#FFFFFF',
+                color: statusFilter !== 'all' ? '#FFFFFF' : '#374151',
+                cursor: 'pointer',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              <Filter size={14} color={statusFilter !== 'all' ? '#00C4CC' : '#6B7280'} />
+              <span>
+                {statusFilter === 'all'
+                  ? `Etapa: Todos (${metrics.total})`
+                  : `Etapa: ${STAGE_CONFIG[statusFilter]?.label || statusFilter} (${prospects.filter(p => p.status === statusFilter).length})`}
+              </span>
+              <ChevronDown
+                size={14}
+                style={{
+                  transform: expandedStageFilter ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                  color: statusFilter !== 'all' ? '#FFFFFF' : '#6B7280',
+                }}
+              />
+            </button>
           </div>
 
-          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+          {/* Animated breakdown (desglose) of stages */}
+          <div style={{
+            maxHeight: expandedStageFilter ? '160px' : '0px',
+            opacity: expandedStageFilter ? 1 : 0,
+            overflow: 'hidden',
+            transition: 'max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease',
+            display: 'flex',
+            gap: '8px',
+            flexWrap: 'wrap',
+            paddingTop: expandedStageFilter ? '6px' : '0px',
+            paddingBottom: expandedStageFilter ? '4px' : '0px',
+          }}>
             <button
               onClick={() => setStatusFilter('all')}
               style={{
@@ -408,16 +469,18 @@ export default function AdminProspectsPage() {
                 borderRadius: '8px',
                 fontSize: '12px',
                 fontWeight: 600,
-                border: 'none',
+                border: statusFilter === 'all' ? '1px solid #111827' : '1px solid #E5E7EB',
                 cursor: 'pointer',
-                background: statusFilter === 'all' ? '#111827' : '#F3F4F6',
+                background: statusFilter === 'all' ? '#111827' : '#FFFFFF',
                 color: statusFilter === 'all' ? '#FFFFFF' : '#4B5563',
+                transition: 'all 0.15s ease',
               }}
             >
               Todos ({metrics.total})
             </button>
             {Object.entries(STAGE_CONFIG).map(([key, cfg]) => {
               const count = prospects.filter(p => p.status === key).length;
+              const isSelected = statusFilter === key;
               return (
                 <button
                   key={key}
@@ -427,10 +490,11 @@ export default function AdminProspectsPage() {
                     borderRadius: '8px',
                     fontSize: '12px',
                     fontWeight: 600,
-                    border: 'none',
+                    border: isSelected ? '1px solid #111827' : `1px solid ${cfg.border}`,
                     cursor: 'pointer',
-                    background: statusFilter === key ? '#111827' : cfg.bg,
-                    color: statusFilter === key ? '#FFFFFF' : cfg.color,
+                    background: isSelected ? '#111827' : cfg.bg,
+                    color: isSelected ? '#FFFFFF' : cfg.color,
+                    transition: 'all 0.15s ease',
                   }}
                 >
                   {cfg.label} ({count})
@@ -462,6 +526,9 @@ export default function AdminProspectsPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {filteredProspects.map((p) => {
               const stageCfg = STAGE_CONFIG[p.status] || STAGE_CONFIG.lead;
+              const docs = p.documents || [];
+              const latestDoc = docs.length > 0 ? docs[0] : null;
+              const isDocsExpanded = expandedDocsIds.has(p.id);
 
               return (
                 <div
@@ -474,7 +541,7 @@ export default function AdminProspectsPage() {
                     background: '#FFFFFF',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '16px',
+                    gap: '14px',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
                     transition: 'border-color 0.15s ease',
                   }}
@@ -611,42 +678,100 @@ export default function AdminProspectsPage() {
                     </div>
                   )}
 
-                  {/* ── Document Versions Section ── */}
-                  <div style={{ paddingTop: '12px', borderTop: '1px solid #F3F4F6' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Layers size={14} color="#00C4CC" />
+                  {/* ── Document Versions Section (Clearly separated & collapsible) ── */}
+                  <div style={{
+                    borderRadius: '12px',
+                    border: '1px solid #E5E7EB',
+                    background: '#F9FAFB',
+                    padding: '12px 16px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: isDocsExpanded && docs.length > 0 ? '12px' : '0px',
+                    transition: 'all 0.2s ease',
+                  }}>
+                    {/* Header Strip */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        <FileText size={15} color="#00C4CC" />
                         <span style={{ fontSize: '13px', fontWeight: 700, color: '#111827' }}>
-                          Historial de Documentos & Versiones ({p.documents?.length || 0})
+                          Documentos & Propuestas ({docs.length})
                         </span>
+                        {latestDoc && (
+                          <span style={{
+                            fontSize: '11px',
+                            fontWeight: 600,
+                            color: '#374151',
+                            background: '#FFFFFF',
+                            border: '1px solid #E5E7EB',
+                            padding: '2px 8px',
+                            borderRadius: '6px',
+                          }}>
+                            Último: {latestDoc.version} ({DOC_TYPES[latestDoc.type]?.label || latestDoc.type})
+                          </span>
+                        )}
                       </div>
 
-                      <button
-                        onClick={() => openAddDocModal(p)}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: '#0284C7',
-                          fontSize: '12px',
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                        }}
-                      >
-                        <Plus size={13} />
-                        Agregar Documento / Versión
-                      </button>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {docs.length > 0 && (
+                          <button
+                            onClick={() => toggleDocs(p.id)}
+                            style={{
+                              background: '#FFFFFF',
+                              border: '1px solid #D1D5DB',
+                              borderRadius: '6px',
+                              padding: '5px 10px',
+                              fontSize: '12px',
+                              fontWeight: 600,
+                              color: '#374151',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                            }}
+                          >
+                            <span>{isDocsExpanded ? 'Ocultar historial' : `Ver versiones (${docs.length})`}</span>
+                            <ChevronDown
+                              size={13}
+                              style={{
+                                transform: isDocsExpanded ? 'rotate(180deg)' : 'none',
+                                transition: 'transform 0.2s ease',
+                              }}
+                            />
+                          </button>
+                        )}
+
+                        <button
+                          onClick={() => openAddDocModal(p)}
+                          style={{
+                            background: '#111827',
+                            border: 'none',
+                            color: '#FFFFFF',
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            padding: '5px 10px',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                          }}
+                        >
+                          <Plus size={13} />
+                          {docs.length === 0 ? 'Adjuntar Propuesta' : 'Nueva Versión'}
+                        </button>
+                      </div>
                     </div>
 
-                    {(!p.documents || p.documents.length === 0) ? (
-                      <p style={{ fontSize: '12.5px', color: '#9CA3AF', margin: 0, fontStyle: 'italic' }}>
-                        Aún no se han registrado propuestas o cotizaciones para este prospecto.
-                      </p>
-                    ) : (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {p.documents.map((doc) => {
+                    {/* Collapsible Document Versions List */}
+                    {isDocsExpanded && docs.length > 0 && (
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '8px',
+                        paddingTop: '8px',
+                        borderTop: '1px solid #E5E7EB',
+                      }}>
+                        {docs.map((doc) => {
                           const docTypeCfg = DOC_TYPES[doc.type] || DOC_TYPES.quote;
                           const docDate = new Date(doc.createdAt).toLocaleDateString('es-MX', {
                             day: 'numeric',
@@ -662,12 +787,14 @@ export default function AdminProspectsPage() {
                                 justifyContent: 'space-between',
                                 alignItems: 'center',
                                 padding: '10px 14px',
-                                borderRadius: '10px',
+                                borderRadius: '8px',
                                 border: '1px solid #E5E7EB',
-                                background: '#F9FAFB',
+                                background: '#FFFFFF',
+                                gap: '10px',
+                                flexWrap: 'wrap',
                               }}
                             >
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                                 <span style={{
                                   padding: '3px 7px',
                                   borderRadius: '6px',
@@ -685,7 +812,7 @@ export default function AdminProspectsPage() {
                                   fontWeight: 700,
                                   padding: '2px 7px',
                                   borderRadius: '5px',
-                                  background: '#FFFFFF',
+                                  background: '#F9FAFB',
                                   border: '1px solid #E5E7EB',
                                   color: docTypeCfg.color,
                                 }}>
@@ -704,9 +831,9 @@ export default function AdminProspectsPage() {
                                 </div>
                               </div>
 
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 <span style={{ fontSize: '11.5px', color: '#9CA3AF' }}>{docDate}</span>
-                                
+
                                 <a
                                   href={doc.url}
                                   target="_blank"
@@ -717,15 +844,15 @@ export default function AdminProspectsPage() {
                                     gap: '5px',
                                     padding: '5px 10px',
                                     borderRadius: '6px',
-                                    background: '#FFFFFF',
-                                    border: '1px solid #D1D5DB',
+                                    background: '#F3F4F6',
+                                    border: '1px solid #E5E7EB',
                                     fontSize: '11.5px',
                                     fontWeight: 600,
                                     color: '#111827',
                                     textDecoration: 'none',
                                   }}
                                 >
-                                  Abrir Link <ExternalLink size={12} />
+                                  Abrir Archivo <ExternalLink size={12} />
                                 </a>
 
                                 <button

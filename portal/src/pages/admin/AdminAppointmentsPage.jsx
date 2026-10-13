@@ -20,6 +20,9 @@ import {
   Search,
   Filter,
   Navigation,
+  Building2,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 
 const TEAM_MEMBERS = {
@@ -50,6 +53,16 @@ export default function AdminAppointmentsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [formError, setFormError] = useState('');
+  const [expandedIds, setExpandedIds] = useState(new Set());
+
+  const toggleExpand = (id) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   // Form state
   const [formData, setFormData] = useState({
@@ -262,120 +275,65 @@ export default function AdminAppointmentsPage() {
           </button>
         </div>
 
-        {/* ── Founder Filter Bar ─────────────────────────────────────── */}
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center', background: '#FFFFFF', padding: '14px 18px', borderRadius: '14px', border: '1px solid #E5E7EB' }}>
-          <span style={{ fontSize: '12.5px', fontWeight: 700, color: '#374151', marginRight: '6px' }}>
-            Filtrar por Responsable:
-          </span>
-
-          <button
-            onClick={() => setAssignedFilter('all')}
-            style={{
-              padding: '6px 14px',
-              borderRadius: '9999px',
-              fontSize: '12px',
-              fontWeight: 600,
-              border: 'none',
-              cursor: 'pointer',
-              background: assignedFilter === 'all' ? '#111827' : '#F3F4F6',
-              color: assignedFilter === 'all' ? '#FFFFFF' : '#4B5563',
-            }}
-          >
-            Todos ({appointments.length})
-          </button>
-
-          {Object.entries(TEAM_MEMBERS).map(([key, member]) => {
-            const count = appointments.filter(a => a.assignedTo === key).length;
-            const isSelected = assignedFilter === key;
-
-            return (
-              <button
-                key={key}
-                onClick={() => setAssignedFilter(key)}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '6px 12px',
-                  borderRadius: '9999px',
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  border: isSelected ? '1px solid #111827' : `1px solid ${member.border}`,
-                  cursor: 'pointer',
-                  background: isSelected ? '#111827' : member.bg,
-                  color: isSelected ? '#FFFFFF' : member.color,
-                }}
-              >
-                <span style={{
-                  width: '18px',
-                  height: '18px',
-                  borderRadius: '50%',
-                  background: isSelected ? 'rgba(255,255,255,0.2)' : member.color,
-                  color: '#FFFFFF',
-                  fontSize: '9px',
-                  fontWeight: 800,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}>
-                  {member.initial}
-                </span>
-                {member.label} ({count})
-              </button>
-            );
-          })}
-        </div>
-
-        {/* ── Search & Status Filters ─────────────────────────────────────── */}
+        {/* ── Search & Compact Filters Bar ───────────────────────────────── */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '10px', padding: '8px 14px', width: '280px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '10px', padding: '8px 14px', width: '300px' }}>
             <Search size={15} color="#9CA3AF" />
             <input
               type="text"
-              placeholder="Buscar cita o lugar..."
+              placeholder="Buscar por empresa, lugar o contacto..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{ border: 'none', outline: 'none', fontSize: '13px', width: '100%', background: 'transparent' }}
             />
           </div>
 
-          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-            <button
-              onClick={() => setStatusFilter('all')}
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {/* Filter by Responsable */}
+            <select
+              value={assignedFilter}
+              onChange={(e) => setAssignedFilter(e.target.value)}
               style={{
-                padding: '6px 12px',
-                borderRadius: '8px',
-                fontSize: '12px',
+                padding: '8px 12px',
+                borderRadius: '10px',
+                border: '1px solid #E5E7EB',
+                background: '#FFFFFF',
+                fontSize: '12.5px',
                 fontWeight: 600,
-                border: 'none',
+                color: '#374151',
+                outline: 'none',
                 cursor: 'pointer',
-                background: statusFilter === 'all' ? '#111827' : '#F3F4F6',
-                color: statusFilter === 'all' ? '#FFFFFF' : '#4B5563',
               }}
             >
-              Todos los estados
-            </button>
-            {Object.entries(STATUS_CONFIG).map(([key, cfg]) => {
-              const count = appointments.filter(a => a.status === key).length;
-              return (
-                <button
-                  key={key}
-                  onClick={() => setStatusFilter(key)}
-                  style={{
-                    padding: '6px 12px',
-                    borderRadius: '8px',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    border: 'none',
-                    cursor: 'pointer',
-                    background: statusFilter === key ? '#111827' : cfg.bg,
-                    color: statusFilter === key ? '#FFFFFF' : cfg.color,
-                  }}
-                >
-                  {cfg.label} ({count})
-                </button>
-              );
-            })}
+              <option value="all">Todos los Responsables</option>
+              <option value="emmanuel">Emmanuel</option>
+              <option value="juan_pablo">Juan Pablo</option>
+              <option value="curiel">Curiel</option>
+              <option value="all">Equipo Conjunto</option>
+            </select>
+
+            {/* Filter by Status */}
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              style={{
+                padding: '8px 12px',
+                borderRadius: '10px',
+                border: '1px solid #E5E7EB',
+                background: '#FFFFFF',
+                fontSize: '12.5px',
+                fontWeight: 600,
+                color: '#374151',
+                outline: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              <option value="all">Todos los Estados</option>
+              <option value="scheduled">Programadas</option>
+              <option value="completed">Realizadas</option>
+              <option value="rescheduled">Reprogramadas</option>
+              <option value="cancelled">Canceladas</option>
+            </select>
           </div>
         </div>
 
@@ -398,14 +356,15 @@ export default function AdminAppointmentsPage() {
             </button>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '18px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '16px' }}>
             {filteredAppointments.map((a) => {
               const memberCfg = TEAM_MEMBERS[a.assignedTo] || TEAM_MEMBERS.emmanuel;
               const statusCfg = STATUS_CONFIG[a.status] || STATUS_CONFIG.scheduled;
+              const isExpanded = expandedIds.has(a.id);
 
               const dateObj = new Date(a.dateTime);
               const formattedDate = dateObj.toLocaleDateString('es-MX', {
-                weekday: 'long',
+                weekday: 'short',
                 day: 'numeric',
                 month: 'short',
               });
@@ -419,106 +378,105 @@ export default function AdminAppointmentsPage() {
                   key={a.id}
                   className="card"
                   style={{
-                    padding: '20px 22px',
+                    padding: '18px 20px',
                     borderRadius: '16px',
                     border: '1px solid #E5E7EB',
                     background: '#FFFFFF',
                     display: 'flex',
                     flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    gap: '16px',
-                    boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
+                    gap: '12px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
+                    transition: 'all 0.2s ease',
                   }}
                 >
-                  <div>
-                    {/* Top: DateTime & Status */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px', gap: '10px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div style={{
-                          padding: '6px 10px',
-                          borderRadius: '8px',
-                          background: '#111827',
-                          color: '#FFFFFF',
-                          fontSize: '12px',
-                          fontWeight: 700,
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                        }}>
-                          <Clock size={13} color="#00C4CC" />
-                          <span style={{ textTransform: 'capitalize' }}>{formattedDate}</span> • {formattedTime}
-                        </div>
-                      </div>
-
-                      {/* Status selector */}
-                      <select
-                        value={a.status}
-                        onChange={(e) => handleStatusChange(a.id, e.target.value)}
-                        className="hx-input"
-                        style={{
-                          padding: '4px 8px',
-                          fontSize: '11.5px',
-                          fontWeight: 700,
-                          borderRadius: '6px',
-                          background: statusCfg.bg,
-                          color: statusCfg.color,
-                          border: `1px solid ${statusCfg.border}`,
-                          width: 'auto',
-                          height: 'auto',
-                        }}
-                      >
-                        {Object.entries(STATUS_CONFIG).map(([val, cfg]) => (
-                          <option key={val} value={val}>{cfg.label}</option>
-                        ))}
-                      </select>
+                  {/* Top: DateTime Pill & Status Selector */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
+                    <div
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: '8px',
+                        background: '#F1F5F9',
+                        color: '#334155',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                      }}
+                    >
+                      <Clock size={13} color="#00C4CC" />
+                      <span style={{ textTransform: 'capitalize' }}>{formattedDate}</span> • {formattedTime}
                     </div>
 
-                    {/* Title & Company */}
-                    <h3 style={{ fontSize: '16.5px', fontWeight: 800, color: '#111827', margin: '0 0 4px', letterSpacing: '-0.01em' }}>
-                      {a.title}
-                    </h3>
-                    <span style={{ fontSize: '14px', fontWeight: 600, color: '#0284C7', display: 'block', marginBottom: '12px' }}>
-                      🏢 {a.companyName}
-                    </span>
+                    <select
+                      value={a.status}
+                      onChange={(e) => handleStatusChange(a.id, e.target.value)}
+                      style={{
+                        padding: '4px 8px',
+                        fontSize: '11.5px',
+                        fontWeight: 700,
+                        borderRadius: '6px',
+                        background: statusCfg.bg,
+                        color: statusCfg.color,
+                        border: `1px solid ${statusCfg.border}`,
+                        outline: 'none',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {Object.entries(STATUS_CONFIG).map(([val, cfg]) => (
+                        <option key={val} value={val}>{cfg.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Empresa a la que vamos */}
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                      <Building2 size={18} color="#0284C7" style={{ flexShrink: 0 }} />
+                      <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#111827', margin: 0, letterSpacing: '-0.01em' }}>
+                        {a.companyName}
+                      </h3>
+                    </div>
 
                     {/* Contact & Phone */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', fontSize: '12.5px', color: '#4B5563', marginBottom: '12px' }}>
-                      {a.contactName && (
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                          <User size={13} color="#9CA3AF" /> {a.contactName}
-                        </span>
-                      )}
-                      {a.contactPhone && (
-                        <a
-                          href={`https://wa.me/${a.contactPhone.replace(/[^0-9]/g, '')}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#059669', textDecoration: 'none', fontWeight: 600 }}
-                        >
-                          <Phone size={13} /> {a.contactPhone}
-                        </a>
-                      )}
-                    </div>
+                    {a.contactName && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: '#4B5563', margin: '4px 0 2px 26px' }}>
+                        <span style={{ fontWeight: 500 }}>{a.contactName}</span>
+                        {a.contactPhone && (
+                          <a
+                            href={`https://wa.me/${a.contactPhone.replace(/[^0-9]/g, '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ color: '#059669', textDecoration: 'none', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '12px' }}
+                          >
+                            <Phone size={12} /> {a.contactPhone}
+                          </a>
+                        )}
+                      </div>
+                    )}
+                  </div>
 
-                    {/* Location & Maps Button */}
-                    <div style={{
+                  {/* Ubicación física & Botón Maps */}
+                  <div
+                    style={{
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      background: '#F9FAFB',
-                      padding: '10px 12px',
+                      background: '#F8FAFC',
+                      padding: '9px 12px',
                       borderRadius: '10px',
-                      border: '1px solid #E5E7EB',
-                      marginBottom: '12px',
-                      gap: '10px',
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-                        <MapPin size={16} color="#DC2626" style={{ flexShrink: 0 }} />
-                        <span style={{ fontSize: '12.5px', color: '#374151', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                          {a.location}
-                        </span>
-                      </div>
+                      border: '1px solid #E2E8F0',
+                      gap: '8px',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '7px', minWidth: 0 }}>
+                      <MapPin size={15} color="#DC2626" style={{ flexShrink: 0 }} />
+                      <span style={{ fontSize: '12.5px', color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {a.location}
+                      </span>
+                    </div>
 
+                    {a.mapsUrl && (
                       <a
                         href={a.mapsUrl}
                         target="_blank"
@@ -527,11 +485,11 @@ export default function AdminAppointmentsPage() {
                           display: 'inline-flex',
                           alignItems: 'center',
                           gap: '4px',
-                          padding: '5px 10px',
+                          padding: '4px 10px',
                           borderRadius: '6px',
                           background: '#FFFFFF',
-                          border: '1px solid #D1D5DB',
-                          color: '#111827',
+                          border: '1px solid #CBD5E1',
+                          color: '#0F172A',
                           fontSize: '11.5px',
                           fontWeight: 700,
                           textDecoration: 'none',
@@ -541,57 +499,102 @@ export default function AdminAppointmentsPage() {
                         <Navigation size={12} color="#00C4CC" />
                         Maps
                       </a>
-                    </div>
-
-                    {/* Summary / Notes if any */}
-                    {a.summary && (
-                      <div style={{ background: '#FFFBEB', border: '1px solid #FEF3C7', padding: '10px 12px', borderRadius: '8px', fontSize: '12px', color: '#92400E' }}>
-                        <strong style={{ display: 'block', marginBottom: '2px' }}>Minuta / Acuerdos:</strong>
-                        {a.summary}
-                      </div>
                     )}
                   </div>
 
-                  {/* Bottom: Assigned Founder & Actions */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid #F3F4F6' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{
-                        width: '22px',
-                        height: '22px',
-                        borderRadius: '50%',
-                        background: memberCfg.color,
-                        color: '#FFFFFF',
-                        fontSize: '9.5px',
-                        fontWeight: 800,
+                  {/* Botón de Desglose interactivo */}
+                  <button
+                    onClick={() => toggleExpand(a.id)}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '7px 12px',
+                      borderRadius: '8px',
+                      background: isExpanded ? '#F1F5F9' : '#FFFFFF',
+                      border: '1px solid #E2E8F0',
+                      cursor: 'pointer',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      color: '#475569',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    <span>{isExpanded ? 'Ocultar detalles' : 'Ver asunto y minuta'}</span>
+                    {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  </button>
+
+                  {/* Desglose Expandible */}
+                  {isExpanded && (
+                    <div
+                      style={{
                         display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}>
-                        {memberCfg.initial}
-                      </span>
-                      <span style={{ fontSize: '12px', fontWeight: 700, color: memberCfg.color }}>
-                        {memberCfg.label}
-                      </span>
-                    </div>
+                        flexDirection: 'column',
+                        gap: '10px',
+                        padding: '12px',
+                        borderRadius: '10px',
+                        background: '#F8FAFC',
+                        border: '1px solid #E2E8F0',
+                        animation: 'fadeIn 0.2s ease',
+                      }}
+                    >
+                      <div>
+                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: '2px' }}>
+                          Asunto / Objetivo:
+                        </span>
+                        <p style={{ margin: 0, fontSize: '13px', fontWeight: 600, color: '#1E293B' }}>
+                          {a.title}
+                        </p>
+                      </div>
 
-                    <div style={{ display: 'flex', gap: '6px' }}>
-                      <button
-                        onClick={() => openEditModal(a)}
-                        className="btn-secondary"
-                        style={{ padding: '6px 10px', fontSize: '11.5px', borderRadius: '6px' }}
-                      >
-                        <Edit size={13} /> Editar
-                      </button>
-                      <button
-                        onClick={() => handleDeleteAppointment(a.id, a.title)}
-                        className="btn-secondary"
-                        style={{ padding: '6px 8px', fontSize: '11.5px', borderRadius: '6px', color: '#DC2626' }}
-                      >
-                        <Trash2 size={13} />
-                      </button>
-                    </div>
-                  </div>
+                      {a.summary && (
+                        <div style={{ background: '#FFFBEB', border: '1px solid #FEF3C7', padding: '9px 12px', borderRadius: '8px', fontSize: '12px', color: '#92400E' }}>
+                          <strong style={{ display: 'block', marginBottom: '2px' }}>Minuta / Acuerdos:</strong>
+                          {a.summary}
+                        </div>
+                      )}
 
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '8px', borderTop: '1px solid #E2E8F0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{
+                            width: '22px',
+                            height: '22px',
+                            borderRadius: '50%',
+                            background: memberCfg.color,
+                            color: '#FFFFFF',
+                            fontSize: '9.5px',
+                            fontWeight: 800,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}>
+                            {memberCfg.initial}
+                          </span>
+                          <span style={{ fontSize: '12px', fontWeight: 700, color: memberCfg.color }}>
+                            {memberCfg.label}
+                          </span>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          <button
+                            onClick={() => openEditModal(a)}
+                            className="btn-secondary"
+                            style={{ padding: '5px 10px', fontSize: '11.5px', borderRadius: '6px' }}
+                          >
+                            <Edit size={12} /> Editar
+                          </button>
+                          <button
+                            onClick={() => handleDeleteAppointment(a.id, a.title)}
+                            className="btn-secondary"
+                            style={{ padding: '5px 8px', fontSize: '11.5px', borderRadius: '6px', color: '#DC2626' }}
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}

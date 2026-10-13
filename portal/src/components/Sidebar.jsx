@@ -17,7 +17,8 @@ import {
   Calendar,
   Briefcase,
   CalendarDays,
-  CheckSquare
+  CheckSquare,
+  DollarSign
 } from 'lucide-react';
 
 const logoSrc = '/logo.png';
@@ -57,8 +58,9 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
     { to: '/admin/clients',     icon: Users,        label: 'Clientes Activos' },
     { to: '/admin/prospects',   icon: Briefcase,    label: 'CRM Prospectos' },
     { to: '/admin/citas',       icon: CalendarDays, label: 'Agenda de Citas' },
-    { to: '/admin/tareas',      icon: CheckSquare,  label: 'Tareas Core' },
-    { to: '/admin/pagos',       icon: Calendar,     label: 'Plan de Pagos' },
+    { to: '/admin/tareas',      icon: CheckSquare,  label: 'Tareas' },
+    { to: '/admin/finanzas',    icon: DollarSign,   label: 'Finanzas & Flujo' },
+    { to: '/admin/pagos',       icon: Calendar,     label: 'Calendario de Pagos' },
     { to: '/admin/analytics',   icon: BarChart3,    label: 'Control & Analíticas' },
   ];
 

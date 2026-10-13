@@ -1408,5 +1408,129 @@ router.delete('/tasks/:id', authenticate, requireAdmin, async (req, res) => {
   }
 });
 
+// ─── HUMMINGX CORE: ANÁLISIS FINANCIERO & PROYECTOS HISTÓRICOS ──
+
+// GET /admin/finances/overview — Retorna total histórico, próximo pago y lista de proyectos
+router.get('/finances/overview', authenticate, requireAdmin, async (req, res) => {
+  try {
+    // 1. Pagos del sistema
+    const completedPayments = await prisma.payment.findMany({
+      where: { status: 'completed' },
+      include: {
+        project: {
+          include: {
+            client: { select: { id: true, name: true, companyName: true, logoUrl: true } }
+          }
+        }
+      },
+      orderBy: { updatedAt: 'desc' }
+    });
+
+    const upcomingPayments = await prisma.payment.findMany({
+      where: { status: { in: ['pending', 'upcoming'] } },
+      include: {
+        project: {
+          include: {
+            client: { select: { id: true, name: true, companyName: true, logoUrl: true } }
+          }
+        }
+      },
+      orderBy: { dueDate: 'asc' }
+    });
+
+    // 2. Proyectos históricos cerrados
+    const historicalDeals = await prisma.historicalDeal.findMany({
+      orderBy: { closedAt: 'desc' }
+    });
+
+    // Cálculos
+    const revenueFromPayments = completedPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+    const revenueFromHistorical = historicalDeals.reduce((sum, d) => sum + (d.amount || 0), 0);
+    const totalHistoricalRevenue = revenueFromPayments + revenueFromHistorical;
+
+    const totalUpcomingRevenue = upcomingPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+    const totalDealsCount = historicalDeals.length + completedPayments.length;
+    const averageTicket = totalDealsCount > 0 ? Math.round(totalHistoricalRevenue / totalDealsCount) : 0;
+
+    const nextPayment = upcomingPayments.length > 0 ? upcomingPayments[0] : null;
+
+    res.json({
+      totalHistoricalRevenue,
+      revenueFromPayments,
+      revenueFromHistorical,
+      totalUpcomingRevenue,
+      totalDealsCount,
+      averageTicket,
+      nextPayment,
+      upcomingPayments,
+      completedPayments,
+      historicalDeals,
+    });
+  } catch (err) {
+    console.error('[ADMIN] Error in GET /admin/finances/overview:', err);
+    res.status(500).json({ error: 'Error al cargar análisis financiero.' });
+  }
+});
+
+// POST /admin/finances/deals — Agregar proyecto histórico cerrado
+router.post('/finances/deals', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { clientName, projectName, amount, closedAt, category, notes } = req.body;
+    if (!clientName || !projectName || amount === undefined) {
+      return res.status(400).json({ error: 'Cliente, proyecto y monto son obligatorios.' });
+    }
+
+    const deal = await prisma.historicalDeal.create({
+      data: {
+        clientName: clientName.trim(),
+        projectName: projectName.trim(),
+        amount: parseFloat(amount),
+        closedAt: closedAt ? new Date(closedAt) : new Date(),
+        category: category?.trim() || 'General',
+        notes: notes?.trim() || null,
+      }
+    });
+
+    res.status(201).json(deal);
+  } catch (err) {
+    console.error('[ADMIN] Error in POST /admin/finances/deals:', err);
+    res.status(500).json({ error: 'Error al registrar proyecto histórico.' });
+  }
+});
+
+// PUT /admin/finances/deals/:id — Editar proyecto histórico
+router.put('/finances/deals/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { clientName, projectName, amount, closedAt, category, notes } = req.body;
+    const data = {};
+    if (clientName !== undefined) data.clientName = clientName.trim();
+    if (projectName !== undefined) data.projectName = projectName.trim();
+    if (amount !== undefined) data.amount = parseFloat(amount);
+    if (closedAt !== undefined) data.closedAt = new Date(closedAt);
+    if (category !== undefined) data.category = category?.trim() || 'General';
+    if (notes !== undefined) data.notes = notes ? notes.trim() : null;
+
+    const deal = await prisma.historicalDeal.update({
+      where: { id: req.params.id },
+      data,
+    });
+    res.json(deal);
+  } catch (err) {
+    console.error('[ADMIN] Error in PUT /admin/finances/deals/:id:', err);
+    res.status(500).json({ error: 'Error al actualizar proyecto histórico.' });
+  }
+});
+
+// DELETE /admin/finances/deals/:id — Eliminar proyecto histórico
+router.delete('/finances/deals/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    await prisma.historicalDeal.delete({ where: { id: req.params.id } });
+    res.json({ message: 'Proyecto histórico eliminado.' });
+  } catch (err) {
+    console.error('[ADMIN] Error in DELETE /admin/finances/deals/:id:', err);
+    res.status(500).json({ error: 'Error al eliminar proyecto histórico.' });
+  }
+});
+
 module.exports = router;
 

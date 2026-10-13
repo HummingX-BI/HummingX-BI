@@ -70,7 +70,7 @@ const TEAM_MEMBERS = {
 
 const PRIORITY_CONFIG = {
   urgent: {
-    label: 'Urgente 🔥',
+    label: 'Urgente',
     bg: '#FEF2F2',
     color: '#DC2626',
     border: '#FECACA',
@@ -181,7 +181,7 @@ export default function AdminTasksPage() {
       });
       setTasks((prev) => [res.data, ...prev]);
       setQuickTitle('');
-      showToast('⚡ Tarea agregada exitosamente');
+      showToast('Tarea agregada exitosamente.');
     } catch (err) {
       console.error('Error al crear tarea rápida:', err);
     } finally {
@@ -306,7 +306,7 @@ export default function AdminTasksPage() {
       const res = await api.put(`/admin/tasks/${task.id}`, { status: newStatus });
       setTasks((prev) => prev.map((t) => (t.id === task.id ? res.data : t)));
       if (newStatus === 'done') {
-        showToast('🎉 ¡Tarea completada!');
+        showToast('Tarea completada.');
       }
     } catch (err) {
       console.error('Error al actualizar estado:', err);
@@ -511,11 +511,11 @@ export default function AdminTasksPage() {
                   letterSpacing: '-0.02em',
                 }}
               >
-                Tareas Core HummingX
+                Tareas
               </h1>
             </div>
             <p style={{ fontSize: '14px', color: '#6B7280', margin: 0 }}>
-              Gestor colaborativo y ágil para los fundadores (Emmanuel, Juan Pablo & Curiel).
+              Gestor colaborativo y ágil para el equipo.
             </p>
           </div>
 
@@ -660,10 +660,10 @@ export default function AdminTasksPage() {
                 outline: 'none',
               }}
             >
-              <option value="emmanuel">👤 Emmanuel</option>
-              <option value="juan_pablo">👤 Juan Pablo</option>
-              <option value="curiel">👤 Curiel</option>
-              <option value="all">👥 Todos</option>
+              <option value="emmanuel">Emmanuel</option>
+              <option value="juan_pablo">Juan Pablo</option>
+              <option value="curiel">Curiel</option>
+              <option value="all">Equipo</option>
             </select>
 
             {/* Quick Priority */}
@@ -682,10 +682,10 @@ export default function AdminTasksPage() {
                 outline: 'none',
               }}
             >
-              <option value="urgent">🔥 Urgente</option>
-              <option value="high">🔺 Alta</option>
-              <option value="medium">🔹 Media</option>
-              <option value="low">▫️ Baja</option>
+              <option value="urgent">Urgente</option>
+              <option value="high">Alta</option>
+              <option value="medium">Media</option>
+              <option value="low">Baja</option>
             </select>
 
             {/* Quick Category */}
@@ -704,11 +704,11 @@ export default function AdminTasksPage() {
                 outline: 'none',
               }}
             >
-              <option value="Comercial">💼 Comercial</option>
-              <option value="Desarrollo">💻 Desarrollo</option>
-              <option value="Operaciones">⚙️ Operaciones</option>
-              <option value="Clientes">🤝 Clientes</option>
-              <option value="Estrategia">🎯 Estrategia</option>
+              <option value="Comercial">Comercial</option>
+              <option value="Desarrollo">Desarrollo</option>
+              <option value="Operaciones">Operaciones</option>
+              <option value="Clientes">Clientes</option>
+              <option value="Estrategia">Estrategia</option>
             </select>
 
             <button
@@ -733,131 +733,6 @@ export default function AdminTasksPage() {
           </div>
         </form>
 
-        {/* ── SCOREBOARD GAMIFICADO DE FUNDADORES ─────────────────────────── */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            gap: '14px',
-          }}
-        >
-          {['emmanuel', 'juan_pablo', 'curiel'].map((memberKey) => {
-            const member = TEAM_MEMBERS[memberKey];
-            const stats = founderStats[memberKey] || { total: 0, done: 0, pending: 0, urgent: 0, percent: 0 };
-            const isSelected = assignedFilter === memberKey;
-
-            return (
-              <div
-                key={memberKey}
-                onClick={() => setAssignedFilter(isSelected ? 'all' : memberKey)}
-                className="card"
-                style={{
-                  padding: '18px 20px',
-                  borderRadius: '16px',
-                  border: isSelected ? `2px solid ${member.color}` : '1px solid #E5E7EB',
-                  background: isSelected ? member.bg : '#FFFFFF',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-                  boxShadow: isSelected
-                    ? `0 8px 24px -4px ${member.color}25`
-                    : '0 2px 8px rgba(0,0,0,0.03)',
-                  position: 'relative',
-                  overflow: 'hidden',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div
-                      style={{
-                        width: '40px',
-                        height: '40px',
-                        borderRadius: '12px',
-                        background: member.avatarBg,
-                        color: '#FFFFFF',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontWeight: 800,
-                        fontSize: '15px',
-                        boxShadow: `0 4px 12px ${member.color}30`,
-                      }}
-                    >
-                      {member.initial}
-                    </div>
-                    <div>
-                      <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#111827' }}>
-                        {member.label}
-                      </h4>
-                      <span style={{ fontSize: '11.5px', color: '#6B7280', fontWeight: 500 }}>
-                        {member.role}
-                      </span>
-                    </div>
-                  </div>
-
-                  {stats.urgent > 0 && (
-                    <span
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        padding: '3px 8px',
-                        borderRadius: '9999px',
-                        background: '#FEF2F2',
-                        border: '1px solid #FECACA',
-                        color: '#DC2626',
-                        fontSize: '11px',
-                        fontWeight: 700,
-                      }}
-                    >
-                      <Flame size={12} /> {stats.urgent}
-                    </span>
-                  )}
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '14px' }}>
-                  <div style={{ padding: '8px 10px', background: isSelected ? '#FFFFFF' : '#F9FAFB', borderRadius: '10px', textAlign: 'center', border: '1px solid #F3F4F6' }}>
-                    <span style={{ fontSize: '16px', fontWeight: 800, color: '#111827', display: 'block' }}>
-                      {stats.total}
-                    </span>
-                    <span style={{ fontSize: '10.5px', color: '#6B7280', fontWeight: 600 }}>Total</span>
-                  </div>
-                  <div style={{ padding: '8px 10px', background: isSelected ? '#FFFFFF' : '#FFFBEB', borderRadius: '10px', textAlign: 'center', border: '1px solid #FEF3C7' }}>
-                    <span style={{ fontSize: '16px', fontWeight: 800, color: '#B45309', display: 'block' }}>
-                      {stats.pending}
-                    </span>
-                    <span style={{ fontSize: '10.5px', color: '#92400E', fontWeight: 600 }}>Pendientes</span>
-                  </div>
-                  <div style={{ padding: '8px 10px', background: isSelected ? '#FFFFFF' : '#ECFDF5', borderRadius: '10px', textAlign: 'center', border: '1px solid #A7F3D0' }}>
-                    <span style={{ fontSize: '16px', fontWeight: 800, color: '#047857', display: 'block' }}>
-                      {stats.done}
-                    </span>
-                    <span style={{ fontSize: '10.5px', color: '#065F46', fontWeight: 600 }}>Hechas</span>
-                  </div>
-                </div>
-
-                {/* Progress bar */}
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
-                    <span style={{ fontSize: '11px', color: '#6B7280', fontWeight: 600 }}>Tasa de avance</span>
-                    <span style={{ fontSize: '11.5px', fontWeight: 700, color: member.color }}>{stats.percent}%</span>
-                  </div>
-                  <div style={{ width: '100%', height: '6px', background: isSelected ? '#E2E8F0' : '#F1F5F9', borderRadius: '9999px', overflow: 'hidden' }}>
-                    <div
-                      style={{
-                        width: `${stats.percent}%`,
-                        height: '100%',
-                        background: member.avatarBg,
-                        borderRadius: '9999px',
-                        transition: 'width 0.4s ease',
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
         {/* ── BARRA DE FILTROS & BÚSQUEDA ─────────────────────────────────── */}
         <div
           style={{
@@ -868,12 +743,12 @@ export default function AdminTasksPage() {
             flexWrap: 'wrap',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: '1 1 260px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: '1 1 280px' }}>
             <div
               style={{
                 position: 'relative',
                 width: '100%',
-                maxWidth: '340px',
+                maxWidth: '360px',
               }}
             >
               <Search
@@ -897,31 +772,32 @@ export default function AdminTasksPage() {
                 }}
               />
             </div>
-
-            {assignedFilter !== 'all' && (
-              <button
-                onClick={() => setAssignedFilter('all')}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: '6px 12px',
-                  borderRadius: '9999px',
-                  background: '#F3F4F6',
-                  border: '1px solid #E5E7EB',
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  color: '#4B5563',
-                  cursor: 'pointer',
-                }}
-              >
-                Filtro: {TEAM_MEMBERS[assignedFilter]?.label}
-                <X size={12} />
-              </button>
-            )}
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            {/* Assigned Filter */}
+            <select
+              value={assignedFilter}
+              onChange={(e) => setAssignedFilter(e.target.value)}
+              style={{
+                padding: '8px 12px',
+                borderRadius: '10px',
+                border: '1px solid #E5E7EB',
+                background: '#FFFFFF',
+                fontSize: '12.5px',
+                fontWeight: 600,
+                color: '#374151',
+                outline: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              <option value="all">Todos los Responsables</option>
+              <option value="emmanuel">Emmanuel</option>
+              <option value="juan_pablo">Juan Pablo</option>
+              <option value="curiel">Curiel</option>
+              <option value="all_team">Equipo Conjunto</option>
+            </select>
+
             {/* Priority Filter */}
             <select
               value={priorityFilter}
@@ -939,10 +815,10 @@ export default function AdminTasksPage() {
               }}
             >
               <option value="all">Todas las Prioridades</option>
-              <option value="urgent">🔥 Urgente</option>
-              <option value="high">🔺 Alta</option>
-              <option value="medium">🔹 Media</option>
-              <option value="low">▫️ Baja</option>
+              <option value="urgent">Urgente</option>
+              <option value="high">Alta</option>
+              <option value="medium">Media</option>
+              <option value="low">Baja</option>
             </select>
 
             {/* Category Filter */}
@@ -975,7 +851,7 @@ export default function AdminTasksPage() {
         {loading ? (
           <div style={{ padding: '60px', textAlign: 'center', color: '#6B7280' }}>
             <div className="spinner" style={{ margin: '0 auto 16px' }} />
-            <p style={{ fontSize: '14px', fontWeight: 500 }}>Cargando tablero de tareas Core...</p>
+            <p style={{ fontSize: '14px', fontWeight: 500 }}>Cargando tablero de tareas...</p>
           </div>
         ) : viewMode === 'kanban' ? (
           /* ── KANBAN BOARD ──────────────────────────────────────────────── */
@@ -1348,7 +1224,7 @@ export default function AdminTasksPage() {
                     </div>
                     <div>
                       <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#111827' }}>
-                        {editingTask ? 'Editar Tarea' : 'Nueva Tarea Core'}
+                        {editingTask ? 'Editar Tarea' : 'Nueva Tarea'}
                       </h3>
                       <span style={{ fontSize: '12px', color: '#6B7280' }}>
                         Asigna y coordina actividades clave del equipo
@@ -1456,10 +1332,10 @@ export default function AdminTasksPage() {
                           outline: 'none',
                         }}
                       >
-                        <option value="emmanuel">👤 Emmanuel</option>
-                        <option value="juan_pablo">👤 Juan Pablo</option>
-                        <option value="curiel">👤 Curiel</option>
-                        <option value="all">👥 Todos (Equipo)</option>
+                        <option value="emmanuel">Emmanuel</option>
+                        <option value="juan_pablo">Juan Pablo</option>
+                        <option value="curiel">Curiel</option>
+                        <option value="all">Equipo Conjunto</option>
                       </select>
                     </div>
 
@@ -1480,10 +1356,10 @@ export default function AdminTasksPage() {
                           outline: 'none',
                         }}
                       >
-                        <option value="urgent">🔥 Urgente</option>
-                        <option value="high">🔺 Alta</option>
-                        <option value="medium">🔹 Media</option>
-                        <option value="low">▫️ Baja</option>
+                        <option value="urgent">Urgente</option>
+                        <option value="high">Alta</option>
+                        <option value="medium">Media</option>
+                        <option value="low">Baja</option>
                       </select>
                     </div>
                   </div>
@@ -1743,9 +1619,9 @@ function TaskCard({
       style={{
         padding: '14px 16px',
         borderRadius: '14px',
-        border: isDone ? '1px solid #E5E7EB' : priority.label.includes('🔥') ? '1px solid #FECACA' : '1px solid #E2E8F0',
+        border: isDone ? '1px solid #E5E7EB' : task.priority === 'urgent' ? '1px solid #FECACA' : '1px solid #E2E8F0',
         background: isDone ? '#FAFAFA' : '#FFFFFF',
-        boxShadow: priority.label.includes('🔥') && !isDone
+        boxShadow: task.priority === 'urgent' && !isDone
           ? '0 4px 14px rgba(239, 68, 68, 0.08)'
           : '0 2px 6px rgba(0,0,0,0.03)',
         transition: 'all 0.2s ease',
@@ -1782,9 +1658,10 @@ function TaskCard({
             border: `1px solid ${priority.border}`,
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '3px',
+            gap: '4px',
           }}
         >
+          {task.priority === 'urgent' && <Flame size={12} color="#DC2626" />}
           {priority.label}
         </span>
       </div>

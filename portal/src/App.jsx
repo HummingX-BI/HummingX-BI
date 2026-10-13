@@ -20,6 +20,9 @@ import AdminClientsPage from './pages/admin/AdminClientsPage';
 import AdminClientDetailPage from './pages/admin/AdminClientDetailPage';
 import AdminAnalyticsPage from './pages/admin/AdminAnalyticsPage';
 import AdminPaymentsPage from './pages/admin/AdminPaymentsPage';
+import AdminProspectsPage from './pages/admin/AdminProspectsPage';
+import AdminAppointmentsPage from './pages/admin/AdminAppointmentsPage';
+import AdminTasksPage from './pages/admin/AdminTasksPage';
 
 export default function App() {
   return (
@@ -43,6 +46,9 @@ export default function App() {
           <Route path="/admin" element={<ProtectedRoute adminOnly><Navigate to="/admin/clients" replace /></ProtectedRoute>} />
           <Route path="/admin/clients" element={<ProtectedRoute adminOnly><AdminClientsPage /></ProtectedRoute>} />
           <Route path="/admin/clients/:id" element={<ProtectedRoute adminOnly><AdminClientDetailPage /></ProtectedRoute>} />
+          <Route path="/admin/prospects" element={<ProtectedRoute adminOnly><AdminProspectsPage /></ProtectedRoute>} />
+          <Route path="/admin/citas" element={<ProtectedRoute adminOnly><AdminAppointmentsPage /></ProtectedRoute>} />
+          <Route path="/admin/tareas" element={<ProtectedRoute adminOnly><AdminTasksPage /></ProtectedRoute>} />
           <Route path="/admin/analytics" element={<ProtectedRoute adminOnly><AdminAnalyticsPage /></ProtectedRoute>} />
           <Route path="/admin/pagos" element={<ProtectedRoute adminOnly><AdminPaymentsPage /></ProtectedRoute>} />
 

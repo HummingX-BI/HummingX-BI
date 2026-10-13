@@ -53,8 +53,12 @@ export default function Layout({ children, customBreadcrumbLabel, fullWidth = fa
     'dashboard': 'Inicio',
     'project': 'Mi Proyecto',
     'referrals': 'Mis Referidos',
+    'pagos': 'Plan de Pagos',
     'admin': 'Admin',
-    'clients': 'Clientes',
+    'clients': 'Clientes Activos',
+    'prospects': 'CRM Prospectos',
+    'citas': 'Agenda de Citas',
+    'tareas': 'Tareas Core',
     'analytics': 'Analíticas',
   };
 

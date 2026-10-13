@@ -976,4 +976,437 @@ router.get('/analytics/behavior', authenticate, requireAdmin, async (req, res) =
   }
 });
 
+// ═══════════════════════════════════════════════════════════════════
+// ─── HUMMINGX CORE: PROSPECTOS & DOCUMENTOS VERSIONADOS ───────────
+// ═══════════════════════════════════════════════════════════════════
+
+// GET /admin/prospects — List all prospects with documents and appointments
+router.get('/prospects', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const prospects = await prisma.prospect.findMany({
+      orderBy: { updatedAt: 'desc' },
+      include: {
+        documents: { orderBy: { createdAt: 'desc' } },
+        appointments: { orderBy: { dateTime: 'desc' } },
+      },
+    });
+    res.json(prospects);
+  } catch (err) {
+    console.error('[ADMIN] Error in GET /admin/prospects:', err);
+    res.status(500).json({ error: 'Error al cargar prospectos.' });
+  }
+});
+
+// POST /admin/prospects — Create new prospect
+router.post('/prospects', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { companyName, contactName, email, phone, industry, estimatedValue, status, source, notes } = req.body;
+    if (!companyName || !companyName.trim()) {
+      return res.status(400).json({ error: 'El nombre de la empresa es requerido.' });
+    }
+
+    const prospect = await prisma.prospect.create({
+      data: {
+        companyName: companyName.trim(),
+        contactName: contactName?.trim() || null,
+        email: email?.trim().toLowerCase() || null,
+        phone: phone?.trim() || null,
+        industry: industry?.trim() || null,
+        estimatedValue: estimatedValue ? parseFloat(estimatedValue) : null,
+        status: status || 'lead',
+        source: source?.trim() || 'Prospección directa',
+        notes: notes?.trim() || null,
+      },
+      include: {
+        documents: true,
+        appointments: true,
+      }
+    });
+    res.status(201).json(prospect);
+  } catch (err) {
+    console.error('[ADMIN] Error in POST /admin/prospects:', err);
+    res.status(500).json({ error: 'Error al crear prospecto.' });
+  }
+});
+
+// PUT /admin/prospects/:id — Update prospect
+router.put('/prospects/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { companyName, contactName, email, phone, industry, estimatedValue, status, source, notes } = req.body;
+
+    const prospect = await prisma.prospect.update({
+      where: { id: req.params.id },
+      data: {
+        ...(companyName !== undefined && { companyName: companyName.trim() }),
+        ...(contactName !== undefined && { contactName: contactName ? contactName.trim() : null }),
+        ...(email !== undefined && { email: email ? email.trim().toLowerCase() : null }),
+        ...(phone !== undefined && { phone: phone ? phone.trim() : null }),
+        ...(industry !== undefined && { industry: industry ? industry.trim() : null }),
+        ...(estimatedValue !== undefined && { estimatedValue: estimatedValue ? parseFloat(estimatedValue) : null }),
+        ...(status !== undefined && { status }),
+        ...(source !== undefined && { source: source ? source.trim() : null }),
+        ...(notes !== undefined && { notes: notes ? notes.trim() : null }),
+      },
+      include: {
+        documents: { orderBy: { createdAt: 'desc' } },
+        appointments: { orderBy: { dateTime: 'desc' } },
+      }
+    });
+    res.json(prospect);
+  } catch (err) {
+    console.error('[ADMIN] Error in PUT /admin/prospects/:id:', err);
+    res.status(500).json({ error: 'Error al actualizar prospecto.' });
+  }
+});
+
+// DELETE /admin/prospects/:id — Delete prospect
+router.delete('/prospects/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    await prisma.prospect.delete({ where: { id: req.params.id } });
+    res.json({ message: 'Prospecto eliminado exitosamente.' });
+  } catch (err) {
+    console.error('[ADMIN] Error in DELETE /admin/prospects/:id:', err);
+    res.status(500).json({ error: 'Error al eliminar prospecto.' });
+  }
+});
+
+// POST /admin/prospects/:id/documents — Add document with version
+router.post('/prospects/:id/documents', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { title, type, version, url, notes } = req.body;
+    if (!title || !url) {
+      return res.status(400).json({ error: 'El título y enlace del documento son requeridos.' });
+    }
+
+    const doc = await prisma.prospectDocument.create({
+      data: {
+        prospectId: req.params.id,
+        title: title.trim(),
+        type: type || 'quote',
+        version: version?.trim() || 'v1.0',
+        url: url.trim(),
+        notes: notes?.trim() || null,
+      }
+    });
+    res.status(201).json(doc);
+  } catch (err) {
+    console.error('[ADMIN] Error in POST /admin/prospects/:id/documents:', err);
+    res.status(500).json({ error: 'Error al registrar documento.' });
+  }
+});
+
+// DELETE /admin/prospects/:id/documents/:docId — Delete document
+router.delete('/prospects/:id/documents/:docId', authenticate, requireAdmin, async (req, res) => {
+  try {
+    await prisma.prospectDocument.delete({ where: { id: req.params.docId } });
+    res.json({ message: 'Documento eliminado.' });
+  } catch (err) {
+    console.error('[ADMIN] Error in DELETE document:', err);
+    res.status(500).json({ error: 'Error al eliminar documento.' });
+  }
+});
+
+// POST /admin/prospects/:id/convert — 1-Click Convert prospect to active client
+router.post('/prospects/:id/convert', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const prospect = await prisma.prospect.findUnique({ where: { id: req.params.id } });
+    if (!prospect) return res.status(404).json({ error: 'Prospecto no encontrado.' });
+
+    const cleanBase = prospect.companyName.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 15) || 'cliente';
+    const email = (prospect.email || `${cleanBase}@cliente.com`).toLowerCase();
+    const name = prospect.contactName || prospect.companyName;
+    const companyName = prospect.companyName;
+
+    // Check if user already exists
+    let user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      const token = crypto.randomBytes(32).toString('hex');
+      const expires = new Date(Date.now() + 72 * 60 * 60 * 1000);
+      const baseCode = cleanBase;
+      let referralCode = baseCode;
+      let suffix = 1;
+      while (await prisma.user.findUnique({ where: { referralCode } })) {
+        referralCode = `${baseCode}-${suffix++}`;
+      }
+
+      user = await prisma.user.create({
+        data: {
+          name,
+          email,
+          companyName,
+          phone: prospect.phone,
+          role: 'client',
+          invitationToken: token,
+          invitationExpires: expires,
+          referralCode,
+          active: true,
+        }
+      });
+    }
+
+    // Create initial project
+    let project = await prisma.project.findFirst({ where: { clientId: user.id } });
+    if (!project) {
+      project = await prisma.project.create({
+        data: {
+          clientId: user.id,
+          name: `Proyecto ${companyName}`,
+          description: `Solución de ingeniería para ${companyName}. Formalizado desde pipeline comercial.`,
+          currentPhase: 1,
+          progressPercent: 10,
+          status: 'active',
+        }
+      });
+    }
+
+    // Update prospect
+    const updatedProspect = await prisma.prospect.update({
+      where: { id: prospect.id },
+      data: {
+        status: 'won',
+        convertedToClientId: user.id,
+      },
+      include: {
+        documents: true,
+        appointments: true,
+      }
+    });
+
+    res.json({
+      prospect: updatedProspect,
+      client: user,
+      project,
+    });
+  } catch (err) {
+    console.error('[ADMIN] Error in convert prospect:', err);
+    res.status(500).json({ error: 'Error al convertir prospecto a cliente.' });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// ─── HUMMINGX CORE: CITAS Y VISITAS PRESENCIALES ──────────────────
+// ═══════════════════════════════════════════════════════════════════
+
+// GET /admin/appointments — List all appointments
+router.get('/appointments', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { assignedTo, status } = req.query;
+    const where = {};
+    if (assignedTo && assignedTo !== 'all') where.assignedTo = assignedTo;
+    if (status && status !== 'all') where.status = status;
+
+    const appointments = await prisma.appointment.findMany({
+      where,
+      orderBy: { dateTime: 'asc' },
+      include: {
+        prospect: { select: { id: true, companyName: true, contactName: true, phone: true } },
+      }
+    });
+    res.json(appointments);
+  } catch (err) {
+    console.error('[ADMIN] Error in GET /admin/appointments:', err);
+    res.status(500).json({ error: 'Error al cargar citas.' });
+  }
+});
+
+// POST /admin/appointments — Create appointment
+router.post('/appointments', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { title, companyName, contactName, contactPhone, dateTime, location, mapsUrl, assignedTo, summary, prospectId } = req.body;
+
+    if (!title || !companyName || !dateTime || !location) {
+      return res.status(400).json({ error: 'Título, empresa, fecha/hora y ubicación son requeridos.' });
+    }
+
+    // Auto-generate Google Maps URL if not provided
+    const cleanMapsUrl = mapsUrl?.trim() || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location.trim())}`;
+
+    const appointment = await prisma.appointment.create({
+      data: {
+        title: title.trim(),
+        companyName: companyName.trim(),
+        contactName: contactName?.trim() || null,
+        contactPhone: contactPhone?.trim() || null,
+        dateTime: new Date(dateTime),
+        location: location.trim(),
+        mapsUrl: cleanMapsUrl,
+        assignedTo: assignedTo || 'emmanuel',
+        status: 'scheduled',
+        summary: summary?.trim() || null,
+        prospectId: prospectId || null,
+      },
+      include: {
+        prospect: true,
+      }
+    });
+    res.status(201).json(appointment);
+  } catch (err) {
+    console.error('[ADMIN] Error in POST /admin/appointments:', err);
+    res.status(500).json({ error: 'Error al registrar cita.' });
+  }
+});
+
+// PUT /admin/appointments/:id — Update appointment
+router.put('/admin/appointments/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { title, companyName, contactName, contactPhone, dateTime, location, mapsUrl, assignedTo, status, summary, prospectId } = req.body;
+
+    const appointment = await prisma.appointment.update({
+      where: { id: req.params.id },
+      data: {
+        ...(title !== undefined && { title: title.trim() }),
+        ...(companyName !== undefined && { companyName: companyName.trim() }),
+        ...(contactName !== undefined && { contactName: contactName ? contactName.trim() : null }),
+        ...(contactPhone !== undefined && { contactPhone: contactPhone ? contactPhone.trim() : null }),
+        ...(dateTime !== undefined && { dateTime: new Date(dateTime) }),
+        ...(location !== undefined && { location: location.trim() }),
+        ...(mapsUrl !== undefined && { mapsUrl: mapsUrl.trim() }),
+        ...(assignedTo !== undefined && { assignedTo }),
+        ...(status !== undefined && { status }),
+        ...(summary !== undefined && { summary: summary ? summary.trim() : null }),
+        ...(prospectId !== undefined && { prospectId: prospectId || null }),
+      },
+      include: {
+        prospect: true,
+      }
+    });
+    res.json(appointment);
+  } catch (err) {
+    console.error('[ADMIN] Error in PUT /admin/appointments/:id:', err);
+    res.status(500).json({ error: 'Error al actualizar cita.' });
+  }
+});
+
+// Also support router.put('/appointments/:id')
+router.put('/appointments/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { title, companyName, contactName, contactPhone, dateTime, location, mapsUrl, assignedTo, status, summary, prospectId } = req.body;
+
+    const appointment = await prisma.appointment.update({
+      where: { id: req.params.id },
+      data: {
+        ...(title !== undefined && { title: title.trim() }),
+        ...(companyName !== undefined && { companyName: companyName.trim() }),
+        ...(contactName !== undefined && { contactName: contactName ? contactName.trim() : null }),
+        ...(contactPhone !== undefined && { contactPhone: contactPhone ? contactPhone.trim() : null }),
+        ...(dateTime !== undefined && { dateTime: new Date(dateTime) }),
+        ...(location !== undefined && { location: location.trim() }),
+        ...(mapsUrl !== undefined && { mapsUrl: mapsUrl.trim() }),
+        ...(assignedTo !== undefined && { assignedTo }),
+        ...(status !== undefined && { status }),
+        ...(summary !== undefined && { summary: summary ? summary.trim() : null }),
+        ...(prospectId !== undefined && { prospectId: prospectId || null }),
+      },
+      include: {
+        prospect: true,
+      }
+    });
+    res.json(appointment);
+  } catch (err) {
+    console.error('[ADMIN] Error in PUT /appointments/:id:', err);
+    res.status(500).json({ error: 'Error al actualizar cita.' });
+  }
+});
+
+// DELETE /admin/appointments/:id — Delete appointment
+router.delete('/appointments/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    await prisma.appointment.delete({ where: { id: req.params.id } });
+    res.json({ message: 'Cita eliminada.' });
+  } catch (err) {
+    console.error('[ADMIN] Error in DELETE /admin/appointments/:id:', err);
+    res.status(500).json({ error: 'Error al eliminar cita.' });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// ─── HUMMINGX CORE: TAREAS PENDIENTES DEL EQUIPO ──────────────────
+// ═══════════════════════════════════════════════════════════════════
+
+// GET /admin/tasks — List all tasks
+router.get('/tasks', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const tasks = await prisma.teamTask.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+    res.json(tasks);
+  } catch (err) {
+    console.error('[ADMIN] Error in GET /admin/tasks:', err);
+    res.status(500).json({ error: 'Error al cargar tareas.' });
+  }
+});
+
+// POST /admin/tasks — Create task
+router.post('/tasks', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, assignedTo, priority, status, category, dueDate, checklist } = req.body;
+    if (!title || !title.trim()) {
+      return res.status(400).json({ error: 'El título de la tarea es requerido.' });
+    }
+
+    const task = await prisma.teamTask.create({
+      data: {
+        title: title.trim(),
+        description: description?.trim() || null,
+        assignedTo: assignedTo || 'all',
+        priority: priority || 'medium',
+        status: status || 'todo',
+        category: category?.trim() || 'General',
+        dueDate: dueDate ? new Date(dueDate) : null,
+        checklist: checklist || null,
+      }
+    });
+    res.status(201).json(task);
+  } catch (err) {
+    console.error('[ADMIN] Error in POST /admin/tasks:', err);
+    res.status(500).json({ error: 'Error al crear tarea.' });
+  }
+});
+
+// PUT /admin/tasks/:id — Update task (status, assignedTo, priority, checklist)
+router.put('/tasks/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, assignedTo, priority, status, category, dueDate, checklist } = req.body;
+
+    const data = {};
+    if (title !== undefined) data.title = title.trim();
+    if (description !== undefined) data.description = description ? description.trim() : null;
+    if (assignedTo !== undefined) data.assignedTo = assignedTo;
+    if (priority !== undefined) data.priority = priority;
+    if (category !== undefined) data.category = category ? category.trim() : null;
+    if (dueDate !== undefined) data.dueDate = dueDate ? new Date(dueDate) : null;
+    if (checklist !== undefined) data.checklist = checklist;
+
+    if (status !== undefined) {
+      data.status = status;
+      if (status === 'done') {
+        data.completedAt = new Date();
+      } else {
+        data.completedAt = null;
+      }
+    }
+
+    const task = await prisma.teamTask.update({
+      where: { id: req.params.id },
+      data,
+    });
+    res.json(task);
+  } catch (err) {
+    console.error('[ADMIN] Error in PUT /admin/tasks/:id:', err);
+    res.status(500).json({ error: 'Error al actualizar tarea.' });
+  }
+});
+
+// DELETE /admin/tasks/:id — Delete task
+router.delete('/tasks/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    await prisma.teamTask.delete({ where: { id: req.params.id } });
+    res.json({ message: 'Tarea eliminada.' });
+  } catch (err) {
+    console.error('[ADMIN] Error in DELETE /admin/tasks/:id:', err);
+    res.status(500).json({ error: 'Error al eliminar tarea.' });
+  }
+});
+
 module.exports = router;
+

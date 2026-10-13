@@ -19,10 +19,10 @@ router.get('/my', authenticate, async (req, res) => {
 
     const totalCredits = creditMovements.reduce((sum, m) => sum + m.amount, 0);
 
-    // Ensure user has a referralCode
+    // Ensure user has a referralCode and fetch level
     let user = await prisma.user.findUnique({
       where: { id: req.user.id },
-      select: { referralCode: true, companyName: true, name: true },
+      select: { referralCode: true, companyName: true, name: true, level: true },
     });
 
     let referralCode = user?.referralCode;
@@ -45,6 +45,7 @@ router.get('/my', authenticate, async (req, res) => {
       creditMovements,
       totalCredits,
       referralCode,
+      level: user?.level || 1,
     });
   } catch (err) {
     console.error('[REFERRALS] Error en GET /referrals/my:', err);

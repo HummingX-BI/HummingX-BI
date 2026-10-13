@@ -14,7 +14,10 @@ import {
   BarChart3,
   Menu,
   X,
-  Calendar
+  Calendar,
+  Briefcase,
+  CalendarDays,
+  CheckSquare
 } from 'lucide-react';
 
 const logoSrc = '/logo.png';
@@ -51,9 +54,12 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
   ];
 
   const adminLinks = [
-    { to: '/admin/clients',   icon: Users,    label: 'Resumen Clientes' },
-    { to: '/admin/pagos',     icon: Calendar, label: 'Plan de Pagos' },
-    { to: '/admin/analytics', icon: BarChart3, label: 'Control & Analíticas' },
+    { to: '/admin/clients',     icon: Users,        label: 'Clientes Activos' },
+    { to: '/admin/prospects',   icon: Briefcase,    label: 'CRM Prospectos' },
+    { to: '/admin/citas',       icon: CalendarDays, label: 'Agenda de Citas' },
+    { to: '/admin/tareas',      icon: CheckSquare,  label: 'Tareas Core' },
+    { to: '/admin/pagos',       icon: Calendar,     label: 'Plan de Pagos' },
+    { to: '/admin/analytics',   icon: BarChart3,    label: 'Control & Analíticas' },
   ];
 
   const links = isAdmin ? adminLinks : clientLinks;

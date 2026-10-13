@@ -30,6 +30,9 @@ import {
   AlertCircle,
   ChevronRight,
   ExternalLink,
+  Crown,
+  Award,
+  Info,
 } from 'lucide-react';
 
 const STATUS_CONFIG = {
@@ -82,11 +85,14 @@ export default function ReferralsPage() {
   const [creditMovements, setCreditMovements] = useState([]);
   const [totalCredits, setTotalCredits] = useState(0);
   const [referralCode, setReferralCode] = useState('');
+  const [userLevel, setUserLevel] = useState(user?.level || 1);
   
   // UI states
   const [copied, setCopied] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [closingModal, setClosingModal] = useState(false);
+  const [showTierModal, setShowTierModal] = useState(false);
+  const [closingTierModal, setClosingTierModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('referrals'); // 'referrals' | 'credits'
   const [searchTerm, setSearchTerm] = useState('');
@@ -110,6 +116,7 @@ export default function ReferralsPage() {
       setCreditMovements(data.creditMovements || []);
       setTotalCredits(data.totalCredits || 0);
       setReferralCode(data.referralCode || user?.referralCode || '');
+      setUserLevel(data.level || user?.level || 1);
     } catch (err) {
       console.error('Error al cargar datos de referidos:', err);
     } finally {
@@ -187,6 +194,67 @@ export default function ReferralsPage() {
   const inProgressCount = useMemo(() => referrals.filter(r => ['registered', 'contacted', 'negotiating'].includes(r.status)).length, [referrals]);
   const totalCount = referrals.length;
 
+  // Membership Tier
+  const userTier = useMemo(() => {
+    const effLevel = Math.max(userLevel || 1, convertedCount >= 10 ? 3 : convertedCount >= 5 ? 2 : 1);
+    if (effLevel >= 3) {
+      return {
+        level: 3,
+        title: 'HummingX VIP',
+        badge: 'Nivel 3 · VIP',
+        color: '#7C3AED',
+        bg: '#F5F3FF',
+        border: '#DDD6FE',
+        gradient: 'linear-gradient(135deg, #7C3AED 0%, #A855F7 100%)',
+        img: '/vip-icon.jpg',
+        desc: 'Máximo nivel de socio con atención y beneficios prioritarios.',
+        nextLevel: null,
+        needed: 0,
+        progressPercent: 100,
+        targetCount: 10,
+        perk: '$3,500 HX Créditos por cada referido concretado + Atención directiva 24/7',
+      };
+    }
+    if (effLevel >= 2) {
+      const needed = Math.max(0, 10 - convertedCount);
+      const progressPercent = Math.min(100, Math.round(((convertedCount - 5) / 5) * 100));
+      return {
+        level: 2,
+        title: 'HummingX Partner',
+        badge: 'Nivel 2 · Partner',
+        color: '#D97706',
+        bg: '#FFFBEB',
+        border: '#FDE68A',
+        gradient: 'linear-gradient(135deg, #D97706 0%, #F59E0B 100%)',
+        img: '/partner-icon.jpg',
+        desc: 'Socio preferente con bonificaciones activas.',
+        nextLevel: 'Nivel 3 · VIP',
+        needed,
+        progressPercent: Math.max(0, progressPercent),
+        targetCount: 10,
+        perk: '$2,500 HX Créditos por referido + Sesión trimestral de optimización BI',
+      };
+    }
+    const needed = Math.max(0, 5 - convertedCount);
+    const progressPercent = Math.min(100, Math.round((convertedCount / 5) * 100));
+    return {
+      level: 1,
+      title: 'HummingX Member',
+      badge: 'Nivel 1 · Member',
+      color: '#0284C7',
+      bg: '#F0F9FF',
+      border: '#BAE6FD',
+      gradient: 'linear-gradient(135deg, #0284C7 0%, #00C4CC 100%)',
+      img: '/member-icon.png',
+      desc: 'Socio activo. Refiere más para ascender a Partner.',
+      nextLevel: 'Nivel 2 · Partner',
+      needed,
+      progressPercent,
+      targetCount: 5,
+      perk: '$1,500 HX Créditos por cada referido concretado',
+    };
+  }, [userLevel, convertedCount]);
+
   // Filtered referrals
   const filteredReferrals = useMemo(() => {
     return referrals.filter(ref => {
@@ -249,7 +317,39 @@ export default function ReferralsPage() {
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+            {/* Membership Level Badge */}
+            <div
+              onClick={() => setShowTierModal(true)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '6px 14px',
+                borderRadius: '9999px',
+                background: userTier.bg,
+                border: `1px solid ${userTier.border}`,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+              title="Haz clic para ver beneficios de tu nivel"
+            >
+              <img
+                src={userTier.img}
+                alt={userTier.title}
+                style={{ width: '26px', height: '26px', borderRadius: '50%', objectFit: 'cover' }}
+              />
+              <div>
+                <span style={{ fontSize: '12.5px', fontWeight: 800, color: userTier.color, display: 'block', lineHeight: 1.1 }}>
+                  {userTier.title}
+                </span>
+                <span style={{ fontSize: '10.5px', color: '#6B7280', fontWeight: 600 }}>
+                  Nivel {userTier.level} Activo · Ver beneficios
+                </span>
+              </div>
+            </div>
+
             <button
               onClick={() => setShowModal(true)}
               className="btn-accent"
@@ -466,7 +566,7 @@ export default function ReferralsPage() {
             </div>
           </div>
 
-          {/* Card 3: Resumen Ejecutivo de Desempeño */}
+          {/* Card 3: Nivel de Socio & Desempeño */}
           <div className="card" style={{
             padding: '24px',
             borderRadius: '16px',
@@ -478,39 +578,110 @@ export default function ReferralsPage() {
             boxShadow: '0 4px 20px -2px rgba(0,0,0,0.04)',
           }}>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-                <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: '#ECFDF5', border: '1px solid #A7F3D0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <TrendingUp size={18} color="#059669" />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <img
+                    src={userTier.img}
+                    alt={userTier.title}
+                    style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: `2px solid ${userTier.border}` }}
+                  />
+                  <div>
+                    <span style={{ fontSize: '13px', fontWeight: 700, color: '#111827', display: 'block' }}>Tu Nivel de Socio</span>
+                    <span style={{ fontSize: '11.5px', fontWeight: 700, color: userTier.color }}>{userTier.title}</span>
+                  </div>
                 </div>
-                <div>
-                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#374151', display: 'block' }}>Métricas de Referidos</span>
-                  <span style={{ fontSize: '11px', color: '#6B7280' }}>Monitoreo en tiempo real</span>
-                </div>
+
+                <button
+                  onClick={() => setShowTierModal(true)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '4px 10px',
+                    borderRadius: '8px',
+                    background: userTier.bg,
+                    border: `1px solid ${userTier.border}`,
+                    color: userTier.color,
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Crown size={12} />
+                  {userTier.badge}
+                </button>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', margin: '16px 0' }}>
-                <div style={{ padding: '12px 10px', background: '#F9FAFB', borderRadius: '10px', border: '1px solid #F3F4F6', textAlign: 'center' }}>
-                  <span style={{ fontSize: '20px', fontWeight: 800, color: '#111827', display: 'block' }}>{totalCount}</span>
-                  <span style={{ fontSize: '11px', color: '#6B7280', fontWeight: 500 }}>Total</span>
+              {/* Progress bar towards next level */}
+              <div style={{ background: '#F8FAFC', padding: '12px 14px', borderRadius: '12px', border: '1px solid #F1F5F9', marginBottom: '14px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <span style={{ fontSize: '11.5px', fontWeight: 600, color: '#374151' }}>
+                    {userTier.nextLevel ? `Progreso a ${userTier.nextLevel}` : 'Máximo Nivel Desbloqueado'}
+                  </span>
+                  <span style={{ fontSize: '11.5px', fontWeight: 700, color: userTier.color }}>
+                    {convertedCount} / {userTier.targetCount}
+                  </span>
+                </div>
+                <div style={{ width: '100%', height: '7px', background: '#E2E8F0', borderRadius: '9999px', overflow: 'hidden' }}>
+                  <div
+                    style={{
+                      width: `${userTier.progressPercent}%`,
+                      height: '100%',
+                      background: userTier.gradient,
+                      borderRadius: '9999px',
+                      transition: 'width 0.4s ease',
+                    }}
+                  />
+                </div>
+                <span style={{ fontSize: '10.5px', color: '#6B7280', display: 'block', marginTop: '6px' }}>
+                  {userTier.nextLevel
+                    ? `Te faltan ${userTier.needed} proyectos concretados para ascender.`
+                    : 'Cuentas con todos los privilegios directivos.'}
+                </span>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '14px' }}>
+                <div style={{ padding: '10px 8px', background: '#F9FAFB', borderRadius: '10px', border: '1px solid #F3F4F6', textAlign: 'center' }}>
+                  <span style={{ fontSize: '18px', fontWeight: 800, color: '#111827', display: 'block' }}>{totalCount}</span>
+                  <span style={{ fontSize: '10.5px', color: '#6B7280', fontWeight: 500 }}>Total</span>
                 </div>
 
-                <div style={{ padding: '12px 10px', background: '#FFFBEB', borderRadius: '10px', border: '1px solid #FEF3C7', textAlign: 'center' }}>
-                  <span style={{ fontSize: '20px', fontWeight: 800, color: '#B45309', display: 'block' }}>{inProgressCount}</span>
-                  <span style={{ fontSize: '11px', color: '#92400E', fontWeight: 500 }}>En Proceso</span>
+                <div style={{ padding: '10px 8px', background: '#FFFBEB', borderRadius: '10px', border: '1px solid #FEF3C7', textAlign: 'center' }}>
+                  <span style={{ fontSize: '18px', fontWeight: 800, color: '#B45309', display: 'block' }}>{inProgressCount}</span>
+                  <span style={{ fontSize: '10.5px', color: '#92400E', fontWeight: 500 }}>En Proceso</span>
                 </div>
 
-                <div style={{ padding: '12px 10px', background: '#ECFDF5', borderRadius: '10px', border: '1px solid #A7F3D0', textAlign: 'center' }}>
-                  <span style={{ fontSize: '20px', fontWeight: 800, color: '#047857', display: 'block' }}>{convertedCount}</span>
-                  <span style={{ fontSize: '11px', color: '#065F46', fontWeight: 500 }}>Concretadas</span>
+                <div style={{ padding: '10px 8px', background: '#ECFDF5', borderRadius: '10px', border: '1px solid #A7F3D0', textAlign: 'center' }}>
+                  <span style={{ fontSize: '18px', fontWeight: 800, color: '#047857', display: 'block' }}>{convertedCount}</span>
+                  <span style={{ fontSize: '10.5px', color: '#065F46', fontWeight: 500 }}>Concretadas</span>
                 </div>
               </div>
             </div>
 
-            <div style={{ paddingTop: '12px', borderTop: '1px solid #F3F4F6', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <ShieldCheck size={16} color="#00C4CC" style={{ flexShrink: 0 }} />
-              <span style={{ fontSize: '11.5px', color: '#6B7280', lineHeight: 1.4 }}>
-                Resguardo bajo <strong>Acuerdo de Confidencialidad</strong> (NDA).
-              </span>
+            <div style={{ paddingTop: '10px', borderTop: '1px solid #F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <ShieldCheck size={14} color="#00C4CC" style={{ flexShrink: 0 }} />
+                <span style={{ fontSize: '11px', color: '#6B7280' }}>
+                  Confidencialidad garantizada
+                </span>
+              </div>
+              <button
+                onClick={() => setShowTierModal(true)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#00C4CC',
+                  fontSize: '11.5px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  padding: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '3px',
+                }}
+              >
+                Ver niveles <ChevronRight size={13} />
+              </button>
             </div>
           </div>
 
@@ -1168,6 +1339,314 @@ export default function ReferralsPage() {
         document.body
       )}
 
+      {/* ── MODAL DE NIVELES DE SOCIO & BENEFICIOS ───────────────────────── */}
+      {showTierModal &&
+        createPortal(
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 10000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '16px',
+              background: 'rgba(17, 24, 39, 0.65)',
+              backdropFilter: 'blur(6px)',
+              animation: closingTierModal ? 'fadeOut 0.2s ease forwards' : 'fadeIn 0.2s ease forwards',
+            }}
+            onClick={() => {
+              setClosingTierModal(true);
+              setTimeout(() => {
+                setShowTierModal(false);
+                setClosingTierModal(false);
+              }, 200);
+            }}
+          >
+            <div
+              style={{
+                background: '#FFFFFF',
+                borderRadius: '20px',
+                width: '100%',
+                maxWidth: '720px',
+                maxHeight: '90vh',
+                overflowY: 'auto',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                border: '1px solid #E5E7EB',
+                animation: closingTierModal ? 'scaleDown 0.2s ease forwards' : 'scaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div
+                style={{
+                  padding: '24px',
+                  borderBottom: '1px solid #F3F4F6',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  background: 'linear-gradient(135deg, #F8FAFC 0%, #FFFFFF 100%)',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div
+                    style={{
+                      width: '42px',
+                      height: '42px',
+                      borderRadius: '12px',
+                      background: '#F0FDFA',
+                      border: '1px solid #CCFBF1',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#00C4CC',
+                    }}
+                  >
+                    <Crown size={22} />
+                  </div>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#111827' }}>
+                      Niveles de Reconocimiento HummingX
+                    </h3>
+                    <span style={{ fontSize: '12.5px', color: '#6B7280' }}>
+                      Asciende de categoría conforme tus recomendaciones se concreten en proyectos
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setClosingTierModal(true);
+                    setTimeout(() => {
+                      setShowTierModal(false);
+                      setClosingTierModal(false);
+                    }, 200);
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#9CA3AF',
+                    cursor: 'pointer',
+                    padding: '6px',
+                    borderRadius: '8px',
+                  }}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Tiers Grid */}
+              <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
+                  
+                  {/* Tier 1: Member */}
+                  <div
+                    style={{
+                      padding: '18px',
+                      borderRadius: '14px',
+                      border: userTier.level === 1 ? '2px solid #0284C7' : '1px solid #E5E7EB',
+                      background: userTier.level === 1 ? '#F0F9FF' : '#FFFFFF',
+                      position: 'relative',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    {userTier.level === 1 && (
+                      <span
+                        style={{
+                          position: 'absolute',
+                          top: '-10px',
+                          right: '12px',
+                          padding: '2px 8px',
+                          borderRadius: '9999px',
+                          background: '#0284C7',
+                          color: '#FFFFFF',
+                          fontSize: '10px',
+                          fontWeight: 800,
+                          letterSpacing: '0.04em',
+                          textTransform: 'uppercase',
+                        }}
+                      >
+                        Tu Nivel Actual
+                      </span>
+                    )}
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                        <img
+                          src="/member-icon.png"
+                          alt="Member"
+                          style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }}
+                        />
+                        <div>
+                          <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: '#111827' }}>
+                            Nivel 1 · Member
+                          </h4>
+                          <span style={{ fontSize: '11px', color: '#6B7280' }}>0 a 4 empresas cerradas</span>
+                        </div>
+                      </div>
+                      <ul style={{ margin: '12px 0 0', paddingLeft: '16px', fontSize: '12px', color: '#4B5563', lineHeight: 1.6 }}>
+                        <li><strong>$1,500 HX Créditos</strong> por proyecto concretado.</li>
+                        <li>Enlace y código de socio personalizado.</li>
+                        <li>Acceso al portal de métricas en tiempo real.</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* Tier 2: Partner */}
+                  <div
+                    style={{
+                      padding: '18px',
+                      borderRadius: '14px',
+                      border: userTier.level === 2 ? '2px solid #D97706' : '1px solid #E5E7EB',
+                      background: userTier.level === 2 ? '#FFFBEB' : '#FFFFFF',
+                      position: 'relative',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    {userTier.level === 2 && (
+                      <span
+                        style={{
+                          position: 'absolute',
+                          top: '-10px',
+                          right: '12px',
+                          padding: '2px 8px',
+                          borderRadius: '9999px',
+                          background: '#D97706',
+                          color: '#FFFFFF',
+                          fontSize: '10px',
+                          fontWeight: 800,
+                          letterSpacing: '0.04em',
+                          textTransform: 'uppercase',
+                        }}
+                      >
+                        Tu Nivel Actual
+                      </span>
+                    )}
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                        <img
+                          src="/partner-icon.jpg"
+                          alt="Partner"
+                          style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }}
+                        />
+                        <div>
+                          <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: '#111827' }}>
+                            Nivel 2 · Partner
+                          </h4>
+                          <span style={{ fontSize: '11px', color: '#6B7280' }}>5 a 9 empresas cerradas</span>
+                        </div>
+                      </div>
+                      <ul style={{ margin: '12px 0 0', paddingLeft: '16px', fontSize: '12px', color: '#4B5563', lineHeight: 1.6 }}>
+                        <li><strong>$2,500 HX Créditos</strong> por proyecto concretado.</li>
+                        <li>Sesión trimestral de optimización de BI con fundadores.</li>
+                        <li>Acceso beta anticipado a nuevos módulos.</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* Tier 3: VIP */}
+                  <div
+                    style={{
+                      padding: '18px',
+                      borderRadius: '14px',
+                      border: userTier.level === 3 ? '2px solid #7C3AED' : '1px solid #E5E7EB',
+                      background: userTier.level === 3 ? '#F5F3FF' : '#FFFFFF',
+                      position: 'relative',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    {userTier.level === 3 && (
+                      <span
+                        style={{
+                          position: 'absolute',
+                          top: '-10px',
+                          right: '12px',
+                          padding: '2px 8px',
+                          borderRadius: '9999px',
+                          background: '#7C3AED',
+                          color: '#FFFFFF',
+                          fontSize: '10px',
+                          fontWeight: 800,
+                          letterSpacing: '0.04em',
+                          textTransform: 'uppercase',
+                        }}
+                      >
+                        Tu Nivel Actual
+                      </span>
+                    )}
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                        <img
+                          src="/vip-icon.jpg"
+                          alt="VIP"
+                          style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }}
+                        />
+                        <div>
+                          <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: '#111827' }}>
+                            Nivel 3 · VIP
+                          </h4>
+                          <span style={{ fontSize: '11px', color: '#6B7280' }}>10+ empresas cerradas</span>
+                        </div>
+                      </div>
+                      <ul style={{ margin: '12px 0 0', paddingLeft: '16px', fontSize: '12px', color: '#4B5563', lineHeight: 1.6 }}>
+                        <li><strong>$3,500 HX Créditos</strong> por proyecto concretado.</li>
+                        <li>Canal prioritario 24/7 directo con directivos.</li>
+                        <li>Créditos transferibles para desarrollos a medida.</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                </div>
+
+                <div
+                  style={{
+                    padding: '14px 18px',
+                    borderRadius: '12px',
+                    background: '#F9FAFB',
+                    border: '1px solid #F3F4F6',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                  }}
+                >
+                  <ShieldCheck size={20} color="#00C4CC" style={{ flexShrink: 0 }} />
+                  <span style={{ fontSize: '12px', color: '#4B5563', lineHeight: 1.5 }}>
+                    Todos los créditos generados en HummingX BI se respaldan formalmente en tu estado de cuenta bajo el Acuerdo de Confidencialidad y son redimibles por servicios, horas de ingeniería y consultoría especializada.
+                  </span>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div
+                style={{
+                  padding: '16px 24px',
+                  borderTop: '1px solid #F3F4F6',
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                }}
+              >
+                <button
+                  onClick={() => {
+                    setClosingTierModal(true);
+                    setTimeout(() => {
+                      setShowTierModal(false);
+                      setClosingTierModal(false);
+                    }, 200);
+                  }}
+                  className="btn-accent"
+                  style={{ padding: '8px 20px', fontSize: '13px' }}
+                >
+                  Entendido
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </Layout>
   );
 }

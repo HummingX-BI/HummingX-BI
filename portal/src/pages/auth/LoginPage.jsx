@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Eye, EyeOff, Lock, Mail, AlertCircle } from 'lucide-react';
+import api from '../../lib/api';
+import { Eye, EyeOff, Lock, Mail, AlertCircle, Sparkles } from 'lucide-react';
 
 const logoSrc = '/logo.png';
 
@@ -12,15 +13,46 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [wakingDbNotice, setWakingDbNotice] = useState(false);
+  const [retryStatus, setRetryStatus] = useState('');
+  const timerRef = useRef(null);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // Silently wake up serverless PostgreSQL instance as soon as the login page loads
+  useEffect(() => {
+    api.get('/auth/warmup').catch(() => {});
+  }, []);
+
+  const executeLogin = async (email, password, isAutoRetry = false) => {
     setError('');
     setLoading(true);
+    setWakingDbNotice(false);
+
+    // If request takes longer than 1.4s, notify user that DB is waking up
+    timerRef.current = setTimeout(() => {
+      setWakingDbNotice(true);
+    }, 1400);
+
     try {
-      const user = await login(form.email, form.password);
+      const user = await login(email, password);
+      clearTimeout(timerRef.current);
+      setRetryStatus('');
       navigate(user.role === 'admin' ? '/admin' : '/dashboard', { replace: true });
     } catch (err) {
+      clearTimeout(timerRef.current);
+      const isWaking = err.response?.data?.isWakingUp || err.response?.status === 503 || err.response?.status === 504 || (err.message || '').includes('timeout');
+      
+      if (isWaking && !isAutoRetry) {
+        setRetryStatus('Reactivando base de datos segura en la nube... Reintentando automáticamente en 2 segundos.');
+        setWakingDbNotice(true);
+        setTimeout(() => {
+          setRetryStatus('Reconectando...');
+          executeLogin(email, password, true);
+        }, 2200);
+        return;
+      }
+
+      setRetryStatus('');
+      setWakingDbNotice(false);
       const apiError = err.response?.data?.error;
       let errorMsg = 'Error al iniciar sesión. Verifica tus credenciales.';
       if (typeof apiError === 'string') {
@@ -30,8 +62,16 @@ export default function LoginPage() {
       }
       setError(errorMsg);
     } finally {
-      setLoading(false);
+      clearTimeout(timerRef.current);
+      if (!retryStatus) {
+        setLoading(false);
+      }
     }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await executeLogin(form.email, form.password);
   };
 
   return (
@@ -83,8 +123,23 @@ export default function LoginPage() {
             </p>
           </div>
 
+          {/* Cold start database wake up banner */}
+          {(wakingDbNotice || retryStatus) && (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '10px',
+              padding: '12px 16px', borderRadius: '10px',
+              background: 'rgba(0, 196, 204, 0.1)', border: '1px solid rgba(0, 196, 204, 0.3)',
+              marginBottom: '20px',
+            }}>
+              <div style={{ width: '14px', height: '14px', border: '2px solid rgba(0, 196, 204, 0.3)', borderTopColor: '#00C4CC', borderRadius: '50%', animation: 'spin 0.8s linear infinite', flexShrink: 0 }} />
+              <span style={{ fontSize: '12.5px', color: '#67e8f9', lineHeight: 1.4 }}>
+                {retryStatus || 'Conectando con la base de datos segura en la nube... Los servidores se reactivan al primer acceso.'}
+              </span>
+            </div>
+          )}
+
           {/* Error */}
-          {error && (
+          {error && !retryStatus && (
             <div style={{
               display: 'flex', alignItems: 'center', gap: '8px',
               padding: '12px 16px', borderRadius: '10px',

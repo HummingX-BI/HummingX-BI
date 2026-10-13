@@ -105,6 +105,10 @@ apiRouter.get('/health', (_req, res) => res.json({ status: 'ok' }));
 app.use('/api', apiRouter);
 app.use('/', apiRouter);
 
+// ─── NFC / QR Short Link Redirection (/t/:code) ─────────────────────────
+app.get('/t/:code', require('./t'));
+apiRouter.get('/t/:code', require('./t'));
+
 // ─── 404 handler ─────────────────────────────────────────────────────────────
 app.use((_req, res) => res.status(404).json({ error: 'Ruta no encontrada.' }));
 

@@ -21,6 +21,7 @@ import {
   Filter,
   Navigation,
   Building2,
+  Calendar,
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
@@ -277,7 +278,7 @@ export default function AdminAppointmentsPage() {
 
         {/* ── Search & Compact Filters Bar ───────────────────────────────── */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '10px', padding: '8px 14px', width: '300px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '10px', padding: '8px 14px', flex: '1 1 240px', maxWidth: '100%' }}>
             <Search size={15} color="#9CA3AF" />
             <input
               type="text"
@@ -356,18 +357,20 @@ export default function AdminAppointmentsPage() {
             </button>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))', gap: '16px' }}>
             {filteredAppointments.map((a) => {
               const memberCfg = TEAM_MEMBERS[a.assignedTo] || TEAM_MEMBERS.emmanuel;
               const statusCfg = STATUS_CONFIG[a.status] || STATUS_CONFIG.scheduled;
               const isExpanded = expandedIds.has(a.id);
 
               const dateObj = new Date(a.dateTime);
-              const formattedDate = dateObj.toLocaleDateString('es-MX', {
-                weekday: 'short',
-                day: 'numeric',
-                month: 'short',
-              });
+              // Cleanly formatted date: e.g. "Dom, 11 Oct"
+              const dayOfWeek = dateObj.toLocaleDateString('es-MX', { weekday: 'short' }).replace('.', '');
+              const capitalizedDay = dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1);
+              const dayNum = dateObj.getDate();
+              const monthName = dateObj.toLocaleDateString('es-MX', { month: 'short' }).replace('.', '');
+              const formattedDate = `${capitalizedDay} ${dayNum} de ${monthName}`;
+              
               const formattedTime = dateObj.toLocaleTimeString('es-MX', {
                 hour: '2-digit',
                 minute: '2-digit',
@@ -389,23 +392,44 @@ export default function AdminAppointmentsPage() {
                     transition: 'all 0.2s ease',
                   }}
                 >
-                  {/* Top: DateTime Pill & Status Selector */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
-                    <div
-                      style={{
-                        padding: '4px 10px',
-                        borderRadius: '8px',
-                        background: '#F1F5F9',
-                        color: '#334155',
-                        fontSize: '12px',
-                        fontWeight: 600,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                      }}
-                    >
-                      <Clock size={13} color="#00C4CC" />
-                      <span style={{ textTransform: 'capitalize' }}>{formattedDate}</span> • {formattedTime}
+                  {/* Top: DateTime Badges & Status Selector */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                      <div
+                        style={{
+                          padding: '4px 10px',
+                          borderRadius: '8px',
+                          background: '#F8FAFC',
+                          border: '1px solid #E2E8F0',
+                          color: '#1E293B',
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                        }}
+                      >
+                        <Calendar size={13} color="#0284C7" />
+                        <span>{formattedDate}</span>
+                      </div>
+
+                      <div
+                        style={{
+                          padding: '4px 8px',
+                          borderRadius: '8px',
+                          background: '#F0FDFA',
+                          border: '1px solid #CCFBF1',
+                          color: '#0F766E',
+                          fontSize: '12px',
+                          fontWeight: 700,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                        }}
+                      >
+                        <Clock size={12} color="#00C4CC" />
+                        <span>{formattedTime}</span>
+                      </div>
                     </div>
 
                     <select

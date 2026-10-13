@@ -24,6 +24,7 @@ import AdminProspectsPage from './pages/admin/AdminProspectsPage';
 import AdminAppointmentsPage from './pages/admin/AdminAppointmentsPage';
 import AdminTasksPage from './pages/admin/AdminTasksPage';
 import AdminFinancesPage from './pages/admin/AdminFinancesPage';
+import AdminNfcCardsPage from './pages/admin/AdminNfcCardsPage';
 
 export default function App() {
   return (
@@ -51,6 +52,7 @@ export default function App() {
           <Route path="/admin/citas" element={<ProtectedRoute adminOnly><AdminAppointmentsPage /></ProtectedRoute>} />
           <Route path="/admin/tareas" element={<ProtectedRoute adminOnly><AdminTasksPage /></ProtectedRoute>} />
           <Route path="/admin/finanzas" element={<ProtectedRoute adminOnly><AdminFinancesPage /></ProtectedRoute>} />
+          <Route path="/admin/tarjetas-qr" element={<ProtectedRoute adminOnly><AdminNfcCardsPage /></ProtectedRoute>} />
           <Route path="/admin/analytics" element={<ProtectedRoute adminOnly><AdminAnalyticsPage /></ProtectedRoute>} />
           <Route path="/admin/pagos" element={<ProtectedRoute adminOnly><AdminPaymentsPage /></ProtectedRoute>} />
 

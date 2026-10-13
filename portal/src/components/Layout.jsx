@@ -60,6 +60,7 @@ export default function Layout({ children, customBreadcrumbLabel, fullWidth = fa
     'citas': 'Agenda de Citas',
     'tareas': 'Tareas',
     'finanzas': 'Finanzas & Flujo',
+    'tarjetas-qr': 'Tarjetas QR & NFC',
     'analytics': 'Analíticas',
   };
 

@@ -60,33 +60,78 @@ async function trackLogin(req, userId) {
   }
 }
 
+// Helper to detect database cold start / connection suspension
+function isDbConnectionError(err) {
+  const msg = (err?.message || '').toLowerCase();
+  return (
+    msg.includes('connection') ||
+    msg.includes('reach database') ||
+    msg.includes('timeout') ||
+    msg.includes('closed') ||
+    msg.includes('econnrefused') ||
+    msg.includes('etimedout') ||
+    err?.name === 'PrismaClientInitializationError'
+  );
+}
+
+// ─── GET /auth/warmup ────────────────────────────────────────────────────────
+// Silently ping database on login page load to wake up Neon serverless instance
+router.get('/warmup', async (_req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({ status: 'ready' });
+  } catch (err) {
+    res.json({ status: 'warming_up' });
+  }
+});
+
 // ─── POST /auth/login ─────────────────────────────────────────────────────────
 // Rate limited: 10 attempts per IP per 15 min
 router.post('/login', loginLimiter, async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email y contraseña son requeridos.' });
+  }
+
+  // SECURITY: Validate email format to prevent injection
+  if (!isValidEmail(email)) {
+    return res.status(400).json({ error: 'Formato de email inválido.' });
+  }
+
+  let user = null;
+
   try {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email y contraseña son requeridos.' });
+    user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+  } catch (err) {
+    if (isDbConnectionError(err)) {
+      console.warn('[AUTH] Database cold start detected. Retrying connection in 1.5s...');
+      await new Promise(r => setTimeout(r, 1500));
+      try {
+        user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+      } catch (retryErr) {
+        console.error('[AUTH] Database retry error:', retryErr.message);
+        return res.status(503).json({
+          error: 'La base de datos segura se está reactivando. Por favor espera unos segundos e intenta de nuevo.',
+          isWakingUp: true,
+        });
+      }
+    } else {
+      console.error('[AUTH] Query error:', err.message);
+      return res.status(500).json({ error: 'Error interno del servidor.' });
     }
+  }
 
-    // SECURITY: Validate email format to prevent injection
-    if (!isValidEmail(email)) {
-      return res.status(400).json({ error: 'Formato de email inválido.' });
-    }
-
-    const user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
-
+  try {
     if (!user) {
       return res.status(401).json({ error: 'Credenciales incorrectas.' });
     }
 
     if (!user.active) {
-      return res.status(403).json({ error: 'Tu cuenta ha sido deshabilitada temporalmente. Nuestro equipo está trabajando para mejorar tu experiencia. Si crees que esto es un error, por favor contacta a soporte.' });
+      return res.status(403).json({ error: 'Tu cuenta ha sido deshabilitada temporalmente. Si crees que esto es un error, por favor contacta a soporte.' });
     }
 
     if (!user.passwordHash) {
-      // This message is fine — account not activated is not sensitive info
       return res.status(401).json({ error: 'Cuenta no activada. Revisa tu correo para crear tu contraseña.' });
     }
 
@@ -117,7 +162,7 @@ router.post('/login', loginLimiter, async (req, res) => {
       }
     });
   } catch (err) {
-    console.error('[AUTH] Login error:', err.message);
+    console.error('[AUTH] Login processing error:', err.message);
     res.status(500).json({ error: 'Error interno del servidor.' });
   }
 });

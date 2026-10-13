@@ -18,7 +18,8 @@ import {
   Briefcase,
   CalendarDays,
   CheckSquare,
-  DollarSign
+  DollarSign,
+  QrCode,
 } from 'lucide-react';
 
 const logoSrc = '/logo.png';
@@ -60,6 +61,7 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
     { to: '/admin/citas',       icon: CalendarDays, label: 'Agenda de Citas' },
     { to: '/admin/tareas',      icon: CheckSquare,  label: 'Tareas' },
     { to: '/admin/finanzas',    icon: DollarSign,   label: 'Finanzas & Flujo' },
+    { to: '/admin/tarjetas-qr', icon: QrCode,       label: 'Tarjetas QR & NFC' },
     { to: '/admin/pagos',       icon: Calendar,     label: 'Calendario de Pagos' },
     { to: '/admin/analytics',   icon: BarChart3,    label: 'Control & Analíticas' },
   ];

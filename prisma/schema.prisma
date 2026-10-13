@@ -373,3 +373,30 @@ model HistoricalDeal {
   @@map("historical_deals")
 }
 
+// ─── HUMMINGX: TARJETAS NFC & CÓDIGOS QR DINÁMICOS ───────────
+
+enum NfcCardType {
+  google_reviews // Reseñas de Google Maps
+  instagram      // Seguidores en Instagram
+  whatsapp       // Contacto Directo WhatsApp
+  menu           // Menú Digital / Catálogo
+  website        // Sitio Web / Enlace Personalizado
+}
+
+model NfcCard {
+  id          String      @id @default(cuid())
+  code        String      @unique // Código corto (ej. "001", "002")
+  clientName  String      // Nombre de la empresa o cliente (ej. "Tahara Café")
+  type        NfcCardType @default(google_reviews)
+  targetUrl   String      // Enlace de destino (ej. https://g.page/r/.../review)
+  active      Boolean     @default(true)
+  scanCount   Int         @default(0) // Total de escaneos/taps
+  notes       String?     // Notas de ubicación o entrega (ej. "En caja principal")
+  lastScanned DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@map("nfc_cards")
+}
+
+

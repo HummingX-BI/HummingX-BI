@@ -376,7 +376,7 @@ export default function AdminProspectsPage() {
         </div>
 
         {/* ── Top Metrics Bar ─────────────────────────────────────── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '14px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '14px' }}>
           <div className="card" style={{ padding: '18px 20px', borderRadius: '12px', border: '1px solid #E5E7EB', background: '#FFFFFF' }}>
             <span style={{ fontSize: '12px', color: '#6B7280', fontWeight: 500, display: 'block', marginBottom: '6px' }}>Total Prospectos</span>
             <span style={{ fontSize: '26px', fontWeight: 800, color: '#111827' }}>{metrics.total}</span>
@@ -403,7 +403,7 @@ export default function AdminProspectsPage() {
         {/* ── Filters & Search ─────────────────────────────────────── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '10px', padding: '8px 14px', width: '280px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '10px', padding: '8px 14px', flex: '1 1 240px', maxWidth: '100%' }}>
               <Search size={15} color="#9CA3AF" />
               <input
                 type="text"

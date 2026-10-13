@@ -610,7 +610,7 @@ export default function AdminTasksPage() {
             boxShadow: '0 4px 16px rgba(0,0,0,0.03)',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: '1 1 300px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: '1 1 min(100%, 260px)' }}>
             <div
               style={{
                 width: '28px',
@@ -743,7 +743,7 @@ export default function AdminTasksPage() {
             flexWrap: 'wrap',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: '1 1 280px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: '1 1 min(100%, 240px)' }}>
             <div
               style={{
                 position: 'relative',
@@ -1186,8 +1186,7 @@ export default function AdminTasksPage() {
                 style={{
                   background: '#FFFFFF',
                   borderRadius: '20px',
-                  width: '100%',
-                  maxWidth: '580px',
+                  width: 'min(94vw, 580px)',
                   maxHeight: '90vh',
                   overflowY: 'auto',
                   boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',

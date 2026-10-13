@@ -214,7 +214,20 @@ router.get('/clients/:id', authenticate, requireAdmin, async (req, res) => {
             }
           }
         },
-        referralsMade: { orderBy: { createdAt: 'desc' }, select: { id: true, companyName: true, status: true, createdAt: true } },
+        referralsMade: { 
+          orderBy: { createdAt: 'desc' }, 
+          select: { 
+            id: true, 
+            companyName: true, 
+            contactName: true, 
+            contactEmail: true, 
+            contactPhone: true, 
+            status: true, 
+            creditsGenerated: true, 
+            notes: true, 
+            createdAt: true 
+          } 
+        },
         creditMovements: { orderBy: { createdAt: 'desc' }, select: { id: true, amount: true, type: true, description: true, createdAt: true } },
       }
     });
@@ -622,20 +635,15 @@ router.put('/referrals/:id', authenticate, requireAdmin, async (req, res) => {
 
     // If converted, generate credits automatically
     if (status === 'converted' && referral.status !== 'converted' && updated.creditsGenerated === 0) {
-      const creditAmount = 1500; // Fixed amount for referrals
+      const creditAmount = req.body.creditAmount ? parseInt(req.body.creditAmount) : 1500; // Fixed or custom amount
       
       await prisma.$transaction([
-        // Add credits to the user's total
-        prisma.user.update({
-          where: { id: referral.referrerId },
-          data: { totalCredits: { increment: creditAmount } }
-        }),
-        // Register the movement
+        // Register the credit movement
         prisma.creditMovement.create({
           data: {
             clientId: referral.referrerId,
             amount: creditAmount,
-            type: 'earned',
+            type: 'referral_converted',
             description: `Bono por recomendación exitosa: ${referral.companyName}`
           }
         }),
@@ -651,6 +659,7 @@ router.put('/referrals/:id', authenticate, requireAdmin, async (req, res) => {
 
     res.json(updated);
   } catch (err) {
+    console.error('[ADMIN] Error al actualizar referido:', err);
     res.status(500).json({ error: 'Error al actualizar referido.' });
   }
 });
@@ -967,4 +976,785 @@ router.get('/analytics/behavior', authenticate, requireAdmin, async (req, res) =
   }
 });
 
+// ═══════════════════════════════════════════════════════════════════
+// ─── HUMMINGX CORE: PROSPECTOS & DOCUMENTOS VERSIONADOS ───────────
+// ═══════════════════════════════════════════════════════════════════
+
+// GET /admin/prospects — List all prospects with documents and appointments
+router.get('/prospects', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const prospects = await prisma.prospect.findMany({
+      orderBy: { updatedAt: 'desc' },
+      include: {
+        documents: { orderBy: { createdAt: 'desc' } },
+        appointments: { orderBy: { dateTime: 'desc' } },
+      },
+    });
+    res.json(prospects);
+  } catch (err) {
+    console.error('[ADMIN] Error in GET /admin/prospects:', err);
+    res.status(500).json({ error: 'Error al cargar prospectos.' });
+  }
+});
+
+// POST /admin/prospects — Create new prospect
+router.post('/prospects', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { companyName, contactName, email, phone, industry, estimatedValue, status, source, notes } = req.body;
+    if (!companyName || !companyName.trim()) {
+      return res.status(400).json({ error: 'El nombre de la empresa es requerido.' });
+    }
+
+    const prospect = await prisma.prospect.create({
+      data: {
+        companyName: companyName.trim(),
+        contactName: contactName?.trim() || null,
+        email: email?.trim().toLowerCase() || null,
+        phone: phone?.trim() || null,
+        industry: industry?.trim() || null,
+        estimatedValue: estimatedValue ? parseFloat(estimatedValue) : null,
+        status: status || 'lead',
+        source: source?.trim() || 'Prospección directa',
+        notes: notes?.trim() || null,
+      },
+      include: {
+        documents: true,
+        appointments: true,
+      }
+    });
+    res.status(201).json(prospect);
+  } catch (err) {
+    console.error('[ADMIN] Error in POST /admin/prospects:', err);
+    res.status(500).json({ error: 'Error al crear prospecto.' });
+  }
+});
+
+// PUT /admin/prospects/:id — Update prospect
+router.put('/prospects/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { companyName, contactName, email, phone, industry, estimatedValue, status, source, notes } = req.body;
+
+    const prospect = await prisma.prospect.update({
+      where: { id: req.params.id },
+      data: {
+        ...(companyName !== undefined && { companyName: companyName.trim() }),
+        ...(contactName !== undefined && { contactName: contactName ? contactName.trim() : null }),
+        ...(email !== undefined && { email: email ? email.trim().toLowerCase() : null }),
+        ...(phone !== undefined && { phone: phone ? phone.trim() : null }),
+        ...(industry !== undefined && { industry: industry ? industry.trim() : null }),
+        ...(estimatedValue !== undefined && { estimatedValue: estimatedValue ? parseFloat(estimatedValue) : null }),
+        ...(status !== undefined && { status }),
+        ...(source !== undefined && { source: source ? source.trim() : null }),
+        ...(notes !== undefined && { notes: notes ? notes.trim() : null }),
+      },
+      include: {
+        documents: { orderBy: { createdAt: 'desc' } },
+        appointments: { orderBy: { dateTime: 'desc' } },
+      }
+    });
+    res.json(prospect);
+  } catch (err) {
+    console.error('[ADMIN] Error in PUT /admin/prospects/:id:', err);
+    res.status(500).json({ error: 'Error al actualizar prospecto.' });
+  }
+});
+
+// DELETE /admin/prospects/:id — Delete prospect
+router.delete('/prospects/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    await prisma.prospect.delete({ where: { id: req.params.id } });
+    res.json({ message: 'Prospecto eliminado exitosamente.' });
+  } catch (err) {
+    console.error('[ADMIN] Error in DELETE /admin/prospects/:id:', err);
+    res.status(500).json({ error: 'Error al eliminar prospecto.' });
+  }
+});
+
+// POST /admin/prospects/:id/documents — Add document with version
+router.post('/prospects/:id/documents', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { title, type, version, url, notes } = req.body;
+    if (!title || !url) {
+      return res.status(400).json({ error: 'El título y enlace del documento son requeridos.' });
+    }
+
+    const doc = await prisma.prospectDocument.create({
+      data: {
+        prospectId: req.params.id,
+        title: title.trim(),
+        type: type || 'quote',
+        version: version?.trim() || 'v1.0',
+        url: url.trim(),
+        notes: notes?.trim() || null,
+      }
+    });
+    res.status(201).json(doc);
+  } catch (err) {
+    console.error('[ADMIN] Error in POST /admin/prospects/:id/documents:', err);
+    res.status(500).json({ error: 'Error al registrar documento.' });
+  }
+});
+
+// DELETE /admin/prospects/:id/documents/:docId — Delete document
+router.delete('/prospects/:id/documents/:docId', authenticate, requireAdmin, async (req, res) => {
+  try {
+    await prisma.prospectDocument.delete({ where: { id: req.params.docId } });
+    res.json({ message: 'Documento eliminado.' });
+  } catch (err) {
+    console.error('[ADMIN] Error in DELETE document:', err);
+    res.status(500).json({ error: 'Error al eliminar documento.' });
+  }
+});
+
+// POST /admin/prospects/:id/convert — 1-Click Convert prospect to active client
+router.post('/prospects/:id/convert', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const prospect = await prisma.prospect.findUnique({ where: { id: req.params.id } });
+    if (!prospect) return res.status(404).json({ error: 'Prospecto no encontrado.' });
+
+    const cleanBase = prospect.companyName.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 15) || 'cliente';
+    const email = (prospect.email || `${cleanBase}@cliente.com`).toLowerCase();
+    const name = prospect.contactName || prospect.companyName;
+    const companyName = prospect.companyName;
+
+    // Check if user already exists
+    let user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      const token = crypto.randomBytes(32).toString('hex');
+      const expires = new Date(Date.now() + 72 * 60 * 60 * 1000);
+      const baseCode = cleanBase;
+      let referralCode = baseCode;
+      let suffix = 1;
+      while (await prisma.user.findUnique({ where: { referralCode } })) {
+        referralCode = `${baseCode}-${suffix++}`;
+      }
+
+      user = await prisma.user.create({
+        data: {
+          name,
+          email,
+          companyName,
+          phone: prospect.phone,
+          role: 'client',
+          invitationToken: token,
+          invitationExpires: expires,
+          referralCode,
+          active: true,
+        }
+      });
+    }
+
+    // Create initial project
+    let project = await prisma.project.findFirst({ where: { clientId: user.id } });
+    if (!project) {
+      project = await prisma.project.create({
+        data: {
+          clientId: user.id,
+          name: `Proyecto ${companyName}`,
+          description: `Solución de ingeniería para ${companyName}. Formalizado desde pipeline comercial.`,
+          currentPhase: 1,
+          progressPercent: 10,
+          status: 'active',
+        }
+      });
+    }
+
+    // Update prospect
+    const updatedProspect = await prisma.prospect.update({
+      where: { id: prospect.id },
+      data: {
+        status: 'won',
+        convertedToClientId: user.id,
+      },
+      include: {
+        documents: true,
+        appointments: true,
+      }
+    });
+
+    res.json({
+      prospect: updatedProspect,
+      client: user,
+      project,
+    });
+  } catch (err) {
+    console.error('[ADMIN] Error in convert prospect:', err);
+    res.status(500).json({ error: 'Error al convertir prospecto a cliente.' });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// ─── HUMMINGX CORE: CITAS Y VISITAS PRESENCIALES ──────────────────
+// ═══════════════════════════════════════════════════════════════════
+
+// GET /admin/appointments — List all appointments
+router.get('/appointments', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { assignedTo, status } = req.query;
+    const where = {};
+    if (assignedTo && assignedTo !== 'all') where.assignedTo = assignedTo;
+    if (status && status !== 'all') where.status = status;
+
+    const appointments = await prisma.appointment.findMany({
+      where,
+      orderBy: { dateTime: 'asc' },
+      include: {
+        prospect: { select: { id: true, companyName: true, contactName: true, phone: true } },
+      }
+    });
+    res.json(appointments);
+  } catch (err) {
+    console.error('[ADMIN] Error in GET /admin/appointments:', err);
+    res.status(500).json({ error: 'Error al cargar citas.' });
+  }
+});
+
+// POST /admin/appointments — Create appointment
+router.post('/appointments', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { title, companyName, contactName, contactPhone, dateTime, location, mapsUrl, assignedTo, summary, prospectId } = req.body;
+
+    if (!title || !companyName || !dateTime || !location) {
+      return res.status(400).json({ error: 'Título, empresa, fecha/hora y ubicación son requeridos.' });
+    }
+
+    // Auto-generate Google Maps URL if not provided
+    const cleanMapsUrl = mapsUrl?.trim() || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location.trim())}`;
+
+    const appointment = await prisma.appointment.create({
+      data: {
+        title: title.trim(),
+        companyName: companyName.trim(),
+        contactName: contactName?.trim() || null,
+        contactPhone: contactPhone?.trim() || null,
+        dateTime: new Date(dateTime),
+        location: location.trim(),
+        mapsUrl: cleanMapsUrl,
+        assignedTo: assignedTo || 'emmanuel',
+        status: 'scheduled',
+        summary: summary?.trim() || null,
+        prospectId: prospectId || null,
+      },
+      include: {
+        prospect: true,
+      }
+    });
+    res.status(201).json(appointment);
+  } catch (err) {
+    console.error('[ADMIN] Error in POST /admin/appointments:', err);
+    res.status(500).json({ error: 'Error al registrar cita.' });
+  }
+});
+
+// PUT /admin/appointments/:id — Update appointment
+router.put('/admin/appointments/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { title, companyName, contactName, contactPhone, dateTime, location, mapsUrl, assignedTo, status, summary, prospectId } = req.body;
+
+    const appointment = await prisma.appointment.update({
+      where: { id: req.params.id },
+      data: {
+        ...(title !== undefined && { title: title.trim() }),
+        ...(companyName !== undefined && { companyName: companyName.trim() }),
+        ...(contactName !== undefined && { contactName: contactName ? contactName.trim() : null }),
+        ...(contactPhone !== undefined && { contactPhone: contactPhone ? contactPhone.trim() : null }),
+        ...(dateTime !== undefined && { dateTime: new Date(dateTime) }),
+        ...(location !== undefined && { location: location.trim() }),
+        ...(mapsUrl !== undefined && { mapsUrl: mapsUrl.trim() }),
+        ...(assignedTo !== undefined && { assignedTo }),
+        ...(status !== undefined && { status }),
+        ...(summary !== undefined && { summary: summary ? summary.trim() : null }),
+        ...(prospectId !== undefined && { prospectId: prospectId || null }),
+      },
+      include: {
+        prospect: true,
+      }
+    });
+    res.json(appointment);
+  } catch (err) {
+    console.error('[ADMIN] Error in PUT /admin/appointments/:id:', err);
+    res.status(500).json({ error: 'Error al actualizar cita.' });
+  }
+});
+
+// Also support router.put('/appointments/:id')
+router.put('/appointments/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { title, companyName, contactName, contactPhone, dateTime, location, mapsUrl, assignedTo, status, summary, prospectId } = req.body;
+
+    const appointment = await prisma.appointment.update({
+      where: { id: req.params.id },
+      data: {
+        ...(title !== undefined && { title: title.trim() }),
+        ...(companyName !== undefined && { companyName: companyName.trim() }),
+        ...(contactName !== undefined && { contactName: contactName ? contactName.trim() : null }),
+        ...(contactPhone !== undefined && { contactPhone: contactPhone ? contactPhone.trim() : null }),
+        ...(dateTime !== undefined && { dateTime: new Date(dateTime) }),
+        ...(location !== undefined && { location: location.trim() }),
+        ...(mapsUrl !== undefined && { mapsUrl: mapsUrl.trim() }),
+        ...(assignedTo !== undefined && { assignedTo }),
+        ...(status !== undefined && { status }),
+        ...(summary !== undefined && { summary: summary ? summary.trim() : null }),
+        ...(prospectId !== undefined && { prospectId: prospectId || null }),
+      },
+      include: {
+        prospect: true,
+      }
+    });
+    res.json(appointment);
+  } catch (err) {
+    console.error('[ADMIN] Error in PUT /appointments/:id:', err);
+    res.status(500).json({ error: 'Error al actualizar cita.' });
+  }
+});
+
+// DELETE /admin/appointments/:id — Delete appointment
+router.delete('/appointments/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    await prisma.appointment.delete({ where: { id: req.params.id } });
+    res.json({ message: 'Cita eliminada.' });
+  } catch (err) {
+    console.error('[ADMIN] Error in DELETE /admin/appointments/:id:', err);
+    res.status(500).json({ error: 'Error al eliminar cita.' });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// ─── HUMMINGX CORE: TAREAS PENDIENTES DEL EQUIPO ──────────────────
+// ═══════════════════════════════════════════════════════════════════
+
+// GET /admin/tasks — List all tasks
+router.get('/tasks', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const tasks = await prisma.teamTask.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+    res.json(tasks);
+  } catch (err) {
+    console.error('[ADMIN] Error in GET /admin/tasks:', err);
+    res.status(500).json({ error: 'Error al cargar tareas.' });
+  }
+});
+
+// POST /admin/tasks — Create task
+router.post('/tasks', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, assignedTo, priority, status, category, dueDate, checklist } = req.body;
+    if (!title || !title.trim()) {
+      return res.status(400).json({ error: 'El título de la tarea es requerido.' });
+    }
+
+    const task = await prisma.teamTask.create({
+      data: {
+        title: title.trim(),
+        description: description?.trim() || null,
+        assignedTo: assignedTo || 'all',
+        priority: priority || 'medium',
+        status: status || 'todo',
+        category: category?.trim() || 'General',
+        dueDate: dueDate ? new Date(dueDate) : null,
+        checklist: checklist || null,
+      }
+    });
+    res.status(201).json(task);
+  } catch (err) {
+    console.error('[ADMIN] Error in POST /admin/tasks:', err);
+    res.status(500).json({ error: 'Error al crear tarea.' });
+  }
+});
+
+// PUT /admin/tasks/:id — Update task (status, assignedTo, priority, checklist)
+router.put('/tasks/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { title, description, assignedTo, priority, status, category, dueDate, checklist } = req.body;
+
+    const data = {};
+    if (title !== undefined) data.title = title.trim();
+    if (description !== undefined) data.description = description ? description.trim() : null;
+    if (assignedTo !== undefined) data.assignedTo = assignedTo;
+    if (priority !== undefined) data.priority = priority;
+    if (category !== undefined) data.category = category ? category.trim() : null;
+    if (dueDate !== undefined) data.dueDate = dueDate ? new Date(dueDate) : null;
+    if (checklist !== undefined) data.checklist = checklist;
+
+    if (status !== undefined) {
+      data.status = status;
+      if (status === 'done') {
+        data.completedAt = new Date();
+      } else {
+        data.completedAt = null;
+      }
+    }
+
+    const task = await prisma.teamTask.update({
+      where: { id: req.params.id },
+      data,
+    });
+    res.json(task);
+  } catch (err) {
+    console.error('[ADMIN] Error in PUT /admin/tasks/:id:', err);
+    res.status(500).json({ error: 'Error al actualizar tarea.' });
+  }
+});
+
+// DELETE /admin/tasks/:id — Delete task
+router.delete('/tasks/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    await prisma.teamTask.delete({ where: { id: req.params.id } });
+    res.json({ message: 'Tarea eliminada.' });
+  } catch (err) {
+    console.error('[ADMIN] Error in DELETE /admin/tasks/:id:', err);
+    res.status(500).json({ error: 'Error al eliminar tarea.' });
+  }
+});
+
+// ─── HUMMINGX CORE: ANÁLISIS FINANCIERO & PROYECTOS HISTÓRICOS ──
+
+// GET /admin/finances/overview — Retorna total histórico, próximo pago y lista de proyectos
+router.get('/finances/overview', authenticate, requireAdmin, async (req, res) => {
+  try {
+    // 1. Pagos del sistema
+    const completedPayments = await prisma.payment.findMany({
+      where: { status: 'completed' },
+      include: {
+        project: {
+          include: {
+            client: { select: { id: true, name: true, companyName: true, logoUrl: true } }
+          }
+        }
+      },
+      orderBy: { updatedAt: 'desc' }
+    });
+
+    const upcomingPayments = await prisma.payment.findMany({
+      where: { status: { in: ['pending', 'upcoming'] } },
+      include: {
+        project: {
+          include: {
+            client: { select: { id: true, name: true, companyName: true, logoUrl: true } }
+          }
+        }
+      },
+      orderBy: { dueDate: 'asc' }
+    });
+
+    // 2. Proyectos históricos cerrados
+    const historicalDeals = await prisma.historicalDeal.findMany({
+      orderBy: { closedAt: 'desc' }
+    });
+
+    // Cálculos
+    const revenueFromPayments = completedPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+    const revenueFromHistorical = historicalDeals.reduce((sum, d) => sum + (d.amount || 0), 0);
+    const totalHistoricalRevenue = revenueFromPayments + revenueFromHistorical;
+
+    const totalUpcomingRevenue = upcomingPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+    const totalDealsCount = historicalDeals.length + completedPayments.length;
+    const averageTicket = totalDealsCount > 0 ? Math.round(totalHistoricalRevenue / totalDealsCount) : 0;
+
+    const nextPayment = upcomingPayments.length > 0 ? upcomingPayments[0] : null;
+
+    res.json({
+      totalHistoricalRevenue,
+      revenueFromPayments,
+      revenueFromHistorical,
+      totalUpcomingRevenue,
+      totalDealsCount,
+      averageTicket,
+      nextPayment,
+      upcomingPayments,
+      completedPayments,
+      historicalDeals,
+    });
+  } catch (err) {
+    console.error('[ADMIN] Error in GET /admin/finances/overview:', err);
+    res.status(500).json({ error: 'Error al cargar análisis financiero.' });
+  }
+});
+
+// POST /admin/finances/deals — Agregar proyecto histórico cerrado
+router.post('/finances/deals', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { clientName, projectName, amount, closedAt, category, notes } = req.body;
+    if (!clientName || !projectName || amount === undefined) {
+      return res.status(400).json({ error: 'Cliente, proyecto y monto son obligatorios.' });
+    }
+
+    const deal = await prisma.historicalDeal.create({
+      data: {
+        clientName: clientName.trim(),
+        projectName: projectName.trim(),
+        amount: parseFloat(amount),
+        closedAt: closedAt ? new Date(closedAt) : new Date(),
+        category: category?.trim() || 'General',
+        notes: notes?.trim() || null,
+      }
+    });
+
+    res.status(201).json(deal);
+  } catch (err) {
+    console.error('[ADMIN] Error in POST /admin/finances/deals:', err);
+    res.status(500).json({ error: 'Error al registrar proyecto histórico.' });
+  }
+});
+
+// PUT /admin/finances/deals/:id — Editar proyecto histórico
+router.put('/finances/deals/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { clientName, projectName, amount, closedAt, category, notes } = req.body;
+    const data = {};
+    if (clientName !== undefined) data.clientName = clientName.trim();
+    if (projectName !== undefined) data.projectName = projectName.trim();
+    if (amount !== undefined) data.amount = parseFloat(amount);
+    if (closedAt !== undefined) data.closedAt = new Date(closedAt);
+    if (category !== undefined) data.category = category?.trim() || 'General';
+    if (notes !== undefined) data.notes = notes ? notes.trim() : null;
+
+    const deal = await prisma.historicalDeal.update({
+      where: { id: req.params.id },
+      data,
+    });
+    res.json(deal);
+  } catch (err) {
+    console.error('[ADMIN] Error in PUT /admin/finances/deals/:id:', err);
+    res.status(500).json({ error: 'Error al actualizar proyecto histórico.' });
+  }
+});
+
+// DELETE /admin/finances/deals/:id — Eliminar proyecto histórico
+router.delete('/finances/deals/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    await prisma.historicalDeal.delete({ where: { id: req.params.id } });
+    res.json({ message: 'Proyecto histórico eliminado.' });
+  } catch (err) {
+    console.error('[ADMIN] Error in DELETE /admin/finances/deals/:id:', err);
+    res.status(500).json({ error: 'Error al eliminar proyecto histórico.' });
+  }
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ─── TARJETAS QR & NFC (/admin/nfc-cards) ────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+
+// GET /admin/nfc-cards — Listar todas las tarjetas y estadísticas
+router.get('/nfc-cards', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const cards = await prisma.nfcCard.findMany({
+      orderBy: { code: 'asc' },
+    });
+
+    const totalCards = cards.length;
+    const activeCards = cards.filter(c => c.active).length;
+    const totalScans = cards.reduce((sum, c) => sum + (c.scanCount || 0), 0);
+
+    // Calcular siguiente código sugerido (ej. si el max es 003 -> sugerir 004)
+    let maxNum = 0;
+    for (const c of cards) {
+      const n = parseInt(c.code, 10);
+      if (!isNaN(n) && n > maxNum) maxNum = n;
+    }
+    const nextSuggestedCode = String(maxNum + 1).padStart(3, '0');
+
+    res.json({
+      cards,
+      metrics: {
+        totalCards,
+        activeCards,
+        inactiveCards: totalCards - activeCards,
+        totalScans,
+        nextSuggestedCode,
+      }
+    });
+  } catch (err) {
+    console.error('[ADMIN] Error in GET /admin/nfc-cards:', err);
+    res.status(500).json({ error: 'Error al obtener tarjetas NFC/QR.' });
+  }
+});
+
+// POST /admin/nfc-cards — Crear o configurar nueva tarjeta
+router.post('/nfc-cards', authenticate, requireAdmin, async (req, res) => {
+  try {
+    let { code, clientName, type, targetUrl, active, notes } = req.body;
+
+    if (!code || !clientName || !targetUrl) {
+      return res.status(400).json({ error: 'Código, nombre del cliente y enlace de destino son obligatorios.' });
+    }
+
+    code = String(code).trim().padStart(3, '0');
+    clientName = String(clientName).trim();
+    targetUrl = String(targetUrl).trim();
+
+    if (!/^https?:\/\//i.test(targetUrl)) {
+      targetUrl = 'https://' + targetUrl;
+    }
+
+    // Verificar si el código ya existe
+    const existing = await prisma.nfcCard.findUnique({ where: { code } });
+    if (existing) {
+      return res.status(400).json({ error: `La tarjeta #${code} ya existe. Elige otro número o edita la existente.` });
+    }
+
+    const card = await prisma.nfcCard.create({
+      data: {
+        code,
+        clientName,
+        type: type || 'google_reviews',
+        targetUrl,
+        active: active !== undefined ? Boolean(active) : true,
+        notes: notes ? String(notes).trim() : null,
+      }
+    });
+
+    res.status(201).json(card);
+  } catch (err) {
+    console.error('[ADMIN] Error in POST /admin/nfc-cards:', err);
+    res.status(500).json({ error: 'Error al registrar tarjeta NFC/QR.' });
+  }
+});
+
+// POST /admin/nfc-cards/batch — Generar lote de tarjetas QR/NFC en la base de datos
+router.post('/nfc-cards/batch', authenticate, requireAdmin, async (req, res) => {
+  try {
+    let { desde, hasta, cantidad, note, defaultUrl, type } = req.body;
+
+    const allCards = await prisma.nfcCard.findMany({ select: { code: true } });
+    const existingSet = new Set(allCards.map(c => c.code));
+
+    let maxNum = 15; // Mínimo 15 de base
+    for (const c of allCards) {
+      const n = parseInt(c.code, 10);
+      if (!isNaN(n) && n > maxNum) maxNum = n;
+    }
+
+    const startNum = desde !== undefined && desde !== null ? parseInt(desde, 10) : (maxNum + 1);
+    let endNum;
+    if (hasta !== undefined && hasta !== null) {
+      endNum = parseInt(hasta, 10);
+    } else if (cantidad !== undefined && cantidad !== null) {
+      endNum = startNum + parseInt(cantidad, 10) - 1;
+    } else {
+      endNum = startNum + 9; // 10 por defecto
+    }
+
+    if (isNaN(startNum) || isNaN(endNum) || startNum > endNum) {
+      return res.status(400).json({ error: 'Rango de numeración no válido.' });
+    }
+
+    if ((endNum - startNum + 1) > 100) {
+      return res.status(400).json({ error: 'El tamaño máximo por lote es de 100 tarjetas a la vez.' });
+    }
+
+    const toCreate = [];
+    const skipped = [];
+    for (let i = startNum; i <= endNum; i++) {
+      const code = String(i).padStart(3, '0');
+      if (existingSet.has(code)) {
+        skipped.push(code);
+        continue;
+      }
+      toCreate.push({
+        code,
+        clientName: 'Disponible para asignar',
+        type: type || 'google_reviews',
+        targetUrl: defaultUrl || 'https://hummingxbi.com',
+        active: false,
+        notes: note ? String(note).trim() : `Lote generado (#${String(startNum).padStart(3, '0')} - #${String(endNum).padStart(3, '0')})`,
+      });
+    }
+
+    if (toCreate.length > 0) {
+      await prisma.nfcCard.createMany({ data: toCreate });
+    }
+
+    res.status(201).json({
+      createdCount: toCreate.length,
+      skippedCount: skipped.length,
+      startCode: String(startNum).padStart(3, '0'),
+      endCode: String(endNum).padStart(3, '0'),
+      createdCodes: toCreate.map(c => c.code),
+      skippedCodes: skipped,
+    });
+  } catch (err) {
+    console.error('[ADMIN] Error in POST /admin/nfc-cards/batch:', err);
+    res.status(500).json({ error: 'Error al generar lote de tarjetas.' });
+  }
+});
+
+// PUT /admin/nfc-cards/:id — Actualizar tarjeta
+router.put('/nfc-cards/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    let { code, clientName, type, targetUrl, active, notes } = req.body;
+    const data = {};
+
+    if (code !== undefined) {
+      const formattedCode = String(code).trim().padStart(3, '0');
+      const conflict = await prisma.nfcCard.findFirst({
+        where: { code: formattedCode, NOT: { id: req.params.id } }
+      });
+      if (conflict) {
+        return res.status(400).json({ error: `El código #${formattedCode} ya pertenece a otra tarjeta.` });
+      }
+      data.code = formattedCode;
+    }
+
+    if (clientName !== undefined) data.clientName = String(clientName).trim();
+    if (type !== undefined) data.type = type;
+    if (targetUrl !== undefined) {
+      let cleanUrl = String(targetUrl).trim();
+      if (!/^https?:\/\//i.test(cleanUrl)) cleanUrl = 'https://' + cleanUrl;
+      data.targetUrl = cleanUrl;
+    }
+    if (active !== undefined) data.active = Boolean(active);
+    if (notes !== undefined) data.notes = notes ? String(notes).trim() : null;
+
+    const card = await prisma.nfcCard.update({
+      where: { id: req.params.id },
+      data,
+    });
+
+    res.json(card);
+  } catch (err) {
+    console.error('[ADMIN] Error in PUT /admin/nfc-cards/:id:', err);
+    res.status(500).json({ error: 'Error al actualizar tarjeta NFC/QR.' });
+  }
+});
+
+// DELETE /admin/nfc-cards/:id — Eliminar tarjeta
+router.delete('/nfc-cards/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    await prisma.nfcCard.delete({ where: { id: req.params.id } });
+    res.json({ message: 'Tarjeta eliminada exitosamente.' });
+  } catch (err) {
+    console.error('[ADMIN] Error in DELETE /admin/nfc-cards/:id:', err);
+    res.status(500).json({ error: 'Error al eliminar tarjeta.' });
+  }
+});
+
+// GET /admin/nfc-cards/:id/qr — Generar imagen QR en alta resolución
+router.get('/nfc-cards/:id/qr', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const card = await prisma.nfcCard.findUnique({ where: { id: req.params.id } });
+    if (!card) return res.status(404).json({ error: 'Tarjeta no encontrada.' });
+
+    const QRCode = require('qrcode');
+    const redirectUrl = `https://hummingxbi.com/t/${card.code}`;
+    const qrDataUrl = await QRCode.toDataURL(redirectUrl, {
+      width: 512,
+      margin: 2,
+      color: { dark: '#000000', light: '#FFFFFF' },
+      errorCorrectionLevel: 'Q',
+    });
+
+    res.json({
+      code: card.code,
+      redirectUrl,
+      qrDataUrl,
+    });
+  } catch (err) {
+    console.error('[ADMIN] Error in GET /admin/nfc-cards/:id/qr:', err);
+    res.status(500).json({ error: 'Error al generar código QR.' });
+  }
+});
+
 module.exports = router;
+

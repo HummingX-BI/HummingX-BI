@@ -227,3 +227,176 @@ model Proposal {
 
   @@map("proposals")
 }
+
+// ─── HUMMINGX CORE: PROSPECTOS & DOCUMENTOS VERSIONADOS ──────
+
+enum ProspectStatus {
+  lead          // Nuevo contacto
+  contacted     // Contactado
+  meeting       // Cita / Demo agendada
+  proposal_sent // Propuesta enviada
+  negotiating   // En negociación
+  won           // Ganado / Convertido a Cliente
+  lost          // No interesado / Perdido
+}
+
+enum DocumentType {
+  quote       // Cotización
+  proposal    // Propuesta Técnica
+  roi         // Análisis de ROI
+  contract    // Contrato
+  specs       // Especificaciones / Requerimientos
+  other       // Otro
+}
+
+model Prospect {
+  id                  String             @id @default(cuid())
+  companyName         String
+  contactName         String?
+  email               String?
+  phone               String?
+  industry            String?            // Giro comercial
+  estimatedValue      Float?             // Monto estimado en MXN
+  status              ProspectStatus     @default(lead)
+  source              String?            // Origen (Visita en frío, Referido, etc.)
+  notes               String?
+  convertedToClientId String?            // ID del User creado si se convirtió
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  // Relaciones
+  documents           ProspectDocument[]
+  appointments        Appointment[]
+
+  @@map("prospects")
+}
+
+model ProspectDocument {
+  id          String       @id @default(cuid())
+  prospectId  String
+  title       String
+  type        DocumentType @default(quote)
+  version     String       @default("v1.0") // v1.0, v1.1, v2.0
+  url         String       // Link de Google Drive o PDF
+  notes       String?      // Notas de cambios en esta versión
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  prospect    Prospect     @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+
+  @@map("prospect_documents")
+}
+
+// ─── HUMMINGX CORE: CITAS Y VISITAS PRESENCIALES ─────────────
+
+enum AppointmentStatus {
+  scheduled   // Programada
+  completed   // Realizada
+  rescheduled // Reprogramada
+  cancelled   // Cancelada
+}
+
+enum TeamMember {
+  emmanuel    // Emmanuel
+  juan_pablo  // Juan Pablo
+  curiel      // Curiel
+  all         // Todos / Conjunto
+}
+
+model Appointment {
+  id           String            @id @default(cuid())
+  title        String            // Asunto / Objetivo
+  companyName  String            // Empresa o lugar
+  contactName  String?
+  contactPhone String?
+  dateTime     DateTime          // Fecha y hora
+  location     String            // Dirección física
+  mapsUrl      String?           // Link a Google Maps
+  assignedTo   TeamMember        @default(emmanuel)
+  status       AppointmentStatus @default(scheduled)
+  summary      String?           // Minuta tras la visita
+  prospectId   String?           // Vinculado a prospecto si aplica
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  prospect     Prospect?         @relation(fields: [prospectId], references: [id], onDelete: SetNull)
+
+  @@map("appointments")
+}
+
+// ─── HUMMINGX CORE: TAREAS PENDIENTES DEL EQUIPO ─────────────
+
+enum TaskPriority {
+  urgent // Fuego 🔥
+  high   // Alta
+  medium // Media
+  low    // Baja
+}
+
+enum TaskStatus {
+  todo        // Por Hacer
+  in_progress // En Progreso
+  review      // En Revisión
+  done        // Completada
+}
+
+model TeamTask {
+  id          String       @id @default(cuid())
+  title       String
+  description String?
+  assignedTo  TeamMember   @default(all)
+  priority    TaskPriority @default(medium)
+  status      TaskStatus   @default(todo)
+  category    String?      // Ventas, Dev, Operaciones, Clientes
+  dueDate     DateTime?
+  checklist   Json?        // Array de sub-tareas [{ id, text, done }]
+  completedAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@map("team_tasks")
+}
+
+// ─── HUMMINGX CORE: PROYECTOS HISTÓRICOS Y CONTROL FINANCIERO ─
+
+model HistoricalDeal {
+  id          String   @id @default(cuid())
+  clientName  String   // Nombre del cliente o empresa
+  projectName String   // Proyecto o servicio realizado
+  amount      Float    // Monto cobrado en MXN
+  closedAt    DateTime @default(now()) // Fecha de cierre/cobro
+  category    String?  // BI & Dashboards, Web App, Automatización, Consultoría
+  notes       String?  // Entregables o notas de valor
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("historical_deals")
+}
+
+// ─── HUMMINGX: TARJETAS NFC & CÓDIGOS QR DINÁMICOS ───────────
+
+enum NfcCardType {
+  google_reviews // Reseñas de Google Maps
+  instagram      // Seguidores en Instagram
+  whatsapp       // Contacto Directo WhatsApp
+  menu           // Menú Digital / Catálogo
+  website        // Sitio Web / Enlace Personalizado
+}
+
+model NfcCard {
+  id          String      @id @default(cuid())
+  code        String      @unique // Código corto (ej. "001", "002")
+  clientName  String      // Nombre de la empresa o cliente (ej. "Tahara Café")
+  type        NfcCardType @default(google_reviews)
+  targetUrl   String      // Enlace de destino (ej. https://g.page/r/.../review)
+  active      Boolean     @default(true)
+  scanCount   Int         @default(0) // Total de escaneos/taps
+  notes       String?     // Notas de ubicación o entrega (ej. "En caja principal")
+  lastScanned DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@map("nfc_cards")
+}
+
+

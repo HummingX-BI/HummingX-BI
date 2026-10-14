@@ -19,7 +19,7 @@ import {
   CalendarDays,
   CheckSquare,
   DollarSign,
-  QrCode,
+  QrCode
 } from 'lucide-react';
 
 const logoSrc = '/logo.png';

@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import Layout from '../../components/Layout';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../lib/api';
+import { SkeletonBox } from '../../components/Skeleton';
 import { Player } from '@lottiefiles/react-lottie-player';
 import conversationAnimation from '../../assets/lottie/Conversation.json';
 import trophyAnimation from '../../assets/lottie/Trophy.json';
@@ -377,6 +378,65 @@ export default function ReferralsPage() {
         </div>
 
         {/* ── Top Hero Cards Grid ─────────────────────────────────────── */}
+        {loading ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(310px, 1fr))', gap: '20px' }}>
+            {/* Card 1: Saldo Skeleton */}
+            <div className="card" style={{ padding: '24px', borderRadius: '16px', border: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '235px', background: '#FFFFFF' }}>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <SkeletonBox width={34} height={34} style={{ borderRadius: '10px' }} />
+                    <SkeletonBox width={120} height={16} />
+                  </div>
+                  <SkeletonBox width={90} height={20} style={{ borderRadius: 9999 }} />
+                </div>
+                <SkeletonBox width="58%" height={38} style={{ borderRadius: '10px', margin: '12px 0 14px' }} />
+                <SkeletonBox width="92%" height={13} style={{ marginBottom: '6px' }} />
+                <SkeletonBox width="70%" height={13} />
+              </div>
+              <div style={{ paddingTop: '14px', borderTop: '1px solid #F3F4F6', marginTop: '16px' }}>
+                <SkeletonBox width="100%" height={36} style={{ borderRadius: '8px' }} />
+              </div>
+            </div>
+
+            {/* Card 2: Nivel Skeleton */}
+            <div className="card" style={{ padding: '24px', borderRadius: '16px', border: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '235px', background: '#FFFFFF' }}>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                  <SkeletonBox width={140} height={16} />
+                  <SkeletonBox width={85} height={14} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', margin: '8px 0 12px' }}>
+                  <SkeletonBox width={64} height={64} style={{ borderRadius: '50%' }} />
+                  <SkeletonBox width={130} height={18} />
+                </div>
+                <SkeletonBox width="100%" height={32} style={{ borderRadius: '8px' }} />
+              </div>
+              <div style={{ paddingTop: '12px', borderTop: '1px solid #F3F4F6', marginTop: '14px' }}>
+                <SkeletonBox width="60%" height={14} style={{ margin: '0 auto' }} />
+              </div>
+            </div>
+
+            {/* Card 3: Código de Socio Skeleton */}
+            <div className="card" style={{ padding: '24px', borderRadius: '16px', border: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: '235px', background: '#FFFFFF' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+                  <SkeletonBox width={34} height={34} style={{ borderRadius: '10px' }} />
+                  <div>
+                    <SkeletonBox width={150} height={15} style={{ marginBottom: '4px' }} />
+                    <SkeletonBox width={110} height={11} />
+                  </div>
+                </div>
+                <SkeletonBox width="95%" height={13} style={{ marginBottom: '6px' }} />
+                <SkeletonBox width="82%" height={13} style={{ marginBottom: '14px' }} />
+                <SkeletonBox width="100%" height={52} style={{ borderRadius: '12px' }} />
+              </div>
+              <div style={{ paddingTop: '12px', borderTop: '1px solid #F3F4F6', marginTop: '14px' }}>
+                <SkeletonBox width="100%" height={36} style={{ borderRadius: '8px' }} />
+              </div>
+            </div>
+          </div>
+        ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(310px, 1fr))', gap: '20px' }}>
           
           {/* Card 1: Saldo de Créditos HX */}
@@ -561,14 +621,15 @@ export default function ReferralsPage() {
                   <Award size={18} color="#6D28D9" />
                 </div>
                 <div>
-                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#374151', display: 'block' }}>Tu Código de Socio</span>
-                  <span style={{ fontSize: '11px', color: '#6B7280' }}>Compártelo al recomendarnos</span>
+                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#374151', display: 'block' }}>Tu Código de Socio Oficial</span>
+                  <span style={{ fontSize: '11px', color: '#6B7280' }}>Pásaselo a tus amigos y colegas</span>
                 </div>
               </div>
 
               <p style={{ fontSize: '12.5px', color: '#6B7280', margin: '0 0 14px', lineHeight: 1.5 }}>
-                Comparte este código con directores o empresarios. Al contactarnos por WhatsApp o llamada y mencionarlo, quedarán enlazados a tu cuenta y recibirás tus Créditos HX.
+                Pásale este código a tus amigos o conocidos de empresas. Diles que al contactarnos por WhatsApp o llamada compartan este código: ellos obtendrán beneficios de bienvenida y tú acumularás Créditos HX según tu nivel cuando comiencen su proyecto.
               </p>
+
 
               {/* Code Display Box */}
               <div style={{
@@ -737,6 +798,7 @@ export default function ReferralsPage() {
           </div>
 
         </div>
+        )}
 
         {/* ── Main Section: Tabs & Data Table ─────────────────────────────────────── */}
         <div className="card" style={{
@@ -857,8 +919,11 @@ export default function ReferralsPage() {
           {activeTab === 'referrals' && (
             <div>
               {loading ? (
-                <div style={{ padding: '60px 20px', textAlign: 'center', color: '#6B7280' }}>
-                  <p style={{ fontSize: '14px', margin: 0 }}>Cargando recomendaciones...</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '10px 0' }}>
+                  <SkeletonBox width="100%" height={56} style={{ borderRadius: '10px' }} />
+                  <SkeletonBox width="100%" height={56} style={{ borderRadius: '10px' }} />
+                  <SkeletonBox width="100%" height={56} style={{ borderRadius: '10px' }} />
+                  <SkeletonBox width="100%" height={56} style={{ borderRadius: '10px' }} />
                 </div>
               ) : totalCount === 0 ? (
                 /* Empty state */

@@ -259,6 +259,7 @@ model Prospect {
   estimatedValue      Float?             // Monto estimado en MXN
   status              ProspectStatus     @default(lead)
   source              String?            // Origen (Visita en frío, Referido, etc.)
+  referralCode        String?            // Código del socio que recomendó (ej. 58291)
   notes               String?
   convertedToClientId String?            // ID del User creado si se convirtió
   createdAt           DateTime           @default(now())

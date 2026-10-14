@@ -30,6 +30,11 @@ import {
   Layers,
   ChevronDown,
   ChevronUp,
+  Award,
+  Coins,
+  Gift,
+  Check,
+  Loader2,
 } from 'lucide-react';
 
 const STAGE_CONFIG = {
@@ -80,6 +85,27 @@ export default function AdminProspectsPage() {
   const [toastMessage, setToastMessage] = useState('');
   const [formError, setFormError] = useState('');
 
+  // Referral code live validation state
+  const [referralValidation, setReferralValidation] = useState({
+    checking: false,
+    valid: null,
+    data: null,
+    message: '',
+  });
+
+  // Announcement modal for awarding referral credits
+  const [rewardModalData, setRewardModalData] = useState({
+    isOpen: false,
+    prospectId: '',
+    companyName: '',
+    referrerId: '',
+    referrerName: '',
+    level: 1,
+    tierName: '',
+    amount: 1500,
+    submitting: false,
+  });
+
   // Form state for Prospect
   const [prospectForm, setProspectForm] = useState({
     companyName: '',
@@ -90,6 +116,7 @@ export default function AdminProspectsPage() {
     estimatedValue: '',
     status: 'lead',
     source: '',
+    referralCode: '',
     notes: '',
   });
 
@@ -122,6 +149,54 @@ export default function AdminProspectsPage() {
     setTimeout(() => setToastMessage(''), 4500);
   };
 
+  // Live validation for referral code
+  useEffect(() => {
+    if (!showProspectModal) return;
+    const rawCode = prospectForm.referralCode?.trim();
+    if (!rawCode) {
+      setReferralValidation({ checking: false, valid: null, data: null, message: '' });
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setReferralValidation(prev => ({ ...prev, checking: true, message: '' }));
+      try {
+        const res = await api.get(`/admin/referrals/validate-code/${encodeURIComponent(rawCode)}`);
+        if (res.data?.valid) {
+          setReferralValidation({
+            checking: false,
+            valid: true,
+            data: res.data.referrer,
+            message: `Viene recomendado por ${res.data.referrer.displayName} (${res.data.referrer.tierName})`,
+          });
+          // Auto-fill source if default or generic
+          setProspectForm(prev => {
+            if (!prev.source || prev.source === 'Prospección directa' || prev.source.startsWith('Recomendado por')) {
+              return { ...prev, source: `Recomendado por ${res.data.referrer.displayName} (Código: ${res.data.referrer.referralCode || rawCode})` };
+            }
+            return prev;
+          });
+        } else {
+          setReferralValidation({
+            checking: false,
+            valid: false,
+            data: null,
+            message: res.data.message || 'Código no encontrado en el sistema de socios.',
+          });
+        }
+      } catch (err) {
+        setReferralValidation({
+          checking: false,
+          valid: false,
+          data: null,
+          message: 'Error al validar código.',
+        });
+      }
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [prospectForm.referralCode, showProspectModal]);
+
   const openNewProspectModal = () => {
     setEditingProspect(null);
     setProspectForm({
@@ -133,8 +208,10 @@ export default function AdminProspectsPage() {
       estimatedValue: '',
       status: 'lead',
       source: 'Prospección directa',
+      referralCode: '',
       notes: '',
     });
+    setReferralValidation({ checking: false, valid: null, data: null, message: '' });
     setFormError('');
     setShowProspectModal(true);
   };
@@ -150,7 +227,14 @@ export default function AdminProspectsPage() {
       estimatedValue: p.estimatedValue ? String(p.estimatedValue) : '',
       status: p.status || 'lead',
       source: p.source || '',
+      referralCode: p.referralCode || '',
       notes: p.notes || '',
+    });
+    setReferralValidation({
+      checking: false,
+      valid: p.referralInfo ? true : null,
+      data: p.referralInfo ? { displayName: p.referralInfo.referrerName, tierName: p.referralInfo.tierName, creditAmount: p.referralInfo.creditAmount } : null,
+      message: p.referralInfo ? `Recomendado por ${p.referralInfo.referrerName}` : '',
     });
     setFormError('');
     setShowProspectModal(true);
@@ -175,21 +259,56 @@ export default function AdminProspectsPage() {
     setSubmitting(true);
     setFormError('');
     try {
+      let res;
       if (editingProspect) {
-        await api.put(`/admin/prospects/${editingProspect.id}`, prospectForm);
+        res = await api.put(`/admin/prospects/${editingProspect.id}`, prospectForm);
         showNotification(`Prospecto ${prospectForm.companyName} actualizado correctamente.`);
       } else {
-        await api.post('/admin/prospects', prospectForm);
+        res = await api.post('/admin/prospects', prospectForm);
         showNotification(`Prospecto ${prospectForm.companyName} creado exitosamente.`);
       }
       closeProspectModal();
-      fetchProspects();
+      await fetchProspects();
+
+      // Check if reward modal should trigger
+      if (res.data?.referralReward?.needsAward) {
+        const rew = res.data.referralReward;
+        setRewardModalData({
+          isOpen: true,
+          prospectId: rew.prospectId,
+          companyName: rew.prospectName,
+          referrerId: rew.referrerId,
+          referrerName: rew.referrerName,
+          level: rew.level,
+          tierName: rew.tierName,
+          amount: rew.creditAmount,
+          submitting: false,
+        });
+      }
     } catch (err) {
       setFormError(err.response?.data?.error || 'Error al guardar prospecto.');
     } finally {
       setSubmitting(false);
     }
   };
+
+  const handleAwardCredits = async () => {
+    if (!rewardModalData.prospectId) return;
+    setRewardModalData(prev => ({ ...prev, submitting: true }));
+    try {
+      const res = await api.post(`/admin/prospects/${rewardModalData.prospectId}/award-referral-credits`, {
+        amount: rewardModalData.amount,
+      });
+      showNotification(res.data.message || 'Créditos abonados con éxito al socio.');
+      setRewardModalData(prev => ({ ...prev, isOpen: false, submitting: false }));
+      await fetchProspects();
+    } catch (err) {
+      console.error('Error al abonar créditos:', err);
+      alert(err.response?.data?.error || 'Error al abonar créditos al socio.');
+      setRewardModalData(prev => ({ ...prev, submitting: false }));
+    }
+  };
+
 
   const handleDeleteProspect = async (id, companyName) => {
     if (!window.confirm(`¿Seguro que deseas eliminar al prospecto "${companyName}" y todo su historial de documentos?`)) return;
@@ -279,7 +398,21 @@ export default function AdminProspectsPage() {
       const { data } = await api.post(`/admin/prospects/${prospect.id}/convert`);
       showNotification(`¡Felicidades! "${prospect.companyName}" ahora es un cliente activo.`);
       await fetchProspects();
-      if (data.client?.id) {
+
+      if (data.referralReward?.needsAward) {
+        const rew = data.referralReward;
+        setRewardModalData({
+          isOpen: true,
+          prospectId: rew.prospectId,
+          companyName: rew.prospectName,
+          referrerId: rew.referrerId,
+          referrerName: rew.referrerName,
+          level: rew.level,
+          tierName: rew.tierName,
+          amount: rew.creditAmount,
+          submitting: false,
+        });
+      } else if (data.client?.id) {
         navigate(`/admin/clients/${data.client.id}`);
       }
     } catch (err) {
@@ -289,6 +422,7 @@ export default function AdminProspectsPage() {
       setConvertingId(null);
     }
   };
+
 
   // Pipeline Metrics
   const metrics = useMemo(() => {
@@ -601,7 +735,92 @@ export default function AdminProspectsPage() {
                           </span>
                         )}
                       </div>
+
+                      {/* Referral Badge & Actions */}
+                      {p.referralInfo && (
+                        <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                          {p.referralInfo.needsCreditAward ? (
+                            <div style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              padding: '5px 12px',
+                              borderRadius: '8px',
+                              background: '#FFFBEB',
+                              border: '1px solid #FDE68A',
+                              color: '#92400E',
+                              fontSize: '12px',
+                              fontWeight: 600,
+                            }}>
+                              <Award size={14} color="#D97706" />
+                              <span>Viene de: <strong>{p.referralInfo.referrerName}</strong> ({p.referralInfo.tierName})</span>
+                              <button
+                                onClick={() => setRewardModalData({
+                                  isOpen: true,
+                                  prospectId: p.id,
+                                  companyName: p.companyName,
+                                  referrerId: p.referralInfo.referrerId,
+                                  referrerName: p.referralInfo.referrerName,
+                                  level: p.referralInfo.level,
+                                  tierName: p.referralInfo.tierName,
+                                  amount: p.referralInfo.creditAmount,
+                                  submitting: false,
+                                })}
+                                style={{
+                                  background: '#D97706',
+                                  color: '#FFFFFF',
+                                  border: 'none',
+                                  borderRadius: '6px',
+                                  padding: '3px 9px',
+                                  fontSize: '11px',
+                                  fontWeight: 700,
+                                  cursor: 'pointer',
+                                  marginLeft: '6px',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                }}
+                              >
+                                <Coins size={12} /> Abonar ${p.referralInfo.creditAmount.toLocaleString('es-MX')} Créditos
+                              </button>
+                            </div>
+                          ) : p.referralInfo.creditsGenerated > 0 ? (
+                            <span style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              padding: '3px 10px',
+                              borderRadius: '6px',
+                              background: '#ECFDF5',
+                              border: '1px solid #A7F3D0',
+                              color: '#047857',
+                              fontSize: '11.5px',
+                              fontWeight: 600,
+                            }}>
+                              <CheckCircle2 size={13} color="#059669" />
+                              Bono de ${p.referralInfo.creditsGenerated.toLocaleString('es-MX')} HX abonado a {p.referralInfo.referrerName}
+                            </span>
+                          ) : (
+                            <span style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              padding: '3px 10px',
+                              borderRadius: '6px',
+                              background: '#F0FDFA',
+                              border: '1px solid #CCFBF1',
+                              color: '#0F766E',
+                              fontSize: '11.5px',
+                              fontWeight: 600,
+                            }}>
+                              <Award size={13} color="#00C4CC" />
+                              Recomendado por socio: <strong>{p.referralInfo.referrerName}</strong> ({p.referralInfo.tierName})
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
+
 
                     {/* Right action group */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1009,6 +1228,74 @@ export default function AdminProspectsPage() {
 
               <div>
                 <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' }}>
+                  Código de Socio / Recomendación (Opcional)
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="text"
+                    className="hx-input"
+                    placeholder="Ej. 58291 o JM-NUTRIOLOGO"
+                    value={prospectForm.referralCode}
+                    onChange={(e) => setProspectForm({ ...prospectForm, referralCode: e.target.value.toUpperCase() })}
+                    style={{
+                      borderColor: referralValidation.valid === true ? '#10B981' : referralValidation.valid === false ? '#F59E0B' : undefined,
+                      paddingRight: referralValidation.checking ? '36px' : undefined,
+                    }}
+                  />
+                  {referralValidation.checking && (
+                    <div style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)' }}>
+                      <Loader2 className="animate-spin" size={15} color="#00C4CC" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Live validation feedback */}
+                {referralValidation.valid === true && referralValidation.data && (
+                  <div style={{
+                    marginTop: '6px',
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    background: '#ECFDF5',
+                    border: '1px solid #A7F3D0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    fontSize: '12px',
+                    color: '#065F46',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <CheckCircle2 size={15} color="#10B981" />
+                      <span>
+                        Viene recomendado por: <strong>{referralValidation.data.displayName}</strong> ({referralValidation.data.tierName})
+                      </span>
+                    </div>
+                    <span style={{ fontWeight: 700, color: '#047857' }}>
+                      +${referralValidation.data.creditAmount?.toLocaleString('es-MX')} HX al cerrar
+                    </span>
+                  </div>
+                )}
+
+                {referralValidation.valid === false && (
+                  <div style={{
+                    marginTop: '6px',
+                    padding: '7px 12px',
+                    borderRadius: '8px',
+                    background: '#FFFBEB',
+                    border: '1px solid #FDE68A',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '12px',
+                    color: '#92400E',
+                  }}>
+                    <AlertCircle size={14} color="#D97706" />
+                    <span>{referralValidation.message}</span>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' }}>
                   Origen del Lead
                 </label>
                 <input
@@ -1019,6 +1306,7 @@ export default function AdminProspectsPage() {
                   onChange={(e) => setProspectForm({ ...prospectForm, source: e.target.value })}
                 />
               </div>
+
 
               <div>
                 <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' }}>
@@ -1164,6 +1452,149 @@ export default function AdminProspectsPage() {
         document.body
       )}
 
+      {/* ── Modal: Anuncio / Abono de Créditos por Referido Cerrado ─────────────── */}
+      {rewardModalData.isOpen && createPortal(
+        <div
+          className="modal-overlay"
+          onClick={(e) => { if (e.target === e.currentTarget && !rewardModalData.submitting) setRewardModalData(prev => ({ ...prev, isOpen: false })); }}
+        >
+          <div className="modal-content" style={{ maxWidth: '500px', borderRadius: '20px', padding: '32px', textAlign: 'center', position: 'relative' }}>
+            
+            {/* Close button */}
+            <button
+              onClick={() => setRewardModalData(prev => ({ ...prev, isOpen: false }))}
+              disabled={rewardModalData.submitting}
+              style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF' }}
+            >
+              <X size={20} />
+            </button>
+
+            {/* Hero Icon */}
+            <div style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #ECFDF5 0%, #CCFBF1 100%)',
+              border: '1px solid #A7F3D0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 16px',
+              boxShadow: '0 8px 20px -4px rgba(0, 196, 204, 0.25)',
+            }}>
+              <Coins size={30} color="#00C4CC" />
+            </div>
+
+            <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#111827', margin: '0 0 6px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              ¡Prospecto Cerrado con Éxito!
+            </h3>
+            <p style={{ fontSize: '13px', color: '#6B7280', margin: '0 0 20px', lineHeight: 1.5 }}>
+              Este cliente vino recomendado por un socio activo de HummingX BI. Es momento de abonar su recompensa de créditos.
+            </p>
+
+            {/* Info Box */}
+            <div style={{
+              background: '#F9FAFB',
+              border: '1px solid #E5E7EB',
+              borderRadius: '14px',
+              padding: '18px 20px',
+              textAlign: 'left',
+              marginBottom: '20px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px' }}>
+                <span style={{ color: '#6B7280' }}>Empresa formalizada:</span>
+                <strong style={{ color: '#111827' }}>{rewardModalData.companyName}</strong>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px' }}>
+                <span style={{ color: '#6B7280' }}>Socio recomendador:</span>
+                <div style={{ textAlign: 'right' }}>
+                  <strong style={{ color: '#111827', display: 'block' }}>{rewardModalData.referrerName}</strong>
+                  <span style={{ fontSize: '11px', color: '#00C4CC', fontWeight: 700 }}>{rewardModalData.tierName}</span>
+                </div>
+              </div>
+
+              <div style={{ borderTop: '1px solid #E5E7EB', paddingTop: '12px', marginTop: '4px' }}>
+                <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '6px' }}>
+                  Monto a abonar en Créditos HX:
+                </label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ position: 'relative', flex: 1 }}>
+                    <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontWeight: 700, color: '#6B7280' }}>$</span>
+                    <input
+                      type="number"
+                      min="100"
+                      step="100"
+                      className="hx-input"
+                      style={{ paddingLeft: '28px', fontWeight: 800, fontSize: '16px', color: '#047857' }}
+                      value={rewardModalData.amount}
+                      onChange={(e) => setRewardModalData(prev => ({ ...prev, amount: parseInt(e.target.value, 10) || 0 }))}
+                    />
+                  </div>
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: '#00C4CC', whiteSpace: 'nowrap' }}>
+                    Créditos HX
+                  </span>
+                </div>
+                <span style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '4px', display: 'block' }}>
+                  Sugerido para su nivel: ${rewardModalData.amount?.toLocaleString('es-MX')} MXN (1 crédito = $1.00 MXN)
+                </span>
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button
+                onClick={handleAwardCredits}
+                disabled={rewardModalData.submitting || !rewardModalData.amount}
+                className="btn-accent"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  borderRadius: '10px',
+                  fontSize: '13.5px',
+                  fontWeight: 800,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: '0 4px 14px rgba(0, 196, 204, 0.3)',
+                }}
+              >
+                {rewardModalData.submitting ? 'Abonando créditos...' : (
+                  <>
+                    <Coins size={16} />
+                    Abonar ${rewardModalData.amount?.toLocaleString('es-MX')} Créditos a {rewardModalData.referrerName}
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setRewardModalData(prev => ({ ...prev, isOpen: false }))}
+                disabled={rewardModalData.submitting}
+                className="btn-secondary"
+                style={{
+                  width: '100%',
+                  padding: '9px',
+                  borderRadius: '10px',
+                  fontSize: '12.5px',
+                  fontWeight: 600,
+                  justifyContent: 'center',
+                }}
+              >
+                Hacerlo más tarde
+              </button>
+            </div>
+
+          </div>
+        </div>,
+        document.body
+      )}
+
     </Layout>
   );
 }
+

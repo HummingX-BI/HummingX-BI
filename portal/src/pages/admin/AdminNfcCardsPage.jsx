@@ -43,7 +43,9 @@ import {
   Compass,
   Zap,
   Flame,
-  ArrowRight
+  ArrowRight,
+  CreditCard,
+  Link2
 } from 'lucide-react';
 
 function InstagramIcon({ size = 18, color = 'currentColor', ...props }) {
@@ -367,7 +369,7 @@ export default function AdminNfcCardsPage() {
           locationName: prev.locationName || `Ubicación GPS (${lat}, ${lng})`
         }));
         setLocatingGps(false);
-        showNotification('📍 Ubicación GPS obtenida exitosamente.');
+        showNotification('Ubicación GPS obtenida exitosamente.');
       },
       (err) => {
         console.error('Error obteniendo GPS:', err);
@@ -392,7 +394,7 @@ export default function AdminNfcCardsPage() {
     reader.onload = (event) => {
       const base64 = event.target?.result;
       setForm(prev => ({ ...prev, photoUrl: base64 }));
-      showNotification('📸 Foto de soporte cargada exitosamente.');
+      showNotification('Foto de soporte cargada exitosamente.');
     };
     reader.readAsDataURL(file);
   };
@@ -575,7 +577,7 @@ export default function AdminNfcCardsPage() {
 
   return (
     <Layout>
-      <div style={{ maxWidth: '1280px', margin: '0 auto', paddingBottom: '60px' }}>
+      <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginTop: '-12px', paddingBottom: '40px', width: '100%' }}>
         
         {/* ── Notification Toast ─────────────────────────────────────────── */}
         {toastMessage && (
@@ -605,104 +607,74 @@ export default function AdminNfcCardsPage() {
         )}
 
         {/* ── Top Header ─────────────────────────────────────────────────── */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-              <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(0,196,204,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Smartphone size={22} color="#00C4CC" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
+              <div
+                style={{
+                  width: '34px',
+                  height: '34px',
+                  borderRadius: '10px',
+                  background: 'linear-gradient(135deg, #0284C7 0%, #00C4CC 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#FFFFFF',
+                  boxShadow: '0 4px 12px rgba(0, 196, 204, 0.25)',
+                }}
+              >
+                <QrCode size={18} />
               </div>
-              <h1 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--color-primary, #FFFFFF)', margin: 0, letterSpacing: '-0.02em' }}>
+              <h1 style={{ fontSize: '24px', fontWeight: 800, color: '#111827', margin: 0, letterSpacing: '-0.02em', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                 Tarjetas QR & NFC
               </h1>
             </div>
-            <p style={{ margin: 0, fontSize: '13.5px', color: '#94A3B8' }}>
-              Gestión de chips NFC físicos y códigos QR vectoriales con redirección inteligente.
+            <p style={{ fontSize: '14px', color: '#6B7280', margin: 0, maxWidth: '640px' }}>
+              Configura y administra las tarjetas físicas con chip NFC y QR vendidos a clientes (Google Reviews, Instagram, WhatsApp o Menú).
             </p>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
             <button
               onClick={openNewModal}
               className="btn-primary"
-              style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', borderRadius: '12px', fontSize: '13.5px' }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 18px',
+                borderRadius: '10px',
+                fontWeight: 600,
+                fontSize: '13.5px',
+              }}
             >
               <Plus size={16} />
-              <span>Nueva Tarjeta</span>
+              Configurar Nueva Tarjeta
             </button>
           </div>
         </div>
 
         {/* ── KPI Metric Cards ───────────────────────────────────────────── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-          
-          <div className="card" style={{ padding: '20px', borderRadius: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-              <span style={{ fontSize: '12.5px', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Total Asignadas
-              </span>
-              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <QrCode size={16} color="#94A3B8" />
-              </div>
-            </div>
-            <div style={{ fontSize: '28px', fontWeight: 800, color: '#FFFFFF', marginBottom: '4px' }}>
-              {metrics.totalCards}
-            </div>
-            <div style={{ fontSize: '12px', color: '#64748B' }}>
-              Lotes activos en base de datos
-            </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '14px' }}>
+          <div className="card" style={{ padding: '18px 20px', borderRadius: '12px', border: '1px solid #E5E7EB', background: '#FFFFFF' }}>
+            <span style={{ fontSize: '12px', color: '#6B7280', fontWeight: 500, display: 'block', marginBottom: '6px' }}>Total Tarjetas Asignadas</span>
+            <span style={{ fontSize: '26px', fontWeight: 800, color: '#111827' }}>{metrics.totalCards}</span>
           </div>
 
-          <div className="card" style={{ padding: '20px', borderRadius: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-              <span style={{ fontSize: '12.5px', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                En Clientes (Activas)
-              </span>
-              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(16,185,129,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <CheckCircle2 size={16} color="#10B981" />
-              </div>
-            </div>
-            <div style={{ fontSize: '28px', fontWeight: 800, color: '#10B981', marginBottom: '4px' }}>
-              {metrics.activeCards}
-            </div>
-            <div style={{ fontSize: '12px', color: '#64748B' }}>
-              Redirigiendo a reseñas o redes
-            </div>
+          <div className="card" style={{ padding: '18px 20px', borderRadius: '12px', border: '1px solid #E5E7EB', background: '#FFFFFF' }}>
+            <span style={{ fontSize: '12px', color: '#6B7280', fontWeight: 500, display: 'block', marginBottom: '6px' }}>Tarjetas Activas</span>
+            <span style={{ fontSize: '26px', fontWeight: 800, color: '#047857' }}>{metrics.activeCards}</span>
           </div>
 
-          <div className="card" style={{ padding: '20px', borderRadius: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-              <span style={{ fontSize: '12.5px', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Disponibles para Asignar
-              </span>
-              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(245,158,11,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Package size={16} color="#F59E0B" />
-              </div>
-            </div>
-            <div style={{ fontSize: '28px', fontWeight: 800, color: '#F59E0B', marginBottom: '4px' }}>
-              {metrics.inactiveCards}
-            </div>
-            <div style={{ fontSize: '12px', color: '#64748B' }}>
-              Listas para vincular con prospectos
-            </div>
+          <div className="card" style={{ padding: '18px 20px', borderRadius: '12px', border: '1px solid #E5E7EB', background: '#FFFFFF' }}>
+            <span style={{ fontSize: '12px', color: '#6B7280', fontWeight: 500, display: 'block', marginBottom: '6px' }}>Escaneos & Taps Acumulados</span>
+            <span style={{ fontSize: '26px', fontWeight: 800, color: '#00C4CC' }}>{metrics.totalScans}</span>
           </div>
 
-          <div className="card" style={{ padding: '20px', borderRadius: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-              <span style={{ fontSize: '12.5px', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Escaneos / Taps Totales
-              </span>
-              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(0,196,204,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Flame size={16} color="#00C4CC" />
-              </div>
-            </div>
-            <div style={{ fontSize: '28px', fontWeight: 800, color: '#00C4CC', marginBottom: '4px' }}>
-              {metrics.totalScans}
-            </div>
-            <div style={{ fontSize: '12px', color: '#64748B' }}>
-              Impactos registrados en tiempo real
-            </div>
+          <div className="card" style={{ padding: '18px 20px', borderRadius: '12px', border: '1px solid #E5E7EB', background: '#FFFFFF' }}>
+            <span style={{ fontSize: '12px', color: '#6B7280', fontWeight: 500, display: 'block', marginBottom: '6px' }}>Siguiente Número Disponible</span>
+            <span style={{ fontSize: '26px', fontWeight: 800, color: '#7C3AED', fontFamily: 'monospace' }}>#{metrics.nextSuggestedCode}</span>
           </div>
-
         </div>
 
         {/* ── Segmented Control: Pestañas Principales (Pill Bar) ─────────── */}
@@ -711,43 +683,41 @@ export default function AdminNfcCardsPage() {
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            marginBottom: '24px',
-            background: 'rgba(255, 255, 255, 0.04)',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
-            padding: '6px',
-            borderRadius: '16px',
+            background: '#F1F5F9',
+            border: '1px solid #E2E8F0',
+            padding: '5px',
+            borderRadius: '12px',
             width: 'fit-content',
-            backdropFilter: 'blur(10px)'
           }}
         >
           <button
             onClick={() => setActiveTab('inventory')}
             style={{
               border: 'none',
-              borderRadius: '12px',
-              padding: '10px 18px',
-              fontSize: '13.5px',
+              borderRadius: '9px',
+              padding: '8px 18px',
+              fontSize: '13px',
               fontWeight: 700,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
               transition: 'all 0.2s ease',
-              background: activeTab === 'inventory' ? '#00C4CC' : 'transparent',
-              color: activeTab === 'inventory' ? '#0B0F19' : '#94A3B8',
-              boxShadow: activeTab === 'inventory' ? '0 4px 14px rgba(0, 196, 204, 0.35)' : 'none',
+              background: activeTab === 'inventory' ? '#FFFFFF' : 'transparent',
+              color: activeTab === 'inventory' ? '#0F172A' : '#64748B',
+              boxShadow: activeTab === 'inventory' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
             }}
           >
-            <Package size={16} />
-            <span>💳 Inventario de Tarjetas</span>
+            <CreditCard size={15} color={activeTab === 'inventory' ? '#00C4CC' : '#64748B'} />
+            <span>Inventario de Tarjetas</span>
             <span
               style={{
                 fontSize: '11px',
                 fontWeight: 800,
                 padding: '2px 7px',
                 borderRadius: '999px',
-                background: activeTab === 'inventory' ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.08)',
-                color: activeTab === 'inventory' ? '#0B0F19' : '#CBD5E1',
+                background: activeTab === 'inventory' ? '#ECFEFF' : '#E2E8F0',
+                color: activeTab === 'inventory' ? '#0891B2' : '#64748B',
               }}
             >
               {cards.length}
@@ -758,22 +728,22 @@ export default function AdminNfcCardsPage() {
             onClick={() => setActiveTab('map')}
             style={{
               border: 'none',
-              borderRadius: '12px',
-              padding: '10px 18px',
-              fontSize: '13.5px',
+              borderRadius: '9px',
+              padding: '8px 18px',
+              fontSize: '13px',
               fontWeight: 700,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
               transition: 'all 0.2s ease',
-              background: activeTab === 'map' ? 'linear-gradient(135deg, #00C4CC 0%, #0284C7 100%)' : 'transparent',
-              color: activeTab === 'map' ? '#0B0F19' : '#94A3B8',
-              boxShadow: activeTab === 'map' ? '0 4px 14px rgba(0, 196, 204, 0.35)' : 'none',
+              background: activeTab === 'map' ? '#FFFFFF' : 'transparent',
+              color: activeTab === 'map' ? '#0F172A' : '#64748B',
+              boxShadow: activeTab === 'map' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
             }}
           >
-            <MapPin size={16} />
-            <span>🗺️ Mapa de Territorio HummingX</span>
+            <MapPin size={15} color={activeTab === 'map' ? '#00C4CC' : '#64748B'} />
+            <span>Mapa de Territorio HummingX</span>
             {metrics.activeCards > 0 && (
               <span
                 style={{
@@ -781,8 +751,8 @@ export default function AdminNfcCardsPage() {
                   fontWeight: 800,
                   padding: '2px 7px',
                   borderRadius: '999px',
-                  background: activeTab === 'map' ? '#0B0F19' : 'rgba(16, 185, 129, 0.2)',
-                  color: activeTab === 'map' ? '#00C4CC' : '#10B981',
+                  background: activeTab === 'map' ? '#ECFDF5' : '#E2E8F0',
+                  color: activeTab === 'map' ? '#047857' : '#64748B',
                 }}
               >
                 {metrics.activeCards}
@@ -807,8 +777,10 @@ export default function AdminNfcCardsPage() {
               className="card"
               style={{
                 padding: '16px 20px',
-                borderRadius: '16px',
-                marginBottom: '20px',
+                borderRadius: '14px',
+                border: '1px solid #E5E7EB',
+                background: '#FFFFFF',
+                marginBottom: '16px',
                 display: 'flex',
                 flexWrap: 'wrap',
                 alignItems: 'center',
@@ -820,7 +792,7 @@ export default function AdminNfcCardsPage() {
               <div style={{ position: 'relative', flex: '1', minWidth: '240px' }}>
                 <Search
                   size={16}
-                  style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#64748B' }}
+                  style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }}
                 />
                 <input
                   type="text"
@@ -828,26 +800,26 @@ export default function AdminNfcCardsPage() {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="hx-input"
-                  style={{ paddingLeft: '36px', height: '40px', fontSize: '13px' }}
+                  style={{ paddingLeft: '36px', height: '38px', fontSize: '13px' }}
                 />
               </div>
 
               {/* Filters */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Filter size={14} color="#64748B" />
+                  <Filter size={14} color="#9CA3AF" />
                   <select
                     value={typeFilter}
                     onChange={(e) => setTypeFilter(e.target.value)}
                     className="hx-input"
-                    style={{ height: '40px', fontSize: '13px', paddingRight: '28px', minWidth: '150px' }}
+                    style={{ height: '38px', fontSize: '13px', paddingRight: '28px', minWidth: '150px' }}
                   >
                     <option value="all">Todos los Tipos</option>
-                    <option value="google_reviews">⭐ Reseñas Google</option>
-                    <option value="instagram">📸 Instagram</option>
-                    <option value="whatsapp">💬 WhatsApp</option>
-                    <option value="menu">🍽️ Menú</option>
-                    <option value="website">🌐 Web</option>
+                    <option value="google_reviews">Reseñas de Google</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="whatsapp">WhatsApp</option>
+                    <option value="menu">Menú Digital</option>
+                    <option value="website">Sitio Web</option>
                   </select>
                 </div>
 
@@ -855,11 +827,11 @@ export default function AdminNfcCardsPage() {
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
                   className="hx-input"
-                  style={{ height: '40px', fontSize: '13px', paddingRight: '28px', minWidth: '140px' }}
+                  style={{ height: '38px', fontSize: '13px', paddingRight: '28px', minWidth: '140px' }}
                 >
                   <option value="all">Todos los Estados</option>
                   <option value="active">Activas (En Cliente)</option>
-                  <option value="inactive">Disponibles / Pausadas</option>
+                  <option value="inactive">Disponibles / Libres</option>
                 </select>
               </div>
             </div>
@@ -870,12 +842,12 @@ export default function AdminNfcCardsPage() {
                 <Loader2 className="animate-spin" size={32} color="#00C4CC" />
               </div>
             ) : filteredCards.length === 0 ? (
-              <div className="card" style={{ padding: '60px 20px', textAlign: 'center', borderRadius: '16px' }}>
-                <QrCode size={48} color="#475569" style={{ margin: '0 auto 16px' }} />
-                <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#FFFFFF', marginBottom: '8px' }}>
+              <div className="card" style={{ padding: '60px 20px', textAlign: 'center', borderRadius: '16px', background: '#FFFFFF', border: '1px solid #E5E7EB' }}>
+                <QrCode size={48} color="#9CA3AF" style={{ margin: '0 auto 16px' }} />
+                <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', marginBottom: '8px' }}>
                   No se encontraron tarjetas
                 </h3>
-                <p style={{ fontSize: '13.5px', color: '#94A3B8', margin: 0 }}>
+                <p style={{ fontSize: '13.5px', color: '#6B7280', margin: 0 }}>
                   Intenta cambiar los filtros de búsqueda o registra una nueva tarjeta.
                 </p>
               </div>
@@ -889,42 +861,28 @@ export default function AdminNfcCardsPage() {
               >
                 {filteredCards.map((card) => {
                   const num = parseInt(card.code, 10);
-                  const isInstagramBatch = num >= 11 && num <= 15;
-                  const isGoogleBatch = num >= 1 && num <= 10;
-                  const typeDef = CARD_TYPES[card.type] || CARD_TYPES.google_reviews;
-                  const Icon = typeDef.icon;
-
-                  // Aesthetic border & glow depending on batch
-                  const borderColor = isInstagramBatch
-                    ? 'rgba(236, 72, 153, 0.3)'
-                    : isGoogleBatch
-                    ? 'rgba(245, 158, 11, 0.28)'
-                    : 'rgba(255, 255, 255, 0.08)';
-
-                  const glowBg = isInstagramBatch
-                    ? 'radial-gradient(circle at top right, rgba(236, 72, 153, 0.06) 0%, transparent 70%)'
-                    : isGoogleBatch
-                    ? 'radial-gradient(circle at top right, rgba(245, 158, 11, 0.06) 0%, transparent 70%)'
-                    : 'transparent';
+                  const isInstagram = card.type === 'instagram' || (num >= 11 && num <= 15);
+                  const isGoogle = card.type === 'google_reviews' || (!card.type && num >= 1 && num <= 10) || (!isInstagram && card.type !== 'whatsapp' && card.type !== 'menu' && card.type !== 'website');
+                  const isLinked = Boolean(card.active && card.clientName && !card.clientName.includes('Disponible'));
 
                   return (
                     <div
                       key={card.id}
                       className="card"
                       style={{
-                        padding: '18px 20px',
-                        borderRadius: '16px',
+                        padding: '16px 18px',
+                        borderRadius: '14px',
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'space-between',
-                        border: `1px solid ${borderColor}`,
-                        background: `#0F172A ${glowBg}`,
-                        boxShadow: card.active ? '0 8px 20px -8px rgba(0,0,0,0.5)' : 'none',
+                        border: card.active ? '1.5px solid #E2E8F0' : '1.5px dashed #CBD5E1',
+                        background: card.active ? '#FFFFFF' : '#FAFAFA',
+                        boxShadow: card.active ? '0 2px 8px rgba(0,0,0,0.04)' : 'none',
                         position: 'relative',
                         transition: 'transform 0.15s ease, box-shadow 0.15s ease',
                       }}
                     >
-                      {/* ── Micro-Card Element A: Compact Header ─────────── */}
+                      {/* Top Row: Serial # + Platform Logo Badge + Status Pill */}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <span
@@ -934,48 +892,78 @@ export default function AdminNfcCardsPage() {
                               fontSize: '12px',
                               padding: '2px 8px',
                               borderRadius: '6px',
-                              background: '#1E293B',
-                              color: '#38BDF8',
-                              border: '1px solid rgba(56, 189, 248, 0.25)',
+                              background: '#F1F5F9',
+                              color: '#0F172A',
+                              border: '1px solid #E2E8F0',
                             }}
                           >
                             #{card.code}
                           </span>
 
-                          {/* Category Badge */}
-                          <span
-                            style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '4px',
-                              fontSize: '11px',
-                              fontWeight: 700,
-                              padding: '2px 8px',
-                              borderRadius: '999px',
-                              background: typeDef.bg,
-                              color: typeDef.color,
-                              border: `1px solid ${typeDef.border}`,
-                            }}
-                          >
-                            <Icon size={11} />
-                            <span>{typeDef.label}</span>
-                          </span>
+                          {/* Visual Logo Badge */}
+                          {isGoogle ? (
+                            <div
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                                background: '#FFFFFF',
+                                border: '1px solid #E5E7EB',
+                                borderRadius: '999px',
+                                padding: '2px 8px',
+                                boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                              }}
+                            >
+                              <img src="/google-logo.png" alt="Google" style={{ width: '15px', height: '15px', objectFit: 'contain' }} />
+                              <span style={{ fontSize: '11px', fontWeight: 700, color: '#374151' }}>Google</span>
+                            </div>
+                          ) : isInstagram ? (
+                            <div
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                                background: '#FDF2F8',
+                                border: '1px solid #FCE7F3',
+                                borderRadius: '999px',
+                                padding: '2px 8px',
+                              }}
+                            >
+                              <img src="/instagram-logo.png" alt="Instagram" style={{ width: '15px', height: '15px', objectFit: 'contain' }} />
+                              <span style={{ fontSize: '11px', fontWeight: 700, color: '#BE185D' }}>Instagram</span>
+                            </div>
+                          ) : (
+                            <div
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                                background: '#F1F5F9',
+                                border: '1px solid #E2E8F0',
+                                borderRadius: '999px',
+                                padding: '2px 8px',
+                              }}
+                            >
+                              <Globe size={13} color="#0284C7" />
+                              <span style={{ fontSize: '11px', fontWeight: 700, color: '#0369A1' }}>Web</span>
+                            </div>
+                          )}
                         </div>
 
-                        {/* Status Indicator */}
+                        {/* Status indicator */}
                         {card.active ? (
                           <span
                             style={{
                               display: 'inline-flex',
                               alignItems: 'center',
                               gap: '5px',
-                              fontSize: '11.5px',
+                              fontSize: '11px',
                               fontWeight: 700,
-                              color: '#10B981',
-                              background: 'rgba(16, 185, 129, 0.12)',
-                              padding: '2px 9px',
+                              color: '#047857',
+                              background: '#ECFDF5',
+                              padding: '2px 8px',
                               borderRadius: '999px',
-                              border: '1px solid rgba(16, 185, 129, 0.25)',
+                              border: '1px solid #A7F3D0',
                             }}
                           >
                             <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10B981' }} />
@@ -986,13 +974,14 @@ export default function AdminNfcCardsPage() {
                             style={{
                               display: 'inline-flex',
                               alignItems: 'center',
-                              gap: '5px',
-                              fontSize: '11.5px',
+                              gap: '4px',
+                              fontSize: '11px',
                               fontWeight: 600,
-                              color: '#94A3B8',
-                              background: 'rgba(255, 255, 255, 0.05)',
+                              color: '#64748B',
+                              background: '#F1F5F9',
                               padding: '2px 8px',
                               borderRadius: '999px',
+                              border: '1px solid #E2E8F0',
                             }}
                           >
                             <span>Disponible</span>
@@ -1000,145 +989,141 @@ export default function AdminNfcCardsPage() {
                         )}
                       </div>
 
-                      {/* ── Micro-Card Element B: Body (Name + Avatar/Photo) */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                        {/* Evidence photo or Avatar */}
+                      {/* Middle: Prominent Restaurant / Business info */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
                         {card.photoUrl ? (
                           <img
                             src={card.photoUrl}
                             alt={card.clientName}
                             style={{
-                              width: '46px',
-                              height: '46px',
+                              width: '48px',
+                              height: '48px',
                               borderRadius: '12px',
                               objectFit: 'cover',
-                              border: '2px solid rgba(0, 196, 204, 0.5)',
-                              boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
+                              border: '1.5px solid #CBD5E1',
+                              boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
                               flexShrink: 0,
                             }}
                           />
                         ) : (
                           <div
                             style={{
-                              width: '46px',
-                              height: '46px',
+                              width: '48px',
+                              height: '48px',
                               borderRadius: '12px',
-                              background: card.active
-                                ? (isInstagramBatch ? 'rgba(236, 72, 153, 0.15)' : 'rgba(245, 158, 11, 0.15)')
-                                : 'rgba(255, 255, 255, 0.04)',
-                              border: `1.5px solid ${card.active ? (isInstagramBatch ? '#EC4899' : '#F59E0B') + '44' : 'rgba(255, 255, 255, 0.08)'}`,
+                              background: card.active ? '#F8FAFC' : '#F1F5F9',
+                              border: `1.5px solid ${card.active ? '#E2E8F0' : '#CBD5E1'}`,
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              fontSize: '20px',
                               flexShrink: 0,
                             }}
                           >
-                            {isInstagramBatch ? '📸' : '⭐'}
+                            {card.active ? (
+                              isGoogle ? (
+                                <img src="/google-logo.png" alt="Google" style={{ width: '26px', height: '26px', objectFit: 'contain' }} />
+                              ) : isInstagram ? (
+                                <img src="/instagram-logo.png" alt="Instagram" style={{ width: '26px', height: '26px', objectFit: 'contain' }} />
+                              ) : (
+                                <QrCode size={22} color="#00C4CC" />
+                              )
+                            ) : (
+                              <QrCode size={22} color="#94A3B8" />
+                            )}
                           </div>
                         )}
 
                         <div style={{ minWidth: 0, flex: 1 }}>
                           <h3
                             style={{
-                              fontSize: '16px',
+                              fontSize: '15px',
                               fontWeight: 800,
-                              color: card.active ? '#FFFFFF' : '#94A3B8',
-                              margin: '0 0 2px',
+                              color: card.active ? '#111827' : '#64748B',
+                              margin: '0 0 3px',
                               whiteSpace: 'nowrap',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
                               letterSpacing: '-0.01em',
                             }}
                           >
-                            {card.clientName && !card.clientName.includes('Disponible') ? card.clientName : 'Lista para vincular'}
+                            {isLinked ? card.clientName : 'Disponible para vincular'}
                           </h3>
 
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11.5px', color: '#64748B' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#6B7280' }}>
                             {card.locationName ? (
                               <>
-                                <MapPin size={11} color="#38BDF8" />
+                                <MapPin size={11} color="#0284C7" />
                                 <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                   {card.locationName}
                                 </span>
                               </>
                             ) : card.active ? (
-                              <span style={{ color: '#00C4CC' }}>Vinculada con cliente</span>
+                              <span style={{ color: '#059669', fontWeight: 500 }}>Vinculada con cliente</span>
                             ) : (
-                              <span>Sin cliente asignado aún</span>
+                              <span>Sin cliente asignado</span>
                             )}
                           </div>
                         </div>
                       </div>
 
-                      {/* ── Micro-Card Element C: Clean Footer (Scans + 1 Action Button) */}
+                      {/* Bottom Footer: Scans & Primary Action Button */}
                       <div
                         style={{
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'space-between',
                           paddingTop: '12px',
-                          borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                          borderTop: '1px solid #F1F5F9',
                           gap: '10px',
                         }}
                       >
                         {/* Scans Metric */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', color: '#94A3B8' }}>
-                          <Flame size={14} color={card.scanCount > 0 ? '#F59E0B' : '#64748B'} />
-                          <span style={{ fontWeight: card.scanCount > 0 ? 700 : 500, color: card.scanCount > 0 ? '#FFFFFF' : '#64748B' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', color: '#6B7280' }}>
+                          <Flame size={14} color={card.scanCount > 0 ? '#F59E0B' : '#9CA3AF'} />
+                          <span style={{ fontWeight: card.scanCount > 0 ? 700 : 500, color: card.scanCount > 0 ? '#111827' : '#9CA3AF' }}>
                             {card.scanCount} {card.scanCount === 1 ? 'escaneo' : 'escaneos'}
                           </span>
                         </div>
 
-                        {/* SINGLE ACTION BUTTON (Anti-Error Safety Mode) */}
+                        {/* Action Button: No Emojis, clean button */}
                         {card.active ? (
                           <button
                             onClick={() => openViewCardModal(card)}
+                            className="btn-secondary"
                             style={{
-                              background: 'rgba(255, 255, 255, 0.07)',
-                              border: '1px solid rgba(255, 255, 255, 0.15)',
-                              color: '#FFFFFF',
-                              borderRadius: '10px',
-                              padding: '8px 14px',
+                              borderRadius: '8px',
+                              padding: '6px 12px',
                               fontSize: '12px',
                               fontWeight: 700,
                               cursor: 'pointer',
                               display: 'inline-flex',
                               alignItems: 'center',
                               gap: '6px',
-                              transition: 'all 0.15s ease',
                             }}
-                            title="Ver detalles, QR y desbloquear edición de seguridad"
                           >
-                            <Lock size={12} color="#94A3B8" />
-                            <span>🔒 Ver / Editar</span>
+                            <Lock size={12} color="#64748B" />
+                            <span>Ver / Editar</span>
                           </button>
                         ) : (
                           <button
                             onClick={() => openBindInSituModal(card)}
+                            className="btn-primary"
                             style={{
-                              background: 'linear-gradient(135deg, #00C4CC 0%, #0284C7 100%)',
-                              border: 'none',
-                              color: '#0B0F19',
-                              borderRadius: '10px',
-                              padding: '8px 14px',
+                              borderRadius: '8px',
+                              padding: '6px 14px',
                               fontSize: '12px',
-                              fontWeight: 800,
+                              fontWeight: 700,
                               cursor: 'pointer',
                               display: 'inline-flex',
                               alignItems: 'center',
                               gap: '6px',
-                              boxShadow: '0 3px 10px rgba(0, 196, 204, 0.3)',
-                              transition: 'all 0.15s ease',
                             }}
-                            title="Vincular tarjeta directamente en el negocio del cliente"
                           >
-                            <Zap size={13} fill="#0B0F19" />
-                            <span>⚡ Vincular en el Lugar</span>
+                            <Link2 size={13} />
+                            <span>Vincular tarjeta</span>
                           </button>
                         )}
                       </div>
-
                     </div>
                   );
                 })}
@@ -1224,7 +1209,7 @@ export default function AdminNfcCardsPage() {
                     title={isLocked ? 'Desbloquear campos para editar' : 'Bloquear campos'}
                   >
                     {isLocked ? <Unlock size={12} /> : <Lock size={12} />}
-                    <span>{isLocked ? '🔓 Desbloquear edición' : '🔒 Bloquear'}</span>
+                    <span>{isLocked ? 'Desbloquear edición' : 'Bloquear'}</span>
                   </button>
                 )}
 
@@ -1261,7 +1246,7 @@ export default function AdminNfcCardsPage() {
               >
                 <Lock size={16} color="#64748B" style={{ flexShrink: 0 }} />
                 <span>
-                  <b>Modo Seguro Activado:</b> Los campos están protegidos contra cambios accidentales. Haz clic en <b>🔓 Desbloquear edición</b> arriba si necesitas reasignar o desvincular.
+                  <b>Modo Seguro Activado:</b> Los campos están protegidos contra cambios accidentales. Haz clic en <b>Desbloquear edición</b> arriba si necesitas reasignar o desvincular.
                 </span>
               </div>
             )}
@@ -1364,11 +1349,11 @@ export default function AdminNfcCardsPage() {
                   className="hx-input"
                   style={{ opacity: isLocked ? 0.75 : 1, fontWeight: 600 }}
                 >
-                  <option value="google_reviews">⭐ Reseñas de Google (Calificación 5 estrellas)</option>
-                  <option value="instagram">📸 Seguidores de Instagram</option>
-                  <option value="whatsapp">💬 WhatsApp Directo</option>
-                  <option value="menu">🍽️ Menú Digital / Carta</option>
-                  <option value="website">🌐 Enlace Web Personalizado</option>
+                  <option value="google_reviews">Reseñas de Google (Calificación 5 estrellas)</option>
+                  <option value="instagram">Seguidores de Instagram</option>
+                  <option value="whatsapp">WhatsApp Directo</option>
+                  <option value="menu">Menú Digital / Carta</option>
+                  <option value="website">Enlace Web Personalizado</option>
                 </select>
               </div>
 
@@ -1376,9 +1361,12 @@ export default function AdminNfcCardsPage() {
               {form.type === 'google_reviews' ? (
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                    <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', margin: 0 }}>
-                      Place ID de Google Maps *
-                    </label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <img src="/google-logo.png" alt="Google" style={{ width: '15px', height: '15px', objectFit: 'contain' }} />
+                      <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', margin: 0 }}>
+                        Place ID de Google Maps *
+                      </label>
+                    </div>
                     <a
                       href="https://developers.google.com/maps/documentation/javascript/examples/places-placeid-finder"
                       target="_blank"
@@ -1398,7 +1386,7 @@ export default function AdminNfcCardsPage() {
                       }}
                       title="Abrir buscador oficial de Place IDs de Google en nueva pestaña"
                     >
-                      <span>🔍 Buscar Place ID</span>
+                      <span>Buscar Place ID</span>
                       <ExternalLink size={11} />
                     </a>
                   </div>
@@ -1438,9 +1426,12 @@ export default function AdminNfcCardsPage() {
               ) : form.type === 'instagram' ? (
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                    <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', margin: 0 }}>
-                      Usuario de Instagram *
-                    </label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <img src="/instagram-logo.png" alt="Instagram" style={{ width: '15px', height: '15px', objectFit: 'contain' }} />
+                      <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', margin: 0 }}>
+                        Usuario de Instagram *
+                      </label>
+                    </div>
                     <span style={{ fontSize: '11px', color: '#9333EA', fontWeight: 600 }}>
                       Sin @ ni URLs largas
                     </span>
@@ -1507,9 +1498,12 @@ export default function AdminNfcCardsPage() {
                 {/* Field 1: Ubicación GPS */}
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
-                    <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', margin: 0 }}>
-                      📍 Ubicación GPS del Negocio (Para el Mapa)
-                    </label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <MapPin size={13} color="#00C4CC" />
+                      <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', margin: 0 }}>
+                        Ubicación GPS del Negocio (Para el Mapa)
+                      </label>
+                    </div>
                     {!isLocked && (
                       <button
                         type="button"
@@ -1530,7 +1524,7 @@ export default function AdminNfcCardsPage() {
                         }}
                       >
                         <Navigation size={11} />
-                        <span>{locatingGps ? 'Obteniendo GPS...' : '📍 Usar mi GPS actual'}</span>
+                        <span>{locatingGps ? 'Obteniendo GPS...' : 'Usar mi ubicación GPS'}</span>
                       </button>
                     )}
                   </div>
@@ -1556,9 +1550,12 @@ export default function AdminNfcCardsPage() {
 
                 {/* Field 2: Foto de Evidencia del Soporte */}
                 <div>
-                  <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' }}>
-                    📸 Foto de Evidencia del Soporte Instalado
-                  </label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '5px' }}>
+                    <Camera size={13} color="#00C4CC" />
+                    <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', margin: 0 }}>
+                      Foto del Soporte Instalado
+                    </label>
+                  </div>
 
                   <input
                     type="file"
@@ -1657,10 +1654,14 @@ export default function AdminNfcCardsPage() {
                         fontSize: '12.5px',
                         fontWeight: 700,
                         cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
                       }}
                       title="Volver a poner la tarjeta en estado Disponible para vincular"
                     >
-                      {unlinking ? 'Desvinculando...' : '⚠️ Desvincular Tarjeta'}
+                      <Trash2 size={13} />
+                      <span>{unlinking ? 'Desvinculando...' : 'Desvincular Tarjeta'}</span>
                     </button>
                   )}
                 </div>
@@ -1891,9 +1892,16 @@ export default function AdminNfcCardsPage() {
             </span>
 
             {/* Client Headline */}
-            <h2 style={{ fontSize: '26px', fontWeight: 900, color: '#FFFFFF', margin: '0 0 6px', letterSpacing: '-0.02em' }}>
-              {celebratedCard.clientName}
-            </h2>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '8px' }}>
+              <img
+                src={celebratedCard.type === 'instagram' ? '/instagram-logo.png' : '/google-logo.png'}
+                alt={celebratedCard.type}
+                style={{ width: '28px', height: '28px', objectFit: 'contain' }}
+              />
+              <h2 style={{ fontSize: '26px', fontWeight: 900, color: '#FFFFFF', margin: 0, letterSpacing: '-0.02em' }}>
+                {celebratedCard.clientName}
+              </h2>
+            </div>
 
             <p style={{ fontSize: '14px', color: '#94A3B8', margin: '0 0 24px', lineHeight: 1.5 }}>
               La tarjeta <b>#{celebratedCard.code}</b> está 100% activa. Acércale el celular al dueño para demostrarle la magia en vivo.

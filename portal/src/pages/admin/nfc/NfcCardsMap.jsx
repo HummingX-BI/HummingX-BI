@@ -137,9 +137,9 @@ export default function NfcCardsMap({ cards = [], onCardClick = () => {} }) {
       }
 
       const isGoogle = card.type === 'google_reviews';
-      const mainColor = isGoogle ? '#F59E0B' : '#EC4899';
-      const secondaryColor = isGoogle ? '#B45309' : '#8B5CF6';
-      const badgeIcon = isGoogle ? '⭐' : '📸';
+      const mainColor = isGoogle ? '#4285F4' : '#E1306C';
+      const secondaryColor = isGoogle ? '#34A853' : '#F77737';
+      const logoUrl = isGoogle ? '/google-logo.png' : '/instagram-logo.png';
 
       // Custom HTML Pin with glowing radar effect
       const pinHtml = `
@@ -178,9 +178,11 @@ export default function NfcCardsMap({ cards = [], onCardClick = () => {} }) {
             font-size: 14px;
             color: #FFFFFF;
             font-weight: 800;
-            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-          ">
-            <span>${badgeIcon}</span>
+            <img
+              src="${logoUrl}"
+              alt="${isGoogle ? 'Google' : 'Instagram'}"
+              style="width: 18px; height: 18px; object-fit: contain;"
+            />
           </div>
 
           <!-- Serial number badge -->
@@ -270,7 +272,9 @@ export default function NfcCardsMap({ cards = [], onCardClick = () => {} }) {
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-              <span style={{ fontSize: '18px' }}>🚀</span>
+              <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(0,196,204,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Compass size={16} color="#00C4CC" />
+              </div>
               <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#FFFFFF', margin: 0, letterSpacing: '-0.02em' }}>
                 Soportes HummingX Conquistando la Ciudad
               </h3>
@@ -284,37 +288,37 @@ export default function NfcCardsMap({ cards = [], onCardClick = () => {} }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             <div
               style={{
-                background: 'rgba(245, 158, 11, 0.12)',
-                border: '1px solid rgba(245, 158, 11, 0.3)',
+                background: 'rgba(255, 255, 255, 0.06)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
                 borderRadius: '10px',
                 padding: '6px 12px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
-                color: '#FBBF24',
+                gap: '8px',
+                color: '#FFFFFF',
                 fontSize: '12.5px',
                 fontWeight: 700
               }}
             >
-              <span>⭐</span>
+              <img src="/google-logo.png" alt="Google" style={{ width: '15px', height: '15px', objectFit: 'contain' }} />
               <span>{googleCount} Google Reviews</span>
             </div>
 
             <div
               style={{
-                background: 'rgba(236, 72, 153, 0.12)',
-                border: '1px solid rgba(236, 72, 153, 0.3)',
+                background: 'rgba(255, 255, 255, 0.06)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
                 borderRadius: '10px',
                 padding: '6px 12px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
-                color: '#F472B6',
+                gap: '8px',
+                color: '#FFFFFF',
                 fontSize: '12.5px',
                 fontWeight: 700
               }}
             >
-              <span>📸</span>
+              <img src="/instagram-logo.png" alt="Instagram" style={{ width: '15px', height: '15px', objectFit: 'contain' }} />
               <span>{instagramCount} Instagram</span>
             </div>
 
@@ -429,12 +433,16 @@ export default function NfcCardsMap({ cards = [], onCardClick = () => {} }) {
                 fontSize: '12px',
                 fontWeight: 700,
                 cursor: 'pointer',
-                background: filterType === 'google_reviews' ? '#F59E0B' : 'transparent',
-                color: filterType === 'google_reviews' ? '#0B0F19' : '#94A3B8',
+                background: filterType === 'google_reviews' ? '#FFFFFF' : 'transparent',
+                color: filterType === 'google_reviews' ? '#0F172A' : '#94A3B8',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
                 transition: 'all 0.15s ease'
               }}
             >
-              ⭐ Google ({googleCount})
+              <img src="/google-logo.png" alt="Google" style={{ width: '13px', height: '13px', objectFit: 'contain' }} />
+              <span>Google ({googleCount})</span>
             </button>
             <button
               onClick={() => setFilterType('instagram')}
@@ -445,12 +453,16 @@ export default function NfcCardsMap({ cards = [], onCardClick = () => {} }) {
                 fontSize: '12px',
                 fontWeight: 700,
                 cursor: 'pointer',
-                background: filterType === 'instagram' ? '#EC4899' : 'transparent',
-                color: filterType === 'instagram' ? '#FFFFFF' : '#94A3B8',
+                background: filterType === 'instagram' ? '#FFFFFF' : 'transparent',
+                color: filterType === 'instagram' ? '#0F172A' : '#94A3B8',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
                 transition: 'all 0.15s ease'
               }}
             >
-              📸 Instagram ({instagramCount})
+              <img src="/instagram-logo.png" alt="Instagram" style={{ width: '13px', height: '13px', objectFit: 'contain' }} />
+              <span>Instagram ({instagramCount})</span>
             </button>
           </div>
 
@@ -558,7 +570,7 @@ export default function NfcCardsMap({ cards = [], onCardClick = () => {} }) {
               No hay tarjetas activas aún
             </h4>
             <p style={{ margin: 0, color: '#94A3B8', fontSize: '13px', lineHeight: 1.5 }}>
-              Vincula una tarjeta en la pestaña "Inventario" con la opción ⚡ <b>Vincular en el Lugar</b> para verla reflejada aquí en el mapa con su foto y ubicación.
+              Vincula una tarjeta en la pestaña "Inventario" con la opción <b>Vincular tarjeta</b> para verla reflejada aquí en el mapa con su foto y ubicación.
             </p>
           </div>
         )}
@@ -605,16 +617,19 @@ export default function NfcCardsMap({ cards = [], onCardClick = () => {} }) {
                     width: '54px',
                     height: '54px',
                     borderRadius: '12px',
-                    background: selectedCard.type === 'google_reviews' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(236, 72, 153, 0.15)',
-                    border: `1.5px solid ${selectedCard.type === 'google_reviews' ? '#F59E0B' : '#EC4899'}44`,
+                    background: '#FFFFFF',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '22px',
                     flexShrink: 0
                   }}
                 >
-                  {selectedCard.type === 'google_reviews' ? '⭐' : '📸'}
+                  <img
+                    src={selectedCard.type === 'google_reviews' ? '/google-logo.png' : '/instagram-logo.png'}
+                    alt={selectedCard.type}
+                    style={{ width: '30px', height: '30px', objectFit: 'contain' }}
+                  />
                 </div>
               )}
 

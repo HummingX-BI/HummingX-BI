@@ -1680,17 +1680,19 @@ router.post('/nfc-cards/batch', authenticate, requireAdmin, async (req, res) => 
   }
 });
 
-// PUT /admin/nfc-cards/:id — Actualizar tarjeta
-router.put('/nfc-cards/:id', authenticate, requireAdmin, async (req, res) => {
+// PUT /nfc-cards/:id — Actualizar tarjeta
+router.put(['/nfc-cards/:id', '/admin/nfc-cards/:id'], authenticate, requireAdmin, async (req, res) => {
   try {
     let { code, clientName, type, targetUrl, active, notes, latitude, longitude, locationName, photoUrl } = req.body;
     const data = {};
 
     if (code !== undefined) {
       const formattedCode = String(code).trim().padStart(3, '0');
-      const conflict = await prisma.nfcCard.findFirst({
-        where: { code: formattedCode, NOT: { id: req.params.id } }
-      });
+      const conflict = await prisma.executeWithRetry(() =>
+        prisma.nfcCard.findFirst({
+          where: { code: formattedCode, NOT: { id: req.params.id } }
+        })
+      );
       if (conflict) {
         return res.status(400).json({ error: `El código #${formattedCode} ya pertenece a otra tarjeta.` });
       }
@@ -1711,14 +1713,19 @@ router.put('/nfc-cards/:id', authenticate, requireAdmin, async (req, res) => {
     if (locationName !== undefined) data.locationName = locationName ? String(locationName).trim() : null;
     if (photoUrl !== undefined) data.photoUrl = photoUrl || null;
 
-    const card = await prisma.nfcCard.update({
-      where: { id: req.params.id },
-      data,
-    });
+    const card = await prisma.executeWithRetry(() =>
+      prisma.nfcCard.update({
+        where: { id: req.params.id },
+        data,
+      })
+    );
 
     res.json(card);
   } catch (err) {
     console.error('[ADMIN] Error in PUT /admin/nfc-cards/:id:', err);
+    if (prisma.isDbConnectionError && prisma.isDbConnectionError(err)) {
+      return res.status(503).json({ error: 'La base de datos se está reactivando. Por favor reintenta en 2 segundos.' });
+    }
     res.status(500).json({ error: 'Error al actualizar tarjeta NFC/QR.' });
   }
 });
@@ -1726,22 +1733,27 @@ router.put('/nfc-cards/:id', authenticate, requireAdmin, async (req, res) => {
 // POST /nfc-cards/:id/unlink — Desvincular tarjeta (desvinculación limpia)
 router.post(['/nfc-cards/:id/unlink', '/admin/nfc-cards/:id/unlink'], authenticate, requireAdmin, async (req, res) => {
   try {
-    const card = await prisma.nfcCard.update({
-      where: { id: req.params.id },
-      data: {
-        clientName: 'Disponible para vincular',
-        active: false,
-        targetUrl: 'https://hummingxbi.com',
-        notes: null,
-        latitude: null,
-        longitude: null,
-        locationName: null,
-        photoUrl: null,
-      }
-    });
+    const card = await prisma.executeWithRetry(() =>
+      prisma.nfcCard.update({
+        where: { id: req.params.id },
+        data: {
+          clientName: 'Disponible para vincular',
+          active: false,
+          targetUrl: 'https://hummingxbi.com',
+          notes: null,
+          latitude: null,
+          longitude: null,
+          locationName: null,
+          photoUrl: null,
+        }
+      })
+    );
     res.json(card);
   } catch (err) {
     console.error('[ADMIN] Error in POST /admin/nfc-cards/:id/unlink:', err);
+    if (prisma.isDbConnectionError && prisma.isDbConnectionError(err)) {
+      return res.status(503).json({ error: 'La base de datos se está reactivando. Por favor reintenta en 2 segundos.' });
+    }
     res.status(500).json({ error: 'Error al desvincular tarjeta.' });
   }
 });

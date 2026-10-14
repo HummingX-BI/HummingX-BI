@@ -259,6 +259,7 @@ model Prospect {
   estimatedValue      Float?             // Monto estimado en MXN
   status              ProspectStatus     @default(lead)
   source              String?            // Origen (Visita en frío, Referido, etc.)
+  referralCode        String?            // Código del socio que recomendó (ej. 58291)
   notes               String?
   convertedToClientId String?            // ID del User creado si se convirtió
   createdAt           DateTime           @default(now())
@@ -392,6 +393,10 @@ model NfcCard {
   active      Boolean     @default(true)
   scanCount   Int         @default(0) // Total de escaneos/taps
   notes       String?     // Notas de ubicación o entrega (ej. "En caja principal")
+  latitude    Float?      // Coordenada latitud GPS (ej. 19.432608)
+  longitude   Float?      // Coordenada longitud GPS (ej. -99.133209)
+  locationName String?    // Dirección o referencia (ej. "Av. Insurgentes Sur 123, CDMX")
+  photoUrl    String?     @db.Text // Foto de evidencia del soporte instalado (base64 o URL)
   lastScanned DateTime?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt

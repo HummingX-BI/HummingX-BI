@@ -78,12 +78,17 @@ const sanitizeString = (str) => {
 
 /**
  * Middleware: sanitiza campos string del body antes de que lleguen a las rutas.
+ * Excluye campos con imágenes en base64 (photoUrl, qrDataUrl, data:image/) para evitar corromperlas.
  */
 const sanitizeBody = (req, _res, next) => {
   if (req.body && typeof req.body === 'object') {
     for (const [key, value] of Object.entries(req.body)) {
       if (typeof value === 'string') {
-        req.body[key] = sanitizeString(value);
+        if (key === 'photoUrl' || key === 'qrDataUrl' || value.startsWith('data:image/')) {
+          req.body[key] = value.trim();
+        } else {
+          req.body[key] = sanitizeString(value);
+        }
       }
     }
   }

@@ -1539,9 +1539,9 @@ router.delete('/finances/deals/:id', authenticate, requireAdmin, async (req, res
 // GET /admin/nfc-cards — Listar todas las tarjetas y estadísticas
 router.get('/nfc-cards', authenticate, requireAdmin, async (req, res) => {
   try {
-    const cards = await prisma.nfcCard.findMany({
-      orderBy: { code: 'asc' },
-    });
+    const cards = await (prisma.executeWithRetry
+      ? prisma.executeWithRetry(() => prisma.nfcCard.findMany({ orderBy: { code: 'asc' } }))
+      : prisma.nfcCard.findMany({ orderBy: { code: 'asc' } }));
 
     const totalCards = cards.length;
     const activeCards = cards.filter(c => c.active).length;
@@ -1567,6 +1567,9 @@ router.get('/nfc-cards', authenticate, requireAdmin, async (req, res) => {
     });
   } catch (err) {
     console.error('[ADMIN] Error in GET /admin/nfc-cards:', err);
+    if (prisma.isDbConnectionError && prisma.isDbConnectionError(err)) {
+      return res.status(503).json({ error: 'La base de datos se está reactivando. Por favor reintenta en 2 segundos.' });
+    }
     res.status(500).json({ error: 'Error al obtener tarjetas NFC/QR.' });
   }
 });
@@ -1574,7 +1577,7 @@ router.get('/nfc-cards', authenticate, requireAdmin, async (req, res) => {
 // POST /admin/nfc-cards — Crear o configurar nueva tarjeta
 router.post('/nfc-cards', authenticate, requireAdmin, async (req, res) => {
   try {
-    let { code, clientName, type, targetUrl, active, notes } = req.body;
+    let { code, clientName, type, targetUrl, active, notes, latitude, longitude, locationName, photoUrl } = req.body;
 
     if (!code || !clientName || !targetUrl) {
       return res.status(400).json({ error: 'Código, nombre del cliente y enlace de destino son obligatorios.' });
@@ -1588,26 +1591,53 @@ router.post('/nfc-cards', authenticate, requireAdmin, async (req, res) => {
       targetUrl = 'https://' + targetUrl;
     }
 
-    // Verificar si el código ya existe
-    const existing = await prisma.nfcCard.findUnique({ where: { code } });
+    // Verificar si el código ya existe con reintentos
+    const existing = await (prisma.executeWithRetry
+      ? prisma.executeWithRetry(() => prisma.nfcCard.findUnique({ where: { code } }))
+      : prisma.nfcCard.findUnique({ where: { code } }));
+
     if (existing) {
       return res.status(400).json({ error: `La tarjeta #${code} ya existe. Elige otro número o edita la existente.` });
     }
 
-    const card = await prisma.nfcCard.create({
-      data: {
-        code,
-        clientName,
-        type: type || 'google_reviews',
-        targetUrl,
-        active: active !== undefined ? Boolean(active) : true,
-        notes: notes ? String(notes).trim() : null,
-      }
-    });
+    const card = await (prisma.executeWithRetry
+      ? prisma.executeWithRetry(() =>
+          prisma.nfcCard.create({
+            data: {
+              code,
+              clientName,
+              type: type || 'google_reviews',
+              targetUrl,
+              active: active !== undefined ? Boolean(active) : true,
+              notes: notes ? String(notes).trim() : null,
+              latitude: latitude !== undefined && latitude !== null && latitude !== '' ? parseFloat(latitude) : null,
+              longitude: longitude !== undefined && longitude !== null && longitude !== '' ? parseFloat(longitude) : null,
+              locationName: locationName ? String(locationName).trim() : null,
+              photoUrl: photoUrl || null,
+            }
+          })
+        )
+      : prisma.nfcCard.create({
+          data: {
+            code,
+            clientName,
+            type: type || 'google_reviews',
+            targetUrl,
+            active: active !== undefined ? Boolean(active) : true,
+            notes: notes ? String(notes).trim() : null,
+            latitude: latitude !== undefined && latitude !== null && latitude !== '' ? parseFloat(latitude) : null,
+            longitude: longitude !== undefined && longitude !== null && longitude !== '' ? parseFloat(longitude) : null,
+            locationName: locationName ? String(locationName).trim() : null,
+            photoUrl: photoUrl || null,
+          }
+        }));
 
     res.status(201).json(card);
   } catch (err) {
     console.error('[ADMIN] Error in POST /admin/nfc-cards:', err);
+    if (prisma.isDbConnectionError && prisma.isDbConnectionError(err)) {
+      return res.status(503).json({ error: 'La base de datos se está reactivando. Por favor reintenta en 2 segundos.' });
+    }
     res.status(500).json({ error: 'Error al registrar tarjeta NFC/QR.' });
   }
 });
@@ -1680,17 +1710,19 @@ router.post('/nfc-cards/batch', authenticate, requireAdmin, async (req, res) => 
   }
 });
 
-// PUT /admin/nfc-cards/:id — Actualizar tarjeta
-router.put('/nfc-cards/:id', authenticate, requireAdmin, async (req, res) => {
+// PUT /nfc-cards/:id — Actualizar tarjeta
+router.put(['/nfc-cards/:id', '/admin/nfc-cards/:id'], authenticate, requireAdmin, async (req, res) => {
   try {
-    let { code, clientName, type, targetUrl, active, notes } = req.body;
+    let { code, clientName, type, targetUrl, active, notes, latitude, longitude, locationName, photoUrl } = req.body;
     const data = {};
 
     if (code !== undefined) {
       const formattedCode = String(code).trim().padStart(3, '0');
-      const conflict = await prisma.nfcCard.findFirst({
-        where: { code: formattedCode, NOT: { id: req.params.id } }
-      });
+      const conflict = await prisma.executeWithRetry(() =>
+        prisma.nfcCard.findFirst({
+          where: { code: formattedCode, NOT: { id: req.params.id } }
+        })
+      );
       if (conflict) {
         return res.status(400).json({ error: `El código #${formattedCode} ya pertenece a otra tarjeta.` });
       }
@@ -1706,26 +1738,70 @@ router.put('/nfc-cards/:id', authenticate, requireAdmin, async (req, res) => {
     }
     if (active !== undefined) data.active = Boolean(active);
     if (notes !== undefined) data.notes = notes ? String(notes).trim() : null;
+    if (latitude !== undefined) data.latitude = latitude !== null && latitude !== '' ? parseFloat(latitude) : null;
+    if (longitude !== undefined) data.longitude = longitude !== null && longitude !== '' ? parseFloat(longitude) : null;
+    if (locationName !== undefined) data.locationName = locationName ? String(locationName).trim() : null;
+    if (photoUrl !== undefined) data.photoUrl = photoUrl || null;
+    if (req.body.resetScans === true || req.body.scanCount === 0) data.scanCount = 0;
 
-    const card = await prisma.nfcCard.update({
-      where: { id: req.params.id },
-      data,
-    });
+    const card = await prisma.executeWithRetry(() =>
+      prisma.nfcCard.update({
+        where: { id: req.params.id },
+        data,
+      })
+    );
 
     res.json(card);
   } catch (err) {
     console.error('[ADMIN] Error in PUT /admin/nfc-cards/:id:', err);
+    if (prisma.isDbConnectionError && prisma.isDbConnectionError(err)) {
+      return res.status(503).json({ error: 'La base de datos se está reactivando. Por favor reintenta en 2 segundos.' });
+    }
     res.status(500).json({ error: 'Error al actualizar tarjeta NFC/QR.' });
+  }
+});
+
+// POST /nfc-cards/:id/unlink — Desvincular tarjeta (desvinculación limpia)
+router.post(['/nfc-cards/:id/unlink', '/admin/nfc-cards/:id/unlink'], authenticate, requireAdmin, async (req, res) => {
+  try {
+    const card = await prisma.executeWithRetry(() =>
+      prisma.nfcCard.update({
+        where: { id: req.params.id },
+        data: {
+          clientName: 'Disponible para vincular',
+          active: false,
+          targetUrl: 'https://hummingxbi.com',
+          notes: null,
+          latitude: null,
+          longitude: null,
+          locationName: null,
+          photoUrl: null,
+          scanCount: 0,
+        }
+      })
+    );
+    res.json(card);
+  } catch (err) {
+    console.error('[ADMIN] Error in POST /admin/nfc-cards/:id/unlink:', err);
+    if (prisma.isDbConnectionError && prisma.isDbConnectionError(err)) {
+      return res.status(503).json({ error: 'La base de datos se está reactivando. Por favor reintenta en 2 segundos.' });
+    }
+    res.status(500).json({ error: 'Error al desvincular tarjeta.' });
   }
 });
 
 // DELETE /admin/nfc-cards/:id — Eliminar tarjeta
 router.delete('/nfc-cards/:id', authenticate, requireAdmin, async (req, res) => {
   try {
-    await prisma.nfcCard.delete({ where: { id: req.params.id } });
+    await (prisma.executeWithRetry
+      ? prisma.executeWithRetry(() => prisma.nfcCard.delete({ where: { id: req.params.id } }))
+      : prisma.nfcCard.delete({ where: { id: req.params.id } }));
     res.json({ message: 'Tarjeta eliminada exitosamente.' });
   } catch (err) {
     console.error('[ADMIN] Error in DELETE /admin/nfc-cards/:id:', err);
+    if (prisma.isDbConnectionError && prisma.isDbConnectionError(err)) {
+      return res.status(503).json({ error: 'La base de datos se está reactivando. Por favor reintenta en 2 segundos.' });
+    }
     res.status(500).json({ error: 'Error al eliminar tarjeta.' });
   }
 });
@@ -1733,7 +1809,9 @@ router.delete('/nfc-cards/:id', authenticate, requireAdmin, async (req, res) => 
 // GET /admin/nfc-cards/:id/qr — Generar imagen QR en alta resolución
 router.get('/nfc-cards/:id/qr', authenticate, requireAdmin, async (req, res) => {
   try {
-    const card = await prisma.nfcCard.findUnique({ where: { id: req.params.id } });
+    const card = await (prisma.executeWithRetry
+      ? prisma.executeWithRetry(() => prisma.nfcCard.findUnique({ where: { id: req.params.id } }))
+      : prisma.nfcCard.findUnique({ where: { id: req.params.id } }));
     if (!card) return res.status(404).json({ error: 'Tarjeta no encontrada.' });
 
     const QRCode = require('qrcode');
@@ -1752,6 +1830,9 @@ router.get('/nfc-cards/:id/qr', authenticate, requireAdmin, async (req, res) => 
     });
   } catch (err) {
     console.error('[ADMIN] Error in GET /admin/nfc-cards/:id/qr:', err);
+    if (prisma.isDbConnectionError && prisma.isDbConnectionError(err)) {
+      return res.status(503).json({ error: 'La base de datos se está reactivando. Por favor reintenta en 2 segundos.' });
+    }
     res.status(500).json({ error: 'Error al generar código QR.' });
   }
 });

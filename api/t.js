@@ -16,7 +16,6 @@ function db() {
   }
   return supabase;
 }
-
 function paginaNoActivada(res, code, status = 200, isSuspended = false, clientName = '') {
   const queryText = isSuspended
     ? `Hola HummingX BI, requiero reactivar o asistencia con la tarjeta NFC/QR #${code || ''} (${clientName || ''})`
@@ -28,7 +27,7 @@ function paginaNoActivada(res, code, status = 200, isSuspended = false, clientNa
   const titulo = isSuspended ? 'Tarjeta temporalmente pausada' : 'Esta tarjeta aún no está activada';
   const descripcion = isSuspended
     ? `Esta tarjeta asignada a <b>${clientName || 'Cliente'}</b> se encuentra pausada temporalmente. Contacta a HummingX BI para reactivarla o solicitar soporte.`
-    : 'Contacta a HummingX BI para activarla o vincularla a tus redes sociales, reseñas de Google o menú.';
+    : 'Contacta a HummingX BI para activarla o para conseguir una para tu negocio.';
 
   res.statusCode = status;
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -37,17 +36,16 @@ function paginaNoActivada(res, code, status = 200, isSuspended = false, clientNa
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex"><title>${titulo} · HummingX BI</title>
 <style>
-body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:system-ui,-apple-system,sans-serif;background:#0B0B0E;color:#FFFFFF;text-align:center;padding:24px}
-main{max-width:380px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:36px 28px;box-shadow:0 12px 36px rgba(0,0,0,0.4)}
-h1{font-size:22px;margin:0 0 12px;font-weight:700}
-p{color:#94A3B8;line-height:1.5;margin:0 0 24px;font-size:14px}
-a{display:inline-block;padding:12px 24px;border-radius:12px;background:#00C4CC;color:#0B0B0E;text-decoration:none;font-weight:700;font-size:14px;box-shadow:0 4px 16px rgba(0,196,204,0.3)}
-small{display:block;margin-top:24px;color:#64748B;font-size:12px}
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:system-ui,sans-serif;background:#fff;color:#262523;text-align:center;padding:24px}
+main{max-width:340px}h1{font-size:22px;margin:0 0 12px}
+p{color:#5F6368;line-height:1.5;margin:0 0 20px}
+a{display:inline-block;padding:12px 20px;border-radius:999px;background:#262523;color:#fff;text-decoration:none;font-weight:600}
+small{display:block;margin-top:28px;color:#9aa0a6}
 </style></head><body><main>
 <h1>${titulo}</h1>
 <p>${descripcion}</p>
 ${boton}
-${code ? `<small>Tarjeta / QR #${code}</small>` : ''}
+${code ? `<small>Tarjeta #${code}</small>` : ''}
 </main></body></html>`);
 }
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import Layout from '../../components/Layout';
 import api from '../../lib/api';
@@ -7,6 +7,7 @@ import JSZip from 'jszip';
 import Confetti from 'react-confetti';
 import { Player } from '@lottiefiles/react-lottie-player';
 import trophyAnimation from '../../assets/lottie/Trophy.json';
+import NfcCardsMap from './nfc/NfcCardsMap';
 import {
   QrCode,
   Smartphone,
@@ -34,6 +35,15 @@ import {
   Terminal,
   Package,
   Loader2,
+  Lock,
+  Unlock,
+  MapPin,
+  Camera,
+  Navigation,
+  Compass,
+  Zap,
+  Flame,
+  ArrowRight
 } from 'lucide-react';
 
 function InstagramIcon({ size = 18, color = 'currentColor', ...props }) {
@@ -124,7 +134,7 @@ const CARD_TYPES = {
     bg: '#FFEDD5',
     border: '#FED7AA',
     placeholder: 'https://menu.tunegocio.com o link de Google Drive al PDF',
-    hint: 'Ideal para restaurantes, cafeterías o catlogos de productos.',
+    hint: 'Ideal para restaurantes, cafeterías o catálogos de productos.',
   },
   website: {
     label: 'Enlace Web Personalizado',
@@ -151,21 +161,42 @@ export default function AdminNfcCardsPage() {
   const [typeFilter, setTypeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
 
+  // Main navigation tab: 'inventory' | 'map'
+  const [activeTab, setActiveTab] = useState('inventory');
+
   // Modals
   const [showModal, setShowModal] = useState(false);
   const [editingCard, setEditingCard] = useState(null);
+  const [isLocked, setIsLocked] = useState(true); // Security Lock Mode for active cards
   const [showQrModal, setShowQrModal] = useState(false);
   const [activeCardForQr, setActiveCardForQr] = useState(null);
   const [qrModalDataUrl, setQrModalDataUrl] = useState('');
   const [closingModal, setClosingModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [unlinking, setUnlinking] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [formError, setFormError] = useState('');
   const [copiedId, setCopiedId] = useState(null);
+  const [locatingGps, setLocatingGps] = useState(false);
 
-  // Celebration Modal State (Serpentina / Confetti para el cierre con el cliente)
+  // File input ref for camera capture
+  const fileInputRef = useRef(null);
+
+  // Celebration Modal State (Serpentina / Confetti con trofeo en loop)
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
   const [celebratedCard, setCelebratedCard] = useState(null);
+
+  // Batch Generation Modal State
+  const [showBatchModal, setShowBatchModal] = useState(false);
+  const [closingBatchModal, setClosingBatchModal] = useState(false);
+  const [batchForm, setBatchForm] = useState({
+    startCode: '001',
+    count: 15,
+    type: 'google_reviews',
+    syncDb: true,
+    downloadZip: true,
+  });
+  const [batchProgress, setBatchProgress] = useState(null);
 
   // Form State
   const [form, setForm] = useState({
@@ -175,6 +206,10 @@ export default function AdminNfcCardsPage() {
     targetUrl: '',
     active: true,
     notes: '',
+    latitude: '',
+    longitude: '',
+    locationName: '',
+    photoUrl: '',
   });
 
   // Dedicated inputs for Google Place ID and Instagram Handle
@@ -219,24 +254,10 @@ export default function AdminNfcCardsPage() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const openNewModal = () => {
-    setEditingCard(null);
-    setForm({
-      code: metrics.nextSuggestedCode || '001',
-      clientName: '',
-      type: 'google_reviews',
-      targetUrl: '',
-      active: true,
-      notes: '',
-    });
-    setPlaceIdInput('');
-    setInstagramHandleInput('');
-    setFormError('');
-    setShowModal(true);
-  };
-
-  const openEditModal = (card) => {
+  // Open modal in Read-Only Security Mode for Active cards
+  const openViewCardModal = (card) => {
     setEditingCard(card);
+    setIsLocked(true); // Locked by default for security
     const cardType = card.type || 'google_reviews';
     setForm({
       code: card.code,
@@ -245,6 +266,10 @@ export default function AdminNfcCardsPage() {
       targetUrl: card.targetUrl,
       active: card.active,
       notes: card.notes || '',
+      latitude: card.latitude || '',
+      longitude: card.longitude || '',
+      locationName: card.locationName || '',
+      photoUrl: card.photoUrl || '',
     });
     if (cardType === 'google_reviews') {
       setPlaceIdInput(cleanPlaceId(card.targetUrl));
@@ -260,8 +285,10 @@ export default function AdminNfcCardsPage() {
     setShowModal(true);
   };
 
-  const openConfigureCardModal = (card) => {
+  // Open modal in Direct In-Situ Binding Mode for Inactive/Available cards
+  const openBindInSituModal = (card) => {
     setEditingCard(card);
+    setIsLocked(false); // Unlocked directly to fill in business info
     const num = parseInt(card.code, 10);
     const defaultType = card.type || (num >= 11 && num <= 15 ? 'instagram' : 'google_reviews');
     const isGenericUrl = !card.targetUrl || card.targetUrl === 'https://hummingxbi.com';
@@ -272,6 +299,10 @@ export default function AdminNfcCardsPage() {
       targetUrl: isGenericUrl ? '' : card.targetUrl,
       active: true,
       notes: card.notes || '',
+      latitude: card.latitude || '',
+      longitude: card.longitude || '',
+      locationName: card.locationName || '',
+      photoUrl: card.photoUrl || '',
     });
     if (defaultType === 'google_reviews') {
       setPlaceIdInput(isGenericUrl ? '' : cleanPlaceId(card.targetUrl));
@@ -287,147 +318,136 @@ export default function AdminNfcCardsPage() {
     setShowModal(true);
   };
 
+  const openNewModal = () => {
+    setEditingCard(null);
+    setIsLocked(false);
+    setForm({
+      code: metrics.nextSuggestedCode || '001',
+      clientName: '',
+      type: 'google_reviews',
+      targetUrl: '',
+      active: true,
+      notes: '',
+      latitude: '',
+      longitude: '',
+      locationName: '',
+      photoUrl: '',
+    });
+    setPlaceIdInput('');
+    setInstagramHandleInput('');
+    setFormError('');
+    setShowModal(true);
+  };
+
   const closeModal = () => {
     setClosingModal(true);
     setTimeout(() => {
       setShowModal(false);
-      setClosingModal(false);
       setEditingCard(null);
-      setPlaceIdInput('');
-      setInstagramHandleInput('');
+      setClosingModal(false);
+      setFormError('');
     }, 180);
   };
 
-  // Batch Generation State
-  const [showBatchModal, setShowBatchModal] = useState(false);
-  const [closingBatchModal, setClosingBatchModal] = useState(false);
-  const [batchForm, setBatchForm] = useState({
-    startCode: '017',
-    count: 10,
-    type: 'google_reviews',
-    downloadZip: true,
-    syncDb: true,
-  });
-  const [batchProgress, setBatchProgress] = useState(null);
-
-  const openBatchModal = () => {
-    setBatchForm({
-      startCode: metrics.nextSuggestedCode || '017',
-      count: 10,
-      type: 'google_reviews',
-      downloadZip: true,
-      syncDb: true,
-    });
-    setFormError('');
-    setShowBatchModal(true);
-  };
-
-  const closeBatchModal = () => {
-    if (batchProgress) return;
-    setClosingBatchModal(true);
-    setTimeout(() => {
-      setShowBatchModal(false);
-      setClosingBatchModal(false);
-      setBatchProgress(null);
-    }, 180);
-  };
-
-  const handleGenerateBatch = async (e) => {
-    e.preventDefault();
-    const start = parseInt(batchForm.startCode, 10);
-    const count = parseInt(batchForm.count, 10);
-    if (isNaN(start) || start <= 0 || isNaN(count) || count <= 0) {
-      setFormError('Por favor introduce un número inicial y cantidad válidos.');
+  // Handle GPS location acquisition
+  const handleGetCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      alert('Tu navegador o dispositivo no soporta geolocalización GPS.');
       return;
     }
-    const end = start + count - 1;
+    setLocatingGps(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = parseFloat(position.coords.latitude.toFixed(6));
+        const lng = parseFloat(position.coords.longitude.toFixed(6));
+        setForm(prev => ({
+          ...prev,
+          latitude: lat,
+          longitude: lng,
+          locationName: prev.locationName || `Ubicación GPS (${lat}, ${lng})`
+        }));
+        setLocatingGps(false);
+        showNotification('📍 Ubicación GPS obtenida exitosamente.');
+      },
+      (err) => {
+        console.error('Error obteniendo GPS:', err);
+        setLocatingGps(false);
+        alert('No se pudo obtener la ubicación GPS: ' + (err.message || 'Permiso denegado'));
+      },
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+    );
+  };
 
-    setSubmitting(true);
-    setFormError('');
+  // Handle evidence photo upload / camera snapshot
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
+    if (file.size > 5 * 1024 * 1024) {
+      alert('La fotografía no debe superar 5MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result;
+      setForm(prev => ({ ...prev, photoUrl: base64 }));
+      showNotification('📸 Foto de soporte cargada exitosamente.');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Unlink card action
+  const handleUnlinkCard = async () => {
+    if (!editingCard) return;
+    if (!window.confirm(`¿Seguro que deseas desvincular la tarjeta #${editingCard.code} (${editingCard.clientName})?\n\nVolverá a estar libre ("Disponible para vincular") y el chip físico dejará de redirigir.`)) {
+      return;
+    }
+
+    setUnlinking(true);
     try {
-      if (batchForm.syncDb) {
-        setBatchProgress({ text: 'Registrando lote en la base de datos...', percent: 15 });
-        await api.post('/admin/nfc-cards/batch', {
-          desde: start,
-          hasta: end,
-          cantidad: count,
-          type: batchForm.type,
-        });
-      }
-
-      if (batchForm.downloadZip) {
-        setBatchProgress({ text: 'Iniciando generación de códigos vectoriales SVG sin margen...', percent: 25 });
-        const zip = new JSZip();
-        const csvRows = [['codigo', 'url', 'archivo_svg']];
-
-        for (let i = start; i <= end; i++) {
-          const code = String(i).padStart(3, '0');
-          const url = `https://hummingxbi.com/t/${code}`;
-          const currentIdx = i - start + 1;
-          const pct = Math.round(25 + (currentIdx / count) * 65);
-          setBatchProgress({ text: `Generando QR #${code} sin margen (${currentIdx} de ${count})...`, percent: pct });
-
-          // SVG sin margen (código vectorial puro solicitado para tarjetas físicas)
-          const svgContent = await QRCode.toString(url, {
-            type: 'svg',
-            margin: 0,
-            errorCorrectionLevel: 'Q',
-            color: { dark: '#000000', light: '#FFFFFF' },
-          });
-          zip.file(`qr_${code}.svg`, svgContent);
-
-          csvRows.push([code, url, `qr_${code}.svg`]);
-        }
-
-        const csvContent = csvRows.map(r => r.join(',')).join('\n') + '\n';
-        zip.file('indice.csv', csvContent);
-
-        setBatchProgress({ text: 'Comprimiendo archivo ZIP de códigos SVG sin margen...', percent: 95 });
-        const blob = await zip.generateAsync({ type: 'blob' });
-        const downloadLink = document.createElement('a');
-        downloadLink.href = URL.createObjectURL(blob);
-        downloadLink.download = `HummingX_QRs_SinMargen_Lote_${String(start).padStart(3, '0')}_a_${String(end).padStart(3, '0')}.zip`;
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-        URL.revokeObjectURL(downloadLink.href);
-      }
-
-      await fetchCards();
-      showNotification(`¡Lote de ${count} códigos QR generado (#${String(start).padStart(3, '0')} a #${String(end).padStart(3, '0')}) con éxito!`);
-      closeBatchModal();
+      await api.post(`/admin/nfc-cards/${editingCard.id}/unlink`);
+      showNotification(`Tarjeta #${editingCard.code} desvinculada.`);
+      closeModal();
+      fetchCards();
     } catch (err) {
-      console.error('Error al generar lote:', err);
-      setFormError(err.response?.data?.error || 'Error al generar el lote de códigos QR.');
+      console.error('Error al desvincular tarjeta:', err);
+      alert('Error al desvincular tarjeta.');
     } finally {
-      setSubmitting(false);
-      setBatchProgress(null);
+      setUnlinking(false);
     }
   };
 
   const handleSaveCard = async (e) => {
     e.preventDefault();
+    setFormError('');
 
-    let finalTargetUrl = '';
+    if (!form.code || !/^[0-9]{3,6}$/.test(form.code.trim())) {
+      setFormError('El código debe ser de 3 a 6 dígitos numéricos (ej. 001, 002).');
+      return;
+    }
+    if (!form.clientName.trim()) {
+      setFormError('Ingresa el nombre del cliente o empresa.');
+      return;
+    }
+
+    let finalTargetUrl = computedFinalUrl;
+
     if (form.type === 'google_reviews') {
-      const cleaned = cleanPlaceId(placeIdInput);
-      if (!cleaned) {
-        setFormError('Por favor ingresa el Place ID del negocio en Google (ej. ChIJd34kTQD90YURJqg9LdnTMiA).');
+      if (!placeIdInput.trim()) {
+        setFormError('Ingresa el Place ID del negocio en Google Maps.');
         return;
       }
-      finalTargetUrl = `https://search.google.com/local/writereview?placeid=${cleaned}`;
+      finalTargetUrl = buildGoogleReviewUrl(placeIdInput);
     } else if (form.type === 'instagram') {
-      const cleaned = cleanInstagramHandle(instagramHandleInput);
-      if (!cleaned) {
-        setFormError('Por favor ingresa el usuario de Instagram (sin @).');
+      if (!instagramHandleInput.trim()) {
+        setFormError('Ingresa el usuario de Instagram del negocio.');
         return;
       }
-      finalTargetUrl = `https://www.instagram.com/${cleaned}/`;
+      finalTargetUrl = buildInstagramUrl(instagramHandleInput);
     } else {
-      finalTargetUrl = form.targetUrl?.trim() || '';
-      if (!finalTargetUrl) {
-        setFormError('El enlace de destino es obligatorio.');
+      if (!form.targetUrl.trim()) {
+        setFormError('Ingresa el enlace de destino.');
         return;
       }
       if (!/^https?:\/\//i.test(finalTargetUrl)) {
@@ -435,20 +455,24 @@ export default function AdminNfcCardsPage() {
       }
     }
 
-    if (!form.code.trim() || !form.clientName.trim() || !finalTargetUrl) {
-      setFormError('El número de tarjeta, cliente y destino son obligatorios.');
-      return;
-    }
-
-    const payload = {
-      ...form,
-      targetUrl: finalTargetUrl,
-    };
-
     setSubmitting(true);
-    setFormError('');
     try {
+      const payload = {
+        code: form.code.trim(),
+        clientName: form.clientName.trim(),
+        type: form.type,
+        targetUrl: finalTargetUrl,
+        active: form.active,
+        notes: form.notes.trim() || null,
+        latitude: form.latitude !== '' && form.latitude !== null ? parseFloat(form.latitude) : null,
+        longitude: form.longitude !== '' && form.longitude !== null ? parseFloat(form.longitude) : null,
+        locationName: form.locationName.trim() || null,
+        photoUrl: form.photoUrl || null,
+      };
+
+      const wasInactive = editingCard ? !editingCard.active : true;
       let savedCardData = null;
+
       if (editingCard) {
         const res = await api.put(`/admin/nfc-cards/${editingCard.id}`, payload);
         savedCardData = res.data;
@@ -456,48 +480,22 @@ export default function AdminNfcCardsPage() {
       } else {
         const res = await api.post('/admin/nfc-cards', payload);
         savedCardData = res.data;
-        showNotification(`Tarjeta #${form.code} configurada y activada.`);
+        showNotification(`Tarjeta #${form.code} vinculada exitosamente.`);
       }
-      closeModal();
-      fetchCards();
 
-      // Lanzar pantalla de celebración con serpentina para mostrársela al dueño del negocio
-      if (form.active && form.clientName.trim() && !form.clientName.includes('Disponible')) {
-        setCelebratedCard({
-          code: form.code,
-          clientName: form.clientName,
-          type: form.type,
-          targetUrl: finalTargetUrl,
-        });
+      closeModal();
+      await fetchCards();
+
+      // Trigger Celebration Modal if activated in-situ with client
+      if (payload.active && wasInactive && savedCardData) {
+        setCelebratedCard(savedCardData);
         setShowCelebrationModal(true);
       }
     } catch (err) {
-      setFormError(err.response?.data?.error || 'Error al guardar tarjeta.');
+      console.error('Error al guardar tarjeta NFC/QR:', err);
+      setFormError(err.response?.data?.error || 'Error al guardar tarjeta. Revisa los datos.');
     } finally {
       setSubmitting(false);
-    }
-  };
-
-  const handleToggleActive = async (card) => {
-    try {
-      await api.put(`/admin/nfc-cards/${card.id}`, { active: !card.active });
-      showNotification(`Tarjeta #${card.code} ${!card.active ? 'activada' : 'desactivada'}.`);
-      fetchCards();
-    } catch (err) {
-      console.error(err);
-      alert('Error al cambiar estado.');
-    }
-  };
-
-  const handleDeleteCard = async (card) => {
-    if (!window.confirm(`¿Seguro que deseas eliminar la tarjeta #${card.code} (${card.clientName})? Si alguien escanea el QR físico, dejará de funcionar.`)) return;
-    try {
-      await api.delete(`/admin/nfc-cards/${card.id}`);
-      showNotification(`Tarjeta #${card.code} eliminada.`);
-      fetchCards();
-    } catch (err) {
-      console.error(err);
-      alert('Error al eliminar tarjeta.');
     }
   };
 
@@ -524,612 +522,862 @@ export default function AdminNfcCardsPage() {
     setQrModalDataUrl('');
   };
 
-  const downloadQrImage = () => {
-    if (!qrModalDataUrl || !activeCardForQr) return;
-    const a = document.createElement('a');
-    a.href = qrModalDataUrl;
-    a.download = `QR_HummingX_${activeCardForQr.code}_${activeCardForQr.clientName.replace(/\s+/g, '_')}.png`;
-    a.click();
-  };
-
-  const downloadQrSvg = async (cardToDownload) => {
-    const targetCard = cardToDownload || activeCardForQr;
-    if (!targetCard) return;
+  const downloadQrSvg = async (card) => {
+    const redirectUrl = `https://hummingxbi.com/t/${card.code}`;
     try {
-      const url = `https://hummingxbi.com/t/${targetCard.code}`;
-      const svgContent = await QRCode.toString(url, {
+      const svgString = await QRCode.toString(redirectUrl, {
         type: 'svg',
         margin: 0,
         errorCorrectionLevel: 'Q',
         color: { dark: '#000000', light: '#FFFFFF' },
       });
-      const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `qr_${targetCard.code}.svg`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(a.href);
-      showNotification(`Código QR sin margen (qr_${targetCard.code}.svg) descargado.`);
+      const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `HummingX_QR_${card.code}_SinMargen.svg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      showNotification(`Código QR #${card.code} descargado (.svg sin margen).`);
     } catch (err) {
-      console.error('Error al generar SVG sin margen:', err);
+      console.error('Error al descargar SVG:', err);
+      alert('No se pudo descargar el SVG sin margen.');
     }
   };
 
-  // Filtered Cards
+  const downloadQrPng = (card, dataUrl) => {
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = `HummingX_QR_${card.code}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showNotification(`Código QR #${card.code} descargado (.png).`);
+  };
+
+  // Filter Cards for Inventory Tab
   const filteredCards = useMemo(() => {
-    return cards.filter((c) => {
-      const q = searchTerm.toLowerCase().trim();
-      const matchSearch =
-        !q ||
-        c.code.toLowerCase().includes(q) ||
-        c.clientName.toLowerCase().includes(q) ||
-        c.targetUrl.toLowerCase().includes(q) ||
-        (c.notes && c.notes.toLowerCase().includes(q));
-
-      if (!matchSearch) return false;
-      if (typeFilter !== 'all' && c.type !== typeFilter) return false;
-      if (statusFilter === 'active' && !c.active) return false;
-      if (statusFilter === 'inactive' && c.active) return false;
-
-      return true;
+    return cards.filter((card) => {
+      const matchesSearch =
+        card.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        card.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (card.notes && card.notes.toLowerCase().includes(searchTerm.toLowerCase()));
+      const matchesType = typeFilter === 'all' || card.type === typeFilter;
+      const matchesStatus =
+        statusFilter === 'all' ||
+        (statusFilter === 'active' && card.active) ||
+        (statusFilter === 'inactive' && !card.active);
+      return matchesSearch && matchesType && matchesStatus;
     });
   }, [cards, searchTerm, typeFilter, statusFilter]);
 
   return (
     <Layout>
-      <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginTop: '-12px', paddingBottom: '40px' }}>
+      <div style={{ maxWidth: '1280px', margin: '0 auto', paddingBottom: '60px' }}>
         
-        {/* Toast Notification */}
+        {/* ── Notification Toast ─────────────────────────────────────────── */}
         {toastMessage && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            background: 'linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%)',
-            border: '1px solid #10B981',
-            borderRadius: '12px',
-            padding: '14px 20px',
-            color: '#065F46',
-            fontSize: '14px',
-            fontWeight: 500,
-            boxShadow: '0 4px 12px rgba(16, 185, 129, 0.15)',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <CheckCircle2 size={18} color="#059669" />
-              <span>{toastMessage}</span>
-            </div>
-            <button
-              onClick={() => setToastMessage('')}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#065F46' }}
-            >
-              <X size={16} />
-            </button>
+          <div
+            style={{
+              position: 'fixed',
+              top: '24px',
+              right: '24px',
+              zIndex: 9999,
+              background: '#0F172A',
+              color: '#FFFFFF',
+              border: '1px solid rgba(0, 196, 204, 0.4)',
+              borderRadius: '12px',
+              padding: '14px 20px',
+              boxShadow: '0 10px 25px rgba(0,0,0,0.4)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              fontSize: '13.5px',
+              fontWeight: 600,
+              animation: 'hxSlideIn 0.25s ease-out',
+            }}
+          >
+            <CheckCircle2 size={18} color="#00C4CC" />
+            <span>{toastMessage}</span>
           </div>
         )}
 
-        {/* ── Header ─────────────────────────────────────── */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+        {/* ── Top Header ─────────────────────────────────────────────────── */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-              <div
-                style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '10px',
-                  background: 'linear-gradient(135deg, #0284C7 0%, #00C4CC 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#FFFFFF',
-                  boxShadow: '0 4px 12px rgba(0, 196, 204, 0.25)',
-                }}
-              >
-                <QrCode size={18} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+              <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'rgba(0,196,204,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Smartphone size={22} color="#00C4CC" />
               </div>
-              <h1 style={{ fontSize: '24px', fontWeight: 800, color: '#111827', margin: 0, letterSpacing: '-0.02em', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              <h1 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--color-primary, #FFFFFF)', margin: 0, letterSpacing: '-0.02em' }}>
                 Tarjetas QR & NFC
               </h1>
             </div>
-            <p style={{ fontSize: '14px', color: '#6B7280', margin: 0, maxWidth: '640px' }}>
-              Configura y administra las tarjetas físicas con chip NFC y QR vendidos a clientes (Google Reviews, Instagram, WhatsApp o Menú).
+            <p style={{ margin: 0, fontSize: '13.5px', color: '#94A3B8' }}>
+              Gestión de chips NFC físicos y códigos QR vectoriales con redirección inteligente.
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
-            <button
-              onClick={openBatchModal}
-              className="btn-secondary"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '10px 16px',
-                borderRadius: '10px',
-                fontWeight: 600,
-                fontSize: '13.5px',
-                background: '#FFFFFF',
-                border: '1px solid #D1D5DB',
-                color: '#374151',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              <Layers size={16} color="#00C4CC" />
-              Generar Lote QR
-            </button>
-
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             <button
               onClick={openNewModal}
               className="btn-primary"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '10px 18px',
-                borderRadius: '10px',
-                fontWeight: 600,
-                fontSize: '13.5px',
-              }}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', borderRadius: '12px', fontSize: '13.5px' }}
             >
               <Plus size={16} />
-              Configurar Nueva Tarjeta
+              <span>Nueva Tarjeta</span>
             </button>
           </div>
         </div>
 
-        {/* ── Top Metrics Bar ─────────────────────────────────────── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '14px' }}>
-          <div className="card" style={{ padding: '18px 20px', borderRadius: '12px', border: '1px solid #E5E7EB', background: '#FFFFFF' }}>
-            <span style={{ fontSize: '12px', color: '#6B7280', fontWeight: 500, display: 'block', marginBottom: '6px' }}>Total Tarjetas Vendidas / Configuradas</span>
-            <span style={{ fontSize: '26px', fontWeight: 800, color: '#111827' }}>{metrics.totalCards}</span>
+        {/* ── KPI Metric Cards ───────────────────────────────────────────── */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+          
+          <div className="card" style={{ padding: '20px', borderRadius: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+              <span style={{ fontSize: '12.5px', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Total Asignadas
+              </span>
+              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <QrCode size={16} color="#94A3B8" />
+              </div>
+            </div>
+            <div style={{ fontSize: '28px', fontWeight: 800, color: '#FFFFFF', marginBottom: '4px' }}>
+              {metrics.totalCards}
+            </div>
+            <div style={{ fontSize: '12px', color: '#64748B' }}>
+              Lotes activos en base de datos
+            </div>
           </div>
 
-          <div className="card" style={{ padding: '18px 20px', borderRadius: '12px', border: '1px solid #E5E7EB', background: '#FFFFFF' }}>
-            <span style={{ fontSize: '12px', color: '#6B7280', fontWeight: 500, display: 'block', marginBottom: '6px' }}>Tarjetas Activas</span>
-            <span style={{ fontSize: '26px', fontWeight: 800, color: '#047857' }}>{metrics.activeCards}</span>
+          <div className="card" style={{ padding: '20px', borderRadius: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+              <span style={{ fontSize: '12.5px', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                En Clientes (Activas)
+              </span>
+              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(16,185,129,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CheckCircle2 size={16} color="#10B981" />
+              </div>
+            </div>
+            <div style={{ fontSize: '28px', fontWeight: 800, color: '#10B981', marginBottom: '4px' }}>
+              {metrics.activeCards}
+            </div>
+            <div style={{ fontSize: '12px', color: '#64748B' }}>
+              Redirigiendo a reseñas o redes
+            </div>
           </div>
 
-          <div className="card" style={{ padding: '18px 20px', borderRadius: '12px', border: '1px solid #E5E7EB', background: '#FFFFFF' }}>
-            <span style={{ fontSize: '12px', color: '#6B7280', fontWeight: 500, display: 'block', marginBottom: '6px' }}>Escaneos & Taps Acumulados</span>
-            <span style={{ fontSize: '26px', fontWeight: 800, color: '#00C4CC' }}>{metrics.totalScans}</span>
+          <div className="card" style={{ padding: '20px', borderRadius: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+              <span style={{ fontSize: '12.5px', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Disponibles para Asignar
+              </span>
+              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(245,158,11,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Package size={16} color="#F59E0B" />
+              </div>
+            </div>
+            <div style={{ fontSize: '28px', fontWeight: 800, color: '#F59E0B', marginBottom: '4px' }}>
+              {metrics.inactiveCards}
+            </div>
+            <div style={{ fontSize: '12px', color: '#64748B' }}>
+              Listas para vincular con prospectos
+            </div>
           </div>
 
-          <div className="card" style={{ padding: '18px 20px', borderRadius: '12px', border: '1px solid #E5E7EB', background: '#FFFFFF' }}>
-            <span style={{ fontSize: '12px', color: '#6B7280', fontWeight: 500, display: 'block', marginBottom: '6px' }}>Siguiente Número Disponible</span>
-            <span style={{ fontSize: '26px', fontWeight: 800, color: '#7C3AED', fontFamily: 'monospace' }}>#{metrics.nextSuggestedCode}</span>
+          <div className="card" style={{ padding: '20px', borderRadius: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+              <span style={{ fontSize: '12.5px', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Escaneos / Taps Totales
+              </span>
+              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(0,196,204,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Flame size={16} color="#00C4CC" />
+              </div>
+            </div>
+            <div style={{ fontSize: '28px', fontWeight: 800, color: '#00C4CC', marginBottom: '4px' }}>
+              {metrics.totalScans}
+            </div>
+            <div style={{ fontSize: '12px', color: '#64748B' }}>
+              Impactos registrados en tiempo real
+            </div>
           </div>
+
         </div>
 
-        {/* ── Search & Filter Bar ─────────────────────────────────── */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '10px', padding: '8px 14px', flex: '1 1 240px', maxWidth: '100%' }}>
-            <Search size={15} color="#9CA3AF" />
-            <input
-              type="text"
-              placeholder="Buscar por código (#001), cliente o destino..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{ border: 'none', outline: 'none', fontSize: '13px', width: '100%', background: 'transparent' }}
-            />
-          </div>
-
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            {/* Filter by Type */}
-            <select
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
+        {/* ── Segmented Control: Pestañas Principales (Pill Bar) ─────────── */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            marginBottom: '24px',
+            background: 'rgba(255, 255, 255, 0.04)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            padding: '6px',
+            borderRadius: '16px',
+            width: 'fit-content',
+            backdropFilter: 'blur(10px)'
+          }}
+        >
+          <button
+            onClick={() => setActiveTab('inventory')}
+            style={{
+              border: 'none',
+              borderRadius: '12px',
+              padding: '10px 18px',
+              fontSize: '13.5px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'all 0.2s ease',
+              background: activeTab === 'inventory' ? '#00C4CC' : 'transparent',
+              color: activeTab === 'inventory' ? '#0B0F19' : '#94A3B8',
+              boxShadow: activeTab === 'inventory' ? '0 4px 14px rgba(0, 196, 204, 0.35)' : 'none',
+            }}
+          >
+            <Package size={16} />
+            <span>💳 Inventario de Tarjetas</span>
+            <span
               style={{
-                padding: '8px 12px',
-                borderRadius: '10px',
-                border: '1px solid #E5E7EB',
-                background: '#FFFFFF',
-                fontSize: '12.5px',
-                fontWeight: 600,
-                color: '#374151',
-                outline: 'none',
-                cursor: 'pointer',
+                fontSize: '11px',
+                fontWeight: 800,
+                padding: '2px 7px',
+                borderRadius: '999px',
+                background: activeTab === 'inventory' ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.08)',
+                color: activeTab === 'inventory' ? '#0B0F19' : '#CBD5E1',
               }}
             >
-              <option value="all">Todos los Tipos de Acción</option>
-              {Object.entries(CARD_TYPES).map(([val, cfg]) => (
-                <option key={val} value={val}>{cfg.label}</option>
-              ))}
-            </select>
+              {cards.length}
+            </span>
+          </button>
 
-            {/* Filter by Status */}
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              style={{
-                padding: '8px 12px',
-                borderRadius: '10px',
-                border: '1px solid #E5E7EB',
-                background: '#FFFFFF',
-                fontSize: '12.5px',
-                fontWeight: 600,
-                color: '#374151',
-                outline: 'none',
-                cursor: 'pointer',
-              }}
-            >
-              <option value="all">Todos los Estados</option>
-              <option value="active">Solo Activas</option>
-              <option value="inactive">Solo Inactivas</option>
-            </select>
-          </div>
+          <button
+            onClick={() => setActiveTab('map')}
+            style={{
+              border: 'none',
+              borderRadius: '12px',
+              padding: '10px 18px',
+              fontSize: '13.5px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'all 0.2s ease',
+              background: activeTab === 'map' ? 'linear-gradient(135deg, #00C4CC 0%, #0284C7 100%)' : 'transparent',
+              color: activeTab === 'map' ? '#0B0F19' : '#94A3B8',
+              boxShadow: activeTab === 'map' ? '0 4px 14px rgba(0, 196, 204, 0.35)' : 'none',
+            }}
+          >
+            <MapPin size={16} />
+            <span>🗺️ Mapa de Territorio HummingX</span>
+            {metrics.activeCards > 0 && (
+              <span
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  padding: '2px 7px',
+                  borderRadius: '999px',
+                  background: activeTab === 'map' ? '#0B0F19' : 'rgba(16, 185, 129, 0.2)',
+                  color: activeTab === 'map' ? '#00C4CC' : '#10B981',
+                }}
+              >
+                {metrics.activeCards}
+              </span>
+            )}
+          </button>
         </div>
 
-        {/* ── Cards Grid ─────────────────────────────────────────── */}
-        {loading ? (
-          <div style={{ padding: '60px', textAlign: 'center', color: '#6B7280' }}>
-            <p>Cargando tarjetas NFC y códigos QR...</p>
-          </div>
-        ) : filteredCards.length === 0 ? (
-          <div className="card" style={{ padding: '60px 20px', textAlign: 'center', borderRadius: '16px', border: '1px solid #E5E7EB', background: '#FFFFFF' }}>
-            <QrCode size={36} color="#9CA3AF" style={{ marginBottom: '12px' }} />
-            <h3 style={{ fontSize: '17px', fontWeight: 700, color: '#111827', margin: '0 0 6px' }}>
-              No hay tarjetas en este filtro
-            </h3>
-            <p style={{ fontSize: '13.5px', color: '#6B7280', margin: '0 0 20px' }}>
-              Configura una tarjeta NFC para asignarle un destino de reseñas, Instagram o menú al cliente.
-            </p>
-            <button onClick={openNewModal} className="btn-primary" style={{ fontSize: '13px', padding: '8px 16px' }}>
-              <Plus size={14} /> Configurar Primera Tarjeta
-            </button>
-          </div>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))', gap: '16px' }}>
-            {filteredCards.map((card) => {
-              const typeCfg = CARD_TYPES[card.type] || CARD_TYPES.google_reviews;
-              const TypeIcon = typeCfg.icon;
-              const shortUrl = `https://hummingxbi.com/t/${card.code}`;
+        {/* ── TAB 2: MAPA DE TERRITORIO HUMMINGX ─────────────────────────── */}
+        {activeTab === 'map' && (
+          <NfcCardsMap
+            cards={cards}
+            onCardClick={(card) => openViewCardModal(card)}
+          />
+        )}
 
-              return (
-                <div
-                  key={card.id}
-                  className="card"
-                  style={{
-                    padding: '20px',
-                    borderRadius: '16px',
-                    border: '1px solid #E5E7EB',
-                    background: '#FFFFFF',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '14px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
-                    transition: 'border-color 0.15s ease',
-                  }}
-                >
-                  {/* Top Bar: Code Badge + Type Pill + Active Toggle */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                      <span
-                        style={{
-                          padding: '4px 10px',
-                          borderRadius: '8px',
-                          background: '#111827',
-                          color: '#FFFFFF',
-                          fontFamily: 'monospace',
-                          fontWeight: 800,
-                          fontSize: '13px',
-                          letterSpacing: '0.05em',
-                        }}
-                      >
-                        #{card.code}
-                      </span>
+        {/* ── TAB 1: INVENTARIO DE TARJETAS ──────────────────────────────── */}
+        {activeTab === 'inventory' && (
+          <>
+            {/* Filter and Search Bar */}
+            <div
+              className="card"
+              style={{
+                padding: '16px 20px',
+                borderRadius: '16px',
+                marginBottom: '20px',
+                display: 'flex',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '12px',
+              }}
+            >
+              {/* Search input */}
+              <div style={{ position: 'relative', flex: '1', minWidth: '240px' }}>
+                <Search
+                  size={16}
+                  style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#64748B' }}
+                />
+                <input
+                  type="text"
+                  placeholder="Buscar por # número de serie o nombre de negocio..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="hx-input"
+                  style={{ paddingLeft: '36px', height: '40px', fontSize: '13px' }}
+                />
+              </div>
 
-                      <span
-                        style={{
-                          padding: '3px 8px',
-                          borderRadius: '6px',
-                          background: typeCfg.bg,
-                          color: typeCfg.color,
-                          border: `1px solid ${typeCfg.border}`,
-                          fontSize: '11.5px',
-                          fontWeight: 700,
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '5px',
-                        }}
-                      >
-                        <TypeIcon size={12} />
-                        {typeCfg.label}
-                      </span>
-                    </div>
-
-                    {/* Active toggle button */}
-                    <button
-                      onClick={() => handleToggleActive(card)}
-                      style={{
-                        padding: '3px 10px',
-                        borderRadius: '9999px',
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        border: card.active ? '1px solid #A7F3D0' : '1px solid #E5E7EB',
-                        background: card.active ? '#ECFDF5' : '#F3F4F6',
-                        color: card.active ? '#047857' : '#6B7280',
-                        cursor: 'pointer',
-                        transition: 'all 0.15s ease',
-                      }}
-                      title="Haz clic para activar o desactivar la redirección"
-                    >
-                      {card.active ? 'Activa' : 'Pausada'}
-                    </button>
-                  </div>
-
-                  {/* Client & Assigned Name */}
-                  <div>
-                    <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#111827', margin: '0 0 2px', letterSpacing: '-0.01em' }}>
-                      {card.clientName}
-                    </h3>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#6B7280' }}>
-                      <span>Link físico del chip:</span>
-                      <code style={{ background: '#F1F5F9', padding: '1px 6px', borderRadius: '4px', color: '#0F172A', fontWeight: 600 }}>
-                        hummingxbi.com/t/{card.code}
-                      </code>
-                    </div>
-                  </div>
-
-                  {/* Destination URL Box */}
-                  <div
-                    style={{
-                      background: '#F8FAFC',
-                      border: '1px solid #E2E8F0',
-                      borderRadius: '10px',
-                      padding: '10px 12px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '4px',
-                    }}
+              {/* Filters */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Filter size={14} color="#64748B" />
+                  <select
+                    value={typeFilter}
+                    onChange={(e) => setTypeFilter(e.target.value)}
+                    className="hx-input"
+                    style={{ height: '40px', fontSize: '13px', paddingRight: '28px', minWidth: '150px' }}
                   >
-                    <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      Destino de Redirección
-                    </span>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-                      <span
-                        style={{
-                          fontSize: '12.5px',
-                          color: '#0284C7',
-                          fontWeight: 500,
-                          wordBreak: 'break-all',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 1,
-                          WebkitBoxOrient: 'vertical',
-                        }}
-                        title={card.targetUrl}
-                      >
-                        {card.targetUrl}
-                      </span>
-
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-                        <button
-                          onClick={() => copyToClipboard(card.targetUrl, card.id)}
-                          style={{
-                            background: '#FFFFFF',
-                            border: '1px solid #CBD5E1',
-                            borderRadius: '6px',
-                            padding: '4px 6px',
-                            cursor: 'pointer',
-                            color: copiedId === card.id ? '#059669' : '#475569',
-                            display: 'flex',
-                            alignItems: 'center',
-                          }}
-                          title="Copiar enlace"
-                        >
-                          {copiedId === card.id ? <Check size={12} /> : <Copy size={12} />}
-                        </button>
-
-                        <a
-                          href={card.targetUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{
-                            background: '#FFFFFF',
-                            border: '1px solid #CBD5E1',
-                            borderRadius: '6px',
-                            padding: '4px 6px',
-                            color: '#475569',
-                            display: 'flex',
-                            alignItems: 'center',
-                            textDecoration: 'none',
-                          }}
-                          title="Probar destino en nueva pestaña"
-                        >
-                          <ExternalLink size={12} />
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Notes if any */}
-                  {card.notes && (
-                    <p style={{ margin: 0, fontSize: '12px', color: '#6B7280', fontStyle: 'italic' }}>
-                      Nota: {card.notes}
-                    </p>
-                  )}
-
-                  {/* Bottom: Scan Counter + Action Buttons */}
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      paddingTop: '10px',
-                      borderTop: '1px solid #F1F5F9',
-                      flexWrap: 'wrap',
-                      gap: '8px',
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Smartphone size={14} color="#00C4CC" />
-                      <span style={{ fontSize: '12.5px', fontWeight: 700, color: '#111827' }}>
-                        {card.scanCount}
-                      </span>
-                      <span style={{ fontSize: '11.5px', color: '#64748B' }}>escaneos</span>
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                      {(!card.active || card.clientName.includes('Disponible')) ? (
-                        <button
-                          onClick={() => openConfigureCardModal(card)}
-                          className="btn-accent"
-                          style={{
-                            fontSize: '12px',
-                            padding: '6px 12px',
-                            borderRadius: '8px',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '5px',
-                            fontWeight: 700,
-                            boxShadow: '0 2px 8px rgba(0, 196, 204, 0.25)',
-                          }}
-                        >
-                          <Sparkles size={13} />
-                          Vincular en el Lugar
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => openQrPreview(card)}
-                          className="btn-secondary"
-                          style={{
-                            fontSize: '12px',
-                            padding: '6px 10px',
-                            borderRadius: '8px',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '5px',
-                          }}
-                        >
-                          <QrCode size={13} color="#00C4CC" />
-                          Ver QR
-                        </button>
-                      )}
-
-                      <button
-                        onClick={() => downloadQrSvg(card)}
-                        className="btn-secondary"
-                        style={{ padding: '6px 8px', borderRadius: '8px' }}
-                        title="Descargar código QR sin margen (.svg)"
-                      >
-                        <Download size={13} color="#00C4CC" />
-                      </button>
-
-                      <button
-                        onClick={() => openEditModal(card)}
-                        className="btn-secondary"
-                        style={{ padding: '6px 8px', borderRadius: '8px' }}
-                        title="Editar configuración"
-                      >
-                        <Edit size={13} />
-                      </button>
-
-                      <button
-                        onClick={() => handleDeleteCard(card)}
-                        className="btn-secondary"
-                        style={{ padding: '6px 8px', borderRadius: '8px', color: '#DC2626' }}
-                        title="Eliminar tarjeta"
-                      >
-                        <Trash2 size={13} />
-                      </button>
-                    </div>
-                  </div>
-
+                    <option value="all">Todos los Tipos</option>
+                    <option value="google_reviews">⭐ Reseñas Google</option>
+                    <option value="instagram">📸 Instagram</option>
+                    <option value="whatsapp">💬 WhatsApp</option>
+                    <option value="menu">🍽️ Menú</option>
+                    <option value="website">🌐 Web</option>
+                  </select>
                 </div>
-              );
-            })}
-          </div>
+
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="hx-input"
+                  style={{ height: '40px', fontSize: '13px', paddingRight: '28px', minWidth: '140px' }}
+                >
+                  <option value="all">Todos los Estados</option>
+                  <option value="active">Activas (En Cliente)</option>
+                  <option value="inactive">Disponibles / Pausadas</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Micro-Cards Grid for Field & Mobile */}
+            {loading ? (
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
+                <Loader2 className="animate-spin" size={32} color="#00C4CC" />
+              </div>
+            ) : filteredCards.length === 0 ? (
+              <div className="card" style={{ padding: '60px 20px', textAlign: 'center', borderRadius: '16px' }}>
+                <QrCode size={48} color="#475569" style={{ margin: '0 auto 16px' }} />
+                <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#FFFFFF', marginBottom: '8px' }}>
+                  No se encontraron tarjetas
+                </h3>
+                <p style={{ fontSize: '13.5px', color: '#94A3B8', margin: 0 }}>
+                  Intenta cambiar los filtros de búsqueda o registra una nueva tarjeta.
+                </p>
+              </div>
+            ) : (
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(310px, 1fr))',
+                  gap: '16px',
+                }}
+              >
+                {filteredCards.map((card) => {
+                  const num = parseInt(card.code, 10);
+                  const isInstagramBatch = num >= 11 && num <= 15;
+                  const isGoogleBatch = num >= 1 && num <= 10;
+                  const typeDef = CARD_TYPES[card.type] || CARD_TYPES.google_reviews;
+                  const Icon = typeDef.icon;
+
+                  // Aesthetic border & glow depending on batch
+                  const borderColor = isInstagramBatch
+                    ? 'rgba(236, 72, 153, 0.3)'
+                    : isGoogleBatch
+                    ? 'rgba(245, 158, 11, 0.28)'
+                    : 'rgba(255, 255, 255, 0.08)';
+
+                  const glowBg = isInstagramBatch
+                    ? 'radial-gradient(circle at top right, rgba(236, 72, 153, 0.06) 0%, transparent 70%)'
+                    : isGoogleBatch
+                    ? 'radial-gradient(circle at top right, rgba(245, 158, 11, 0.06) 0%, transparent 70%)'
+                    : 'transparent';
+
+                  return (
+                    <div
+                      key={card.id}
+                      className="card"
+                      style={{
+                        padding: '18px 20px',
+                        borderRadius: '16px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        border: `1px solid ${borderColor}`,
+                        background: `#0F172A ${glowBg}`,
+                        boxShadow: card.active ? '0 8px 20px -8px rgba(0,0,0,0.5)' : 'none',
+                        position: 'relative',
+                        transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                      }}
+                    >
+                      {/* ── Micro-Card Element A: Compact Header ─────────── */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span
+                            style={{
+                              fontFamily: 'monospace',
+                              fontWeight: 800,
+                              fontSize: '12px',
+                              padding: '2px 8px',
+                              borderRadius: '6px',
+                              background: '#1E293B',
+                              color: '#38BDF8',
+                              border: '1px solid rgba(56, 189, 248, 0.25)',
+                            }}
+                          >
+                            #{card.code}
+                          </span>
+
+                          {/* Category Badge */}
+                          <span
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              padding: '2px 8px',
+                              borderRadius: '999px',
+                              background: typeDef.bg,
+                              color: typeDef.color,
+                              border: `1px solid ${typeDef.border}`,
+                            }}
+                          >
+                            <Icon size={11} />
+                            <span>{typeDef.label}</span>
+                          </span>
+                        </div>
+
+                        {/* Status Indicator */}
+                        {card.active ? (
+                          <span
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              fontSize: '11.5px',
+                              fontWeight: 700,
+                              color: '#10B981',
+                              background: 'rgba(16, 185, 129, 0.12)',
+                              padding: '2px 9px',
+                              borderRadius: '999px',
+                              border: '1px solid rgba(16, 185, 129, 0.25)',
+                            }}
+                          >
+                            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10B981' }} />
+                            <span>Activa</span>
+                          </span>
+                        ) : (
+                          <span
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              fontSize: '11.5px',
+                              fontWeight: 600,
+                              color: '#94A3B8',
+                              background: 'rgba(255, 255, 255, 0.05)',
+                              padding: '2px 8px',
+                              borderRadius: '999px',
+                            }}
+                          >
+                            <span>Disponible</span>
+                          </span>
+                        )}
+                      </div>
+
+                      {/* ── Micro-Card Element B: Body (Name + Avatar/Photo) */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                        {/* Evidence photo or Avatar */}
+                        {card.photoUrl ? (
+                          <img
+                            src={card.photoUrl}
+                            alt={card.clientName}
+                            style={{
+                              width: '46px',
+                              height: '46px',
+                              borderRadius: '12px',
+                              objectFit: 'cover',
+                              border: '2px solid rgba(0, 196, 204, 0.5)',
+                              boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
+                              flexShrink: 0,
+                            }}
+                          />
+                        ) : (
+                          <div
+                            style={{
+                              width: '46px',
+                              height: '46px',
+                              borderRadius: '12px',
+                              background: card.active
+                                ? (isInstagramBatch ? 'rgba(236, 72, 153, 0.15)' : 'rgba(245, 158, 11, 0.15)')
+                                : 'rgba(255, 255, 255, 0.04)',
+                              border: `1.5px solid ${card.active ? (isInstagramBatch ? '#EC4899' : '#F59E0B') + '44' : 'rgba(255, 255, 255, 0.08)'}`,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '20px',
+                              flexShrink: 0,
+                            }}
+                          >
+                            {isInstagramBatch ? '📸' : '⭐'}
+                          </div>
+                        )}
+
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <h3
+                            style={{
+                              fontSize: '16px',
+                              fontWeight: 800,
+                              color: card.active ? '#FFFFFF' : '#94A3B8',
+                              margin: '0 0 2px',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              letterSpacing: '-0.01em',
+                            }}
+                          >
+                            {card.clientName && !card.clientName.includes('Disponible') ? card.clientName : 'Lista para vincular'}
+                          </h3>
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11.5px', color: '#64748B' }}>
+                            {card.locationName ? (
+                              <>
+                                <MapPin size={11} color="#38BDF8" />
+                                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {card.locationName}
+                                </span>
+                              </>
+                            ) : card.active ? (
+                              <span style={{ color: '#00C4CC' }}>Vinculada con cliente</span>
+                            ) : (
+                              <span>Sin cliente asignado aún</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* ── Micro-Card Element C: Clean Footer (Scans + 1 Action Button) */}
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          paddingTop: '12px',
+                          borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                          gap: '10px',
+                        }}
+                      >
+                        {/* Scans Metric */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', color: '#94A3B8' }}>
+                          <Flame size={14} color={card.scanCount > 0 ? '#F59E0B' : '#64748B'} />
+                          <span style={{ fontWeight: card.scanCount > 0 ? 700 : 500, color: card.scanCount > 0 ? '#FFFFFF' : '#64748B' }}>
+                            {card.scanCount} {card.scanCount === 1 ? 'escaneo' : 'escaneos'}
+                          </span>
+                        </div>
+
+                        {/* SINGLE ACTION BUTTON (Anti-Error Safety Mode) */}
+                        {card.active ? (
+                          <button
+                            onClick={() => openViewCardModal(card)}
+                            style={{
+                              background: 'rgba(255, 255, 255, 0.07)',
+                              border: '1px solid rgba(255, 255, 255, 0.15)',
+                              color: '#FFFFFF',
+                              borderRadius: '10px',
+                              padding: '8px 14px',
+                              fontSize: '12px',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              transition: 'all 0.15s ease',
+                            }}
+                            title="Ver detalles, QR y desbloquear edición de seguridad"
+                          >
+                            <Lock size={12} color="#94A3B8" />
+                            <span>🔒 Ver / Editar</span>
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => openBindInSituModal(card)}
+                            style={{
+                              background: 'linear-gradient(135deg, #00C4CC 0%, #0284C7 100%)',
+                              border: 'none',
+                              color: '#0B0F19',
+                              borderRadius: '10px',
+                              padding: '8px 14px',
+                              fontSize: '12px',
+                              fontWeight: 800,
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              boxShadow: '0 3px 10px rgba(0, 196, 204, 0.3)',
+                              transition: 'all 0.15s ease',
+                            }}
+                            title="Vincular tarjeta directamente en el negocio del cliente"
+                          >
+                            <Zap size={13} fill="#0B0F19" />
+                            <span>⚡ Vincular en el Lugar</span>
+                          </button>
+                        )}
+                      </div>
+
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
         )}
 
       </div>
 
-      {/* ── Modal: Configurar / Editar Tarjeta ─────────────────────────────── */}
+      {/* ── Modal Inteligente: Ver / Editar / Vincular Tarjeta ─────────────── */}
       {showModal && createPortal(
         <div
           className={`modal-overlay${closingModal ? ' closing' : ''}`}
           onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
         >
-          <div className="modal-content" style={{ maxWidth: '540px', width: '100%', borderRadius: '16px', padding: '32px' }}>
-            <button
-              onClick={closeModal}
-              style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', cursor: 'pointer', color: '#6B7280' }}
+          <div
+            className="modal-content"
+            style={{
+              maxWidth: '560px',
+              width: '100%',
+              borderRadius: '20px',
+              padding: '28px',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+            }}
+          >
+            {/* Modal Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                  <span
+                    style={{
+                      fontFamily: 'monospace',
+                      fontWeight: 800,
+                      fontSize: '13px',
+                      padding: '2px 8px',
+                      borderRadius: '6px',
+                      background: '#1E293B',
+                      color: '#00C4CC',
+                      border: '1px solid rgba(0, 196, 204, 0.3)',
+                    }}
+                  >
+                    Tarjeta #{form.code}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      color: form.active ? '#10B981' : '#F59E0B',
+                    }}
+                  >
+                    {form.active ? '● Tarjeta Activa' : '○ Tarjeta Disponible'}
+                  </span>
+                </div>
+
+                <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#111827', margin: 0 }}>
+                  {editingCard ? (isLocked ? 'Detalles de Tarjeta Activa' : 'Modificar Tarjeta') : 'Vincular Nueva Tarjeta'}
+                </h2>
+              </div>
+
+              {/* Close Button & Security Lock Toggle */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                {editingCard && form.active && (
+                  <button
+                    type="button"
+                    onClick={() => setIsLocked(!isLocked)}
+                    style={{
+                      border: '1px solid',
+                      borderColor: isLocked ? '#FDE68A' : '#A7F3D0',
+                      background: isLocked ? '#FEF3C7' : '#ECFDF5',
+                      color: isLocked ? '#92400E' : '#065F46',
+                      borderRadius: '8px',
+                      padding: '5px 10px',
+                      fontSize: '11.5px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      transition: 'all 0.15s ease',
+                    }}
+                    title={isLocked ? 'Desbloquear campos para editar' : 'Bloquear campos'}
+                  >
+                    {isLocked ? <Unlock size={12} /> : <Lock size={12} />}
+                    <span>{isLocked ? '🔓 Desbloquear edición' : '🔒 Bloquear'}</span>
+                  </button>
+                )}
+
+                <button
+                  onClick={closeModal}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: '#6B7280',
+                    padding: '4px',
+                  }}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            </div>
+
+            {/* Read-Only Safety Banner */}
+            {isLocked && editingCard && form.active && (
+              <div
+                style={{
+                  background: '#F8FAFC',
+                  border: '1px solid #E2E8F0',
+                  borderRadius: '12px',
+                  padding: '12px 14px',
+                  marginBottom: '18px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  fontSize: '12px',
+                  color: '#475569',
+                }}
+              >
+                <Lock size={16} color="#64748B" style={{ flexShrink: 0 }} />
+                <span>
+                  <b>Modo Seguro Activado:</b> Los campos están protegidos contra cambios accidentales. Haz clic en <b>🔓 Desbloquear edición</b> arriba si necesitas reasignar o desvincular.
+                </span>
+              </div>
+            )}
+
+            {/* Quick Physical Chip Links in Modal */}
+            <div
+              style={{
+                background: '#F1F5F9',
+                border: '1px solid #E2E8F0',
+                borderRadius: '12px',
+                padding: '12px 14px',
+                marginBottom: '18px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '10px',
+              }}
             >
-              <X size={20} />
-            </button>
+              <div>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', display: 'block' }}>
+                  Enlace físico del chip / QR:
+                </span>
+                <code style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A', fontFamily: 'monospace' }}>
+                  hummingxbi.com/t/{form.code}
+                </code>
+              </div>
 
-            <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#111827', margin: '0 0 4px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-              {editingCard ? `Editar Tarjeta #${editingCard.code}` : 'Configurar Tarjeta QR & NFC'}
-            </h2>
-            <p style={{ fontSize: '13px', color: '#6B7280', margin: '0 0 20px' }}>
-              Vincula el número de la tarjeta física al negocio del cliente y su enlace de destino.
-            </p>
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(`https://hummingxbi.com/t/${form.code}`, `modal-${form.code}`)}
+                  className="btn-secondary"
+                  style={{ padding: '6px 10px', borderRadius: '8px', fontSize: '11.5px', gap: '4px' }}
+                >
+                  {copiedId === `modal-${form.code}` ? <Check size={12} color="#10B981" /> : <Copy size={12} />}
+                  <span>{copiedId === `modal-${form.code}` ? 'Copiado' : 'Copiar'}</span>
+                </button>
 
+                <button
+                  type="button"
+                  onClick={() => openQrPreview({ code: form.code, clientName: form.clientName })}
+                  className="btn-secondary"
+                  style={{ padding: '6px 10px', borderRadius: '8px', fontSize: '11.5px', gap: '4px' }}
+                >
+                  <QrCode size={12} color="#00C4CC" />
+                  <span>Ver QR</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Form Error Alert */}
             {formError && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '8px', color: '#B91C1C', fontSize: '12.5px', marginBottom: '16px' }}>
-                <AlertCircle size={15} />
+              <div
+                style={{
+                  background: '#FEF2F2',
+                  border: '1px solid #FCA5A5',
+                  borderRadius: '10px',
+                  padding: '10px 14px',
+                  marginBottom: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  color: '#991B1B',
+                  fontSize: '13px',
+                }}
+              >
+                <AlertCircle size={16} />
                 <span>{formError}</span>
               </div>
             )}
 
-            <form onSubmit={handleSaveCard} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
-                <div>
-                  <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' }}>
-                    Número Tarjeta *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="001"
-                    className="hx-input"
-                    value={form.code}
-                    onChange={(e) => setForm({ ...form, code: e.target.value })}
-                    style={{ fontFamily: 'monospace', fontWeight: 700 }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' }}>
-                    Cliente / Negocio *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Ej. Tahara Café, Dr. Fernando Robles"
-                    className="hx-input"
-                    value={form.clientName}
-                    onChange={(e) => setForm({ ...form, clientName: e.target.value })}
-                  />
-                </div>
-              </div>
-
+            <form onSubmit={handleSaveCard} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              
+              {/* Client Name */}
               <div>
                 <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' }}>
-                  Tipo de Acción / Propósito *
+                  Nombre del Cliente o Negocio *
                 </label>
-                <select
+                <input
+                  type="text"
+                  required
+                  disabled={isLocked}
+                  placeholder="Ej. Kikis el Camarón, Valhalla Gym, Tahara Café"
                   className="hx-input"
-                  value={form.type}
-                  onChange={(e) => setForm({ ...form, type: e.target.value })}
-                >
-                  {Object.entries(CARD_TYPES).map(([val, cfg]) => (
-                    <option key={val} value={val}>{cfg.label}</option>
-                  ))}
-                </select>
-                <span style={{ fontSize: '11.5px', color: '#6B7280', display: 'block', marginTop: '4px' }}>
-                  {CARD_TYPES[form.type]?.hint}
-                </span>
+                  style={{ opacity: isLocked ? 0.75 : 1, fontWeight: 700 }}
+                  value={form.clientName}
+                  onChange={(e) => setForm({ ...form, clientName: e.target.value })}
+                />
               </div>
 
-              {/* ── Dynamic Field by Card Type ── */}
+              {/* Type Selector */}
+              <div>
+                <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' }}>
+                  Objetivo del Soporte *
+                </label>
+                <select
+                  disabled={isLocked}
+                  value={form.type}
+                  onChange={(e) => setForm({ ...form, type: e.target.value })}
+                  className="hx-input"
+                  style={{ opacity: isLocked ? 0.75 : 1, fontWeight: 600 }}
+                >
+                  <option value="google_reviews">⭐ Reseñas de Google (Calificación 5 estrellas)</option>
+                  <option value="instagram">📸 Seguidores de Instagram</option>
+                  <option value="whatsapp">💬 WhatsApp Directo</option>
+                  <option value="menu">🍽️ Menú Digital / Carta</option>
+                  <option value="website">🌐 Enlace Web Personalizado</option>
+                </select>
+              </div>
+
+              {/* Smart Destination Fields */}
               {form.type === 'google_reviews' ? (
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap', gap: '6px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                     <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', margin: 0 }}>
-                      Place ID del negocio en Google *
+                      Place ID de Google Maps *
                     </label>
                     <a
                       href="https://developers.google.com/maps/documentation/javascript/examples/places-placeid-finder"
@@ -1139,21 +1387,18 @@ export default function AdminNfcCardsPage() {
                         display: 'inline-flex',
                         alignItems: 'center',
                         gap: '4px',
-                        fontSize: '11.5px',
-                        fontWeight: 600,
+                        fontSize: '11px',
+                        fontWeight: 700,
                         color: '#0284C7',
                         textDecoration: 'none',
                         background: '#F0F9FF',
                         border: '1px solid #BAE6FD',
-                        padding: '3px 9px',
-                        borderRadius: '7px',
-                        transition: 'all 0.15s ease',
+                        padding: '2px 8px',
+                        borderRadius: '6px',
                       }}
-                      onMouseEnter={(e) => { e.currentTarget.style.background = '#E0F2FE'; e.currentTarget.style.borderColor = '#7DD3FC'; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.background = '#F0F9FF'; e.currentTarget.style.borderColor = '#BAE6FD'; }}
                       title="Abrir buscador oficial de Place IDs de Google en nueva pestaña"
                     >
-                      <span>🔍 Buscar Place ID en Google</span>
+                      <span>🔍 Buscar Place ID</span>
                       <ExternalLink size={11} />
                     </a>
                   </div>
@@ -1161,47 +1406,32 @@ export default function AdminNfcCardsPage() {
                   <input
                     type="text"
                     required
+                    disabled={isLocked}
                     placeholder="Ej. ChIJd34kTQD90YURJqg9LdnTMiA"
                     className="hx-input"
-                    style={{ fontFamily: 'monospace', fontWeight: 600, fontSize: '13px' }}
+                    style={{ fontFamily: 'monospace', fontWeight: 600, fontSize: '13px', opacity: isLocked ? 0.75 : 1 }}
                     value={placeIdInput}
                     onChange={(e) => setPlaceIdInput(e.target.value)}
                   />
 
-                  {/* Live preview box */}
                   {cleanPlaceId(placeIdInput) && (
                     <div style={{ marginTop: '8px', padding: '10px 12px', background: '#FEF3C7', border: '1px solid #FDE68A', borderRadius: '10px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginBottom: '5px' }}>
-                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#92400E', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                          Enlace final generado:
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#92400E', textTransform: 'uppercase' }}>
+                          Enlace autogenerado:
                         </span>
                         <a
                           href={computedFinalUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            fontSize: '11.5px',
-                            fontWeight: 700,
-                            color: '#B45309',
-                            textDecoration: 'none',
-                            background: '#FFFFFF',
-                            border: '1px solid #FCD34D',
-                            padding: '2px 8px',
-                            borderRadius: '6px',
-                          }}
+                          style={{ fontSize: '11.5px', fontWeight: 700, color: '#B45309', textDecoration: 'none' }}
                         >
-                          Probar enlace <ExternalLink size={11} />
+                          Probar enlace ↗
                         </a>
                       </div>
                       <code style={{ fontSize: '11.5px', color: '#78350F', wordBreak: 'break-all', display: 'block', fontWeight: 600 }}>
                         {computedFinalUrl}
                       </code>
-                      <span style={{ fontSize: '11px', color: '#A16207', display: 'block', marginTop: '4px' }}>
-                        Al escanear, abrirá directamente el cuadro de calificación de 5 estrellas en Google.
-                      </span>
                     </div>
                   )}
                 </div>
@@ -1212,7 +1442,7 @@ export default function AdminNfcCardsPage() {
                       Usuario de Instagram *
                     </label>
                     <span style={{ fontSize: '11px', color: '#9333EA', fontWeight: 600 }}>
-                      Sin @ ni enlaces largos
+                      Sin @ ni URLs largas
                     </span>
                   </div>
 
@@ -1223,43 +1453,31 @@ export default function AdminNfcCardsPage() {
                     <input
                       type="text"
                       required
-                      placeholder="Ej. kikiselcamaron (sin @)"
+                      disabled={isLocked}
+                      placeholder="Ej. kikiselcamaron"
                       className="hx-input"
-                      style={{ paddingLeft: '28px', fontWeight: 600 }}
+                      style={{ paddingLeft: '28px', fontWeight: 600, opacity: isLocked ? 0.75 : 1 }}
                       value={instagramHandleInput}
                       onChange={(e) => setInstagramHandleInput(e.target.value)}
                     />
                   </div>
 
-                  {/* Live preview box */}
                   {cleanInstagramHandle(instagramHandleInput) && (
                     <div style={{ marginTop: '8px', padding: '10px 12px', background: '#FAF5FF', border: '1px solid #E9D5FF', borderRadius: '10px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginBottom: '5px' }}>
-                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#7E22CE', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#7E22CE', textTransform: 'uppercase' }}>
                           Perfil que se abrirá:
                         </span>
                         <a
                           href={computedFinalUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            fontSize: '11.5px',
-                            fontWeight: 700,
-                            color: '#9333EA',
-                            textDecoration: 'none',
-                            background: '#FFFFFF',
-                            border: '1px solid #D8B4FE',
-                            padding: '2px 8px',
-                            borderRadius: '6px',
-                          }}
+                          style={{ fontSize: '11.5px', fontWeight: 700, color: '#9333EA', textDecoration: 'none' }}
                         >
-                          Probar perfil <ExternalLink size={11} />
+                          Probar enlace ↗
                         </a>
                       </div>
-                      <code style={{ fontSize: '12px', color: '#581C87', wordBreak: 'break-all', display: 'block', fontWeight: 600 }}>
+                      <code style={{ fontSize: '11.5px', color: '#581C87', wordBreak: 'break-all', display: 'block', fontWeight: 600 }}>
                         {computedFinalUrl}
                       </code>
                     </div>
@@ -1268,53 +1486,198 @@ export default function AdminNfcCardsPage() {
               ) : (
                 <div>
                   <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' }}>
-                    Enlace de Destino (URL) *
+                    Enlace de Destino *
                   </label>
                   <input
-                    type="text"
+                    type="url"
                     required
-                    placeholder={CARD_TYPES[form.type]?.placeholder || 'https://...'}
+                    disabled={isLocked}
+                    placeholder="https://..."
                     className="hx-input"
+                    style={{ opacity: isLocked ? 0.75 : 1 }}
                     value={form.targetUrl}
                     onChange={(e) => setForm({ ...form, targetUrl: e.target.value })}
                   />
                 </div>
               )}
 
-              <div>
-                <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' }}>
-                  Notas de Entrega / Ubicación
-                </label>
-                <input
-                  type="text"
-                  placeholder="Ej. En barra de cobro, acrílico mesa 4"
-                  className="hx-input"
-                  value={form.notes}
-                  onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                />
+              {/* ── Nuevos Campos Clave: GPS y Foto de Evidencia ───────────── */}
+              <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                
+                {/* Field 1: Ubicación GPS */}
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
+                    <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', margin: 0 }}>
+                      📍 Ubicación GPS del Negocio (Para el Mapa)
+                    </label>
+                    {!isLocked && (
+                      <button
+                        type="button"
+                        onClick={handleGetCurrentLocation}
+                        disabled={locatingGps}
+                        style={{
+                          background: '#ECFEFF',
+                          border: '1px solid #A5F3FC',
+                          color: '#0891B2',
+                          borderRadius: '6px',
+                          padding: '3px 8px',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                        }}
+                      >
+                        <Navigation size={11} />
+                        <span>{locatingGps ? 'Obteniendo GPS...' : '📍 Usar mi GPS actual'}</span>
+                      </button>
+                    )}
+                  </div>
+
+                  <input
+                    type="text"
+                    disabled={isLocked}
+                    placeholder="Ej. Av. Insurgentes Sur 450, Roma Norte, CDMX"
+                    className="hx-input"
+                    style={{ opacity: isLocked ? 0.75 : 1, fontSize: '12.5px' }}
+                    value={form.locationName}
+                    onChange={(e) => setForm({ ...form, locationName: e.target.value })}
+                  />
+
+                  {(form.latitude || form.longitude) && (
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '6px', fontSize: '11px', color: '#64748B' }}>
+                      <span style={{ fontFamily: 'monospace' }}>Lat: {form.latitude}</span>
+                      <span>·</span>
+                      <span style={{ fontFamily: 'monospace' }}>Lng: {form.longitude}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Field 2: Foto de Evidencia del Soporte */}
+                <div>
+                  <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' }}>
+                    📸 Foto de Evidencia del Soporte Instalado
+                  </label>
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    ref={fileInputRef}
+                    onChange={handlePhotoUpload}
+                    style={{ display: 'none' }}
+                  />
+
+                  {form.photoUrl ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '10px', borderRadius: '12px' }}>
+                      <img
+                        src={form.photoUrl}
+                        alt="Evidencia"
+                        style={{ width: '60px', height: '60px', borderRadius: '10px', objectFit: 'cover', border: '1px solid #CBD5E1' }}
+                      />
+                      <div style={{ flex: 1 }}>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#0F172A', display: 'block' }}>
+                          Foto capturada
+                        </span>
+                        <span style={{ fontSize: '11px', color: '#64748B' }}>
+                          Se mostrará como avatar del local y en el Pin del Mapa.
+                        </span>
+                      </div>
+                      {!isLocked && (
+                        <button
+                          type="button"
+                          onClick={() => setForm(prev => ({ ...prev, photoUrl: '' }))}
+                          style={{ background: 'none', border: 'none', color: '#DC2626', cursor: 'pointer', padding: '6px' }}
+                          title="Quitar foto"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    !isLocked && (
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          border: '2px dashed #CBD5E1',
+                          borderRadius: '12px',
+                          background: '#F8FAFC',
+                          color: '#475569',
+                          fontSize: '12.5px',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                        }}
+                      >
+                        <Camera size={16} color="#00C4CC" />
+                        <span>Tomar foto con cámara o subir archivo</span>
+                      </button>
+                    )
+                  )}
+                </div>
+
               </div>
 
+              {/* Active Checkbox */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
                 <input
                   type="checkbox"
                   id="activeCheck"
+                  disabled={isLocked}
                   checked={form.active}
                   onChange={(e) => setForm({ ...form, active: e.target.checked })}
-                  style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                  style={{ width: '16px', height: '16px', cursor: isLocked ? 'not-allowed' : 'pointer' }}
                 />
-                <label htmlFor="activeCheck" style={{ fontSize: '13px', fontWeight: 600, color: '#374151', cursor: 'pointer' }}>
+                <label htmlFor="activeCheck" style={{ fontSize: '13px', fontWeight: 600, color: '#374151', cursor: isLocked ? 'not-allowed' : 'pointer' }}>
                   Tarjeta activada (responder inmediatamente al escanear)
                 </label>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
-                <button type="button" onClick={closeModal} className="btn-secondary" disabled={submitting}>
-                  Cancelar
-                </button>
-                <button type="submit" className="btn-primary" disabled={submitting}>
-                  {submitting ? 'Guardando...' : editingCard ? 'Actualizar Tarjeta' : 'Activar y Guardar'}
-                </button>
+              {/* Modal Action Buttons */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '14px', paddingTop: '14px', borderTop: '1px solid #E2E8F0' }}>
+                <div>
+                  {!isLocked && editingCard && (
+                    <button
+                      type="button"
+                      onClick={handleUnlinkCard}
+                      disabled={unlinking || submitting}
+                      style={{
+                        background: '#FEF2F2',
+                        border: '1px solid #FCA5A5',
+                        color: '#DC2626',
+                        borderRadius: '10px',
+                        padding: '9px 14px',
+                        fontSize: '12.5px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                      }}
+                      title="Volver a poner la tarjeta en estado Disponible para vincular"
+                    >
+                      {unlinking ? 'Desvinculando...' : '⚠️ Desvincular Tarjeta'}
+                    </button>
+                  )}
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button type="button" onClick={closeModal} className="btn-secondary" disabled={submitting}>
+                    {isLocked ? 'Cerrar' : 'Cancelar'}
+                  </button>
+
+                  {!isLocked && (
+                    <button type="submit" className="btn-primary" disabled={submitting}>
+                      {submitting ? 'Guardando...' : editingCard ? 'Actualizar Tarjeta' : 'Activar y Guardar'}
+                    </button>
+                  )}
+                </div>
               </div>
+
             </form>
           </div>
         </div>,
@@ -1351,510 +1714,288 @@ export default function AdminNfcCardsPage() {
               Tarjeta #{activeCardForQr.code}
             </span>
 
-            <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#111827', margin: '0 0 4px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-              {activeCardForQr.clientName}
-            </h2>
+            <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#111827', margin: '0 0 6px' }}>
+              {activeCardForQr.clientName || 'HummingX QR'}
+            </h3>
+
             <p style={{ fontSize: '13px', color: '#6B7280', margin: '0 0 20px' }}>
-              {CARD_TYPES[activeCardForQr.type]?.label}
+              Código vectorial de alta resolución listo para grabado láser o serigrafía en tarjetas físicas.
             </p>
 
-            {/* QR Image Display */}
-            <div
-              style={{
-                background: '#FFFFFF',
-                padding: '16px',
-                borderRadius: '16px',
-                border: '1px solid #E5E7EB',
-                display: 'inline-block',
-                boxShadow: '0 8px 24px rgba(0,0,0,0.06)',
-                marginBottom: '16px',
-              }}
-            >
-              {qrModalDataUrl ? (
+            {qrModalDataUrl && (
+              <div
+                style={{
+                  background: '#FFFFFF',
+                  padding: '16px',
+                  borderRadius: '16px',
+                  display: 'inline-block',
+                  border: '1px solid #E5E7EB',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
+                  marginBottom: '20px',
+                }}
+              >
                 <img
                   src={qrModalDataUrl}
-                  alt={`QR Tarjeta ${activeCardForQr.code}`}
+                  alt={`QR ${activeCardForQr.code}`}
                   style={{ width: '220px', height: '220px', display: 'block' }}
                 />
-              ) : (
-                <div style={{ width: '220px', height: '220px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  Generando QR...
-                </div>
-              )}
-            </div>
-
-            <div style={{ background: '#F8FAFC', padding: '8px 12px', borderRadius: '8px', marginBottom: '20px' }}>
-              <span style={{ fontSize: '11px', color: '#64748B', display: 'block' }}>URL fija del chip y QR:</span>
-              <code style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>
-                https://hummingxbi.com/t/{activeCardForQr.code}
-              </code>
-            </div>
-
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button
-                onClick={() => downloadQrSvg(activeCardForQr)}
-                className="btn-accent"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  fontSize: '13px',
-                  padding: '9px 16px',
-                  fontWeight: 600,
-                  boxShadow: '0 4px 12px rgba(0, 196, 204, 0.25)',
-                }}
-              >
-                <Download size={15} />
-                Descargar SVG sin margen (.svg)
-              </button>
-
-              <button
-                onClick={downloadQrImage}
-                className="btn-secondary"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  fontSize: '13px',
-                  padding: '9px 14px',
-                }}
-              >
-                <Download size={14} />
-                Descargar PNG
-              </button>
-
-              <a
-                href={`https://hummingxbi.com/t/${activeCardForQr.code}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-secondary"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  fontSize: '13px',
-                  padding: '9px 14px',
-                  textDecoration: 'none',
-                }}
-              >
-                <ExternalLink size={14} />
-                Probar
-              </a>
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
-
-      {/* ── Modal: Generador de Lote de Códigos QR ────────────────────────── */}
-      {showBatchModal && createPortal(
-        <div
-          className={`modal-overlay${closingBatchModal ? ' closing' : ''}`}
-          onClick={(e) => { if (e.target === e.currentTarget) closeBatchModal(); }}
-        >
-          <div className="modal-content" style={{ maxWidth: '580px', width: '100%', borderRadius: '16px', padding: '32px' }}>
-            <button
-              onClick={closeBatchModal}
-              disabled={!!batchProgress}
-              style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', cursor: batchProgress ? 'not-allowed' : 'pointer', color: '#6B7280' }}
-            >
-              <X size={20} />
-            </button>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(0, 196, 204, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00C4CC' }}>
-                <Layers size={18} />
-              </div>
-              <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#111827', margin: 0, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                Generador de Lotes QR
-              </h2>
-            </div>
-            <p style={{ fontSize: '13px', color: '#6B7280', margin: '0 0 16px' }}>
-              Genera la siguiente tanda de tarjetas físicas continuando la numeración sin sobreescribir las existentes.
-            </p>
-
-            {/* Status Card: Current inventory & Next suggested code */}
-            <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '12px 16px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-              <div>
-                <span style={{ fontSize: '11px', color: '#64748B', display: 'block', fontWeight: 500 }}>Existencia actual en sistema</span>
-                <strong style={{ fontSize: '14px', color: '#0F172A' }}>{metrics.totalCards} tarjetas registradas</strong>
-              </div>
-              <div>
-                <span style={{ fontSize: '11px', color: '#64748B', display: 'block', fontWeight: 500 }}>Continuar a partir de</span>
-                <span style={{ fontSize: '14px', fontWeight: 800, color: '#7C3AED', fontFamily: 'monospace' }}>#{metrics.nextSuggestedCode}</span>
-              </div>
-            </div>
-
-            {formError && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '8px', color: '#B91C1C', fontSize: '12.5px', marginBottom: '16px' }}>
-                <AlertCircle size={15} />
-                <span>{formError}</span>
               </div>
             )}
 
-            <form onSubmit={handleGenerateBatch} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {/* Range settings */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
-                <div>
-                  <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' }}>
-                    Número Inicial *
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    required
-                    className="hx-input"
-                    value={batchForm.startCode}
-                    onChange={(e) => setBatchForm({ ...batchForm, startCode: e.target.value })}
-                    style={{ fontFamily: 'monospace', fontWeight: 700 }}
-                  />
-                </div>
+            <div
+              style={{
+                background: '#F9FAFB',
+                padding: '10px 14px',
+                borderRadius: '10px',
+                fontSize: '12px',
+                color: '#6B7280',
+                fontFamily: 'monospace',
+                marginBottom: '20px',
+                wordBreak: 'break-all',
+              }}
+            >
+              https://hummingxbi.com/t/{activeCardForQr.code}
+            </div>
 
-                <div>
-                  <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' }}>
-                    Cantidad de Códigos *
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="100"
-                    required
-                    className="hx-input"
-                    value={batchForm.count}
-                    onChange={(e) => setBatchForm({ ...batchForm, count: e.target.value })}
-                    style={{ fontFamily: 'monospace', fontWeight: 700 }}
-                  />
-                </div>
-              </div>
+            {/* Quick action buttons in modal */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button
+                onClick={() => downloadQrSvg(activeCardForQr)}
+                className="btn-primary"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  padding: '12px',
+                  borderRadius: '10px',
+                  background: 'linear-gradient(135deg, #00C4CC 0%, #0E7490 100%)',
+                  fontWeight: 700,
+                }}
+              >
+                <Download size={16} />
+                <span>Descargar Código QR sin margen (.svg)</span>
+              </button>
 
-              {/* Quick count buttons */}
-              <div>
-                <span style={{ fontSize: '11px', color: '#6B7280', display: 'block', marginBottom: '6px' }}>Cantidades rápidas:</span>
-                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                  {[5, 10, 15, 25, 50].map((qty) => (
-                    <button
-                      key={qty}
-                      type="button"
-                      onClick={() => setBatchForm({ ...batchForm, count: qty })}
-                      style={{
-                        padding: '4px 10px',
-                        borderRadius: '6px',
-                        border: batchForm.count === qty ? '1px solid #00C4CC' : '1px solid #E5E7EB',
-                        background: batchForm.count === qty ? 'rgba(0, 196, 204, 0.1)' : '#FFFFFF',
-                        color: batchForm.count === qty ? '#007A80' : '#4B5563',
-                        fontSize: '12px',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      +{qty} tarjetas
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Live resulting preview badge */}
-              {(() => {
-                const s = parseInt(batchForm.startCode, 10) || 1;
-                const c = parseInt(batchForm.count, 10) || 1;
-                const e = s + c - 1;
-                return (
-                  <div style={{ background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: '10px', padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <CheckCircle2 size={16} color="#059669" />
-                      <span style={{ fontSize: '12.5px', color: '#065F46', fontWeight: 600 }}>
-                        Lote resultante: #{String(s).padStart(3, '0')} a #{String(e).padStart(3, '0')}
-                      </span>
-                    </div>
-                    <span style={{ fontSize: '12px', color: '#047857', fontWeight: 700 }}>
-                      Total: {c} tarjetas
-                    </span>
-                  </div>
-                );
-              })()}
-
-              {/* Default action type */}
-              <div>
-                <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' }}>
-                  Tipo de Acción por Defecto
-                </label>
-                <select
-                  value={batchForm.type}
-                  onChange={(e) => setBatchForm({ ...batchForm, type: e.target.value })}
-                  className="hx-input"
-                >
-                  {Object.entries(CARD_TYPES).map(([key, val]) => (
-                    <option key={key} value={key}>{val.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Options checkboxes */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: '#F9FAFB', padding: '12px 14px', borderRadius: '10px', border: '1px solid #E5E7EB' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '12.5px', color: '#374151', fontWeight: 500 }}>
-                  <input
-                    type="checkbox"
-                    checked={batchForm.syncDb}
-                    onChange={(e) => setBatchForm({ ...batchForm, syncDb: e.target.checked })}
-                    style={{ accentColor: '#00C4CC' }}
-                  />
-                  <span>Registrar tarjetas en la base de datos como <strong>"Disponibles para asignar"</strong></span>
-                </label>
-
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '12.5px', color: '#374151', fontWeight: 500 }}>
-                  <input
-                    type="checkbox"
-                    checked={batchForm.downloadZip}
-                    onChange={(e) => setBatchForm({ ...batchForm, downloadZip: e.target.checked })}
-                    style={{ accentColor: '#00C4CC' }}
-                  />
-                  <span>Descargar paquete ZIP con todos los archivos (PNG + SVG + CSV para imprenta)</span>
-                </label>
-              </div>
-
-              {/* Progress bar if generating */}
-              {batchProgress && (
-                <div style={{ background: '#F0FDFA', border: '1px solid #99F6E4', borderRadius: '10px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', fontWeight: 600, color: '#0F766E' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Loader2 size={14} className="spin" />
-                      {batchProgress.text}
-                    </span>
-                    <span>{batchProgress.percent}%</span>
-                  </div>
-                  <div style={{ width: '100%', height: '6px', background: '#CCFBF1', borderRadius: '9999px', overflow: 'hidden' }}>
-                    <div
-                      style={{
-                        width: `${batchProgress.percent}%`,
-                        height: '100%',
-                        background: 'linear-gradient(90deg, #00C4CC 0%, #0284C7 100%)',
-                        transition: 'width 0.2s ease',
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* CLI Command Tip */}
-              <div style={{ background: '#1E293B', color: '#E2E8F0', padding: '10px 14px', borderRadius: '10px', fontSize: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px', color: '#94A3B8', fontWeight: 600 }}>
-                  <Terminal size={13} />
-                  <span>O desde tu terminal ejecutando:</span>
-                </div>
-                <code style={{ fontFamily: 'monospace', color: '#38BDF8', fontSize: '11.5px', wordBreak: 'break-all' }}>
-                  npm run generate-qr -- --desde {batchForm.startCode || metrics.nextSuggestedCode} --cantidad {batchForm.count || 10}
-                </code>
-              </div>
-
-              {/* Submit Buttons */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '6px' }}>
-                <button
-                  type="button"
-                  disabled={submitting}
-                  onClick={closeBatchModal}
-                  className="btn-secondary"
-                  style={{ padding: '9px 18px', fontSize: '13px' }}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="btn-primary"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '9px 20px',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                  }}
-                >
-                  {submitting ? (
-                    <>
-                      <Loader2 size={15} className="spin" />
-                      Generando Lote...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles size={15} />
-                      Generar Lote de {batchForm.count || 10} Tarjetas
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
+              <button
+                onClick={() => downloadQrPng(activeCardForQr, qrModalDataUrl)}
+                className="btn-secondary"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  padding: '10px',
+                  borderRadius: '10px',
+                  fontWeight: 600,
+                }}
+              >
+                <Download size={15} />
+                <span>Descargar Imagen PNG (.png)</span>
+              </button>
+            </div>
           </div>
         </div>,
         document.body
       )}
 
-      {/* ── Modal: Celebración con Serpentina / Confetti al vincular tarjeta ── */}
+      {/* ── Modal de Celebración con Trofeo en Loop ──────────────────────── */}
       {showCelebrationModal && celebratedCard && createPortal(
         <div
-          className="modal-overlay"
           style={{
             position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.78)',
-            backdropFilter: 'blur(8px)',
+            inset: 0,
+            zIndex: 10000,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            zIndex: 99999,
-            padding: '20px',
+            background: 'rgba(11, 15, 25, 0.85)',
+            backdropFilter: 'blur(16px)',
+            padding: '24px',
+            animation: 'hxFadeIn 0.3s ease-out',
           }}
         >
+          {/* Confetti Explosion */}
           <Confetti
-            width={typeof window !== 'undefined' ? window.innerWidth : 400}
-            height={typeof window !== 'undefined' ? window.innerHeight : 400}
             recycle={false}
             numberOfPieces={400}
-            gravity={0.24}
-            colors={['#00C4CC', '#2563EB', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#F43F5E']}
+            gravity={0.15}
+            colors={['#00C4CC', '#F59E0B', '#38BDF8', '#10B981', '#EC4899', '#8B5CF6']}
           />
 
           <div
-            className="modal-content fade-in-up"
             style={{
-              maxWidth: '520px',
+              maxWidth: '480px',
               width: '100%',
-              background: '#FFFFFF',
+              background: '#0F172A',
+              border: '2px solid rgba(0, 196, 204, 0.4)',
               borderRadius: '24px',
-              padding: '36px 30px 30px',
+              padding: '36px 28px',
               textAlign: 'center',
+              boxShadow: '0 25px 60px -15px rgba(0, 196, 204, 0.4), 0 0 40px rgba(0, 0, 0, 0.8)',
               position: 'relative',
-              boxShadow: '0 25px 60px -15px rgba(0, 196, 204, 0.35), 0 0 0 1px rgba(0,0,0,0.06)',
-              overflow: 'hidden',
+              animation: 'hxPopUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
             }}
           >
-            {/* Background Glow */}
-            <div style={{ position: 'absolute', top: '-60px', left: '50%', transform: 'translateX(-50%)', width: '260px', height: '260px', background: 'radial-gradient(circle, rgba(0,196,204,0.18) 0%, rgba(255,255,255,0) 70%)', pointerEvents: 'none' }} />
-
-            {/* Close Button */}
+            {/* Close button */}
             <button
-              onClick={() => setShowCelebrationModal(false)}
-              style={{ position: 'absolute', top: '18px', right: '18px', background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8', padding: '6px' }}
+              onClick={() => { setShowCelebrationModal(false); setCelebratedCard(null); }}
+              style={{
+                position: 'absolute',
+                top: '20px',
+                right: '20px',
+                background: 'rgba(255,255,255,0.08)',
+                border: 'none',
+                borderRadius: '50%',
+                width: '32px',
+                height: '32px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#94A3B8',
+                cursor: 'pointer',
+              }}
             >
-              <X size={20} />
+              <X size={18} />
             </button>
 
-            {/* Lottie Trophy Animation */}
-            <div style={{ width: '130px', height: '130px', margin: '-10px auto 8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {/* Lottie Trophy in continuous Celebratory LOOP */}
+            <div style={{ display: 'flex', justifyContent: 'center', margin: '0 auto 10px' }}>
               <Player
                 autoplay
-                loop={false}
+                loop={true}
                 src={trophyAnimation}
-                style={{ height: '130px', width: '130px' }}
+                style={{ height: '170px', width: '170px' }}
               />
             </div>
 
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#ECFDF5', border: '1px solid #A7F3D0', padding: '4px 14px', borderRadius: '9999px', color: '#047857', fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>
-              <CheckCircle2 size={14} color="#10B981" />
-              ¡Tarjeta #{celebratedCard.code} Vinculada con Éxito!
-            </div>
+            {/* Badge */}
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: 'rgba(0, 196, 204, 0.15)',
+                border: '1px solid rgba(0, 196, 204, 0.4)',
+                color: '#00C4CC',
+                padding: '4px 14px',
+                borderRadius: '999px',
+                fontSize: '12px',
+                fontWeight: 800,
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                marginBottom: '12px',
+              }}
+            >
+              <Sparkles size={14} /> ¡Soporte Vinculado con Éxito!
+            </span>
 
-            <h2 style={{ fontSize: '26px', fontWeight: 800, color: '#111827', margin: '0 0 6px', letterSpacing: '-0.025em', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            {/* Client Headline */}
+            <h2 style={{ fontSize: '26px', fontWeight: 900, color: '#FFFFFF', margin: '0 0 6px', letterSpacing: '-0.02em' }}>
               {celebratedCard.clientName}
             </h2>
 
-            <p style={{ fontSize: '14px', color: '#4B5563', margin: '0 0 20px', lineHeight: 1.5 }}>
-              La tarjeta física y su código QR ya están activos y listos para colocar en el mostrador o mesa del negocio.
+            <p style={{ fontSize: '14px', color: '#94A3B8', margin: '0 0 24px', lineHeight: 1.5 }}>
+              La tarjeta <b>#{celebratedCard.code}</b> está 100% activa. Acércale el celular al dueño para demostrarle la magia en vivo.
             </p>
 
-            {/* Details Box */}
-            <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '16px', padding: '16px', marginBottom: '22px', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '12px', color: '#64748B', fontWeight: 600 }}>Acción Vinculada:</span>
-                <span style={{ fontSize: '12.5px', fontWeight: 700, color: CARD_TYPES[celebratedCard.type]?.color || '#111827' }}>
-                  {CARD_TYPES[celebratedCard.type]?.label}
+            {/* Target Live Card */}
+            <div
+              style={{
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '16px',
+                padding: '16px',
+                marginBottom: '28px',
+                textAlign: 'left',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase' }}>
+                  Enlace en el Chip NFC
+                </span>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: '#10B981' }}>
+                  ● Redirigiendo en Vivo
                 </span>
               </div>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '12px', color: '#64748B', fontWeight: 600 }}>Enlace Físico Chip/QR:</span>
-                <code style={{ fontSize: '12px', fontWeight: 700, color: '#0F172A', background: '#FFFFFF', padding: '2px 8px', borderRadius: '6px', border: '1px solid #CBD5E1' }}>
-                  hummingxbi.com/t/{celebratedCard.code}
-                </code>
+              <div style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '14px', color: '#38BDF8', marginBottom: '6px' }}>
+                hummingxbi.com/t/{celebratedCard.code}
               </div>
-
-              <div>
-                <span style={{ fontSize: '12px', color: '#64748B', fontWeight: 600, display: 'block', marginBottom: '3px' }}>Destino Configurado:</span>
-                <span style={{ fontSize: '12px', color: '#0284C7', fontWeight: 500, wordBreak: 'break-all', display: 'block' }}>
-                  {celebratedCard.targetUrl}
-                </span>
+              <div style={{ fontSize: '12px', color: '#94A3B8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                ↳ Destino: {celebratedCard.targetUrl}
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ display: 'flex', gap: '10px' }}>
               <a
                 href={`https://hummingxbi.com/t/${celebratedCard.code}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-accent"
+                className="btn-primary"
                 style={{
-                  display: 'inline-flex',
+                  flex: 1,
+                  display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
-                  fontSize: '15px',
-                  padding: '13px 20px',
-                  borderRadius: '12px',
-                  fontWeight: 700,
-                  boxShadow: '0 8px 24px rgba(0, 196, 204, 0.35)',
+                  padding: '14px',
+                  borderRadius: '14px',
+                  fontWeight: 800,
+                  fontSize: '14px',
                   textDecoration: 'none',
                 }}
               >
-                <ExternalLink size={18} />
-                Demostrar Redirección en Vivo Ahora
+                <span>Probar Tap en Vivo</span>
+                <ExternalLink size={16} />
               </a>
 
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button
-                  onClick={() => {
-                    const cardObj = cards.find(c => c.code === celebratedCard.code) || celebratedCard;
-                    setShowCelebrationModal(false);
-                    openQrPreview(cardObj);
-                  }}
-                  className="btn-secondary"
-                  style={{
-                    flex: 1,
-                    justifyContent: 'center',
-                    fontSize: '13px',
-                    padding: '10px 14px',
-                    borderRadius: '10px',
-                    fontWeight: 600,
-                  }}
-                >
-                  <QrCode size={15} color="#00C4CC" />
-                  Ver Código QR
-                </button>
-
-                <button
-                  onClick={() => setShowCelebrationModal(false)}
-                  className="btn-secondary"
-                  style={{
-                    flex: 1,
-                    justifyContent: 'center',
-                    fontSize: '13px',
-                    padding: '10px 14px',
-                    borderRadius: '10px',
-                    fontWeight: 600,
-                  }}
-                >
-                  Listo / Finalizar
-                </button>
-              </div>
+              <button
+                onClick={() => { setShowCelebrationModal(false); setCelebratedCard(null); }}
+                className="btn-secondary"
+                style={{
+                  padding: '14px 20px',
+                  borderRadius: '14px',
+                  fontWeight: 700,
+                  fontSize: '14px',
+                  color: '#FFFFFF',
+                }}
+              >
+                Cerrar
+              </button>
             </div>
           </div>
         </div>,
         document.body
       )}
 
+      {/* Keyframe animations */}
+      <style>{`
+        @keyframes hxSlideIn {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        @keyframes hxFadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes hxPopUp {
+          from {
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+      `}</style>
     </Layout>
   );
 }

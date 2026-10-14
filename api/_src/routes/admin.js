@@ -1683,7 +1683,7 @@ router.post('/nfc-cards/batch', authenticate, requireAdmin, async (req, res) => 
 // PUT /admin/nfc-cards/:id — Actualizar tarjeta
 router.put('/nfc-cards/:id', authenticate, requireAdmin, async (req, res) => {
   try {
-    let { code, clientName, type, targetUrl, active, notes } = req.body;
+    let { code, clientName, type, targetUrl, active, notes, latitude, longitude, locationName, photoUrl } = req.body;
     const data = {};
 
     if (code !== undefined) {
@@ -1706,6 +1706,10 @@ router.put('/nfc-cards/:id', authenticate, requireAdmin, async (req, res) => {
     }
     if (active !== undefined) data.active = Boolean(active);
     if (notes !== undefined) data.notes = notes ? String(notes).trim() : null;
+    if (latitude !== undefined) data.latitude = latitude !== null && latitude !== '' ? parseFloat(latitude) : null;
+    if (longitude !== undefined) data.longitude = longitude !== null && longitude !== '' ? parseFloat(longitude) : null;
+    if (locationName !== undefined) data.locationName = locationName ? String(locationName).trim() : null;
+    if (photoUrl !== undefined) data.photoUrl = photoUrl || null;
 
     const card = await prisma.nfcCard.update({
       where: { id: req.params.id },
@@ -1716,6 +1720,29 @@ router.put('/nfc-cards/:id', authenticate, requireAdmin, async (req, res) => {
   } catch (err) {
     console.error('[ADMIN] Error in PUT /admin/nfc-cards/:id:', err);
     res.status(500).json({ error: 'Error al actualizar tarjeta NFC/QR.' });
+  }
+});
+
+// POST /admin/nfc-cards/:id/unlink — Desvincular tarjeta
+router.post('/admin/nfc-cards/:id/unlink', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const card = await prisma.nfcCard.update({
+      where: { id: req.params.id },
+      data: {
+        clientName: 'Disponible para vincular',
+        active: false,
+        targetUrl: 'https://hummingxbi.com',
+        notes: null,
+        latitude: null,
+        longitude: null,
+        locationName: null,
+        photoUrl: null,
+      }
+    });
+    res.json(card);
+  } catch (err) {
+    console.error('[ADMIN] Error in POST /admin/nfc-cards/:id/unlink:', err);
+    res.status(500).json({ error: 'Error al desvincular tarjeta.' });
   }
 });
 

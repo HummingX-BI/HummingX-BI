@@ -1712,6 +1712,7 @@ router.put(['/nfc-cards/:id', '/admin/nfc-cards/:id'], authenticate, requireAdmi
     if (longitude !== undefined) data.longitude = longitude !== null && longitude !== '' ? parseFloat(longitude) : null;
     if (locationName !== undefined) data.locationName = locationName ? String(locationName).trim() : null;
     if (photoUrl !== undefined) data.photoUrl = photoUrl || null;
+    if (req.body.resetScans === true || req.body.scanCount === 0) data.scanCount = 0;
 
     const card = await prisma.executeWithRetry(() =>
       prisma.nfcCard.update({
@@ -1745,6 +1746,7 @@ router.post(['/nfc-cards/:id/unlink', '/admin/nfc-cards/:id/unlink'], authentica
           longitude: null,
           locationName: null,
           photoUrl: null,
+          scanCount: 0,
         }
       })
     );

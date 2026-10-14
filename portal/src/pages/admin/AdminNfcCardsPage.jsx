@@ -402,14 +402,14 @@ export default function AdminNfcCardsPage() {
   // Unlink card action
   const handleUnlinkCard = async () => {
     if (!editingCard) return;
-    if (!window.confirm(`¿Seguro que deseas desvincular la tarjeta #${editingCard.code} (${editingCard.clientName})?\n\nVolverá a estar libre ("Disponible para vincular") y el chip físico dejará de redirigir.`)) {
+    if (!window.confirm(`¿Seguro que deseas desvincular la tarjeta #${editingCard.code} (${editingCard.clientName})?\n\nVolverá a estar libre ("Disponible para vincular"), se resetearán sus escaneos a 0 y quedará lista para otro cliente.`)) {
       return;
     }
 
     setUnlinking(true);
     try {
       await api.post(`/admin/nfc-cards/${editingCard.id}/unlink`);
-      showNotification(`Tarjeta #${editingCard.code} desvinculada.`);
+      showNotification(`Tarjeta #${editingCard.code} desvinculada y reiniciada.`);
       closeModal();
       fetchCards();
     } catch (err) {
@@ -418,6 +418,29 @@ export default function AdminNfcCardsPage() {
     } finally {
       setUnlinking(false);
     }
+  };
+
+  // Helper to convert human text address (e.g. "Roma Norte", "Polanco") to map coordinates
+  const geocodeAddress = async (text) => {
+    if (!text || !text.trim()) return null;
+    try {
+      const clean = text.trim();
+      const hasMexico = /méxico|mexico|cdmx/i.test(clean);
+      const query = encodeURIComponent(clean + (hasMexico ? '' : ', CDMX, México'));
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1`, {
+        headers: { 'Accept-Language': 'es' }
+      });
+      const data = await res.json();
+      if (data && data.length > 0) {
+        return {
+          lat: parseFloat(data[0].lat),
+          lng: parseFloat(data[0].lon)
+        };
+      }
+    } catch (err) {
+      console.warn('Geocodificación no disponible:', err);
+    }
+    return null;
   };
 
   const handleSaveCard = async (e) => {
@@ -459,6 +482,18 @@ export default function AdminNfcCardsPage() {
 
     setSubmitting(true);
     try {
+      let lat = form.latitude !== '' && form.latitude !== null ? parseFloat(form.latitude) : null;
+      let lng = form.longitude !== '' && form.longitude !== null ? parseFloat(form.longitude) : null;
+
+      // Auto-geocoding from text address if coordinates are missing
+      if ((!lat || !lng) && form.locationName && form.locationName.trim()) {
+        const geo = await geocodeAddress(form.locationName.trim());
+        if (geo) {
+          lat = geo.lat;
+          lng = geo.lng;
+        }
+      }
+
       const payload = {
         code: form.code.trim(),
         clientName: form.clientName.trim(),
@@ -466,8 +501,8 @@ export default function AdminNfcCardsPage() {
         targetUrl: finalTargetUrl,
         active: form.active,
         notes: form.notes.trim() || null,
-        latitude: form.latitude !== '' && form.latitude !== null ? parseFloat(form.latitude) : null,
-        longitude: form.longitude !== '' && form.longitude !== null ? parseFloat(form.longitude) : null,
+        latitude: lat,
+        longitude: lng,
         locationName: form.locationName.trim() || null,
         photoUrl: form.photoUrl || null,
       };
@@ -772,62 +807,63 @@ export default function AdminNfcCardsPage() {
         {/* ── TAB 1: INVENTARIO DE TARJETAS ──────────────────────────────── */}
         {activeTab === 'inventory' && (
           <>
-            {/* Filter and Search Bar */}
+            {/* Filter and Search Bar (Horizontal alignment side-by-side) */}
             <div
               className="card"
               style={{
-                padding: '16px 20px',
+                padding: '12px 16px',
                 borderRadius: '14px',
                 border: '1px solid #E5E7EB',
                 background: '#FFFFFF',
                 marginBottom: '16px',
                 display: 'flex',
-                flexWrap: 'wrap',
+                flexDirection: 'row',
                 alignItems: 'center',
-                justifyContent: 'space-between',
                 gap: '12px',
+                width: '100%',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
               }}
             >
-              {/* Search input */}
-              <div style={{ position: 'relative', flex: '1', minWidth: '240px' }}>
+              {/* Search input (Expands to fill remaining width) */}
+              <div style={{ position: 'relative', flex: 1, minWidth: '180px' }}>
                 <Search
-                  size={16}
+                  size={15}
                   style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }}
                 />
                 <input
                   type="text"
-                  placeholder="Buscar por # número de serie o nombre de negocio..."
+                  placeholder="Buscar por # número o nombre de negocio..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="hx-input"
-                  style={{ paddingLeft: '36px', height: '38px', fontSize: '13px' }}
+                  style={{ paddingLeft: '34px', height: '38px', fontSize: '13px', width: '100%' }}
                 />
               </div>
 
-              {/* Filters */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Filter size={14} color="#9CA3AF" />
-                  <select
-                    value={typeFilter}
-                    onChange={(e) => setTypeFilter(e.target.value)}
-                    className="hx-input"
-                    style={{ height: '38px', fontSize: '13px', paddingRight: '28px', minWidth: '150px' }}
-                  >
-                    <option value="all">Todos los Tipos</option>
-                    <option value="google_reviews">Reseñas de Google</option>
-                    <option value="instagram">Instagram</option>
-                    <option value="whatsapp">WhatsApp</option>
-                    <option value="menu">Menú Digital</option>
-                    <option value="website">Sitio Web</option>
-                  </select>
-                </div>
+              {/* Type Filter */}
+              <div style={{ flex: '0 0 auto', width: '170px' }}>
+                <select
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value)}
+                  className="hx-input"
+                  style={{ height: '38px', fontSize: '12.5px', paddingRight: '24px', width: '100%' }}
+                >
+                  <option value="all">Todos los Tipos</option>
+                  <option value="google_reviews">Google Reviews</option>
+                  <option value="instagram">Instagram</option>
+                  <option value="whatsapp">WhatsApp</option>
+                  <option value="menu">Menú Digital</option>
+                  <option value="website">Sitio Web</option>
+                </select>
+              </div>
 
+              {/* Status Filter */}
+              <div style={{ flex: '0 0 auto', width: '160px' }}>
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
                   className="hx-input"
-                  style={{ height: '38px', fontSize: '13px', paddingRight: '28px', minWidth: '140px' }}
+                  style={{ height: '38px', fontSize: '12.5px', paddingRight: '24px', width: '100%' }}
                 >
                   <option value="all">Todos los Estados</option>
                   <option value="active">Activas (En Cliente)</option>
@@ -1214,6 +1250,28 @@ export default function AdminNfcCardsPage() {
                 )}
 
                 <button
+                  type="button"
+                  onClick={() => openQrPreview({ code: form.code, clientName: form.clientName })}
+                  style={{
+                    background: '#F8FAFC',
+                    border: '1px solid #E2E8F0',
+                    color: '#0F172A',
+                    borderRadius: '8px',
+                    padding: '5px 10px',
+                    fontSize: '11.5px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                  }}
+                  title="Ver código QR"
+                >
+                  <QrCode size={12} color="#00C4CC" />
+                  <span>Ver QR</span>
+                </button>
+
+                <button
                   onClick={closeModal}
                   style={{
                     background: 'none',
@@ -1250,52 +1308,6 @@ export default function AdminNfcCardsPage() {
                 </span>
               </div>
             )}
-
-            {/* Quick Physical Chip Links in Modal */}
-            <div
-              style={{
-                background: '#F1F5F9',
-                border: '1px solid #E2E8F0',
-                borderRadius: '12px',
-                padding: '12px 14px',
-                marginBottom: '18px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '10px',
-              }}
-            >
-              <div>
-                <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', display: 'block' }}>
-                  Enlace físico del chip / QR:
-                </span>
-                <code style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A', fontFamily: 'monospace' }}>
-                  hummingxbi.com/t/{form.code}
-                </code>
-              </div>
-
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <button
-                  type="button"
-                  onClick={() => copyToClipboard(`https://hummingxbi.com/t/${form.code}`, `modal-${form.code}`)}
-                  className="btn-secondary"
-                  style={{ padding: '6px 10px', borderRadius: '8px', fontSize: '11.5px', gap: '4px' }}
-                >
-                  {copiedId === `modal-${form.code}` ? <Check size={12} color="#10B981" /> : <Copy size={12} />}
-                  <span>{copiedId === `modal-${form.code}` ? 'Copiado' : 'Copiar'}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => openQrPreview({ code: form.code, clientName: form.clientName })}
-                  className="btn-secondary"
-                  style={{ padding: '6px 10px', borderRadius: '8px', fontSize: '11.5px', gap: '4px' }}
-                >
-                  <QrCode size={12} color="#00C4CC" />
-                  <span>Ver QR</span>
-                </button>
-              </div>
-            </div>
 
             {/* Form Error Alert */}
             {formError && (
@@ -1495,13 +1507,13 @@ export default function AdminNfcCardsPage() {
               {/* ── Nuevos Campos Clave: GPS y Foto de Evidencia ───────────── */}
               <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 
-                {/* Field 1: Ubicación GPS */}
+                {/* Field 1: Ubicación en texto o GPS */}
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <MapPin size={13} color="#00C4CC" />
                       <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', margin: 0 }}>
-                        Ubicación GPS del Negocio (Para el Mapa)
+                        Ubicación o Sucursal (Texto o GPS)
                       </label>
                     </div>
                     {!isLocked && (
@@ -1524,7 +1536,7 @@ export default function AdminNfcCardsPage() {
                         }}
                       >
                         <Navigation size={11} />
-                        <span>{locatingGps ? 'Obteniendo GPS...' : 'Usar mi ubicación GPS'}</span>
+                        <span>{locatingGps ? 'Obteniendo GPS...' : 'Usar mi GPS actual'}</span>
                       </button>
                     )}
                   </div>
@@ -1532,20 +1544,23 @@ export default function AdminNfcCardsPage() {
                   <input
                     type="text"
                     disabled={isLocked}
-                    placeholder="Ej. Av. Insurgentes Sur 450, Roma Norte, CDMX"
+                    placeholder="Ej. Roma Norte, Polanco, Condesa, Av. Insurgentes 450, etc."
                     className="hx-input"
                     style={{ opacity: isLocked ? 0.75 : 1, fontSize: '12.5px' }}
                     value={form.locationName}
                     onChange={(e) => setForm({ ...form, locationName: e.target.value })}
                   />
 
-                  {(form.latitude || form.longitude) && (
-                    <div style={{ display: 'flex', gap: '8px', marginTop: '6px', fontSize: '11px', color: '#64748B' }}>
-                      <span style={{ fontFamily: 'monospace' }}>Lat: {form.latitude}</span>
-                      <span>·</span>
-                      <span style={{ fontFamily: 'monospace' }}>Lng: {form.longitude}</span>
-                    </div>
-                  )}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px' }}>
+                    <span style={{ fontSize: '11px', color: '#64748B' }}>
+                      Escribe la colonia o calle. Se posicionará automáticamente en el Mapa.
+                    </span>
+                    {(form.latitude || form.longitude) && (
+                      <span style={{ fontSize: '11px', color: '#059669', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                        <Check size={11} /> Coordenadas listas
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {/* Field 2: Foto de Evidencia del Soporte */}
@@ -1800,7 +1815,7 @@ export default function AdminNfcCardsPage() {
         document.body
       )}
 
-      {/* ── Modal de Celebración con Trofeo en Loop ──────────────────────── */}
+      {/* ── Modal de Presentación al Cliente (Soporte Vinculado) ─────────── */}
       {showCelebrationModal && celebratedCard && createPortal(
         <div
           style={{
@@ -1810,30 +1825,30 @@ export default function AdminNfcCardsPage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'rgba(11, 15, 25, 0.85)',
+            background: 'rgba(11, 15, 25, 0.88)',
             backdropFilter: 'blur(16px)',
-            padding: '24px',
+            padding: '20px',
             animation: 'hxFadeIn 0.3s ease-out',
           }}
         >
           {/* Confetti Explosion */}
           <Confetti
             recycle={false}
-            numberOfPieces={400}
-            gravity={0.15}
+            numberOfPieces={300}
+            gravity={0.16}
             colors={['#00C4CC', '#F59E0B', '#38BDF8', '#10B981', '#EC4899', '#8B5CF6']}
           />
 
           <div
             style={{
-              maxWidth: '480px',
+              maxWidth: '470px',
               width: '100%',
-              background: '#0F172A',
-              border: '2px solid rgba(0, 196, 204, 0.4)',
+              background: '#0B0F19',
+              border: '1.5px solid rgba(0, 196, 204, 0.45)',
               borderRadius: '24px',
-              padding: '36px 28px',
+              padding: '32px 26px',
               textAlign: 'center',
-              boxShadow: '0 25px 60px -15px rgba(0, 196, 204, 0.4), 0 0 40px rgba(0, 0, 0, 0.8)',
+              boxShadow: '0 25px 60px -15px rgba(0, 196, 204, 0.35), 0 0 50px rgba(0, 0, 0, 0.8)',
               position: 'relative',
               animation: 'hxPopUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
             }}
@@ -1843,8 +1858,8 @@ export default function AdminNfcCardsPage() {
               onClick={() => { setShowCelebrationModal(false); setCelebratedCard(null); }}
               style={{
                 position: 'absolute',
-                top: '20px',
-                right: '20px',
+                top: '18px',
+                right: '18px',
                 background: 'rgba(255,255,255,0.08)',
                 border: 'none',
                 borderRadius: '50%',
@@ -1861,115 +1876,179 @@ export default function AdminNfcCardsPage() {
             </button>
 
             {/* Lottie Trophy in continuous Celebratory LOOP */}
-            <div style={{ display: 'flex', justifyContent: 'center', margin: '0 auto 10px' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', margin: '0 auto 6px' }}>
               <Player
                 autoplay
                 loop={true}
                 src={trophyAnimation}
-                style={{ height: '170px', width: '170px' }}
+                style={{ height: '140px', width: '140px' }}
               />
             </div>
 
-            {/* Badge */}
-            <span
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                background: 'rgba(0, 196, 204, 0.15)',
-                border: '1px solid rgba(0, 196, 204, 0.4)',
-                color: '#00C4CC',
-                padding: '4px 14px',
-                borderRadius: '999px',
-                fontSize: '12px',
-                fontWeight: 800,
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-                marginBottom: '12px',
-              }}
-            >
-              <Sparkles size={14} /> ¡Soporte Vinculado con Éxito!
-            </span>
-
-            {/* Client Headline */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '8px' }}>
-              <img
-                src={celebratedCard.type === 'instagram' ? '/instagram-logo.png' : '/google-logo.png'}
-                alt={celebratedCard.type}
-                style={{ width: '28px', height: '28px', objectFit: 'contain' }}
-              />
-              <h2 style={{ fontSize: '26px', fontWeight: 900, color: '#FFFFFF', margin: 0, letterSpacing: '-0.02em' }}>
-                {celebratedCard.clientName}
-              </h2>
+            {/* Official Badge */}
+            <div style={{ marginBottom: '14px' }}>
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: 'rgba(0, 196, 204, 0.12)',
+                  border: '1px solid rgba(0, 196, 204, 0.4)',
+                  color: '#00C4CC',
+                  padding: '5px 14px',
+                  borderRadius: '999px',
+                  fontSize: '11.5px',
+                  fontWeight: 800,
+                  letterSpacing: '0.04em',
+                }}
+              >
+                Soporte Físico Conectado
+              </span>
             </div>
 
-            <p style={{ fontSize: '14px', color: '#94A3B8', margin: '0 0 24px', lineHeight: 1.5 }}>
-              La tarjeta <b>#{celebratedCard.code}</b> está 100% activa. Acércale el celular al dueño para demostrarle la magia en vivo.
-            </p>
-
-            {/* Target Live Card */}
+            {/* Presentation Card for Client */}
             <div
               style={{
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '16px',
-                padding: '16px',
-                marginBottom: '28px',
-                textAlign: 'left',
+                background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.95) 100%)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                borderRadius: '20px',
+                padding: '24px 20px',
+                marginBottom: '22px',
+                textAlign: 'center',
+                boxShadow: '0 10px 28px rgba(0,0,0,0.4)',
               }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase' }}>
-                  Enlace en el Chip NFC
+              {/* Official Brand Logo (Google or Instagram) */}
+              <div
+                style={{
+                  width: '56px',
+                  height: '56px',
+                  borderRadius: '16px',
+                  background: '#FFFFFF',
+                  margin: '0 auto 12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 6px 18px rgba(0,0,0,0.3)',
+                  border: '1px solid rgba(255,255,255,0.9)',
+                }}
+              >
+                <img
+                  src={celebratedCard.type === 'instagram' ? '/instagram-logo.png' : '/google-logo.png'}
+                  alt={celebratedCard.type}
+                  style={{ width: '32px', height: '32px', objectFit: 'contain' }}
+                />
+              </div>
+
+              {/* Client Business Name */}
+              <h2
+                style={{
+                  fontSize: '22px',
+                  fontWeight: 900,
+                  color: '#FFFFFF',
+                  margin: '0 0 6px',
+                  letterSpacing: '-0.02em',
+                }}
+              >
+                {celebratedCard.clientName}
+              </h2>
+
+              {/* Series & Live indicator */}
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+                <span
+                  style={{
+                    fontFamily: 'monospace',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    color: '#94A3B8',
+                    background: 'rgba(255,255,255,0.06)',
+                    padding: '2px 8px',
+                    borderRadius: '6px',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                  }}
+                >
+                  Soporte #{celebratedCard.code}
                 </span>
-                <span style={{ fontSize: '11px', fontWeight: 700, color: '#10B981' }}>
-                  ● Redirigiendo en Vivo
+                <span style={{ fontSize: '11.5px', color: '#10B981', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10B981' }}></span>
+                  Conexión en vivo
                 </span>
               </div>
-              <div style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '14px', color: '#38BDF8', marginBottom: '6px' }}>
-                hummingxbi.com/t/{celebratedCard.code}
-              </div>
-              <div style={{ fontSize: '12px', color: '#94A3B8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                ↳ Destino: {celebratedCard.targetUrl}
-              </div>
+
+              {/* Client-Facing Value Proposition */}
+              <p
+                style={{
+                  fontSize: '13.5px',
+                  color: '#CBD5E1',
+                  margin: 0,
+                  lineHeight: 1.55,
+                  fontWeight: 500,
+                }}
+              >
+                {celebratedCard.type === 'google_reviews'
+                  ? 'Tu soporte físico ya está activo. Cualquier cliente que acerque su celular o escanee el código irá directo a calificar tu negocio con 5 estrellas en Google.'
+                  : celebratedCard.type === 'instagram'
+                  ? 'Tu soporte físico ya está activo. Cualquier cliente que acerque su celular o escanee el código irá directo a seguir tu perfil oficial de Instagram.'
+                  : 'Tu soporte físico HummingX está conectado y listo para recibir clientes en tiempo real.'}
+              </p>
+
+              {/* Photo Evidence Thumbnail if uploaded */}
+              {celebratedCard.photoUrl && (
+                <div style={{ marginTop: '14px', display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.05)', padding: '5px 10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <img src={celebratedCard.photoUrl} alt="Soporte" style={{ width: '22px', height: '22px', borderRadius: '4px', objectFit: 'cover' }} />
+                  <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 600 }}>Foto de soporte registrada</span>
+                </div>
+              )}
             </div>
 
-            {/* Action Buttons */}
-            <div style={{ display: 'flex', gap: '10px' }}>
+            {/* Action Buttons (Strictly Styled for High Contrast - No White-on-White) */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {/* Primary Demo Button */}
               <a
-                href={`https://hummingxbi.com/t/${celebratedCard.code}`}
+                href={celebratedCard.targetUrl || `https://hummingxbi.com/t/${celebratedCard.code}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-primary"
                 style={{
-                  flex: 1,
+                  width: '100%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
-                  padding: '14px',
-                  borderRadius: '14px',
+                  padding: '13px 20px',
+                  borderRadius: '12px',
+                  background: '#00C4CC',
+                  color: '#0B0F19',
                   fontWeight: 800,
-                  fontSize: '14px',
+                  fontSize: '13.5px',
                   textDecoration: 'none',
+                  boxShadow: '0 4px 14px rgba(0, 196, 204, 0.4)',
+                  cursor: 'pointer',
+                  border: 'none',
+                  transition: 'opacity 0.15s ease',
                 }}
               >
-                <span>Probar Tap en Vivo</span>
-                <ExternalLink size={16} />
+                <span>Probar con mi celular ahora</span>
+                <ExternalLink size={15} />
               </a>
 
+              {/* Secondary Close Button (Crisp dark button with bright white text) */}
               <button
+                type="button"
                 onClick={() => { setShowCelebrationModal(false); setCelebratedCard(null); }}
-                className="btn-secondary"
                 style={{
-                  padding: '14px 20px',
-                  borderRadius: '14px',
+                  width: '100%',
+                  padding: '12px 20px',
+                  borderRadius: '12px',
                   fontWeight: 700,
-                  fontSize: '14px',
+                  fontSize: '13px',
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid rgba(255, 255, 255, 0.18)',
                   color: '#FFFFFF',
+                  cursor: 'pointer',
+                  transition: 'background 0.15s ease',
                 }}
               >
-                Cerrar
+                Listo, soporte configurado
               </button>
             </div>
           </div>

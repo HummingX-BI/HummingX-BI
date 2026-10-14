@@ -245,15 +245,104 @@ export default function AdminNfcCardsPage() {
     fetchCards();
   }, []);
 
+  const [compressingPhoto, setCompressingPhoto] = useState(false);
+
+  // Helper de compresión de imágenes en el cliente mediante Canvas (evita 413 Payload Too Large)
+  const compressImage = (file, maxWidth = 900, maxHeight = 900, quality = 0.75) => {
+    return new Promise((resolve, reject) => {
+      if (!file || !file.type.startsWith('image/')) {
+        return reject(new Error('El archivo seleccionado no es una imagen válida.'));
+      }
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('Error al leer el archivo.'));
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onerror = () => reject(new Error('Error al procesar la imagen.'));
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxWidth) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width = Math.round((width * maxHeight) / height);
+              height = maxHeight;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            return resolve(e.target.result);
+          }
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const dataUrl = canvas.toDataURL('image/jpeg', quality);
+          resolve(dataUrl);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
   const showNotification = (msg) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(''), 4000);
   };
 
   const copyToClipboard = (text, id) => {
-    navigator.clipboard.writeText(text);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
+    const onDone = () => {
+      setCopiedId(id);
+      showNotification('Enlace copiado al portapapeles.');
+      setTimeout(() => setCopiedId(null), 2000);
+    };
+
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).then(onDone).catch(() => fallbackCopy(text, onDone));
+    } else {
+      fallbackCopy(text, onDone);
+    }
+  };
+
+  const fallbackCopy = (text, callback) => {
+    try {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      if (callback) callback();
+    } catch (err) {
+      console.error('Error al copiar:', err);
+    }
+  };
+
+  // Quick Toggle Active / Paused state for field operations
+  const handleToggleActive = async (card, e) => {
+    e?.stopPropagation();
+    const willPause = card.active;
+    const actionText = willPause ? 'pausar temporalmente' : 'reactivar';
+    if (!window.confirm(`¿Deseas ${actionText} la tarjeta #${card.code} (${card.clientName})?`)) {
+      return;
+    }
+    try {
+      await api.put(`/admin/nfc-cards/${card.id}`, { active: !willPause });
+      showNotification(`Tarjeta #${card.code} ${willPause ? 'pausada' : 'reactivada'} con éxito.`);
+      fetchCards();
+    } catch (err) {
+      console.error('Error al cambiar estado de tarjeta:', err);
+      showNotification('Error al cambiar el estado de la tarjeta.');
+    }
   };
 
   // Open modal in Read-Only Security Mode for Active cards
@@ -294,17 +383,18 @@ export default function AdminNfcCardsPage() {
     const num = parseInt(card.code, 10);
     const defaultType = card.type || (num >= 11 && num <= 15 ? 'instagram' : 'google_reviews');
     const isGenericUrl = !card.targetUrl || card.targetUrl === 'https://hummingxbi.com';
+    const isBlank = !card.clientName || card.clientName.includes('Disponible');
     setForm({
       code: card.code,
-      clientName: card.clientName && !card.clientName.includes('Disponible') ? card.clientName : '',
+      clientName: isBlank ? '' : card.clientName,
       type: defaultType,
       targetUrl: isGenericUrl ? '' : card.targetUrl,
       active: true,
-      notes: card.notes || '',
-      latitude: card.latitude || '',
-      longitude: card.longitude || '',
-      locationName: card.locationName || '',
-      photoUrl: card.photoUrl || '',
+      notes: isBlank ? '' : (card.notes || ''),
+      latitude: isBlank ? '' : (card.latitude || ''),
+      longitude: isBlank ? '' : (card.longitude || ''),
+      locationName: isBlank ? '' : (card.locationName || ''),
+      photoUrl: isBlank ? '' : (card.photoUrl || ''),
     });
     if (defaultType === 'google_reviews') {
       setPlaceIdInput(isGenericUrl ? '' : cleanPlaceId(card.targetUrl));
@@ -354,7 +444,7 @@ export default function AdminNfcCardsPage() {
   // Handle GPS location acquisition
   const handleGetCurrentLocation = () => {
     if (!navigator.geolocation) {
-      alert('Tu navegador o dispositivo no soporta geolocalización GPS.');
+      showNotification('Tu navegador o dispositivo no soporta geolocalización GPS.');
       return;
     }
     setLocatingGps(true);
@@ -374,29 +464,37 @@ export default function AdminNfcCardsPage() {
       (err) => {
         console.error('Error obteniendo GPS:', err);
         setLocatingGps(false);
-        alert('No se pudo obtener la ubicación GPS: ' + (err.message || 'Permiso denegado'));
+        showNotification('No se pudo obtener la ubicación GPS: ' + (err.message || 'Permiso denegado'));
       },
       { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
     );
   };
 
-  // Handle evidence photo upload / camera snapshot
-  const handlePhotoUpload = (e) => {
+  // Handle evidence photo upload / camera snapshot with automatic client-side canvas compression
+  const handlePhotoUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      alert('La fotografía no debe superar 5MB.');
+    if (file.size > 20 * 1024 * 1024) {
+      setFormError('La fotografía seleccionada supera los 20MB. Por favor selecciona otra.');
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const base64 = event.target?.result;
-      setForm(prev => ({ ...prev, photoUrl: base64 }));
-      showNotification('Foto de soporte cargada exitosamente.');
-    };
-    reader.readAsDataURL(file);
+    setCompressingPhoto(true);
+    setFormError('');
+    try {
+      // Comprimir imagen a resolución optimizada (máx 900x900px, JPEG 0.75)
+      const compressedDataUrl = await compressImage(file, 900, 900, 0.75);
+      const estKb = Math.round((compressedDataUrl.length * 3) / 4 / 1024);
+      setForm(prev => ({ ...prev, photoUrl: compressedDataUrl }));
+      showNotification(`Foto de soporte optimizada (${estKb} KB) cargada con éxito.`);
+    } catch (err) {
+      console.error('Error al procesar foto:', err);
+      setFormError('No se pudo procesar la imagen seleccionada.');
+    } finally {
+      setCompressingPhoto(false);
+      if (e.target) e.target.value = '';
+    }
   };
 
   // Unlink card action
@@ -414,7 +512,7 @@ export default function AdminNfcCardsPage() {
       fetchCards();
     } catch (err) {
       console.error('Error al desvincular tarjeta:', err);
-      alert('Error al desvincular tarjeta.');
+      setFormError('Error al desvincular tarjeta.');
     } finally {
       setUnlinking(false);
     }
@@ -507,7 +605,8 @@ export default function AdminNfcCardsPage() {
         photoUrl: form.photoUrl || null,
       };
 
-      const wasInactive = editingCard ? !editingCard.active : true;
+      // Identificar si es una vinculación genuinamente nueva con un cliente (para celebrar en campo)
+      const wasNewBinding = !editingCard || (!editingCard.active && (!editingCard.clientName || editingCard.clientName.includes('Disponible')));
       let savedCardData = null;
 
       if (editingCard) {
@@ -523,14 +622,18 @@ export default function AdminNfcCardsPage() {
       closeModal();
       await fetchCards();
 
-      // Trigger Celebration Modal if activated in-situ with client
-      if (payload.active && wasInactive && savedCardData) {
+      // Disparar modal de celebración ÚNICAMENTE si fue una vinculación nueva en el lugar
+      if (payload.active && wasNewBinding && savedCardData) {
         setCelebratedCard(savedCardData);
         setShowCelebrationModal(true);
       }
     } catch (err) {
       console.error('Error al guardar tarjeta NFC/QR:', err);
-      setFormError(err.response?.data?.error || 'Error al guardar tarjeta. Revisa los datos.');
+      if (err.response?.status === 413) {
+        setFormError('La fotografía o datos exceden el límite de tamaño permitido en el servidor. Selecciona una imagen más ligera.');
+      } else {
+        setFormError(err.response?.data?.error || 'Error al guardar tarjeta. Revisa los datos.');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -600,11 +703,19 @@ export default function AdminNfcCardsPage() {
       const matchesSearch =
         card.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
         card.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (card.notes && card.notes.toLowerCase().includes(searchTerm.toLowerCase()));
+        (card.notes && card.notes.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (card.locationName && card.locationName.toLowerCase().includes(searchTerm.toLowerCase()));
       const matchesType = typeFilter === 'all' || card.type === typeFilter;
+
+      const isAvailable = !card.clientName || card.clientName.includes('Disponible');
+      const isSuspended = !card.active && !isAvailable;
+      const isActive = card.active;
+
       const matchesStatus =
         statusFilter === 'all' ||
-        (statusFilter === 'active' && card.active) ||
+        (statusFilter === 'active' && isActive) ||
+        (statusFilter === 'suspended' && isSuspended) ||
+        (statusFilter === 'available' && isAvailable) ||
         (statusFilter === 'inactive' && !card.active);
       return matchesSearch && matchesType && matchesStatus;
     });
@@ -807,7 +918,7 @@ export default function AdminNfcCardsPage() {
         {/* ── TAB 1: INVENTARIO DE TARJETAS ──────────────────────────────── */}
         {activeTab === 'inventory' && (
           <>
-            {/* Filter and Search Bar (Horizontal alignment side-by-side) */}
+            {/* Filter and Search Bar (Responsive flex-wrap layout for mobile & desktop) */}
             <div
               className="card"
               style={{
@@ -817,15 +928,15 @@ export default function AdminNfcCardsPage() {
                 background: '#FFFFFF',
                 marginBottom: '16px',
                 display: 'flex',
-                flexDirection: 'row',
+                flexWrap: 'wrap',
                 alignItems: 'center',
-                gap: '12px',
+                gap: '10px',
                 width: '100%',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
               }}
             >
               {/* Search input (Expands to fill remaining width) */}
-              <div style={{ position: 'relative', flex: 1, minWidth: '180px' }}>
+              <div style={{ position: 'relative', flex: '1 1 200px', minWidth: '160px' }}>
                 <Search
                   size={15}
                   style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }}
@@ -841,7 +952,7 @@ export default function AdminNfcCardsPage() {
               </div>
 
               {/* Type Filter */}
-              <div style={{ flex: '0 0 auto', width: '170px' }}>
+              <div style={{ flex: '1 1 140px', minWidth: '130px' }}>
                 <select
                   value={typeFilter}
                   onChange={(e) => setTypeFilter(e.target.value)}
@@ -858,7 +969,7 @@ export default function AdminNfcCardsPage() {
               </div>
 
               {/* Status Filter */}
-              <div style={{ flex: '0 0 auto', width: '160px' }}>
+              <div style={{ flex: '1 1 140px', minWidth: '130px' }}>
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
@@ -867,7 +978,8 @@ export default function AdminNfcCardsPage() {
                 >
                   <option value="all">Todos los Estados</option>
                   <option value="active">Activas (En Cliente)</option>
-                  <option value="inactive">Disponibles / Libres</option>
+                  <option value="suspended">Pausadas / Suspendidas</option>
+                  <option value="available">Disponibles / Libres</option>
                 </select>
               </div>
             </div>
@@ -891,7 +1003,7 @@ export default function AdminNfcCardsPage() {
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(310px, 1fr))',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))',
                   gap: '16px',
                 }}
               >
@@ -899,7 +1011,10 @@ export default function AdminNfcCardsPage() {
                   const num = parseInt(card.code, 10);
                   const isInstagram = card.type === 'instagram' || (num >= 11 && num <= 15);
                   const isGoogle = card.type === 'google_reviews' || (!card.type && num >= 1 && num <= 10) || (!isInstagram && card.type !== 'whatsapp' && card.type !== 'menu' && card.type !== 'website');
-                  const isLinked = Boolean(card.active && card.clientName && !card.clientName.includes('Disponible'));
+                  
+                  const isAvailable = !card.clientName || card.clientName.includes('Disponible');
+                  const isSuspended = !card.active && !isAvailable;
+                  const isActive = card.active;
 
                   return (
                     <div
@@ -911,9 +1026,21 @@ export default function AdminNfcCardsPage() {
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'space-between',
-                        border: card.active ? '1.5px solid #E2E8F0' : '1.5px dashed #CBD5E1',
-                        background: card.active ? '#FFFFFF' : '#FAFAFA',
-                        boxShadow: card.active ? '0 2px 8px rgba(0,0,0,0.04)' : 'none',
+                        border: isActive
+                          ? '1.5px solid #E2E8F0'
+                          : isSuspended
+                          ? '1.5px solid #FCD34D'
+                          : '1.5px dashed #CBD5E1',
+                        background: isActive
+                          ? '#FFFFFF'
+                          : isSuspended
+                          ? '#FFFDF5'
+                          : '#FAFAFA',
+                        boxShadow: isActive
+                          ? '0 2px 8px rgba(0,0,0,0.04)'
+                          : isSuspended
+                          ? '0 2px 8px rgba(245, 158, 11, 0.08)'
+                          : 'none',
                         position: 'relative',
                         transition: 'transform 0.15s ease, box-shadow 0.15s ease',
                       }}
@@ -987,7 +1114,7 @@ export default function AdminNfcCardsPage() {
                         </div>
 
                         {/* Status indicator */}
-                        {card.active ? (
+                        {isActive ? (
                           <span
                             style={{
                               display: 'inline-flex',
@@ -1004,6 +1131,24 @@ export default function AdminNfcCardsPage() {
                           >
                             <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10B981' }} />
                             <span>Activa</span>
+                          </span>
+                        ) : isSuspended ? (
+                          <span
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              color: '#B45309',
+                              background: '#FEF3C7',
+                              padding: '2px 8px',
+                              borderRadius: '999px',
+                              border: '1px solid #FDE68A',
+                            }}
+                          >
+                            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#F59E0B' }} />
+                            <span>Pausada</span>
                           </span>
                         ) : (
                           <span
@@ -1047,21 +1192,27 @@ export default function AdminNfcCardsPage() {
                               width: '48px',
                               height: '48px',
                               borderRadius: '12px',
-                              background: card.active ? '#F8FAFC' : '#F1F5F9',
-                              border: `1.5px solid ${card.active ? '#E2E8F0' : '#CBD5E1'}`,
+                              background: isActive ? '#F8FAFC' : isSuspended ? '#FEF3C7' : '#F1F5F9',
+                              border: `1.5px solid ${isActive ? '#E2E8F0' : isSuspended ? '#FDE68A' : '#CBD5E1'}`,
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
                               flexShrink: 0,
                             }}
                           >
-                            {card.active ? (
+                            {isActive ? (
                               isGoogle ? (
                                 <img src="/google-logo.png" alt="Google" style={{ width: '26px', height: '26px', objectFit: 'contain' }} />
                               ) : isInstagram ? (
                                 <img src="/instagram-logo.png" alt="Instagram" style={{ width: '26px', height: '26px', objectFit: 'contain' }} />
                               ) : (
                                 <QrCode size={22} color="#00C4CC" />
+                              )
+                            ) : isSuspended ? (
+                              isGoogle ? (
+                                <img src="/google-logo.png" alt="Google" style={{ width: '22px', height: '22px', objectFit: 'contain', opacity: 0.7 }} />
+                              ) : (
+                                <QrCode size={22} color="#D97706" />
                               )
                             ) : (
                               <QrCode size={22} color="#94A3B8" />
@@ -1074,7 +1225,7 @@ export default function AdminNfcCardsPage() {
                             style={{
                               fontSize: '15px',
                               fontWeight: 800,
-                              color: card.active ? '#111827' : '#64748B',
+                              color: (isActive || isSuspended) ? '#111827' : '#64748B',
                               margin: '0 0 3px',
                               whiteSpace: 'nowrap',
                               overflow: 'hidden',
@@ -1082,7 +1233,7 @@ export default function AdminNfcCardsPage() {
                               letterSpacing: '-0.01em',
                             }}
                           >
-                            {isLinked ? card.clientName : 'Disponible para vincular'}
+                            {!isAvailable ? card.clientName : 'Disponible para vincular'}
                           </h3>
 
                           <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#6B7280' }}>
@@ -1093,7 +1244,9 @@ export default function AdminNfcCardsPage() {
                                   {card.locationName}
                                 </span>
                               </>
-                            ) : card.active ? (
+                            ) : isSuspended ? (
+                              <span style={{ color: '#D97706', fontWeight: 600 }}>Pausada temporalmente</span>
+                            ) : isActive ? (
                               <span style={{ color: '#059669', fontWeight: 500 }}>Vinculada con cliente</span>
                             ) : (
                               <span>Sin cliente asignado</span>
@@ -1121,25 +1274,78 @@ export default function AdminNfcCardsPage() {
                           </span>
                         </div>
 
-                        {/* Action Button: No Emojis, clean button */}
-                        {card.active ? (
-                          <button
-                            onClick={() => openViewCardModal(card)}
-                            className="btn-secondary"
-                            style={{
-                              borderRadius: '8px',
-                              padding: '6px 12px',
-                              fontSize: '12px',
-                              fontWeight: 700,
-                              cursor: 'pointer',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '6px',
-                            }}
-                          >
-                            <Lock size={12} color="#64748B" />
-                            <span>Ver / Editar</span>
-                          </button>
+                        {/* Action Buttons: Responsive & Clear */}
+                        {isActive ? (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <button
+                              onClick={(e) => handleToggleActive(card, e)}
+                              className="btn-secondary"
+                              style={{
+                                borderRadius: '8px',
+                                padding: '6px 10px',
+                                fontSize: '11.5px',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                color: '#64748B',
+                              }}
+                              title="Pausar temporalmente esta tarjeta"
+                            >
+                              Pausar
+                            </button>
+                            <button
+                              onClick={() => openViewCardModal(card)}
+                              className="btn-secondary"
+                              style={{
+                                borderRadius: '8px',
+                                padding: '6px 12px',
+                                fontSize: '12px',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                              }}
+                            >
+                              <Lock size={12} color="#64748B" />
+                              <span>Ver / Editar</span>
+                            </button>
+                          </div>
+                        ) : isSuspended ? (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <button
+                              onClick={(e) => handleToggleActive(card, e)}
+                              style={{
+                                borderRadius: '8px',
+                                padding: '6px 12px',
+                                fontSize: '12px',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                background: '#ECFDF5',
+                                border: '1px solid #A7F3D0',
+                                color: '#065F46',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                              }}
+                              title="Reactivar tarjeta para responder inmediatamente al escanear"
+                            >
+                              <CheckCircle2 size={13} color="#059669" />
+                              <span>Reactivar</span>
+                            </button>
+                            <button
+                              onClick={() => openViewCardModal(card)}
+                              className="btn-secondary"
+                              style={{
+                                borderRadius: '8px',
+                                padding: '6px 10px',
+                                fontSize: '12px',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                              }}
+                            >
+                              <span>Editar</span>
+                            </button>
+                          </div>
                         ) : (
                           <button
                             onClick={() => openBindInSituModal(card)}
@@ -1209,15 +1415,23 @@ export default function AdminNfcCardsPage() {
                     style={{
                       fontSize: '12px',
                       fontWeight: 700,
-                      color: form.active ? '#10B981' : '#F59E0B',
+                      color: form.active ? '#10B981' : (form.clientName && !form.clientName.includes('Disponible') ? '#D97706' : '#64748B'),
                     }}
                   >
-                    {form.active ? '● Tarjeta Activa' : '○ Tarjeta Disponible'}
+                    {form.active
+                      ? '● Tarjeta Activa'
+                      : (form.clientName && !form.clientName.includes('Disponible')
+                          ? '● Tarjeta Pausada'
+                          : '○ Tarjeta Disponible')}
                   </span>
                 </div>
 
                 <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#111827', margin: 0 }}>
-                  {editingCard ? (isLocked ? 'Detalles de Tarjeta Activa' : 'Modificar Tarjeta') : 'Vincular Nueva Tarjeta'}
+                  {editingCard
+                    ? (isLocked
+                        ? (form.active ? 'Detalles de Tarjeta Activa' : 'Detalles de Tarjeta Pausada')
+                        : 'Modificar Tarjeta')
+                    : 'Vincular Nueva Tarjeta'}
                 </h2>
               </div>
 
@@ -1581,7 +1795,26 @@ export default function AdminNfcCardsPage() {
                     style={{ display: 'none' }}
                   />
 
-                  {form.photoUrl ? (
+                  {compressingPhoto ? (
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        padding: '16px',
+                        background: '#F8FAFC',
+                        borderRadius: '12px',
+                        border: '1px solid #E2E8F0',
+                        color: '#0284C7',
+                        fontSize: '12.5px',
+                        fontWeight: 600,
+                      }}
+                    >
+                      <Loader2 className="animate-spin" size={16} />
+                      <span>Optimizando y comprimiendo imagen en alta calidad...</span>
+                    </div>
+                  ) : form.photoUrl ? (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '10px', borderRadius: '12px' }}>
                       <img
                         src={form.photoUrl}
@@ -1590,10 +1823,10 @@ export default function AdminNfcCardsPage() {
                       />
                       <div style={{ flex: 1 }}>
                         <span style={{ fontSize: '12px', fontWeight: 700, color: '#0F172A', display: 'block' }}>
-                          Foto capturada
+                          Foto de soporte cargada
                         </span>
                         <span style={{ fontSize: '11px', color: '#64748B' }}>
-                          Se mostrará como avatar del local y en el Pin del Mapa.
+                          Optimizada (~{Math.round((form.photoUrl.length * 3) / 4 / 1024)} KB). Se mostrará en el Pin del Mapa y avatar.
                         </span>
                       </div>
                       {!isLocked && (
@@ -1652,8 +1885,23 @@ export default function AdminNfcCardsPage() {
                 </label>
               </div>
 
-              {/* Modal Action Buttons */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '14px', paddingTop: '14px', borderTop: '1px solid #E2E8F0' }}>
+              {/* Modal Action Buttons (Sticky on mobile scroll) */}
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginTop: '16px',
+                  paddingTop: '14px',
+                  borderTop: '1px solid #E2E8F0',
+                  position: 'sticky',
+                  bottom: '-28px',
+                  background: '#FFFFFF',
+                  paddingBottom: '8px',
+                  zIndex: 10,
+                  gap: '8px',
+                }}
+              >
                 <div>
                   {!isLocked && editingCard && (
                     <button

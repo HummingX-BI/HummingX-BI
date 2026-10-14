@@ -27,13 +27,17 @@ router.get('/my', authenticate, async (req, res) => {
 
     let referralCode = user?.referralCode;
     if (!referralCode) {
-      const baseCode = (user?.companyName || user?.name || 'hx')
-        .toLowerCase()
-        .replace(/\s+/g, '-')
-        .replace(/[^a-z0-9-]/g, '')
-        .slice(0, 20) || 'socio';
-
-      referralCode = `${baseCode}-${Math.random().toString(36).substring(2, 6)}`;
+      // Generar código numérico único de 5 dígitos (ej. 84920)
+      let candidateCode;
+      let isUnique = false;
+      let attempts = 0;
+      while (!isUnique && attempts < 10) {
+        attempts++;
+        candidateCode = String(Math.floor(10000 + Math.random() * 90000));
+        const existing = await prisma.user.findUnique({ where: { referralCode: candidateCode } });
+        if (!existing) isUnique = true;
+      }
+      referralCode = candidateCode || `HX-${Math.floor(1000 + Math.random() * 9000)}`;
       await prisma.user.update({
         where: { id: req.user.id },
         data: { referralCode },
@@ -113,6 +117,40 @@ router.post('/', authenticate, async (req, res) => {
   } catch (err) {
     console.error('[REFERRALS] Error en POST /referrals:', err);
     res.status(500).json({ error: 'Error al registrar recomendación.' });
+  }
+});
+
+// PUT /referrals/code — Client updates their referral code (numeric or custom)
+router.put('/code', authenticate, async (req, res) => {
+  try {
+    const { code } = req.body;
+    if (!code || !/^[A-Za-z0-9_-]{3,20}$/.test(String(code).trim())) {
+      return res.status(400).json({ error: 'El código debe tener entre 3 y 20 caracteres alfanuméricos o números (ej. 84920).' });
+    }
+
+    const cleanCode = String(code).trim();
+    // Check if code is taken by another user
+    const existing = await prisma.user.findFirst({
+      where: {
+        referralCode: { equals: cleanCode, mode: 'insensitive' },
+        NOT: { id: req.user.id }
+      }
+    });
+
+    if (existing) {
+      return res.status(400).json({ error: 'Este código ya está en uso por otro socio. Por favor elige otro número o código.' });
+    }
+
+    const updated = await prisma.user.update({
+      where: { id: req.user.id },
+      data: { referralCode: cleanCode },
+      select: { referralCode: true }
+    });
+
+    res.json({ referralCode: updated.referralCode });
+  } catch (err) {
+    console.error('[REFERRALS] Error en PUT /referrals/code:', err);
+    res.status(500).json({ error: 'Error al actualizar código de socio.' });
   }
 });
 

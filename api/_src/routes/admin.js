@@ -1723,8 +1723,8 @@ router.put('/nfc-cards/:id', authenticate, requireAdmin, async (req, res) => {
   }
 });
 
-// POST /admin/nfc-cards/:id/unlink — Desvincular tarjeta
-router.post('/admin/nfc-cards/:id/unlink', authenticate, requireAdmin, async (req, res) => {
+// POST /nfc-cards/:id/unlink — Desvincular tarjeta (desvinculación limpia)
+router.post(['/nfc-cards/:id/unlink', '/admin/nfc-cards/:id/unlink'], authenticate, requireAdmin, async (req, res) => {
   try {
     const card = await prisma.nfcCard.update({
       where: { id: req.params.id },

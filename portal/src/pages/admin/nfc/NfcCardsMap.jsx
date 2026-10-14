@@ -91,14 +91,14 @@ export default function NfcCardsMap({ cards = [], onCardClick = () => {} }) {
       }
     });
 
-    // Add selected tile layer
-    const tileUrl = mapTheme === 'dark'
-      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-      : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+    // Add selected tile layer using OpenStreetMap (100% free, no API key required, no billing)
+    const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 
     L.tileLayer(tileUrl, {
       maxZoom: 19,
-      subdomains: 'abcd'
+      subdomains: ['a', 'b', 'c'],
+      className: mapTheme === 'dark' ? 'hx-dark-osm-tiles' : '',
+      attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
     // Invalidate size after layout mounts
@@ -818,6 +818,10 @@ export default function NfcCardsMap({ cards = [], onCardClick = () => {} }) {
         .hx-div-icon {
           background: transparent !important;
           border: none !important;
+        }
+        .hx-dark-osm-tiles,
+        .leaflet-tile.hx-dark-osm-tiles {
+          filter: invert(100%) hue-rotate(180deg) brightness(85%) contrast(90%) !important;
         }
       `}</style>
     </div>

@@ -33,6 +33,7 @@ import {
   Crown,
   Award,
   Info,
+  Edit2,
 } from 'lucide-react';
 
 const STATUS_CONFIG = {
@@ -129,14 +130,38 @@ export default function ReferralsPage() {
   }, []);
 
   const [copiedCode, setCopiedCode] = useState(false);
+  const [editingCustomCode, setEditingCustomCode] = useState(false);
+  const [newCodeInput, setNewCodeInput] = useState('');
+  const [savingCode, setSavingCode] = useState(false);
+  const [codeError, setCodeError] = useState('');
 
+  // Si el código es puramente numérico (ej. 84920), se muestra tal cual. Si tiene letras y no tiene HX-, se le agrega HX-
   const displayCode = referralCode
-    ? (referralCode.toUpperCase().startsWith('HX-') ? referralCode.toUpperCase() : `HX-${referralCode.toUpperCase()}`)
-    : 'HX-SOCIO';
+    ? (/^[0-9]+$/.test(referralCode) 
+        ? referralCode 
+        : (referralCode.toUpperCase().startsWith('HX-') ? referralCode.toUpperCase() : `HX-${referralCode.toUpperCase()}`))
+    : '84920';
 
   const referralLink = referralCode 
     ? `https://hummingxbi.com/ref/${referralCode}` 
     : 'https://hummingxbi.com/afiliate';
+
+  const handleSaveCode = async (e) => {
+    if (e) e.preventDefault();
+    if (!newCodeInput || !newCodeInput.trim()) return;
+    setSavingCode(true);
+    setCodeError('');
+    try {
+      const res = await api.put('/referrals/code', { code: newCodeInput.trim() });
+      setReferralCode(res.data.referralCode);
+      setEditingCustomCode(false);
+      setNewCodeInput('');
+    } catch (err) {
+      setCodeError(err.response?.data?.error || 'Error al actualizar código.');
+    } finally {
+      setSavingCode(false);
+    }
+  };
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(displayCode);
@@ -558,10 +583,89 @@ export default function ReferralsPage() {
                 marginBottom: '12px',
               }}>
                 <div>
-                  <span style={{ fontSize: '10px', fontWeight: 700, color: '#64748B', display: 'block', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Código de Socio</span>
-                  <span style={{ fontSize: '18px', fontWeight: 800, color: '#111827', fontFamily: 'monospace', letterSpacing: '0.05em' }}>
-                    {displayCode}
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontSize: '10px', fontWeight: 700, color: '#64748B', display: 'block', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Código de Socio</span>
+                    {!editingCustomCode && (
+                      <button
+                        onClick={() => {
+                          setNewCodeInput(referralCode || '');
+                          setEditingCustomCode(true);
+                          setCodeError('');
+                        }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          padding: '2px',
+                          cursor: 'pointer',
+                          color: '#94A3B8',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          borderRadius: '4px'
+                        }}
+                        title="Personalizar mi código"
+                      >
+                        <Edit2 size={11} />
+                      </button>
+                    )}
+                  </div>
+                  {!editingCustomCode ? (
+                    <span style={{ fontSize: '18px', fontWeight: 800, color: '#111827', fontFamily: 'monospace', letterSpacing: '0.05em' }}>
+                      {displayCode}
+                    </span>
+                  ) : (
+                    <form onSubmit={handleSaveCode} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
+                      <input
+                        type="text"
+                        value={newCodeInput}
+                        onChange={(e) => setNewCodeInput(e.target.value)}
+                        placeholder="Ej. 58291"
+                        maxLength={20}
+                        style={{
+                          padding: '4px 8px',
+                          fontSize: '14px',
+                          fontWeight: 700,
+                          borderRadius: '6px',
+                          border: '1px solid #00C4CC',
+                          outline: 'none',
+                          width: '120px',
+                          fontFamily: 'monospace'
+                        }}
+                        autoFocus
+                      />
+                      <button
+                        type="submit"
+                        disabled={savingCode}
+                        style={{
+                          background: '#00C4CC',
+                          border: 'none',
+                          color: '#0B0F19',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          padding: '5px 10px',
+                          borderRadius: '6px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {savingCode ? '...' : 'Guardar'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setEditingCustomCode(false); setCodeError(''); }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#64748B',
+                          fontSize: '11px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Cancelar
+                      </button>
+                    </form>
+                  )}
+                  {codeError && (
+                    <span style={{ fontSize: '11px', color: '#EF4444', display: 'block', marginTop: '2px' }}>{codeError}</span>
+                  )}
                 </div>
 
                 <button

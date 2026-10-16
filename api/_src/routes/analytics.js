@@ -20,35 +20,46 @@ router.post('/heartbeat', authenticate, async (req, res) => {
     const deviceType = /Mobi|Android|iPhone/i.test(ua) ? 'mobile' : 'desktop';
     const entryPath = path && typeof path === 'string' ? path.substring(0, 255) : null;
 
-    await prisma.$transaction([
-      prisma.portalSession.upsert({
-        where: { id: sessionId },
-        create: {
-          id: sessionId,
-          userId: req.user.id,
-          startedAt: new Date(),
-          lastSeenAt: new Date(),
-          activeSec,
-          deviceType,
-          entryPath,
-        },
-        update: {
-          activeSec: { increment: activeSec },
-          lastSeenAt: new Date(),
-        }
-      }),
-      prisma.user.update({
-        where: { id: req.user.id },
-        data: {
-          totalTimeSpent: { increment: activeSec }
-        }
-      })
-    ]);
+    try {
+      await prisma.$transaction([
+        prisma.portalSession.upsert({
+          where: { id: sessionId },
+          create: {
+            id: sessionId,
+            userId: req.user.id,
+            startedAt: new Date(),
+            lastSeenAt: new Date(),
+            activeSec,
+            deviceType,
+            entryPath,
+          },
+          update: {
+            activeSec: { increment: activeSec },
+            lastSeenAt: new Date(),
+          }
+        }),
+        prisma.user.update({
+          where: { id: req.user.id },
+          data: {
+            totalTimeSpent: { increment: activeSec }
+          }
+        })
+      ]);
+    } catch (dbErr) {
+      if (dbErr.code === 'P2021' || dbErr.code === 'P2022') {
+        await prisma.user.update({
+          where: { id: req.user.id },
+          data: { totalTimeSpent: { increment: activeSec } }
+        }).catch(() => {});
+      } else {
+        console.error('[ANALYTICS] heartbeat dbErr:', dbErr.message);
+      }
+    }
 
     res.json({ ok: true });
   } catch (err) {
     console.error('[ANALYTICS] heartbeat err:', err.message);
-    res.status(500).json({ error: 'Internal server error' });
+    res.json({ ok: true });
   }
 });
 

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import OverviewTab from './analytics/OverviewTab';
 import CommercialTab from './analytics/CommercialTab';
@@ -7,8 +8,26 @@ import BehaviorTab from './analytics/BehaviorTab';
 import ClientTab from './analytics/ClientTab';
 
 export default function AdminAnalyticsPage() {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlTab = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(urlTab || 'overview');
   const [range, setRange] = useState(30);
+  const initialClient = searchParams.get('client') || '';
+
+  useEffect(() => {
+    if (urlTab && urlTab !== activeTab) {
+      setActiveTab(urlTab);
+    }
+  }, [urlTab]);
+
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      next.set('tab', tabId);
+      return next;
+    });
+  };
 
   return (
     <Layout customBreadcrumbLabel="Control y Analíticas">
@@ -64,7 +83,7 @@ export default function AdminAnalyticsPage() {
           ].map(tab => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => handleTabChange(tab.id)}
               style={{
                 padding: '12px 0',
                 fontSize: '14px',
@@ -89,7 +108,7 @@ export default function AdminAnalyticsPage() {
           {activeTab === 'commercial' && <CommercialTab range={range} />}
           {activeTab === 'projects' && <ProjectsTab range={range} />}
           {activeTab === 'behavior' && <BehaviorTab range={range} />}
-          {activeTab === 'client' && <ClientTab range={range} />}
+          {activeTab === 'client' && <ClientTab range={range} initialClientId={initialClient} />}
         </div>
 
       </div>

@@ -686,6 +686,26 @@ export default function AdminClientDetailPage() {
               }
               return <span style={{ padding: '6px 12px', borderRadius: '6px', background: '#FEF3C7', color: '#92400E', fontSize: '13px', fontWeight: 600, display: 'inline-flex', alignItems: 'center' }}>Invitación Enviada</span>;
             })()}
+            <Link
+              to={`/admin/analytics?tab=client&client=${client.id}`}
+              className="btn-secondary"
+              title="Ver métricas de actividad y uso de este cliente"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 16px',
+                fontSize: '13px',
+                fontWeight: 600,
+                color: '#00C4CC',
+                borderColor: '#CCFBF1',
+                background: '#F0FDFA',
+                textDecoration: 'none',
+                borderRadius: '8px'
+              }}
+            >
+              <Activity size={16} /> Ver analíticas
+            </Link>
             <button
               type="button"
               onClick={handleImpersonate}

@@ -3,7 +3,7 @@ import api from '../../../lib/api';
 import { BarChart, Bar, PieChart, Pie, Cell, Legend, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Clock, LogIn, TrendingUp, Sparkles, AlertCircle, RefreshCw, Smartphone, Laptop, Calendar, Layers } from 'lucide-react';
+import { Clock, LogIn, TrendingUp, Sparkles, AlertCircle, RefreshCw, Smartphone, Laptop, Calendar, Layers, Search, ChevronDown, Check } from 'lucide-react';
 import { SkeletonBox, SkeletonStatCard } from '../../../components/Skeleton';
 import { fmtDuration } from '../../../lib/format';
 import HeatmapGrid from './HeatmapGrid';
@@ -12,31 +12,52 @@ import ActivityCalendar from './ActivityCalendar';
 const SECTION_COLORS = ['#00C4CC', '#7B2FBE', '#10B981', '#F59E0B', '#3B82F6', '#EC4899'];
 const DEVICE_COLORS = ['#10B981', '#F59E0B'];
 
-export default function ClientTab({ range }) {
+export default function ClientTab({ range, initialClientId }) {
   const [clients, setClients] = useState([]);
   const [selectedClientId, setSelectedClientId] = useState('');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [listError, setListError] = useState(null);
   const [error, setError] = useState(null);
+  const [search, setSearch] = useState('');
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   // Fetch client list once
   useEffect(() => {
     setInitialLoading(true);
-    api.get('/admin/clients')
+    setListError(null);
+    api.get('/admin/analytics/clients-list')
       .then(res => {
-        const clientUsers = (res.data || []).filter(c => c.role === 'client');
-        setClients(clientUsers);
-        if (clientUsers.length > 0) {
-          setSelectedClientId(clientUsers[0].id);
+        const list = res.data || [];
+        setClients(list);
+        if (list.length > 0) {
+          if (initialClientId && list.some(c => c.id === initialClientId)) {
+            setSelectedClientId(initialClientId);
+          } else {
+            // Default to client with most recent lastLoginAt
+            const sorted = [...list].sort((a, b) => {
+              const ta = a.lastLoginAt ? new Date(a.lastLoginAt).getTime() : 0;
+              const tb = b.lastLoginAt ? new Date(b.lastLoginAt).getTime() : 0;
+              return tb - ta;
+            });
+            setSelectedClientId(sorted[0].id);
+          }
         }
       })
       .catch(err => {
-        console.error('Error fetching clients:', err);
-        setError('No se pudo cargar la lista de clientes.');
+        console.error('Error fetching clients-list:', err);
+        setListError('Error al cargar la lista de clientes.');
       })
       .finally(() => setInitialLoading(false));
-  }, []);
+  }, [initialClientId]);
+
+  // Sync if initialClientId changes
+  useEffect(() => {
+    if (initialClientId && clients.some(c => c.id === initialClientId)) {
+      setSelectedClientId(initialClientId);
+    }
+  }, [initialClientId, clients]);
 
   const fetchClientAnalytics = () => {
     if (!selectedClientId) return;
@@ -70,36 +91,170 @@ export default function ClientTab({ range }) {
     );
   }
 
-  if (clients.length === 0) {
+  if (listError) {
     return (
-      <div className="card" style={{ padding: '48px', textAlign: 'center', color: '#6B7280' }}>
-        <p style={{ fontSize: '16px', margin: 0 }}>No hay clientes registrados en la plataforma.</p>
+      <div className="card" style={{ padding: '32px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+        <AlertCircle size={36} color="#EF4444" />
+        <p style={{ margin: 0, color: '#B91C1C', fontWeight: 600 }}>{listError}</p>
       </div>
     );
   }
+
+  if (clients.length === 0) {
+    return (
+      <div className="card" style={{ padding: '48px', textAlign: 'center', color: '#6B7280' }}>
+        <p style={{ fontSize: '16px', margin: 0, fontWeight: 600 }}>No hay clientes registrados en la plataforma.</p>
+      </div>
+    );
+  }
+
+  const selectedClient = clients.find(c => c.id === selectedClientId);
+  const filteredClients = clients.filter(c => {
+    const q = search.toLowerCase().trim();
+    if (!q) return true;
+    const nameMatch = (c.name || '').toLowerCase().includes(q);
+    const companyMatch = (c.companyName || '').toLowerCase().includes(q);
+    return nameMatch || companyMatch;
+  });
 
   return (
     <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
       
       {/* Client Selector Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <label htmlFor="client-selector" style={{ fontSize: '14px', fontWeight: 700, color: '#374151' }}>
+        <div style={{ position: 'relative' }}>
+          <label style={{ fontSize: '13px', fontWeight: 700, color: '#374151', marginBottom: '6px', display: 'block' }}>
             Cliente a supervisar:
           </label>
-          <select
-            id="client-selector"
-            className="input-field"
-            style={{ minWidth: '260px', padding: '8px 12px' }}
-            value={selectedClientId}
-            onChange={(e) => setSelectedClientId(e.target.value)}
-          >
-            {clients.map(c => (
-              <option key={c.id} value={c.id}>
-                {c.companyName ? `${c.companyName} (${c.name})` : c.name}
-              </option>
-            ))}
-          </select>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div 
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '8px 14px',
+                background: '#FFFFFF',
+                border: '1px solid #D1D5DB',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                minWidth: '300px',
+                maxWidth: '420px',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+              }}
+            >
+              {selectedClient?.logoUrl ? (
+                <img 
+                  src={selectedClient.logoUrl} 
+                  alt="" 
+                  style={{ width: '28px', height: '28px', borderRadius: '6px', objectFit: 'contain', background: '#F3F4F6' }} 
+                />
+              ) : (
+                <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: '#E0F2FE', color: '#0284C7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700 }}>
+                  {(selectedClient?.companyName || selectedClient?.name || 'C').charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
+                <div style={{ fontSize: '14px', fontWeight: 600, color: '#111827', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {selectedClient?.companyName || selectedClient?.name || 'Seleccionar cliente'}
+                </div>
+                <div style={{ fontSize: '11px', color: '#6B7280', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {selectedClient?.lastLoginAt 
+                    ? `Último acceso ${formatDistanceToNow(new Date(selectedClient.lastLoginAt), { addSuffix: true, locale: es })}`
+                    : 'Sin accesos registrados'}
+                </div>
+              </div>
+              <ChevronDown size={16} color="#6B7280" />
+            </div>
+          </div>
+
+          {dropdownOpen && (
+            <div 
+              style={{
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                marginTop: '6px',
+                width: '380px',
+                maxHeight: '340px',
+                background: '#FFFFFF',
+                borderRadius: '10px',
+                border: '1px solid #E5E7EB',
+                boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.05)',
+                zIndex: 50,
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden'
+              }}
+            >
+              <div style={{ padding: '10px', borderBottom: '1px solid #F3F4F6', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Search size={16} color="#9CA3AF" />
+                <input 
+                  type="text"
+                  placeholder="Buscar por nombre o empresa..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  autoFocus
+                  style={{
+                    border: 'none',
+                    outline: 'none',
+                    width: '100%',
+                    fontSize: '13px',
+                    color: '#111827'
+                  }}
+                />
+              </div>
+              <div style={{ overflowY: 'auto', flex: 1, maxHeight: '280px' }}>
+                {filteredClients.length === 0 ? (
+                  <div style={{ padding: '16px', fontSize: '13px', color: '#9CA3AF', textAlign: 'center' }}>
+                    No se encontraron clientes coincidentes
+                  </div>
+                ) : (
+                  filteredClients.map(c => (
+                    <div 
+                      key={c.id}
+                      onClick={() => {
+                        setSelectedClientId(c.id);
+                        setDropdownOpen(false);
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '10px 14px',
+                        cursor: 'pointer',
+                        background: c.id === selectedClientId ? '#F0FDFA' : 'transparent',
+                        borderBottom: '1px solid #F9FAFB',
+                        transition: 'background 0.15s'
+                      }}
+                    >
+                      {c.logoUrl ? (
+                        <img src={c.logoUrl} alt="" style={{ width: '28px', height: '28px', borderRadius: '6px', objectFit: 'contain', background: '#F3F4F6', flexShrink: 0 }} />
+                      ) : (
+                        <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: '#E0F2FE', color: '#0284C7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, flexShrink: 0 }}>
+                          {(c.companyName || c.name || 'C').charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '13px', fontWeight: 600, color: '#111827', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {c.companyName || c.name}
+                        </div>
+                        <div style={{ fontSize: '11px', color: '#6B7280', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          {c.companyName && c.companyName !== c.name && <span>{c.name} • </span>}
+                          <span>
+                            {c.lastLoginAt 
+                              ? `hace ${formatDistanceToNow(new Date(c.lastLoginAt), { locale: es })}`
+                              : 'Sin accesos'}
+                          </span>
+                        </div>
+                      </div>
+                      {c.id === selectedClientId && <Check size={16} color="#00C4CC" />}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {data && (

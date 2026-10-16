@@ -223,9 +223,6 @@ router.get('/clients/:id', authenticate, requireAdmin, async (req, res) => {
           } 
         },
         creditMovements: { orderBy: { createdAt: 'desc' }, select: { id: true, amount: true, type: true, description: true, createdAt: true } },
-        _count: {
-          select: { portalSessions: true }
-        }
       }
     });
 
@@ -235,7 +232,14 @@ router.get('/clients/:id', authenticate, requireAdmin, async (req, res) => {
 
     // Compute total credits and session count
     const totalCredits = client.creditMovements.reduce((sum, m) => sum + m.amount, 0);
-    const sessionCount = client._count?.portalSessions || 0;
+    let sessionCount = 0;
+    try {
+      sessionCount = await prisma.portalSession.count({ where: { userId: client.id } });
+    } catch (sessionErr) {
+      if (sessionErr.code === 'P2021' || sessionErr.code === 'P2022') {
+        sessionCount = 0;
+      }
+    }
     // SECURITY: No need to strip passwordHash — using select: {} above never fetches it
     res.json({ ...client, sessionCount, totalCredits });
   } catch (err) {
@@ -980,6 +984,85 @@ router.post('/impersonate/:clientId', authenticate, requireAdmin, async (req, re
 
 // --- ANALYTICS ENDPOINTS ---
 
+// GET /admin/analytics/clients-list — Lista ligera de clientes para selector de analíticas
+router.get('/analytics/clients-list', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const clients = await prisma.user.findMany({
+      where: { role: 'client' },
+      orderBy: { companyName: 'asc' },
+      select: {
+        id: true,
+        name: true,
+        companyName: true,
+        logoUrl: true,
+        lastLoginAt: true,
+        invitationAccepted: true,
+      }
+    });
+    res.json(clients);
+  } catch (err) {
+    console.error('Error fetching analytics clients list:', err);
+    res.status(500).json({ error: 'Error al cargar lista de clientes' });
+  }
+});
+
+// GET /admin/analytics/activity-calendar — Calendario global de actividad (últimos 365 días)
+router.get('/analytics/activity-calendar', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const yearAgo = new Date();
+    yearAgo.setDate(yearAgo.getDate() - 365);
+
+    let portalSessions = [];
+    try {
+      portalSessions = await prisma.portalSession.findMany({
+        where: { startedAt: { gte: yearAgo } },
+        select: { startedAt: true, activeSec: true }
+      });
+    } catch (sessionErr) {
+      if (sessionErr.code === 'P2021' || sessionErr.code === 'P2022') {
+        portalSessions = [];
+      } else {
+        throw sessionErr;
+      }
+    }
+
+    const loginEvents = await prisma.loginEvent.findMany({
+      where: { createdAt: { gte: yearAgo } },
+      select: { createdAt: true }
+    });
+
+    const calMap = {};
+    if (portalSessions.length > 0) {
+      portalSessions.forEach(s => {
+        const { ymd } = mxParts(s.startedAt);
+        if (!calMap[ymd]) calMap[ymd] = { date: ymd, sessions: 0, activeSec: 0 };
+        calMap[ymd].sessions++;
+        calMap[ymd].activeSec += (s.activeSec || 0);
+      });
+    } else {
+      loginEvents.forEach(evt => {
+        const { ymd } = mxParts(evt.createdAt);
+        if (!calMap[ymd]) calMap[ymd] = { date: ymd, sessions: 0, activeSec: 0 };
+        calMap[ymd].sessions++;
+      });
+    }
+
+    const calendar = Object.values(calMap).map(c => ({
+      date: c.date,
+      sessions: c.sessions,
+      activeMin: Math.round(c.activeSec / 60)
+    }));
+
+    res.json({
+      calendar,
+      source: portalSessions.length > 0 ? 'portalSessions' : 'loginEvents'
+    });
+  } catch (err) {
+    console.error('Error in activity-calendar:', err);
+    res.status(500).json({ error: 'Error al cargar calendario de actividad' });
+  }
+});
+
 router.get('/analytics/overview', authenticate, requireAdmin, async (req, res) => {
   try {
     const range = parseInt(req.query.range || '30', 10);
@@ -1172,14 +1255,23 @@ router.get('/analytics/client/:id', authenticate, requireAdmin, async (req, res)
       return res.status(404).json({ error: 'Cliente no encontrado.' });
     }
 
-    // 1. Fetch portal sessions in the last 365 days
-    const allSessions = await prisma.portalSession.findMany({
-      where: {
-        userId: client.id,
-        startedAt: { gte: yearAgo }
-      },
-      orderBy: { startedAt: 'desc' }
-    });
+    // 1. Fetch portal sessions in the last 365 days (with P2021/P2022 guard)
+    let allSessions = [];
+    try {
+      allSessions = await prisma.portalSession.findMany({
+        where: {
+          userId: client.id,
+          startedAt: { gte: yearAgo }
+        },
+        orderBy: { startedAt: 'desc' }
+      });
+    } catch (sessionErr) {
+      if (sessionErr.code === 'P2021' || sessionErr.code === 'P2022') {
+        allSessions = [];
+      } else {
+        throw sessionErr;
+      }
+    }
 
     // 2. Fetch page views in range for sections
     const pageViews = await prisma.pageView.findMany({
@@ -1202,6 +1294,11 @@ router.get('/analytics/client/:id', authenticate, requireAdmin, async (req, res)
         where: {
           userId: client.id,
           createdAt: { gte: yearAgo }
+        },
+        select: {
+          id: true,
+          createdAt: true,
+          deviceType: true
         },
         orderBy: { createdAt: 'desc' }
       });

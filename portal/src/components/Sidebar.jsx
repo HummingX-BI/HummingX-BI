@@ -80,6 +80,7 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
       title: 'Dinero',
       links: [
         { to: '/admin/finanzas',    icon: DollarSign,   label: 'Finanzas & Cobranza' },
+        { to: '/admin/pagos',       icon: Calendar,     label: 'Calendario de Pagos' },
       ],
     },
     {

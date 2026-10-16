@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import api from '../../../lib/api';
 import { BarChart, Bar, PieChart, Pie, Cell, Legend, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { MousePointerClick, Smartphone, HeartHandshake, Medal, Clock, LogIn } from 'lucide-react';
+import { MousePointerClick, Smartphone, HeartHandshake, Medal, Clock, LogIn, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import HeatmapGrid from './HeatmapGrid';
+import ActivityCalendar from './ActivityCalendar';
 
 const COLORS = ['#00C4CC', '#7B2FBE', '#10B981', '#F59E0B', '#3B82F6', '#EC4899'];
 const DAYS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
@@ -11,12 +12,19 @@ const HOURS = ['12a','1a','2a','3a','4a','5a','6a','7a','8a','9a','10a','11a','1
 
 export default function BehaviorTab({ range }) {
   const [data, setData] = useState(null);
+  const [globalCalendar, setGlobalCalendar] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
-    api.get(`/admin/analytics/behavior?range=${range}`)
-      .then(res => setData(res.data))
+    Promise.all([
+      api.get(`/admin/analytics/behavior?range=${range}`),
+      api.get('/admin/analytics/activity-calendar')
+    ])
+      .then(([behRes, calRes]) => {
+        setData(behRes.data);
+        setGlobalCalendar(calRes.data?.calendar || []);
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [range]);
@@ -145,6 +153,21 @@ export default function BehaviorTab({ range }) {
           )}
         </div>
 
+      </div>
+
+      {/* Actividad Global (Calendario 365 días) */}
+      <div className="card" style={{ padding: '24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+          <div>
+            <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#111827', margin: '0 0 4px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Calendar size={20} color="#00C4CC" /> Actividad global
+            </h3>
+            <p style={{ fontSize: '13px', color: '#6B7280', margin: 0 }}>
+              Frecuencia de accesos y sesiones de todos los clientes en los últimos 365 días (hora local CDMX).
+            </p>
+          </div>
+        </div>
+        <ActivityCalendar calendar={globalCalendar} />
       </div>
 
       {/* Ranking */}

@@ -143,4 +143,6 @@ Cada vez que modifiques el archivo `prisma/schema.prisma`:
    ```
    *(Asegúrate de contar con las variables de entorno de producción correctas).*
 2. **Al desplegar a Vercel**: Usa siempre la bandera `--force` o `-f` (ej. `vercel --prod -f` o `npx vercel --prod -f --yes`) para limpiar el caché de compilación y asegurar que `@prisma/client` se regenere con el nuevo esquema.
+3. **Runbook completo**: Consulta el flujo paso a paso en `docs/DEPLOY_RUNBOOK.md` antes de realizar despliegues.
+
 

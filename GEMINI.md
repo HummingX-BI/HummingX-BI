@@ -16,3 +16,4 @@ Cada vez que modifiques el archivo `prisma/schema.prisma`:
   - Frontend Portal: Aplicación Vite + React en la carpeta `portal/` (`https://portal.hummingxbi.com`).
   - Landing page: Archivos en la raíz (`index.html`, etc.).
 - **Regla de Privacidad de Pruebas**: No tomar capturas de pantalla ni grabaciones del navegador a menos que el usuario lo solicite expresamente.
+- **Procedimiento de despliegue**: Consulta siempre el runbook obligatorio en `docs/DEPLOY_RUNBOOK.md` antes de sincronizar base de datos o publicar a producción.

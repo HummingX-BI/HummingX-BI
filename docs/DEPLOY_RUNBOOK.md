@@ -56,3 +56,66 @@ así que las consultas fallaban y la UI mostraba vacío. **Los datos nunca se bo
 - [ ] `git push origin main` (Vercel NO auto-despliega: hay que correr `vercel --prod`).
 - [ ] Probar en la URL `.vercel.app` Y en el dominio real; no asumir que son el mismo proyecto.
 - [ ] Móvil intacto: no tocar reglas `@media (max-width: 768px)` al ajustar desktop.
+
+## 5. Flujo localhost → producción
+
+Sigue este procedimiento estricto para desplegar cualquier cambio sin riesgo de pérdida de datos ni desincronización:
+
+1. **Verificación previa (solo lectura):**
+   ```bash
+   npm run predeploy:check
+   ```
+   Valida si la base de datos de producción está sincronizada con `prisma/schema.prisma` y muestra los conteos actuales de registros.
+
+2. **Respaldo de seguridad:**
+   ```bash
+   node api/_scripts/backup_db.js
+   ```
+   Genera una copia en JSON de todas las tablas en la carpeta `backups/`.
+
+3. **Sincronización de esquema (solo si el check lo solicita):**
+   ```bash
+   npx prisma db push
+   ```
+   *Nota crítica:* NUNCA uses `--accept-data-loss` ni `--force-reset`. Si `predeploy:check` alertó sobre un `DROP`, revisa el esquema manualmente antes de continuar.
+
+4. **Publicar código en control de versiones:**
+   ```bash
+   git push origin <nombre-de-rama>
+   ```
+
+5. **Desplegar API y Landing (raíz del repositorio):**
+   ```bash
+   npx vercel --prod -f --yes
+   ```
+
+6. **Desplegar Portal del Cliente (carpeta portal/):**
+   ```bash
+   cd portal && npx vercel --prod -f --yes
+   ```
+   *(Recordatorio: HummingX BI maneja dos proyectos separados en Vercel).*
+
+7. **Verificación post-despliegue:**
+   - Comprobar endpoint de salud de la API:
+     ```bash
+     curl -s https://hummingx-bi.vercel.app/api/health
+     ```
+   - Ejecutar conteo de registros nuevamente para asegurar que coincidan con el pre-deploy:
+     ```bash
+     node api/_scripts/predeploy_check.js
+     ```
+
+## 6. Incidente C — localhost usa la BD de producción
+
+**Riesgo:**
+Actualmente los archivos `.env` y `api/.env` en el entorno local apuntan a la base de datos Neon de producción (`ep-silent-surf-...`). Cualquier prueba con mutaciones (POST, PUT, DELETE, scripts de seed o smoke tests) impacta datos reales de clientes.
+
+**Recomendación de arquitectura (para implementar a futuro):**
+Crear una rama de base de datos aislada en la consola de Neon para desarrollo local:
+1. Entrar a [Neon Console](https://console.neon.tech/) → Proyecto HummingX BI.
+2. Ir a la pestaña **Branches** y hacer clic en **Create Branch**.
+3. Nombrar la rama como `dev` o `staging` con snapshot de la rama `main`.
+4. Copiar la connection string de la nueva rama `dev`.
+5. Reemplazar `DATABASE_URL` únicamente en los archivos locales `.env` y `api/.env`.
+6. Con esto, cualquier prueba de mutación local o migración experimental no afectará la base de producción.
+

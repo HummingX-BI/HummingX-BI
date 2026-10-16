@@ -1,36 +1,37 @@
 import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+import { useSearchParams } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import api from '../../lib/api';
+import AppointmentDrawer from './appointments/AppointmentDrawer';
+import AppointmentCompactList from './appointments/AppointmentCompactList';
+import AppointmentKanban from './appointments/AppointmentKanban';
 import {
   CalendarDays,
   Plus,
-  MapPin,
-  ExternalLink,
-  User,
-  Building,
-  Phone,
-  Clock,
+  Search,
+  Filter,
   CheckCircle2,
-  AlertCircle,
   X,
   Edit,
   Trash2,
-  MessageSquare,
-  Search,
-  Filter,
-  Navigation,
-  Building2,
+  LayoutList,
+  Columns3,
   Calendar,
-  ChevronDown,
-  ChevronUp,
+  AlertCircle,
+  Building,
+  User,
+  Phone,
+  Clock,
+  MapPin,
+  FileText,
 } from 'lucide-react';
 
 const TEAM_MEMBERS = {
-  emmanuel: { label: 'Emmanuel', color: '#0E7490', bg: '#F0FDFA', border: '#CCFBF1', initial: 'E' },
-  juan_pablo: { label: 'Juan Pablo', color: '#1D4ED8', bg: '#EFF6FF', border: '#DBEAFE', initial: 'JP' },
-  curiel: { label: 'Curiel', color: '#7C3AED', bg: '#F5F3FF', border: '#DDD6FE', initial: 'C' },
-  all: { label: 'Equipo Conjunto', color: '#047857', bg: '#ECFDF5', border: '#A7F3D0', initial: 'HX' },
+  emmanuel: { label: 'Emmanuel', color: '#0E7490', bg: '#F0FDFA', border: '#CCFBF1' },
+  juan_pablo: { label: 'Juan Pablo', color: '#1D4ED8', bg: '#EFF6FF', border: '#DBEAFE' },
+  curiel: { label: 'Curiel', color: '#7C3AED', bg: '#F5F3FF', border: '#DDD6FE' },
+  all: { label: 'Equipo Conjunto', color: '#047857', bg: '#ECFDF5', border: '#A7F3D0' },
 };
 
 const STATUS_CONFIG = {
@@ -41,11 +42,15 @@ const STATUS_CONFIG = {
 };
 
 export default function AdminAppointmentsPage() {
+  const [searchParams] = useSearchParams();
+
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [assignedFilter, setAssignedFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [viewMode, setViewMode] = useState('compact'); // 'compact' | 'kanban'
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
 
   // Modal states
   const [showModal, setShowModal] = useState(false);
@@ -54,16 +59,6 @@ export default function AdminAppointmentsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [formError, setFormError] = useState('');
-  const [expandedIds, setExpandedIds] = useState(new Set());
-
-  const toggleExpand = (id) => {
-    setExpandedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
 
   // Form state
   const [formData, setFormData] = useState({
@@ -83,6 +78,11 @@ export default function AdminAppointmentsPage() {
     try {
       const { data } = await api.get('/admin/appointments');
       setAppointments(data);
+
+      if (selectedAppointment) {
+        const updatedCurrent = data.find((a) => a.id === selectedAppointment.id);
+        if (updatedCurrent) setSelectedAppointment(updatedCurrent);
+      }
     } catch (err) {
       console.error('Error al cargar citas:', err);
     } finally {
@@ -94,6 +94,31 @@ export default function AdminAppointmentsPage() {
     fetchAppointments();
   }, []);
 
+  // Pre-fill from query params if coming from CRM
+  useEffect(() => {
+    const qCompany = searchParams.get('company');
+    if (qCompany) {
+      const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      tomorrow.setHours(11, 0, 0, 0);
+      const isoLocal = tomorrow.toISOString().slice(0, 16);
+
+      setFormData({
+        title: `Demostración en sitio — ${qCompany}`,
+        companyName: qCompany,
+        contactName: searchParams.get('contact') || '',
+        contactPhone: searchParams.get('phone') || '',
+        dateTime: isoLocal,
+        location: '',
+        mapsUrl: '',
+        assignedTo: 'emmanuel',
+        status: 'scheduled',
+        summary: '',
+      });
+      setEditingAppointment(null);
+      setShowModal(true);
+    }
+  }, [searchParams]);
+
   const showNotification = (msg) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(''), 4500);
@@ -101,7 +126,6 @@ export default function AdminAppointmentsPage() {
 
   const openNewModal = () => {
     setEditingAppointment(null);
-    // default datetime tomorrow 11:00 AM local
     const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
     tomorrow.setHours(11, 0, 0, 0);
     const isoLocal = tomorrow.toISOString().slice(0, 16);
@@ -160,15 +184,21 @@ export default function AdminAppointmentsPage() {
     setSubmitting(true);
     setFormError('');
     try {
+      let saved;
       if (editingAppointment) {
-        await api.put(`/admin/appointments/${editingAppointment.id}`, formData);
+        const res = await api.put(`/admin/appointments/${editingAppointment.id}`, formData);
+        saved = res.data;
         showNotification(`Cita "${formData.title}" actualizada.`);
       } else {
-        await api.post('/admin/appointments', formData);
+        const res = await api.post('/admin/appointments', formData);
+        saved = res.data;
         showNotification(`Cita con "${formData.companyName}" agendada.`);
       }
       closeModal();
-      fetchAppointments();
+      await fetchAppointments();
+      if (saved && selectedAppointment?.id === saved.id) {
+        setSelectedAppointment(saved);
+      }
     } catch (err) {
       setFormError(err.response?.data?.error || 'Error al guardar cita.');
     } finally {
@@ -180,6 +210,9 @@ export default function AdminAppointmentsPage() {
     try {
       await api.put(`/admin/appointments/${appointmentId}`, { status: newStatus });
       fetchAppointments();
+      if (selectedAppointment && selectedAppointment.id === appointmentId) {
+        setSelectedAppointment((prev) => ({ ...prev, status: newStatus }));
+      }
       showNotification('Estado de la cita actualizado.');
     } catch (err) {
       console.error(err);
@@ -187,11 +220,18 @@ export default function AdminAppointmentsPage() {
     }
   };
 
+  const handleUpdateSummary = async (appointmentId, summary) => {
+    await api.put(`/admin/appointments/${appointmentId}`, { summary });
+    fetchAppointments();
+    showNotification('Minuta guardada correctamente.');
+  };
+
   const handleDeleteAppointment = async (id, title) => {
     if (!window.confirm(`¿Seguro que deseas eliminar la cita "${title}"?`)) return;
     try {
       await api.delete(`/admin/appointments/${id}`);
       showNotification('Cita eliminada correctamente.');
+      if (selectedAppointment?.id === id) setSelectedAppointment(null);
       fetchAppointments();
     } catch (err) {
       console.error(err);
@@ -201,7 +241,7 @@ export default function AdminAppointmentsPage() {
 
   // Filtered appointments
   const filteredAppointments = useMemo(() => {
-    return appointments.filter(a => {
+    return appointments.filter((a) => {
       const matchSearch =
         a.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         a.companyName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -217,23 +257,25 @@ export default function AdminAppointmentsPage() {
 
   return (
     <Layout>
-      <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginTop: '-12px', paddingBottom: '40px' }}>
+      <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '-12px', paddingBottom: '40px' }}>
         
         {/* Toast Notification */}
         {toastMessage && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            background: 'linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%)',
-            border: '1px solid #10B981',
-            borderRadius: '12px',
-            padding: '14px 20px',
-            color: '#065F46',
-            fontSize: '14px',
-            fontWeight: 500,
-            boxShadow: '0 4px 12px rgba(16, 185, 129, 0.15)',
-          }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: '#ECFDF5',
+              border: '1px solid #10B981',
+              borderRadius: '12px',
+              padding: '12px 18px',
+              color: '#065F46',
+              fontSize: '13.5px',
+              fontWeight: 500,
+              boxShadow: '0 4px 12px rgba(16, 185, 129, 0.15)',
+            }}
+          >
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <CheckCircle2 size={18} color="#059669" />
               <span>{toastMessage}</span>
@@ -250,11 +292,11 @@ export default function AdminAppointmentsPage() {
         {/* ── Header ─────────────────────────────────────── */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <h1 style={{ fontSize: '26px', fontWeight: 800, color: '#111827', margin: '0 0 4px', letterSpacing: '-0.025em', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            <h1 style={{ fontSize: '24px', fontWeight: 800, color: '#111827', margin: '0 0 4px', letterSpacing: '-0.025em', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
               Agenda de Citas & Visitas de Campo
             </h1>
-            <p style={{ fontSize: '14px', color: '#6B7280', margin: 0, maxWidth: '640px' }}>
-              Organiza salidas de prospección presencial, demostraciones en sitio y registra los acuerdos de cada reunión entre Emmanuel, Juan Pablo y Curiel.
+            <p style={{ fontSize: '13.5px', color: '#6B7280', margin: 0, maxWidth: '640px' }}>
+              Organiza salidas de prospección presencial, demostraciones en sitio y registra los acuerdos de cada reunión.
             </p>
           </div>
 
@@ -265,10 +307,10 @@ export default function AdminAppointmentsPage() {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
-              padding: '10px 20px',
+              padding: '9px 18px',
               borderRadius: '10px',
               fontWeight: 600,
-              fontSize: '13.5px',
+              fontSize: '13px',
             }}
           >
             <Plus size={16} />
@@ -276,20 +318,20 @@ export default function AdminAppointmentsPage() {
           </button>
         </div>
 
-        {/* ── Search & Compact Filters Bar ───────────────────────────────── */}
+        {/* ── Controls Bar: Search, Filters, and View Switcher ─────────────── */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '10px', padding: '8px 14px', flex: '1 1 240px', maxWidth: '100%' }}>
-            <Search size={15} color="#9CA3AF" />
-            <input
-              type="text"
-              placeholder="Buscar por empresa, lugar o contacto..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{ border: 'none', outline: 'none', fontSize: '13px', width: '100%', background: 'transparent' }}
-            />
-          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: '1 1 300px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '10px', padding: '8px 14px', width: '100%' }}>
+              <Search size={15} color="#9CA3AF" />
+              <input
+                type="text"
+                placeholder="Buscar por empresa, lugar o contacto..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{ border: 'none', outline: 'none', fontSize: '13px', width: '100%', background: 'transparent' }}
+              />
+            </div>
 
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             {/* Filter by Responsable */}
             <select
               value={assignedFilter}
@@ -304,6 +346,7 @@ export default function AdminAppointmentsPage() {
                 color: '#374151',
                 outline: 'none',
                 cursor: 'pointer',
+                whiteSpace: 'nowrap',
               }}
             >
               <option value="all">Todos los Responsables</option>
@@ -327,18 +370,75 @@ export default function AdminAppointmentsPage() {
                 color: '#374151',
                 outline: 'none',
                 cursor: 'pointer',
+                whiteSpace: 'nowrap',
               }}
             >
-              <option value="all">Todos los Estados</option>
+              <option value="all">Todos los Estados ({appointments.length})</option>
               <option value="scheduled">Programadas</option>
               <option value="completed">Realizadas</option>
               <option value="rescheduled">Reprogramadas</option>
               <option value="cancelled">Canceladas</option>
             </select>
           </div>
+
+          {/* View Toggle (Compact List vs Kanban) */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              background: '#F3F4F6',
+              borderRadius: '10px',
+              padding: '3px',
+              gap: '3px',
+            }}
+          >
+            <button
+              onClick={() => setViewMode('compact')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 12px',
+                borderRadius: '8px',
+                border: 'none',
+                background: viewMode === 'compact' ? '#FFFFFF' : 'transparent',
+                color: viewMode === 'compact' ? '#111827' : '#6B7280',
+                fontWeight: viewMode === 'compact' ? 700 : 500,
+                fontSize: '12px',
+                cursor: 'pointer',
+                boxShadow: viewMode === 'compact' ? '0 1px 3px rgba(0,0,0,0.06)' : 'none',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              <LayoutList size={14} />
+              <span>Lista</span>
+            </button>
+
+            <button
+              onClick={() => setViewMode('kanban')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 12px',
+                borderRadius: '8px',
+                border: 'none',
+                background: viewMode === 'kanban' ? '#FFFFFF' : 'transparent',
+                color: viewMode === 'kanban' ? '#111827' : '#6B7280',
+                fontWeight: viewMode === 'kanban' ? 700 : 500,
+                fontSize: '12px',
+                cursor: 'pointer',
+                boxShadow: viewMode === 'kanban' ? '0 1px 3px rgba(0,0,0,0.06)' : 'none',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              <Columns3 size={14} />
+              <span>Kanban</span>
+            </button>
+          </div>
         </div>
 
-        {/* ── Appointment Cards Grid ─────────────────────────────────────── */}
+        {/* ── Content View ─────────────────────────────────────── */}
         {loading ? (
           <div style={{ padding: '60px', textAlign: 'center', color: '#6B7280' }}>
             <p>Cargando agenda de citas...</p>
@@ -356,284 +456,42 @@ export default function AdminAppointmentsPage() {
               <Plus size={14} /> Agendar Cita
             </button>
           </div>
+        ) : viewMode === 'compact' ? (
+          <AppointmentCompactList
+            appointments={filteredAppointments}
+            onSelectAppointment={setSelectedAppointment}
+            onChangeStatus={handleStatusChange}
+            onEdit={openEditModal}
+          />
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))', gap: '16px' }}>
-            {filteredAppointments.map((a) => {
-              const memberCfg = TEAM_MEMBERS[a.assignedTo] || TEAM_MEMBERS.emmanuel;
-              const statusCfg = STATUS_CONFIG[a.status] || STATUS_CONFIG.scheduled;
-              const isExpanded = expandedIds.has(a.id);
-
-              const dateObj = new Date(a.dateTime);
-              // Cleanly formatted date: e.g. "Dom, 11 Oct"
-              const dayOfWeek = dateObj.toLocaleDateString('es-MX', { weekday: 'short' }).replace('.', '');
-              const capitalizedDay = dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1);
-              const dayNum = dateObj.getDate();
-              const monthName = dateObj.toLocaleDateString('es-MX', { month: 'short' }).replace('.', '');
-              const formattedDate = `${capitalizedDay} ${dayNum} de ${monthName}`;
-              
-              const formattedTime = dateObj.toLocaleTimeString('es-MX', {
-                hour: '2-digit',
-                minute: '2-digit',
-              });
-
-              return (
-                <div
-                  key={a.id}
-                  className="card"
-                  style={{
-                    padding: '18px 20px',
-                    borderRadius: '16px',
-                    border: '1px solid #E5E7EB',
-                    background: '#FFFFFF',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '12px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
-                    transition: 'all 0.2s ease',
-                  }}
-                >
-                  {/* Top: DateTime Badges & Status Selector */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                      <div
-                        style={{
-                          padding: '4px 10px',
-                          borderRadius: '8px',
-                          background: '#F8FAFC',
-                          border: '1px solid #E2E8F0',
-                          color: '#1E293B',
-                          fontSize: '12px',
-                          fontWeight: 600,
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                        }}
-                      >
-                        <Calendar size={13} color="#0284C7" />
-                        <span>{formattedDate}</span>
-                      </div>
-
-                      <div
-                        style={{
-                          padding: '4px 8px',
-                          borderRadius: '8px',
-                          background: '#F0FDFA',
-                          border: '1px solid #CCFBF1',
-                          color: '#0F766E',
-                          fontSize: '12px',
-                          fontWeight: 700,
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                        }}
-                      >
-                        <Clock size={12} color="#00C4CC" />
-                        <span>{formattedTime}</span>
-                      </div>
-                    </div>
-
-                    <select
-                      value={a.status}
-                      onChange={(e) => handleStatusChange(a.id, e.target.value)}
-                      style={{
-                        padding: '4px 8px',
-                        fontSize: '11.5px',
-                        fontWeight: 700,
-                        borderRadius: '6px',
-                        background: statusCfg.bg,
-                        color: statusCfg.color,
-                        border: `1px solid ${statusCfg.border}`,
-                        outline: 'none',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {Object.entries(STATUS_CONFIG).map(([val, cfg]) => (
-                        <option key={val} value={val}>{cfg.label}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Empresa a la que vamos */}
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                      <Building2 size={18} color="#0284C7" style={{ flexShrink: 0 }} />
-                      <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#111827', margin: 0, letterSpacing: '-0.01em' }}>
-                        {a.companyName}
-                      </h3>
-                    </div>
-
-                    {/* Contact & Phone */}
-                    {a.contactName && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: '#4B5563', margin: '4px 0 2px 26px' }}>
-                        <span style={{ fontWeight: 500 }}>{a.contactName}</span>
-                        {a.contactPhone && (
-                          <a
-                            href={`https://wa.me/${a.contactPhone.replace(/[^0-9]/g, '')}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ color: '#059669', textDecoration: 'none', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '12px' }}
-                          >
-                            <Phone size={12} /> {a.contactPhone}
-                          </a>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Ubicación física & Botón Maps */}
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      background: '#F8FAFC',
-                      padding: '9px 12px',
-                      borderRadius: '10px',
-                      border: '1px solid #E2E8F0',
-                      gap: '8px',
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '7px', minWidth: 0 }}>
-                      <MapPin size={15} color="#DC2626" style={{ flexShrink: 0 }} />
-                      <span style={{ fontSize: '12.5px', color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {a.location}
-                      </span>
-                    </div>
-
-                    {a.mapsUrl && (
-                      <a
-                        href={a.mapsUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          padding: '4px 10px',
-                          borderRadius: '6px',
-                          background: '#FFFFFF',
-                          border: '1px solid #CBD5E1',
-                          color: '#0F172A',
-                          fontSize: '11.5px',
-                          fontWeight: 700,
-                          textDecoration: 'none',
-                          flexShrink: 0,
-                        }}
-                      >
-                        <Navigation size={12} color="#00C4CC" />
-                        Maps
-                      </a>
-                    )}
-                  </div>
-
-                  {/* Botón de Desglose interactivo */}
-                  <button
-                    onClick={() => toggleExpand(a.id)}
-                    style={{
-                      width: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '7px 12px',
-                      borderRadius: '8px',
-                      background: isExpanded ? '#F1F5F9' : '#FFFFFF',
-                      border: '1px solid #E2E8F0',
-                      cursor: 'pointer',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      color: '#475569',
-                      transition: 'all 0.15s ease',
-                    }}
-                  >
-                    <span>{isExpanded ? 'Ocultar detalles' : 'Ver asunto y minuta'}</span>
-                    {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                  </button>
-
-                  {/* Desglose Expandible */}
-                  {isExpanded && (
-                    <div
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '10px',
-                        padding: '12px',
-                        borderRadius: '10px',
-                        background: '#F8FAFC',
-                        border: '1px solid #E2E8F0',
-                        animation: 'fadeIn 0.2s ease',
-                      }}
-                    >
-                      <div>
-                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: '2px' }}>
-                          Asunto / Objetivo:
-                        </span>
-                        <p style={{ margin: 0, fontSize: '13px', fontWeight: 600, color: '#1E293B' }}>
-                          {a.title}
-                        </p>
-                      </div>
-
-                      {a.summary && (
-                        <div style={{ background: '#FFFBEB', border: '1px solid #FEF3C7', padding: '9px 12px', borderRadius: '8px', fontSize: '12px', color: '#92400E' }}>
-                          <strong style={{ display: 'block', marginBottom: '2px' }}>Minuta / Acuerdos:</strong>
-                          {a.summary}
-                        </div>
-                      )}
-
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '8px', borderTop: '1px solid #E2E8F0' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span style={{
-                            width: '22px',
-                            height: '22px',
-                            borderRadius: '50%',
-                            background: memberCfg.color,
-                            color: '#FFFFFF',
-                            fontSize: '9.5px',
-                            fontWeight: 800,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}>
-                            {memberCfg.initial}
-                          </span>
-                          <span style={{ fontSize: '12px', fontWeight: 700, color: memberCfg.color }}>
-                            {memberCfg.label}
-                          </span>
-                        </div>
-
-                        <div style={{ display: 'flex', gap: '6px' }}>
-                          <button
-                            onClick={() => openEditModal(a)}
-                            className="btn-secondary"
-                            style={{ padding: '5px 10px', fontSize: '11.5px', borderRadius: '6px' }}
-                          >
-                            <Edit size={12} /> Editar
-                          </button>
-                          <button
-                            onClick={() => handleDeleteAppointment(a.id, a.title)}
-                            className="btn-secondary"
-                            style={{ padding: '5px 8px', fontSize: '11.5px', borderRadius: '6px', color: '#DC2626' }}
-                          >
-                            <Trash2 size={12} />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+          <AppointmentKanban
+            appointments={filteredAppointments}
+            onSelectAppointment={setSelectedAppointment}
+            onChangeStatus={handleStatusChange}
+          />
         )}
 
       </div>
 
-      {/* ── Modal: Agendar / Editar Cita ─────────────────────────────────────── */}
+      {/* ── Slide-over Lateral Drawer (Detalle de Cita) ─────────────── */}
+      {selectedAppointment && (
+        <AppointmentDrawer
+          appointment={selectedAppointment}
+          onClose={() => setSelectedAppointment(null)}
+          onEdit={openEditModal}
+          onDelete={handleDeleteAppointment}
+          onChangeStatus={handleStatusChange}
+          onUpdateSummary={handleUpdateSummary}
+        />
+      )}
+
+      {/* ── Modal: Crear / Editar Cita ─────────────────────────────── */}
       {showModal && createPortal(
         <div
           className={`modal-overlay${closingModal ? ' closing' : ''}`}
           onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
         >
-          <div className="modal-content" style={{ maxWidth: '540px', borderRadius: '16px', padding: '32px' }}>
+          <div className="modal-content" style={{ maxWidth: '580px', borderRadius: '16px', padding: '32px' }}>
             <button
               onClick={closeModal}
               style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', cursor: 'pointer', color: '#6B7280' }}
@@ -642,10 +500,10 @@ export default function AdminAppointmentsPage() {
             </button>
 
             <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#111827', margin: '0 0 4px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-              {editingAppointment ? 'Editar Cita Presencial' : 'Agendar Visita de Prospección'}
+              {editingAppointment ? 'Editar Cita' : 'Agendar Nueva Cita Presencial'}
             </h2>
             <p style={{ fontSize: '13px', color: '#6B7280', margin: '0 0 20px' }}>
-              Registra los detalles de la visita y asígnala al responsable correspondiente.
+              Programa la visita a prospecto o cliente y asígnala al responsable del equipo.
             </p>
 
             {formError && (
@@ -664,7 +522,7 @@ export default function AdminAppointmentsPage() {
                   type="text"
                   required
                   className="hx-input"
-                  placeholder="Ej. Demostración de Menú NFC y Comandera"
+                  placeholder="Ej. Demo en vivo de la plataforma y cotización final"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 />
@@ -679,7 +537,7 @@ export default function AdminAppointmentsPage() {
                     type="text"
                     required
                     className="hx-input"
-                    placeholder="Ej. Restaurante La Casona"
+                    placeholder="Ej. Tahara Café Roma Norte"
                     value={formData.companyName}
                     onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
                   />
@@ -687,14 +545,45 @@ export default function AdminAppointmentsPage() {
 
                 <div>
                   <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' }}>
-                    Contacto / Director
+                    Responsable Asignado
+                  </label>
+                  <select
+                    className="hx-input"
+                    value={formData.assignedTo}
+                    onChange={(e) => setFormData({ ...formData, assignedTo: e.target.value })}
+                  >
+                    <option value="emmanuel">Emmanuel</option>
+                    <option value="juan_pablo">Juan Pablo</option>
+                    <option value="curiel">Curiel</option>
+                    <option value="all">Equipo Conjunto</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' }}>
+                    Persona de Contacto
                   </label>
                   <input
                     type="text"
                     className="hx-input"
-                    placeholder="Ej. Don Alberto Domínguez"
+                    placeholder="Ej. Lic. Fernando Robles"
                     value={formData.contactName}
                     onChange={(e) => setFormData({ ...formData, contactName: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' }}>
+                    Teléfono / WhatsApp
+                  </label>
+                  <input
+                    type="tel"
+                    className="hx-input"
+                    placeholder="+52 55..."
+                    value={formData.contactPhone}
+                    onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
                   />
                 </div>
               </div>
@@ -715,30 +604,30 @@ export default function AdminAppointmentsPage() {
 
                 <div>
                   <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' }}>
-                    Responsable Asignado *
+                    Estado
                   </label>
                   <select
                     className="hx-input"
-                    value={formData.assignedTo}
-                    onChange={(e) => setFormData({ ...formData, assignedTo: e.target.value })}
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                   >
-                    <option value="emmanuel">Emmanuel</option>
-                    <option value="juan_pablo">Juan Pablo</option>
-                    <option value="curiel">Curiel</option>
-                    <option value="all">Equipo Conjunto (Todos)</option>
+                    <option value="scheduled">Programada</option>
+                    <option value="completed">Realizada</option>
+                    <option value="rescheduled">Reprogramada</option>
+                    <option value="cancelled">Cancelada</option>
                   </select>
                 </div>
               </div>
 
               <div>
                 <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' }}>
-                  Dirección Física (Ubicación) *
+                  Dirección Física de la Visita *
                 </label>
                 <input
                   type="text"
                   required
                   className="hx-input"
-                  placeholder="Ej. Jardín Centenario 14, Coyoacán, CDMX"
+                  placeholder="Ej. Av. Álvaro Obregón 151, Roma Nte., Cuauhtémoc, CDMX"
                   value={formData.location}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                 />
@@ -746,25 +635,25 @@ export default function AdminAppointmentsPage() {
 
               <div>
                 <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' }}>
-                  Teléfono / WhatsApp de Contacto
+                  Enlace de Google Maps (Opcional)
                 </label>
                 <input
-                  type="tel"
+                  type="url"
                   className="hx-input"
-                  placeholder="+52 55..."
-                  value={formData.contactPhone}
-                  onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
+                  placeholder="https://maps.google.com/..."
+                  value={formData.mapsUrl}
+                  onChange={(e) => setFormData({ ...formData, mapsUrl: e.target.value })}
                 />
               </div>
 
               <div>
                 <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' }}>
-                  Minuta / Acuerdos de la Reunión (Conclusiones)
+                  Minuta / Resumen de Acuerdos (Opcional)
                 </label>
                 <textarea
                   className="hx-input"
                   rows={2}
-                  placeholder="¿Qué se acordó? Siguientes pasos, fecha de llamada de cierre..."
+                  placeholder="Se puede llenar después de realizar la visita..."
                   value={formData.summary}
                   onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
                   style={{ resize: 'vertical' }}

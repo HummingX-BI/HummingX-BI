@@ -3,6 +3,10 @@ import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import api from '../../lib/api';
+import ProspectDrawer from './prospects/ProspectDrawer';
+import ProspectCompactList from './prospects/ProspectCompactList';
+import ProspectKanban from './prospects/ProspectKanban';
+import PartnersProgramTab from './prospects/PartnersProgramTab';
 import {
   Briefcase,
   Plus,
@@ -22,19 +26,16 @@ import {
   Calendar,
   X,
   AlertCircle,
-  Tag,
   Clock,
-  ArrowRight,
   Sparkles,
-  Link as LinkIcon,
   Layers,
   ChevronDown,
-  ChevronUp,
   Award,
   Coins,
-  Gift,
-  Check,
   Loader2,
+  LayoutList,
+  Columns3,
+  Users,
 } from 'lucide-react';
 
 const STAGE_CONFIG = {
@@ -58,21 +59,17 @@ const DOC_TYPES = {
 
 export default function AdminProspectsPage() {
   const navigate = useNavigate();
+
+  // Navigation tabs & views
+  const [activeTab, setActiveTab] = useState('pipeline'); // 'pipeline' | 'partners'
+  const [viewMode, setViewMode] = useState('compact'); // 'compact' | 'kanban'
+  const [selectedProspect, setSelectedProspect] = useState(null);
+
+  // Prospects state
   const [prospects, setProspects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [expandedStageFilter, setExpandedStageFilter] = useState(false);
-  const [expandedDocsIds, setExpandedDocsIds] = useState(new Set());
-
-  const toggleDocs = (id) => {
-    setExpandedDocsIds(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
 
   // Modal states
   const [showProspectModal, setShowProspectModal] = useState(false);
@@ -115,7 +112,7 @@ export default function AdminProspectsPage() {
     industry: '',
     estimatedValue: '',
     status: 'lead',
-    source: '',
+    source: 'Prospección directa',
     referralCode: '',
     notes: '',
   });
@@ -133,6 +130,13 @@ export default function AdminProspectsPage() {
     try {
       const { data } = await api.get('/admin/prospects');
       setProspects(data);
+
+      // Keep selected prospect in sync if drawer is open
+      setSelectedProspect((prev) => {
+        if (!prev) return null;
+        const updatedCurrent = data.find((p) => p.id === prev.id);
+        return updatedCurrent ? { ...prev, ...updatedCurrent } : prev;
+      });
     } catch (err) {
       console.error('Error al cargar prospectos:', err);
     } finally {
@@ -159,7 +163,7 @@ export default function AdminProspectsPage() {
     }
 
     const timer = setTimeout(async () => {
-      setReferralValidation(prev => ({ ...prev, checking: true, message: '' }));
+      setReferralValidation((prev) => ({ ...prev, checking: true, message: '' }));
       try {
         const res = await api.get(`/admin/referrals/validate-code/${encodeURIComponent(rawCode)}`);
         if (res.data?.valid) {
@@ -169,8 +173,7 @@ export default function AdminProspectsPage() {
             data: res.data.referrer,
             message: `Viene recomendado por ${res.data.referrer.displayName} (${res.data.referrer.tierName})`,
           });
-          // Auto-fill source if default or generic
-          setProspectForm(prev => {
+          setProspectForm((prev) => {
             if (!prev.source || prev.source === 'Prospección directa' || prev.source.startsWith('Recomendado por')) {
               return { ...prev, source: `Recomendado por ${res.data.referrer.displayName} (Código: ${res.data.referrer.referralCode || rawCode})` };
             }
@@ -262,15 +265,17 @@ export default function AdminProspectsPage() {
       let res;
       if (editingProspect) {
         res = await api.put(`/admin/prospects/${editingProspect.id}`, prospectForm);
-        showNotification(`Prospecto ${prospectForm.companyName} actualizado correctamente.`);
+        showNotification(`Prospecto "${prospectForm.companyName}" actualizado.`);
+        if (selectedProspect?.id === editingProspect.id && res.data) {
+          setSelectedProspect(res.data);
+        }
       } else {
         res = await api.post('/admin/prospects', prospectForm);
-        showNotification(`Prospecto ${prospectForm.companyName} creado exitosamente.`);
+        showNotification(`Prospecto "${prospectForm.companyName}" creado exitosamente.`);
       }
       closeProspectModal();
       await fetchProspects();
 
-      // Check if reward modal should trigger
       if (res.data?.referralReward?.needsAward) {
         const rew = res.data.referralReward;
         setRewardModalData({
@@ -292,29 +297,64 @@ export default function AdminProspectsPage() {
     }
   };
 
+  const handleChangeStage = async (prospectId, newStatus) => {
+    // 1. Optimistic update: UI responds immediately
+    setSelectedProspect((prev) => (prev && prev.id === prospectId ? { ...prev, status: newStatus } : prev));
+    setProspects((prev) => prev.map((p) => (p.id === prospectId ? { ...p, status: newStatus } : p)));
+
+    try {
+      const res = await api.put(`/admin/prospects/${prospectId}`, { status: newStatus });
+      showNotification('Etapa actualizada con éxito.');
+
+      if (res.data) {
+        setSelectedProspect((prev) => (prev && prev.id === prospectId ? { ...prev, ...res.data } : prev));
+        setProspects((prev) => prev.map((p) => (p.id === prospectId ? { ...p, ...res.data } : p)));
+
+        if (res.data.referralReward?.needsAward) {
+          const rew = res.data.referralReward;
+          setRewardModalData({
+            isOpen: true,
+            prospectId: rew.prospectId,
+            companyName: rew.prospectName,
+            referrerId: rew.referrerId,
+            referrerName: rew.referrerName,
+            level: rew.level,
+            tierName: rew.tierName,
+            amount: rew.creditAmount,
+            submitting: false,
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Error al actualizar etapa:', err);
+      showNotification('Error al actualizar etapa.');
+      fetchProspects();
+    }
+  };
+
   const handleAwardCredits = async () => {
     if (!rewardModalData.prospectId) return;
-    setRewardModalData(prev => ({ ...prev, submitting: true }));
+    setRewardModalData((prev) => ({ ...prev, submitting: true }));
     try {
       const res = await api.post(`/admin/prospects/${rewardModalData.prospectId}/award-referral-credits`, {
         amount: rewardModalData.amount,
       });
       showNotification(res.data.message || 'Créditos abonados con éxito al socio.');
-      setRewardModalData(prev => ({ ...prev, isOpen: false, submitting: false }));
+      setRewardModalData((prev) => ({ ...prev, isOpen: false, submitting: false }));
       await fetchProspects();
     } catch (err) {
       console.error('Error al abonar créditos:', err);
       alert(err.response?.data?.error || 'Error al abonar créditos al socio.');
-      setRewardModalData(prev => ({ ...prev, submitting: false }));
+      setRewardModalData((prev) => ({ ...prev, submitting: false }));
     }
   };
-
 
   const handleDeleteProspect = async (id, companyName) => {
     if (!window.confirm(`¿Seguro que deseas eliminar al prospecto "${companyName}" y todo su historial de documentos?`)) return;
     try {
       await api.delete(`/admin/prospects/${id}`);
       showNotification(`Prospecto "${companyName}" eliminado.`);
+      if (selectedProspect?.id === id) setSelectedProspect(null);
       fetchProspects();
     } catch (err) {
       console.error(err);
@@ -324,10 +364,9 @@ export default function AdminProspectsPage() {
 
   const openAddDocModal = (prospect) => {
     setActiveProspectForDoc(prospect);
-    // Suggest next version if previous exists
     let nextVer = 'v1.0';
     if (prospect.documents && prospect.documents.length > 0) {
-      const lastVer = prospect.documents[0].version; // e.g. v1.0
+      const lastVer = prospect.documents[0].version;
       const match = lastVer.match(/v?(\d+)(\.(\d+))?/);
       if (match) {
         const major = parseInt(match[1]) || 1;
@@ -423,19 +462,22 @@ export default function AdminProspectsPage() {
     }
   };
 
+  const handleOpenNewAppointment = (prospect) => {
+    navigate(`/admin/citas?company=${encodeURIComponent(prospect.companyName)}&contact=${encodeURIComponent(prospect.contactName || '')}&phone=${encodeURIComponent(prospect.phone || '')}`);
+  };
 
   // Pipeline Metrics
   const metrics = useMemo(() => {
     const total = prospects.length;
     const totalPipelineValue = prospects.reduce((sum, p) => sum + (p.estimatedValue || 0), 0);
-    const wonCount = prospects.filter(p => p.status === 'won').length;
-    const negotiatingCount = prospects.filter(p => ['meeting', 'proposal_sent', 'negotiating'].includes(p.status)).length;
+    const wonCount = prospects.filter((p) => p.status === 'won').length;
+    const negotiatingCount = prospects.filter((p) => ['meeting', 'proposal_sent', 'negotiating'].includes(p.status)).length;
     return { total, totalPipelineValue, wonCount, negotiatingCount };
   }, [prospects]);
 
   // Filtered prospects
   const filteredProspects = useMemo(() => {
-    return prospects.filter(p => {
+    return prospects.filter((p) => {
       const matchSearch =
         p.companyName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.contactName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -450,23 +492,25 @@ export default function AdminProspectsPage() {
 
   return (
     <Layout>
-      <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginTop: '-12px', paddingBottom: '40px' }}>
+      <div className="fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '-12px', paddingBottom: '40px' }}>
         
         {/* Toast Notification */}
         {toastMessage && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            background: 'linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%)',
-            border: '1px solid #10B981',
-            borderRadius: '12px',
-            padding: '14px 20px',
-            color: '#065F46',
-            fontSize: '14px',
-            fontWeight: 500,
-            boxShadow: '0 4px 12px rgba(16, 185, 129, 0.15)',
-          }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: '#ECFDF5',
+              border: '1px solid #10B981',
+              borderRadius: '12px',
+              padding: '12px 18px',
+              color: '#065F46',
+              fontSize: '13.5px',
+              fontWeight: 500,
+              boxShadow: '0 4px 12px rgba(16, 185, 129, 0.15)',
+            }}
+          >
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <CheckCircle2 size={18} color="#059669" />
               <span>{toastMessage}</span>
@@ -480,624 +524,296 @@ export default function AdminProspectsPage() {
           </div>
         )}
 
-        {/* ── Header ─────────────────────────────────────── */}
+        {/* ── Top Header Strip ─────────────────────────────────────── */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <h1 style={{ fontSize: '26px', fontWeight: 800, color: '#111827', margin: '0 0 4px', letterSpacing: '-0.025em', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-              CRM de Prospectos & Cotizaciones
+            <h1 style={{ fontSize: '24px', fontWeight: 800, color: '#111827', margin: '0 0 4px', letterSpacing: '-0.025em', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              CRM Comercial & Programa de Socios
             </h1>
-            <p style={{ fontSize: '14px', color: '#6B7280', margin: 0, maxWidth: '640px' }}>
-              Administra empresas en proceso de cierre, gestiona versiones de propuestas técnicas (v1, v2...) y conviértelas en clientes con 1 clic.
+            <p style={{ fontSize: '13.5px', color: '#6B7280', margin: 0, maxWidth: '640px' }}>
+              Administra el embudo de ventas, cotizaciones versionadas y el programa de incentivos para clientes socios.
             </p>
           </div>
 
-          <button
-            onClick={openNewProspectModal}
-            className="btn-primary"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '10px 20px',
-              borderRadius: '10px',
-              fontWeight: 600,
-              fontSize: '13.5px',
-            }}
-          >
-            <Plus size={16} />
-            Nuevo Prospecto
-          </button>
-        </div>
-
-        {/* ── Top Metrics Bar ─────────────────────────────────────── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '14px' }}>
-          <div className="card" style={{ padding: '18px 20px', borderRadius: '12px', border: '1px solid #E5E7EB', background: '#FFFFFF' }}>
-            <span style={{ fontSize: '12px', color: '#6B7280', fontWeight: 500, display: 'block', marginBottom: '6px' }}>Total Prospectos</span>
-            <span style={{ fontSize: '26px', fontWeight: 800, color: '#111827' }}>{metrics.total}</span>
-          </div>
-
-          <div className="card" style={{ padding: '18px 20px', borderRadius: '12px', border: '1px solid #E5E7EB', background: '#FFFFFF' }}>
-            <span style={{ fontSize: '12px', color: '#6B7280', fontWeight: 500, display: 'block', marginBottom: '6px' }}>Valor Pipeline Estimado</span>
-            <span style={{ fontSize: '26px', fontWeight: 800, color: '#00C4CC' }}>
-              ${metrics.totalPipelineValue.toLocaleString('es-MX')} <span style={{ fontSize: '13px', fontWeight: 600, color: '#6B7280' }}>MXN</span>
-            </span>
-          </div>
-
-          <div className="card" style={{ padding: '18px 20px', borderRadius: '12px', border: '1px solid #E5E7EB', background: '#FFFFFF' }}>
-            <span style={{ fontSize: '12px', color: '#6B7280', fontWeight: 500, display: 'block', marginBottom: '6px' }}>En Negociación / Propuesta</span>
-            <span style={{ fontSize: '26px', fontWeight: 800, color: '#B45309' }}>{metrics.negotiatingCount}</span>
-          </div>
-
-          <div className="card" style={{ padding: '18px 20px', borderRadius: '12px', border: '1px solid #E5E7EB', background: '#FFFFFF' }}>
-            <span style={{ fontSize: '12px', color: '#6B7280', fontWeight: 500, display: 'block', marginBottom: '6px' }}>Ganados / Convertidos</span>
-            <span style={{ fontSize: '26px', fontWeight: 800, color: '#047857' }}>{metrics.wonCount}</span>
-          </div>
-        </div>
-
-        {/* ── Filters & Search ─────────────────────────────────────── */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '10px', padding: '8px 14px', flex: '1 1 240px', maxWidth: '100%' }}>
-              <Search size={15} color="#9CA3AF" />
-              <input
-                type="text"
-                placeholder="Buscar por empresa o contacto..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ border: 'none', outline: 'none', fontSize: '13px', width: '100%', background: 'transparent' }}
-              />
-            </div>
-
-            {/* Single filter pill with breakdown toggle */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <button
-              onClick={() => setExpandedStageFilter(!expandedStageFilter)}
+              onClick={openNewProspectModal}
+              className="btn-primary"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '8px',
-                padding: '8px 16px',
+                padding: '9px 18px',
                 borderRadius: '10px',
+                fontWeight: 600,
                 fontSize: '13px',
-                fontWeight: 600,
-                border: '1px solid #E5E7EB',
-                background: statusFilter !== 'all' ? '#111827' : '#FFFFFF',
-                color: statusFilter !== 'all' ? '#FFFFFF' : '#374151',
-                cursor: 'pointer',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-                transition: 'all 0.15s ease',
               }}
             >
-              <Filter size={14} color={statusFilter !== 'all' ? '#00C4CC' : '#6B7280'} />
-              <span>
-                {statusFilter === 'all'
-                  ? `Etapa: Todos (${metrics.total})`
-                  : `Etapa: ${STAGE_CONFIG[statusFilter]?.label || statusFilter} (${prospects.filter(p => p.status === statusFilter).length})`}
-              </span>
-              <ChevronDown
-                size={14}
-                style={{
-                  transform: expandedStageFilter ? 'rotate(180deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-                  color: statusFilter !== 'all' ? '#FFFFFF' : '#6B7280',
-                }}
-              />
+              <Plus size={16} />
+              Nuevo Prospecto
             </button>
-          </div>
-
-          {/* Animated breakdown (desglose) of stages */}
-          <div style={{
-            maxHeight: expandedStageFilter ? '160px' : '0px',
-            opacity: expandedStageFilter ? 1 : 0,
-            overflow: 'hidden',
-            transition: 'max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease',
-            display: 'flex',
-            gap: '8px',
-            flexWrap: 'wrap',
-            paddingTop: expandedStageFilter ? '6px' : '0px',
-            paddingBottom: expandedStageFilter ? '4px' : '0px',
-          }}>
-            <button
-              onClick={() => setStatusFilter('all')}
-              style={{
-                padding: '6px 12px',
-                borderRadius: '8px',
-                fontSize: '12px',
-                fontWeight: 600,
-                border: statusFilter === 'all' ? '1px solid #111827' : '1px solid #E5E7EB',
-                cursor: 'pointer',
-                background: statusFilter === 'all' ? '#111827' : '#FFFFFF',
-                color: statusFilter === 'all' ? '#FFFFFF' : '#4B5563',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              Todos ({metrics.total})
-            </button>
-            {Object.entries(STAGE_CONFIG).map(([key, cfg]) => {
-              const count = prospects.filter(p => p.status === key).length;
-              const isSelected = statusFilter === key;
-              return (
-                <button
-                  key={key}
-                  onClick={() => setStatusFilter(key)}
-                  style={{
-                    padding: '6px 12px',
-                    borderRadius: '8px',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    border: isSelected ? '1px solid #111827' : `1px solid ${cfg.border}`,
-                    cursor: 'pointer',
-                    background: isSelected ? '#111827' : cfg.bg,
-                    color: isSelected ? '#FFFFFF' : cfg.color,
-                    transition: 'all 0.15s ease',
-                  }}
-                >
-                  {cfg.label} ({count})
-                </button>
-              );
-            })}
           </div>
         </div>
 
-        {/* ── Prospects List / Cards ─────────────────────────────────────── */}
-        {loading ? (
-          <div style={{ padding: '60px', textAlign: 'center', color: '#6B7280' }}>
-            <p>Cargando prospectos del pipeline...</p>
-          </div>
-        ) : filteredProspects.length === 0 ? (
-          <div className="card" style={{ padding: '60px 20px', textAlign: 'center', borderRadius: '16px', border: '1px solid #E5E7EB', background: '#FFFFFF' }}>
-            <Briefcase size={36} color="#9CA3AF" style={{ marginBottom: '12px' }} />
-            <h3 style={{ fontSize: '17px', fontWeight: 700, color: '#111827', margin: '0 0 6px' }}>
-              No hay prospectos en este filtro
-            </h3>
-            <p style={{ fontSize: '13.5px', color: '#6B7280', margin: '0 0 20px' }}>
-              Agrega una empresa prospecto para iniciar el seguimiento y registrar propuestas enviadas.
-            </p>
-            <button onClick={openNewProspectModal} className="btn-primary" style={{ fontSize: '13px', padding: '8px 16px' }}>
-              <Plus size={14} /> Crear Primer Prospecto
-            </button>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {filteredProspects.map((p) => {
-              const stageCfg = STAGE_CONFIG[p.status] || STAGE_CONFIG.lead;
-              const docs = p.documents || [];
-              const latestDoc = docs.length > 0 ? docs[0] : null;
-              const isDocsExpanded = expandedDocsIds.has(p.id);
+        {/* ── Navigation Tabs ─────────────────────────────────────── */}
+        <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #E5E7EB', gap: '8px' }}>
+          <button
+            onClick={() => setActiveTab('pipeline')}
+            style={{
+              padding: '10px 16px',
+              background: 'none',
+              border: 'none',
+              borderBottom: activeTab === 'pipeline' ? '2.5px solid #00C4CC' : '2.5px solid transparent',
+              color: activeTab === 'pipeline' ? '#111827' : '#6B7280',
+              fontWeight: activeTab === 'pipeline' ? 700 : 500,
+              fontSize: '14px',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            <Briefcase size={16} color={activeTab === 'pipeline' ? '#00C4CC' : '#9CA3AF'} />
+            <span>Embudo Comercial</span>
+            <span
+              style={{
+                fontSize: '11px',
+                fontWeight: 700,
+                padding: '2px 7px',
+                borderRadius: '9999px',
+                background: activeTab === 'pipeline' ? '#F0FDFA' : '#F3F4F6',
+                color: activeTab === 'pipeline' ? '#0D9488' : '#6B7280',
+              }}
+            >
+              {metrics.total}
+            </span>
+          </button>
 
-              return (
-                <div
-                  key={p.id}
-                  className="card"
+          <button
+            onClick={() => setActiveTab('partners')}
+            style={{
+              padding: '10px 16px',
+              background: 'none',
+              border: 'none',
+              borderBottom: activeTab === 'partners' ? '2.5px solid #00C4CC' : '2.5px solid transparent',
+              color: activeTab === 'partners' ? '#111827' : '#6B7280',
+              fontWeight: activeTab === 'partners' ? 700 : 500,
+              fontSize: '14px',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            <Award size={16} color={activeTab === 'partners' ? '#00C4CC' : '#9CA3AF'} />
+            <span>Programa de Socios</span>
+          </button>
+        </div>
+
+        {/* ── TAB CONTENT: PROGRAMA DE SOCIOS ────────────────────────────────── */}
+        {activeTab === 'partners' && (
+          <PartnersProgramTab onAwardCreditsSuccess={fetchProspects} />
+        )}
+
+        {/* ── TAB CONTENT: EMBUDO COMERCIAL (PIPELINE) ──────────────────────── */}
+        {activeTab === 'pipeline' && (
+          <>
+            {/* Top Metrics Cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '14px' }}>
+              <div className="card" style={{ padding: '16px 18px', borderRadius: '12px', border: '1px solid #E5E7EB', background: '#FFFFFF' }}>
+                <span style={{ fontSize: '11.5px', color: '#6B7280', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Total Prospectos</span>
+                <span style={{ fontSize: '24px', fontWeight: 800, color: '#111827' }}>{metrics.total}</span>
+              </div>
+
+              <div className="card" style={{ padding: '16px 18px', borderRadius: '12px', border: '1px solid #E5E7EB', background: '#FFFFFF' }}>
+                <span style={{ fontSize: '11.5px', color: '#6B7280', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Pipeline Estimado</span>
+                <span style={{ fontSize: '24px', fontWeight: 800, color: '#00C4CC' }}>
+                  ${metrics.totalPipelineValue.toLocaleString('es-MX')}{' '}
+                  <span style={{ fontSize: '12px', fontWeight: 600, color: '#6B7280' }}>MXN</span>
+                </span>
+              </div>
+
+              <div className="card" style={{ padding: '16px 18px', borderRadius: '12px', border: '1px solid #E5E7EB', background: '#FFFFFF' }}>
+                <span style={{ fontSize: '11.5px', color: '#6B7280', fontWeight: 600, display: 'block', marginBottom: '4px' }}>En Negociación / Cita</span>
+                <span style={{ fontSize: '24px', fontWeight: 800, color: '#B45309' }}>{metrics.negotiatingCount}</span>
+              </div>
+
+              <div className="card" style={{ padding: '16px 18px', borderRadius: '12px', border: '1px solid #E5E7EB', background: '#FFFFFF' }}>
+                <span style={{ fontSize: '11.5px', color: '#6B7280', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Ganados / Convertidos</span>
+                <span style={{ fontSize: '24px', fontWeight: 800, color: '#047857' }}>{metrics.wonCount}</span>
+              </div>
+            </div>
+
+            {/* Controls Bar: Search, Filters, and View Switcher */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: '1 1 300px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '10px', padding: '8px 14px', width: '100%' }}>
+                  <Search size={15} color="#9CA3AF" />
+                  <input
+                    type="text"
+                    placeholder="Buscar por empresa, contacto o giro..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    style={{ border: 'none', outline: 'none', fontSize: '13px', width: '100%', background: 'transparent' }}
+                  />
+                </div>
+
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
                   style={{
-                    padding: '22px 24px',
-                    borderRadius: '16px',
+                    padding: '8px 12px',
+                    borderRadius: '10px',
                     border: '1px solid #E5E7EB',
                     background: '#FFFFFF',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '14px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
-                    transition: 'border-color 0.15s ease',
+                    fontSize: '12.5px',
+                    fontWeight: 600,
+                    color: '#374151',
+                    outline: 'none',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
                   }}
                 >
-                  {/* Top Row: Company, Status Badge & Actions */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '6px' }}>
-                        <span style={{ fontSize: '18px', fontWeight: 800, color: '#111827', letterSpacing: '-0.01em' }}>
-                          {p.companyName}
-                        </span>
+                  <option value="all">Todas las Etapas ({metrics.total})</option>
+                  {Object.entries(STAGE_CONFIG).map(([key, cfg]) => {
+                    const count = prospects.filter((p) => p.status === key).length;
+                    return (
+                      <option key={key} value={key}>
+                        {cfg.label} ({count})
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
 
-                        <span style={{
-                          padding: '3px 10px',
-                          borderRadius: '9999px',
-                          fontSize: '11.5px',
-                          fontWeight: 700,
-                          background: stageCfg.bg,
-                          color: stageCfg.color,
-                          border: `1px solid ${stageCfg.border}`,
-                        }}>
-                          {stageCfg.label}
-                        </span>
+              {/* View Toggle (Compact List vs Kanban) */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  background: '#F3F4F6',
+                  borderRadius: '10px',
+                  padding: '3px',
+                  gap: '3px',
+                }}
+              >
+                <button
+                  onClick={() => setViewMode('compact')}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '6px 12px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: viewMode === 'compact' ? '#FFFFFF' : 'transparent',
+                    color: viewMode === 'compact' ? '#111827' : '#6B7280',
+                    fontWeight: viewMode === 'compact' ? 700 : 500,
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                    boxShadow: viewMode === 'compact' ? '0 1px 3px rgba(0,0,0,0.06)' : 'none',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <LayoutList size={14} />
+                  <span>Lista</span>
+                </button>
 
-                        {p.industry && (
-                          <span style={{ fontSize: '11.5px', color: '#6B7280', background: '#F3F4F6', padding: '2px 8px', borderRadius: '6px', fontWeight: 500 }}>
-                            {p.industry}
-                          </span>
-                        )}
-                      </div>
+                <button
+                  onClick={() => setViewMode('kanban')}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '6px 12px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: viewMode === 'kanban' ? '#FFFFFF' : 'transparent',
+                    color: viewMode === 'kanban' ? '#111827' : '#6B7280',
+                    fontWeight: viewMode === 'kanban' ? 700 : 500,
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                    boxShadow: viewMode === 'kanban' ? '0 1px 3px rgba(0,0,0,0.06)' : 'none',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <Columns3 size={14} />
+                  <span>Kanban</span>
+                </button>
+              </div>
+            </div>
 
-                      {/* Contact row */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap', fontSize: '12.5px', color: '#4B5563' }}>
-                        {p.contactName && (
-                          <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                            <User size={13} color="#9CA3AF" /> {p.contactName}
-                          </span>
-                        )}
-                        {p.phone && (
-                          <a
-                            href={`https://wa.me/${p.phone.replace(/[^0-9]/g, '')}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#0284C7', textDecoration: 'none', fontWeight: 500 }}
-                          >
-                            <Phone size={13} /> {p.phone}
-                          </a>
-                        )}
-                        {p.email && (
-                          <a href={`mailto:${p.email}`} style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#4B5563', textDecoration: 'none' }}>
-                            <Mail size={13} color="#9CA3AF" /> {p.email}
-                          </a>
-                        )}
-                        {p.source && (
-                          <span style={{ fontSize: '11.5px', color: '#9CA3AF' }}>
-                            • Origen: {p.source}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Referral Badge & Actions */}
-                      {p.referralInfo && (
-                        <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                          {p.referralInfo.needsCreditAward ? (
-                            <div style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '6px',
-                              padding: '5px 12px',
-                              borderRadius: '8px',
-                              background: '#FFFBEB',
-                              border: '1px solid #FDE68A',
-                              color: '#92400E',
-                              fontSize: '12px',
-                              fontWeight: 600,
-                            }}>
-                              <Award size={14} color="#D97706" />
-                              <span>Viene de: <strong>{p.referralInfo.referrerName}</strong> ({p.referralInfo.tierName})</span>
-                              <button
-                                onClick={() => setRewardModalData({
-                                  isOpen: true,
-                                  prospectId: p.id,
-                                  companyName: p.companyName,
-                                  referrerId: p.referralInfo.referrerId,
-                                  referrerName: p.referralInfo.referrerName,
-                                  level: p.referralInfo.level,
-                                  tierName: p.referralInfo.tierName,
-                                  amount: p.referralInfo.creditAmount,
-                                  submitting: false,
-                                })}
-                                style={{
-                                  background: '#D97706',
-                                  color: '#FFFFFF',
-                                  border: 'none',
-                                  borderRadius: '6px',
-                                  padding: '3px 9px',
-                                  fontSize: '11px',
-                                  fontWeight: 700,
-                                  cursor: 'pointer',
-                                  marginLeft: '6px',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '4px',
-                                }}
-                              >
-                                <Coins size={12} /> Abonar ${p.referralInfo.creditAmount.toLocaleString('es-MX')} Créditos
-                              </button>
-                            </div>
-                          ) : p.referralInfo.creditsGenerated > 0 ? (
-                            <span style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '5px',
-                              padding: '3px 10px',
-                              borderRadius: '6px',
-                              background: '#ECFDF5',
-                              border: '1px solid #A7F3D0',
-                              color: '#047857',
-                              fontSize: '11.5px',
-                              fontWeight: 600,
-                            }}>
-                              <CheckCircle2 size={13} color="#059669" />
-                              Bono de ${p.referralInfo.creditsGenerated.toLocaleString('es-MX')} HX abonado a {p.referralInfo.referrerName}
-                            </span>
-                          ) : (
-                            <span style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '5px',
-                              padding: '3px 10px',
-                              borderRadius: '6px',
-                              background: '#F0FDFA',
-                              border: '1px solid #CCFBF1',
-                              color: '#0F766E',
-                              fontSize: '11.5px',
-                              fontWeight: 600,
-                            }}>
-                              <Award size={13} color="#00C4CC" />
-                              Recomendado por socio: <strong>{p.referralInfo.referrerName}</strong> ({p.referralInfo.tierName})
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </div>
-
-
-                    {/* Right action group */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      {p.estimatedValue && (
-                        <div style={{ textAlign: 'right', marginRight: '8px' }}>
-                          <span style={{ fontSize: '11px', color: '#9CA3AF', display: 'block' }}>Presupuesto Estimado</span>
-                          <span style={{ fontSize: '16px', fontWeight: 800, color: '#111827' }}>
-                            ${p.estimatedValue.toLocaleString('es-MX')} MXN
-                          </span>
-                        </div>
-                      )}
-
-                      {/* 1-Click Convert to Client */}
-                      {p.status !== 'won' ? (
-                        <button
-                          onClick={() => handleConvertProspect(p)}
-                          disabled={convertingId === p.id}
-                          className="btn-accent"
-                          style={{
-                            fontSize: '12.5px',
-                            padding: '8px 14px',
-                            borderRadius: '8px',
-                            fontWeight: 700,
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            boxShadow: '0 2px 8px rgba(0, 196, 204, 0.2)',
-                          }}
-                        >
-                          <Sparkles size={14} />
-                          {convertingId === p.id ? 'Convirtiendo...' : 'Convertir a Cliente'}
-                        </button>
-                      ) : (
-                        <span style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          padding: '6px 12px',
-                          borderRadius: '8px',
-                          background: '#ECFDF5',
-                          border: '1px solid #A7F3D0',
-                          color: '#047857',
-                          fontSize: '12px',
-                          fontWeight: 700,
-                        }}>
-                          <CheckCircle2 size={14} /> Cliente Activo
-                        </span>
-                      )}
-
-                      <button
-                        onClick={() => openEditProspectModal(p)}
-                        className="btn-secondary"
-                        style={{ padding: '8px', borderRadius: '8px' }}
-                        title="Editar datos del prospecto"
-                      >
-                        <Edit size={14} />
-                      </button>
-
-                      <button
-                        onClick={() => handleDeleteProspect(p.id, p.companyName)}
-                        className="btn-secondary"
-                        style={{ padding: '8px', borderRadius: '8px', color: '#DC2626' }}
-                        title="Eliminar prospecto"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Notes if any */}
-                  {p.notes && (
-                    <div style={{ background: '#F9FAFB', padding: '10px 14px', borderRadius: '8px', border: '1px solid #F3F4F6', fontSize: '12.5px', color: '#4B5563' }}>
-                      <strong style={{ color: '#111827' }}>Notas:</strong> {p.notes}
-                    </div>
-                  )}
-
-                  {/* ── Document Versions Section (Clearly separated & collapsible) ── */}
-                  <div style={{
-                    borderRadius: '12px',
-                    border: '1px solid #E5E7EB',
-                    background: '#F9FAFB',
-                    padding: '12px 16px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: isDocsExpanded && docs.length > 0 ? '12px' : '0px',
-                    transition: 'all 0.2s ease',
-                  }}>
-                    {/* Header Strip */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                        <FileText size={15} color="#00C4CC" />
-                        <span style={{ fontSize: '13px', fontWeight: 700, color: '#111827' }}>
-                          Documentos & Propuestas ({docs.length})
-                        </span>
-                        {latestDoc && (
-                          <span style={{
-                            fontSize: '11px',
-                            fontWeight: 600,
-                            color: '#374151',
-                            background: '#FFFFFF',
-                            border: '1px solid #E5E7EB',
-                            padding: '2px 8px',
-                            borderRadius: '6px',
-                          }}>
-                            Último: {latestDoc.version} ({DOC_TYPES[latestDoc.type]?.label || latestDoc.type})
-                          </span>
-                        )}
-                      </div>
-
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        {docs.length > 0 && (
-                          <button
-                            onClick={() => toggleDocs(p.id)}
-                            style={{
-                              background: '#FFFFFF',
-                              border: '1px solid #D1D5DB',
-                              borderRadius: '6px',
-                              padding: '5px 10px',
-                              fontSize: '12px',
-                              fontWeight: 600,
-                              color: '#374151',
-                              cursor: 'pointer',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '5px',
-                            }}
-                          >
-                            <span>{isDocsExpanded ? 'Ocultar historial' : `Ver versiones (${docs.length})`}</span>
-                            <ChevronDown
-                              size={13}
-                              style={{
-                                transform: isDocsExpanded ? 'rotate(180deg)' : 'none',
-                                transition: 'transform 0.2s ease',
-                              }}
-                            />
-                          </button>
-                        )}
-
-                        <button
-                          onClick={() => openAddDocModal(p)}
-                          style={{
-                            background: '#111827',
-                            border: 'none',
-                            color: '#FFFFFF',
-                            fontSize: '12px',
-                            fontWeight: 600,
-                            padding: '5px 10px',
-                            borderRadius: '6px',
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                          }}
-                        >
-                          <Plus size={13} />
-                          {docs.length === 0 ? 'Adjuntar Propuesta' : 'Nueva Versión'}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Collapsible Document Versions List */}
-                    {isDocsExpanded && docs.length > 0 && (
-                      <div style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '8px',
-                        paddingTop: '8px',
-                        borderTop: '1px solid #E5E7EB',
-                      }}>
-                        {docs.map((doc) => {
-                          const docTypeCfg = DOC_TYPES[doc.type] || DOC_TYPES.quote;
-                          const docDate = new Date(doc.createdAt).toLocaleDateString('es-MX', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric',
-                          });
-
-                          return (
-                            <div
-                              key={doc.id}
-                              style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                padding: '10px 14px',
-                                borderRadius: '8px',
-                                border: '1px solid #E5E7EB',
-                                background: '#FFFFFF',
-                                gap: '10px',
-                                flexWrap: 'wrap',
-                              }}
-                            >
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                                <span style={{
-                                  padding: '3px 7px',
-                                  borderRadius: '6px',
-                                  fontSize: '11px',
-                                  fontWeight: 800,
-                                  background: '#111827',
-                                  color: '#FFFFFF',
-                                  fontFamily: 'monospace',
-                                }}>
-                                  {doc.version}
-                                </span>
-
-                                <span style={{
-                                  fontSize: '10.5px',
-                                  fontWeight: 700,
-                                  padding: '2px 7px',
-                                  borderRadius: '5px',
-                                  background: '#F9FAFB',
-                                  border: '1px solid #E5E7EB',
-                                  color: docTypeCfg.color,
-                                }}>
-                                  {docTypeCfg.label}
-                                </span>
-
-                                <div>
-                                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#111827', display: 'block' }}>
-                                    {doc.title}
-                                  </span>
-                                  {doc.notes && (
-                                    <span style={{ fontSize: '11.5px', color: '#6B7280' }}>
-                                      Cambios: {doc.notes}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <span style={{ fontSize: '11.5px', color: '#9CA3AF' }}>{docDate}</span>
-
-                                <a
-                                  href={doc.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '5px',
-                                    padding: '5px 10px',
-                                    borderRadius: '6px',
-                                    background: '#F3F4F6',
-                                    border: '1px solid #E5E7EB',
-                                    fontSize: '11.5px',
-                                    fontWeight: 600,
-                                    color: '#111827',
-                                    textDecoration: 'none',
-                                  }}
-                                >
-                                  Abrir Archivo <ExternalLink size={12} />
-                                </a>
-
-                                <button
-                                  onClick={() => handleDeleteDoc(p.id, doc.id, doc.version)}
-                                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', padding: '4px' }}
-                                  title="Eliminar versión"
-                                >
-                                  <X size={14} />
-                                </button>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-
-                </div>
-              );
-            })}
-          </div>
+            {/* Views Content */}
+            {loading ? (
+              <div style={{ padding: '60px', textAlign: 'center', color: '#6B7280' }}>
+                <p>Cargando prospectos del pipeline...</p>
+              </div>
+            ) : filteredProspects.length === 0 ? (
+              <div className="card" style={{ padding: '60px 20px', textAlign: 'center', borderRadius: '16px', border: '1px solid #E5E7EB', background: '#FFFFFF' }}>
+                <Briefcase size={36} color="#9CA3AF" style={{ marginBottom: '12px' }} />
+                <h3 style={{ fontSize: '17px', fontWeight: 700, color: '#111827', margin: '0 0 6px' }}>
+                  No hay prospectos en este filtro
+                </h3>
+                <p style={{ fontSize: '13.5px', color: '#6B7280', margin: '0 0 20px' }}>
+                  Agrega una empresa prospecto para iniciar el seguimiento y registrar propuestas enviadas.
+                </p>
+                <button onClick={openNewProspectModal} className="btn-primary" style={{ fontSize: '13px', padding: '8px 16px' }}>
+                  <Plus size={14} /> Crear Primer Prospecto
+                </button>
+              </div>
+            ) : viewMode === 'compact' ? (
+              <ProspectCompactList
+                prospects={filteredProspects}
+                onSelectProspect={setSelectedProspect}
+                onConvert={handleConvertProspect}
+                convertingId={convertingId}
+                onEdit={openEditProspectModal}
+                onDelete={handleDeleteProspect}
+              />
+            ) : (
+              <ProspectKanban
+                prospects={filteredProspects}
+                onSelectProspect={setSelectedProspect}
+                onChangeStage={handleChangeStage}
+              />
+            )}
+          </>
         )}
 
       </div>
 
-      {/* ── Modal: Crear / Editar Prospecto ─────────────────────────────────────── */}
+      {/* ── Slide-over Lateral Drawer (Detalle del Prospecto) ───────────── */}
+      {selectedProspect && (
+        <ProspectDrawer
+          prospect={selectedProspect}
+          onClose={() => setSelectedProspect(null)}
+          onEdit={openEditProspectModal}
+          onDelete={handleDeleteProspect}
+          onConvert={handleConvertProspect}
+          convertingId={convertingId}
+          onAddDoc={openAddDocModal}
+          onDeleteDoc={handleDeleteDoc}
+          onAwardCredits={(p) => {
+            setRewardModalData({
+              isOpen: true,
+              prospectId: p.id,
+              companyName: p.companyName,
+              referrerId: p.referralInfo?.referrerId || '',
+              referrerName: p.referralInfo?.referrerName || '',
+              level: p.referralInfo?.level || 1,
+              tierName: p.referralInfo?.tierName || '',
+              amount: p.referralInfo?.creditAmount || 1500,
+              submitting: false,
+            });
+          }}
+          onChangeStage={handleChangeStage}
+          onOpenNewAppointment={handleOpenNewAppointment}
+        />
+      )}
+
+      {/* ── Modal: Crear / Editar Prospecto ──────────────────────────── */}
       {showProspectModal && createPortal(
         <div
           className={`modal-overlay${closingModal ? ' closing' : ''}`}
@@ -1234,7 +950,7 @@ export default function AdminProspectsPage() {
                   <input
                     type="text"
                     className="hx-input"
-                    placeholder="Ej. 58291 o JM-NUTRIOLOGO"
+                    placeholder="Ej. 58291"
                     value={prospectForm.referralCode}
                     onChange={(e) => setProspectForm({ ...prospectForm, referralCode: e.target.value.toUpperCase() })}
                     style={{
@@ -1249,7 +965,6 @@ export default function AdminProspectsPage() {
                   )}
                 </div>
 
-                {/* Live validation feedback */}
                 {referralValidation.valid === true && referralValidation.data && (
                   <div style={{
                     marginTop: '6px',
@@ -1307,7 +1022,6 @@ export default function AdminProspectsPage() {
                 />
               </div>
 
-
               <div>
                 <label style={{ fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' }}>
                   Notas de Necesidades
@@ -1336,7 +1050,7 @@ export default function AdminProspectsPage() {
         document.body
       )}
 
-      {/* ── Modal: Agregar Documento / Versión ─────────────────────────────────────── */}
+      {/* ── Modal: Agregar Documento / Versión ──────────────────────── */}
       {showDocModal && createPortal(
         <div
           className={`modal-overlay${closingModal ? ' closing' : ''}`}
@@ -1452,24 +1166,21 @@ export default function AdminProspectsPage() {
         document.body
       )}
 
-      {/* ── Modal: Anuncio / Abono de Créditos por Referido Cerrado ─────────────── */}
+      {/* ── Modal: Anuncio / Abono de Créditos por Referido ───────────── */}
       {rewardModalData.isOpen && createPortal(
         <div
           className="modal-overlay"
-          onClick={(e) => { if (e.target === e.currentTarget && !rewardModalData.submitting) setRewardModalData(prev => ({ ...prev, isOpen: false })); }}
+          onClick={(e) => { if (e.target === e.currentTarget && !rewardModalData.submitting) setRewardModalData((prev) => ({ ...prev, isOpen: false })); }}
         >
           <div className="modal-content" style={{ maxWidth: '500px', borderRadius: '20px', padding: '32px', textAlign: 'center', position: 'relative' }}>
-            
-            {/* Close button */}
             <button
-              onClick={() => setRewardModalData(prev => ({ ...prev, isOpen: false }))}
+              onClick={() => setRewardModalData((prev) => ({ ...prev, isOpen: false }))}
               disabled={rewardModalData.submitting}
               style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF' }}
             >
               <X size={20} />
             </button>
 
-            {/* Hero Icon */}
             <div style={{
               width: '64px',
               height: '64px',
@@ -1492,7 +1203,6 @@ export default function AdminProspectsPage() {
               Este cliente vino recomendado por un socio activo de HummingX BI. Es momento de abonar su recompensa de créditos.
             </p>
 
-            {/* Info Box */}
             <div style={{
               background: '#F9FAFB',
               border: '1px solid #E5E7EB',
@@ -1531,64 +1241,41 @@ export default function AdminProspectsPage() {
                       className="hx-input"
                       style={{ paddingLeft: '28px', fontWeight: 800, fontSize: '16px', color: '#047857' }}
                       value={rewardModalData.amount}
-                      onChange={(e) => setRewardModalData(prev => ({ ...prev, amount: parseInt(e.target.value, 10) || 0 }))}
+                      onChange={(e) => setRewardModalData((prev) => ({ ...prev, amount: parseInt(e.target.value, 10) || 0 }))}
                     />
                   </div>
                   <span style={{ fontSize: '12px', fontWeight: 700, color: '#00C4CC', whiteSpace: 'nowrap' }}>
                     Créditos HX
                   </span>
                 </div>
-                <span style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '4px', display: 'block' }}>
-                  Sugerido para su nivel: ${rewardModalData.amount?.toLocaleString('es-MX')} MXN (1 crédito = $1.00 MXN)
-                </span>
               </div>
             </div>
 
-            {/* Modal Actions */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <button
                 onClick={handleAwardCredits}
-                disabled={rewardModalData.submitting || !rewardModalData.amount}
-                className="btn-accent"
+                disabled={rewardModalData.submitting}
+                className="btn-primary"
                 style={{
                   width: '100%',
                   padding: '12px',
                   borderRadius: '10px',
-                  fontSize: '13.5px',
-                  fontWeight: 800,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  boxShadow: '0 4px 14px rgba(0, 196, 204, 0.3)',
+                  fontWeight: 700,
+                  fontSize: '14px',
+                  background: 'linear-gradient(135deg, #00C4CC 0%, #0099AA 100%)',
                 }}
               >
-                {rewardModalData.submitting ? 'Abonando créditos...' : (
-                  <>
-                    <Coins size={16} />
-                    Abonar ${rewardModalData.amount?.toLocaleString('es-MX')} Créditos a {rewardModalData.referrerName}
-                  </>
-                )}
+                {rewardModalData.submitting ? 'Abonando créditos...' : `Abonar $${rewardModalData.amount?.toLocaleString('es-MX')} Créditos HX`}
               </button>
-
               <button
-                type="button"
-                onClick={() => setRewardModalData(prev => ({ ...prev, isOpen: false }))}
+                onClick={() => setRewardModalData((prev) => ({ ...prev, isOpen: false }))}
                 disabled={rewardModalData.submitting}
                 className="btn-secondary"
-                style={{
-                  width: '100%',
-                  padding: '9px',
-                  borderRadius: '10px',
-                  fontSize: '12.5px',
-                  fontWeight: 600,
-                  justifyContent: 'center',
-                }}
+                style={{ width: '100%', padding: '10px' }}
               >
                 Hacerlo más tarde
               </button>
             </div>
-
           </div>
         </div>,
         document.body
@@ -1597,4 +1284,3 @@ export default function AdminProspectsPage() {
     </Layout>
   );
 }
-

@@ -309,17 +309,18 @@ export default function AdminClientDetailPage() {
 
   const handleUpdateReferral = async (referralId, newStatus) => {
     try {
-      let creditAmount = 1500;
+      let creditAmount;
       if (newStatus === 'converted') {
-        const inputAmount = window.prompt('Monto de Créditos HX a acreditar al cliente por este proyecto:', '1500');
+        const defaultTierAmount = client?.level === 3 ? 3500 : client?.level === 2 ? 2500 : 1500;
+        const inputAmount = window.prompt(`Monto de Créditos HX a acreditar al socio (Sugerido por nivel: $${defaultTierAmount}):`, String(defaultTierAmount));
         if (inputAmount === null) return; // cancelado por usuario
-        creditAmount = parseInt(inputAmount) || 1500;
+        creditAmount = parseInt(inputAmount, 10) || defaultTierAmount;
       }
       await api.put(`/admin/referrals/${referralId}`, { status: newStatus, creditAmount });
       fetchClient();
     } catch (err) { 
       console.error('Error updating referral', err); 
-      alert('Error al actualizar el estado del referido.');
+      alert(err.response?.data?.error || 'Error al actualizar el estado del referido.');
     }
   };
 

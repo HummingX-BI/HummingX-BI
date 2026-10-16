@@ -80,9 +80,24 @@ model User {
   creditMovements   CreditMovement[]
   projectActivities ProjectActivity[]  @relation("ActivityAuthor")
   loginEvents       LoginEvent[]
+  portalSessions    PortalSession[]
   pageViews         PageView[]
 
   @@map("users")
+}
+
+model PortalSession {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  startedAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+  activeSec  Int      @default(0)
+  deviceType String?
+  entryPath  String?
+
+  @@index([userId, startedAt])
+  @@map("portal_sessions")
 }
 
 model LoginEvent {
@@ -93,7 +108,9 @@ model LoginEvent {
   ip         String?
   userAgent  String?
   deviceType String?
+  kind       String   @default("login")
 
+  @@index([userId, createdAt])
   @@map("login_events")
 }
 
@@ -102,8 +119,10 @@ model PageView {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   path      String
+  sessionId String?
   createdAt DateTime @default(now())
 
+  @@index([userId, createdAt])
   @@map("page_views")
 }
 

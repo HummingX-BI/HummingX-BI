@@ -1,6 +1,23 @@
-const { PrismaClient } = require('@prisma/client');
 require('dotenv').config();
 
+function printDbHost() {
+  const url = process.env.DATABASE_URL || '';
+  try {
+    const parsed = new URL(url);
+    console.log(`🔌 Base de datos objetivo: ${parsed.protocol}//${parsed.host}${parsed.pathname}`);
+  } catch (_) {
+    console.log('🔌 Base de datos objetivo: [DATABASE_URL no parseable]');
+  }
+}
+
+if (process.env.CONFIRM_DB !== 'yes') {
+  printDbHost();
+  console.log('Define CONFIRM_DB=yes y apunta DATABASE_URL a la BD correcta');
+  process.exit(1);
+}
+printDbHost();
+
+const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function generateUnique5DigitCode(existingCodes) {

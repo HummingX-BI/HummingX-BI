@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const prisma = require('../lib/prisma');
 const referralService = require('../services/referralService');
+const { mxParts } = require('../lib/mxTime');
 const { authenticate, requireAdmin } = require('../middleware/auth');
 const { adminLimiter, isValidEmail } = require('../middleware/security');
 
@@ -222,6 +223,9 @@ router.get('/clients/:id', authenticate, requireAdmin, async (req, res) => {
           } 
         },
         creditMovements: { orderBy: { createdAt: 'desc' }, select: { id: true, amount: true, type: true, description: true, createdAt: true } },
+        _count: {
+          select: { portalSessions: true }
+        }
       }
     });
 
@@ -229,10 +233,11 @@ router.get('/clients/:id', authenticate, requireAdmin, async (req, res) => {
       return res.status(404).json({ error: 'Cliente no encontrado.' });
     }
 
-    // Compute total credits
+    // Compute total credits and session count
     const totalCredits = client.creditMovements.reduce((sum, m) => sum + m.amount, 0);
+    const sessionCount = client._count?.portalSessions || 0;
     // SECURITY: No need to strip passwordHash — using select: {} above never fetches it
-    res.json({ ...client, totalCredits });
+    res.json({ ...client, sessionCount, totalCredits });
   } catch (err) {
     res.status(500).json({ error: 'Error al cargar el cliente.' });
   }
@@ -646,7 +651,10 @@ router.put('/referrals/:id', authenticate, requireAdmin, async (req, res) => {
     res.json(updated);
   } catch (err) {
     console.error('[ADMIN] Error al actualizar referido:', err);
-    res.status(500).json({ error: 'Error al actualizar referido.' });
+    if (err.message && (err.message.includes('Ya se habían') || err.message.includes('Ya existe') || err.message.includes('No se encontró'))) {
+      return res.status(400).json({ error: err.message });
+    }
+    res.status(500).json({ error: err.message || 'Error al actualizar referido.' });
   }
 });
 
@@ -1103,25 +1111,9 @@ router.get('/analytics/behavior', authenticate, requireAdmin, async (req, res) =
         else if (type.includes('desktop') || type.includes('mac') || type.includes('windows')) deviceCounts.desktop++;
         else deviceCounts.desktop++; // fallback to desktop for unknown if mostly web
 
-        const d = new Date(evt.createdAt);
-        let day = d.getDay();
-        let hour = d.getHours();
-        try {
-          const parts = new Intl.DateTimeFormat('en-US', {
-            timeZone: 'America/Mexico_City',
-            hour: 'numeric',
-            weekday: 'short',
-            hourCycle: 'h23'
-          }).formatToParts(d);
-          const h = parts.find(p => p.type === 'hour');
-          if (h) hour = parseInt(h.value, 10);
-          const w = parts.find(p => p.type === 'weekday');
-          const dayMap = { 'Sun': 0, 'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 'Fri': 5, 'Sat': 6 };
-          if (w && dayMap[w.value] !== undefined) day = dayMap[w.value];
-        } catch (_) {}
-
-        if (heatmap[day] && heatmap[day][hour] !== undefined) {
-          heatmap[day][hour]++;
+        const { hour, dow } = mxParts(evt.createdAt);
+        if (heatmap[dow] && heatmap[dow][hour] !== undefined) {
+          heatmap[dow][hour]++;
         }
       });
 
@@ -1149,6 +1141,225 @@ router.get('/analytics/behavior', authenticate, requireAdmin, async (req, res) =
     });
   } catch (err) {
     res.status(500).json({ error: 'Error loading behavior analytics' });
+  }
+});
+
+// GET /admin/analytics/client/:id — Analíticas de comportamiento, sesiones y horarios por cliente
+router.get('/analytics/client/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const range = parseInt(req.query.range || '30', 10);
+    const dateLimit = new Date();
+    dateLimit.setDate(dateLimit.getDate() - range);
+
+    const yearAgo = new Date();
+    yearAgo.setDate(yearAgo.getDate() - 365);
+
+    const client = await prisma.user.findUnique({
+      where: { id: req.params.id },
+      select: {
+        id: true,
+        name: true,
+        companyName: true,
+        lastLoginAt: true,
+        activatedAt: true,
+        totalTimeSpent: true,
+        loginCount: true,
+        role: true
+      }
+    });
+
+    if (!client || client.role !== 'client') {
+      return res.status(404).json({ error: 'Cliente no encontrado.' });
+    }
+
+    // 1. Fetch portal sessions in the last 365 days
+    const allSessions = await prisma.portalSession.findMany({
+      where: {
+        userId: client.id,
+        startedAt: { gte: yearAgo }
+      },
+      orderBy: { startedAt: 'desc' }
+    });
+
+    // 2. Fetch page views in range for sections
+    const pageViews = await prisma.pageView.findMany({
+      where: {
+        userId: client.id,
+        createdAt: { gte: dateLimit }
+      },
+      select: { path: true }
+    });
+
+    // 3. Fallback: if no portalSessions exist at all, use loginEvents
+    let source = 'portalSessions';
+    let sessionItems = [];
+
+    if (allSessions.length > 0) {
+      sessionItems = allSessions;
+    } else {
+      source = 'loginEvents';
+      const loginEvents = await prisma.loginEvent.findMany({
+        where: {
+          userId: client.id,
+          createdAt: { gte: yearAgo }
+        },
+        orderBy: { createdAt: 'desc' }
+      });
+
+      sessionItems = loginEvents.map(evt => ({
+        id: evt.id,
+        startedAt: evt.createdAt,
+        lastSeenAt: evt.createdAt,
+        activeSec: 0,
+        deviceType: evt.deviceType || 'desktop',
+        entryPath: '/dashboard'
+      }));
+    }
+
+    // Filter sessions for the active range
+    const rangeSessions = sessionItems.filter(s => new Date(s.startedAt) >= dateLimit);
+
+    // KPIs calculation
+    const totalSessionsPeriod = rangeSessions.length;
+    const totalActiveSecPeriod = source === 'portalSessions'
+      ? rangeSessions.reduce((sum, s) => sum + (s.activeSec || 0), 0)
+      : client.totalTimeSpent;
+    const activeMin = source === 'portalSessions' ? Math.round(totalActiveSecPeriod / 60) : 0;
+    const avgSessionMin = (source === 'portalSessions' && totalSessionsPeriod > 0)
+      ? Math.round(((totalActiveSecPeriod / totalSessionsPeriod) / 60) * 10) / 10
+      : 0;
+
+    const activeDaysSet = new Set();
+    rangeSessions.forEach(s => {
+      const { ymd } = mxParts(s.startedAt);
+      activeDaysSet.add(ymd);
+    });
+    const daysActive = activeDaysSet.size;
+    const visitsPerWeek = range > 0 ? Math.round(((totalSessionsPeriod / (range / 7))) * 10) / 10 : 0;
+    const lastSeenAt = sessionItems.length > 0 ? sessionItems[0].startedAt : client.lastLoginAt;
+    const loginsPeriod = rangeSessions.length;
+
+    // By hour and heatmap arrays
+    const byHour = Array(24).fill(0);
+    const heatmap = Array(7).fill().map(() => Array(24).fill(0));
+    const dowCounts = Array(7).fill(0);
+    const deviceCounts = { desktop: 0, mobile: 0 };
+
+    rangeSessions.forEach(s => {
+      const { hour, dow } = mxParts(s.startedAt);
+      byHour[hour]++;
+      heatmap[dow][hour]++;
+      dowCounts[dow]++;
+
+      const dev = (s.deviceType || '').toLowerCase();
+      if (dev.includes('mob')) deviceCounts.mobile++;
+      else deviceCounts.desktop++;
+    });
+
+    // Calendar for the last 365 days
+    const calendarMap = {};
+    sessionItems.forEach(s => {
+      const { ymd } = mxParts(s.startedAt);
+      if (!calendarMap[ymd]) {
+        calendarMap[ymd] = { date: ymd, sessions: 0, activeSec: 0 };
+      }
+      calendarMap[ymd].sessions++;
+      calendarMap[ymd].activeSec += (s.activeSec || 0);
+    });
+
+    const calendar = Object.values(calendarMap).map(c => ({
+      date: c.date,
+      sessions: c.sessions,
+      activeMin: Math.round(c.activeSec / 60)
+    }));
+
+    // Sections
+    const sectionCounts = { 'Inicio': 0, 'Mi Proyecto': 0, 'Plan de Pagos': 0, 'Mis Referidos': 0, 'Soporte': 0 };
+    pageViews.forEach(pv => {
+      let sec = 'Otro';
+      if (pv.path === '/dashboard' || pv.path === '/') sec = 'Inicio';
+      else if (pv.path.includes('/project')) sec = 'Mi Proyecto';
+      else if (pv.path.includes('/pagos')) sec = 'Plan de Pagos';
+      else if (pv.path.includes('/referrals')) sec = 'Mis Referidos';
+      else if (pv.path.includes('/support')) sec = 'Soporte';
+      if (sec !== 'Otro') {
+        sectionCounts[sec] = (sectionCounts[sec] || 0) + 1;
+      }
+    });
+
+    const sections = Object.entries(sectionCounts)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+
+    // Devices
+    const devices = [
+      { name: 'Escritorio', count: deviceCounts.desktop },
+      { name: 'Móvil', count: deviceCounts.mobile }
+    ].filter(d => d.count > 0);
+
+    // Recent sessions
+    const recentSessions = sessionItems.slice(0, 15).map(s => ({
+      startedAt: s.startedAt,
+      activeMin: Math.round((s.activeSec || 0) / 60),
+      device: (s.deviceType || 'Escritorio').toLowerCase().includes('mob') ? 'Móvil' : 'Escritorio',
+      entryPath: s.entryPath || '/dashboard'
+    }));
+
+    // Rule-based insight
+    let insight = 'Aún hay pocos datos para detectar un patrón';
+    if (rangeSessions.length >= 3) {
+      const dayNames = ['domingos', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábados'];
+      const sortedDays = dowCounts
+        .map((count, idx) => ({ idx, count }))
+        .sort((a, b) => b.count - a.count)
+        .filter(d => d.count > 0);
+
+      let maxWindow = { start: 10, end: 12, count: 0 };
+      for (let h = 0; h < 23; h++) {
+        const windowCount = byHour[h] + byHour[h + 1];
+        if (windowCount > maxWindow.count) {
+          maxWindow = { start: h, end: h + 2, count: windowCount };
+        }
+      }
+
+      if (sortedDays.length >= 2) {
+        insight = `Suele conectarse ${dayNames[sortedDays[0].idx]} y ${dayNames[sortedDays[1].idx]}, entre ${maxWindow.start} y ${maxWindow.end} h (hora CDMX).`;
+      } else if (sortedDays.length === 1) {
+        insight = `Suele conectarse los ${dayNames[sortedDays[0].idx]}, entre ${maxWindow.start} y ${maxWindow.end} h (hora CDMX).`;
+      }
+    }
+
+    res.json({
+      client: {
+        id: client.id,
+        name: client.name,
+        companyName: client.companyName,
+        lastLoginAt: client.lastLoginAt,
+        activatedAt: client.activatedAt,
+        totalTimeSpent: client.totalTimeSpent,
+        loginCount: client.loginCount
+      },
+      kpis: {
+        sessions: totalSessionsPeriod,
+        activeMin,
+        avgSessionMin,
+        visitsPerWeek,
+        daysActive,
+        lastSeenAt,
+        loginsPeriod
+      },
+      byHour,
+      heatmap,
+      calendar,
+      sections,
+      devices,
+      recentSessions,
+      insight,
+      source
+    });
+  } catch (err) {
+    console.error('[ADMIN] client analytics error:', err);
+    res.status(500).json({ error: 'Error al cargar analíticas del cliente.' });
   }
 });
 

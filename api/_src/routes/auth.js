@@ -30,7 +30,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // ─── Login Tracking Helper ───────────────────────────────────────────────────
-async function trackLogin(req, userId) {
+async function trackLogin(req, userId, kind = 'login') {
   // Impersonation doesn't count as a real client login
   if (req.headers['x-impersonating'] === 'true') return;
 
@@ -38,14 +38,16 @@ async function trackLogin(req, userId) {
   const ua = req.headers['user-agent'] || '';
   const deviceType = /Mobi|Android|iPhone/i.test(ua) ? 'mobile' : 'desktop';
 
+  const userUpdateData = { lastLoginAt: new Date() };
+  if (kind === 'login') {
+    userUpdateData.loginCount = { increment: 1 };
+  }
+
   try {
     await prisma.$transaction([
       prisma.user.update({
         where: { id: userId },
-        data: {
-          lastLoginAt: new Date(),
-          loginCount: { increment: 1 },
-        }
+        data: userUpdateData
       }),
       prisma.loginEvent.create({
         data: {
@@ -53,6 +55,7 @@ async function trackLogin(req, userId) {
           ip: ip.substring(0, 45), // IPv6 safe length
           userAgent: ua.substring(0, 255),
           deviceType,
+          kind: kind === 'resume' ? 'resume' : 'login',
         }
       })
     ]);
@@ -186,7 +189,7 @@ router.get('/me', authenticate, async (req, res) => {
     if (req.headers['x-impersonating'] !== 'true') {
       const thirtyMinsAgo = new Date(Date.now() - 30 * 60 * 1000);
       if (!user.lastLoginAt || user.lastLoginAt < thirtyMinsAgo) {
-        trackLogin(req, user.id).catch(err => console.error('[AUTH] visit track err:', err.message));
+        trackLogin(req, user.id, 'resume').catch(err => console.error('[AUTH] visit track err:', err.message));
       }
     }
 

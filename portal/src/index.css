@@ -2152,5 +2152,103 @@ textarea.hx-input {
   background: linear-gradient(90deg, #00C4CC, #10B981);
 }
 
+/* Analytics & Client Tracking Components */
+.heatmap-card {
+  padding: 24px;
+  overflow-x: auto;
+}
+
+.heatmap-grid-wrapper {
+  min-width: 820px;
+}
+
+.heatmap-day-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #4B5563;
+  display: flex;
+  align-items: center;
+}
+
+.heatmap-hour-label {
+  font-size: 11px;
+  color: #6B7280;
+  text-align: center;
+  font-weight: 500;
+}
+
+.heatmap-cell {
+  height: 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+}
+
+.heatmap-cell:hover {
+  transform: scale(1.2);
+  z-index: 5;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15);
+}
+
+.activity-cal-scroll {
+  overflow-x: auto;
+  padding: 8px 0;
+}
+
+.activity-cal-svg {
+  display: block;
+}
+
+.activity-cal-cell {
+  cursor: pointer;
+  transition: stroke 0.15s ease, stroke-width 0.15s ease;
+  outline: none;
+}
+
+.activity-cal-cell:hover {
+  stroke: #111827;
+  stroke-width: 1.5px;
+}
+
+.client-insight-banner {
+  background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 50%, #A7F3D0 100%);
+  border: 1px solid #6EE7B7;
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.client-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.client-sessions-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.client-sessions-table th {
+  padding: 14px 18px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6B7280;
+  text-transform: uppercase;
+  background: #F9FAFB;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.client-sessions-table td {
+  padding: 14px 18px;
+  border-bottom: 1px solid #F3F4F6;
+  font-size: 13px;
+}
+
+
 
 

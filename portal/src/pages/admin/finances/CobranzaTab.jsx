@@ -76,7 +76,7 @@ export default function CobranzaTab({ data, onRefresh, onShowToast }) {
       onRefresh();
     } catch (err) {
       console.error('Error toggling payment status:', err);
-      alert('Error al actualizar el estado del pago.');
+      if (onShowToast) onShowToast('Error al actualizar el estado del pago.');
     } finally {
       setSubmittingId(null);
     }

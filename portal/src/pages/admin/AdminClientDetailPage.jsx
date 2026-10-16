@@ -4,10 +4,13 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import api from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
+import { fmtDuration } from '../../lib/format';
+import { useToast } from '../../lib/useToast';
+import { ToastContainer } from '../../components/Toast';
 import { 
   ArrowLeft, User, Mail, Phone, Building, Save, FolderOpen, AlertCircle,
   ClipboardList, Paintbrush, Code2, Search, Rocket, CheckCircle, CheckCircle2, Activity,
-  Plus, Trash2, Calendar, X, Users, DollarSign, Clock, Edit2, Sparkles, Check, Eye
+  Plus, Trash2, Calendar, X, Users, DollarSign, Clock, Edit2, Sparkles, Check, Eye, Award
 } from 'lucide-react';
 
 const PHASES = [
@@ -56,7 +59,12 @@ export default function AdminClientDetailPage() {
   const [projectErrorMsg, setProjectErrorMsg] = useState('');
   
   // Referrals and Credits
+  const toast = useToast();
   const [creditAmount, setCreditAmount] = useState('');
+  const [rewardModalData, setRewardModalData] = useState(null);
+  const [useCustomReward, setUseCustomReward] = useState(false);
+  const [customRewardAmount, setCustomRewardAmount] = useState('');
+  const [submittingReward, setSubmittingReward] = useState(false);
   const { impersonate } = useAuth();
   const [impersonating, setImpersonating] = useState(false);
 
@@ -308,19 +316,50 @@ export default function AdminClientDetailPage() {
   };
 
   const handleUpdateReferral = async (referralId, newStatus) => {
+    const ref = client?.referralsMade?.find(r => r.id === referralId);
+    if (newStatus === 'converted') {
+      const defaultTierAmount = client?.level === 3 ? 3500 : client?.level === 2 ? 2500 : 1500;
+      setRewardModalData({
+        referralId,
+        companyName: ref?.companyName || 'Empresa Recomendada',
+        defaultTierAmount,
+      });
+      setUseCustomReward(false);
+      setCustomRewardAmount('');
+      return;
+    }
+
     try {
-      let creditAmount;
-      if (newStatus === 'converted') {
-        const defaultTierAmount = client?.level === 3 ? 3500 : client?.level === 2 ? 2500 : 1500;
-        const inputAmount = window.prompt(`Monto de Créditos HX a acreditar al socio (Sugerido por nivel: $${defaultTierAmount}):`, String(defaultTierAmount));
-        if (inputAmount === null) return; // cancelado por usuario
-        creditAmount = parseInt(inputAmount, 10) || defaultTierAmount;
-      }
-      await api.put(`/admin/referrals/${referralId}`, { status: newStatus, creditAmount });
+      await api.put(`/admin/referrals/${referralId}`, { status: newStatus });
+      toast.success('Estado Actualizado', 'El estatus del referido se actualizó correctamente.');
       fetchClient();
-    } catch (err) { 
-      console.error('Error updating referral', err); 
-      alert(err.response?.data?.error || 'Error al actualizar el estado del referido.');
+    } catch (err) {
+      console.error('Error updating referral', err);
+      toast.error('Atención', err.response?.data?.error || 'Error al actualizar el estado del referido.');
+    }
+  };
+
+  const handleConfirmAwardReward = async () => {
+    if (!rewardModalData) return;
+    setSubmittingReward(true);
+    try {
+      const creditAmount = useCustomReward && customRewardAmount
+        ? parseInt(customRewardAmount, 10)
+        : rewardModalData.defaultTierAmount;
+
+      await api.put(`/admin/referrals/${rewardModalData.referralId}`, {
+        status: 'converted',
+        creditAmount,
+      });
+
+      toast.success('¡Créditos Acreditados!', `Se abonaron $${creditAmount.toLocaleString()} HX al socio.`);
+      setRewardModalData(null);
+      fetchClient();
+    } catch (err) {
+      console.error('Error awarding referral credits:', err);
+      toast.error('Atención', err.response?.data?.error || 'Error al otorgar créditos de recomendación.');
+    } finally {
+      setSubmittingReward(false);
     }
   };
 
@@ -616,7 +655,13 @@ export default function AdminClientDetailPage() {
               {client.loginCount !== undefined && (
                 <p style={{ color: '#4B5563', fontSize: '13px', margin: '4px 0 0 0', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                   <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: client.lastLoginAt && new Date() - new Date(client.lastLoginAt) < 7*24*60*60*1000 ? '#10B981' : '#9CA3AF' }}></span>
-                  <strong>{client.loginCount}</strong> {client.loginCount === 1 ? 'visita' : 'visitas'}
+                  <strong>{client.loginCount}</strong> {client.loginCount === 1 ? 'inicio de sesión' : 'inicios de sesión'}
+                  {client.sessionCount !== undefined && (
+                    <span>• <strong>{client.sessionCount}</strong> {client.sessionCount === 1 ? 'sesión' : 'sesiones'}</span>
+                  )}
+                  {client.totalTimeSpent !== undefined && client.totalTimeSpent > 0 && (
+                    <span>• Tiempo activo: <strong>{fmtDuration(client.totalTimeSpent)}</strong></span>
+                  )}
                   {client.lastLoginAt && (
                     <span style={{ color: '#9CA3AF' }}>
                       • Último acceso: {new Date(client.lastLoginAt).toLocaleDateString()} a las {new Date(client.lastLoginAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
@@ -1740,6 +1785,97 @@ export default function AdminClientDetailPage() {
           </button>
         </div>
       )}
+
+      {/* Modal de Confirmación para Acreditar Recompensa de Referido */}
+      {rewardModalData && createPortal(
+        <div className="modal-overlay">
+          <div className="modal-content" style={{ maxWidth: '440px', padding: '24px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#DCFCE7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#15803D' }}>
+                  <Award size={22} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '17px', fontWeight: 700, margin: 0, color: '#111827' }}>
+                    Acreditar Recompensa
+                  </h3>
+                  <p style={{ fontSize: '13px', color: '#6B7280', margin: 0 }}>
+                    Confirmar cierre con {rewardModalData.companyName}
+                  </p>
+                </div>
+              </div>
+              <button 
+                type="button"
+                onClick={() => setRewardModalData(null)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div style={{ background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
+                <span style={{ color: '#6B7280' }}>Socio Recomendador:</span>
+                <strong style={{ color: '#111827' }}>{client?.name} (Nivel {client?.level || 1})</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px' }}>
+                <span style={{ color: '#6B7280' }}>Recompensa por Nivel:</span>
+                <span style={{ fontSize: '18px', fontWeight: 800, color: '#059669' }}>
+                  ${rewardModalData.defaultTierAmount.toLocaleString()} MXN
+                </span>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '18px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#4B5563', cursor: 'pointer', marginBottom: useCustomReward ? '10px' : 0 }}>
+                <input
+                  type="checkbox"
+                  checked={useCustomReward}
+                  onChange={(e) => setUseCustomReward(e.target.checked)}
+                  style={{ accentColor: '#00C4CC', width: '16px', height: '16px' }}
+                />
+                <span>Personalizar monto de créditos</span>
+              </label>
+
+              {useCustomReward && (
+                <input
+                  type="number"
+                  min="100"
+                  step="100"
+                  placeholder={`Ej. ${rewardModalData.defaultTierAmount}`}
+                  className="hx-input"
+                  value={customRewardAmount}
+                  onChange={(e) => setCustomRewardAmount(e.target.value)}
+                  style={{ marginTop: '6px' }}
+                />
+              )}
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => setRewardModalData(null)}
+                disabled={submittingReward}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={handleConfirmAwardReward}
+                disabled={submittingReward}
+                style={{ background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)' }}
+              >
+                {submittingReward ? 'Acreditando...' : 'Confirmar y Acreditar'}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      <ToastContainer toasts={toast.toasts} onDismiss={toast.dismiss} />
     </Layout>
   );
 }

@@ -3,6 +3,7 @@ import api from '../../../lib/api';
 import { BarChart, Bar, PieChart, Pie, Cell, Legend, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { MousePointerClick, Smartphone, HeartHandshake, Medal, Clock, LogIn } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import HeatmapGrid from './HeatmapGrid';
 
 const COLORS = ['#00C4CC', '#7B2FBE', '#10B981', '#F59E0B', '#3B82F6', '#EC4899'];
 const DAYS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
@@ -76,94 +77,15 @@ export default function BehaviorTab({ range }) {
 
       {/* Heatmap */}
       <div className="card" style={{ padding: '24px', overflowX: 'auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', margin: '0 0 20px 0' }}>
-          <div>
-            <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', margin: '0 0 4px 0' }}>
-              Mapa de Calor: Días y Horas de Actividad
-            </h3>
-            <p style={{ fontSize: '13px', color: '#6B7280', margin: 0 }}>
-              Frecuencia de accesos al portal por hora local (GMT-6). Pasa el cursor sobre una celda para ver el detalle.
-            </p>
-          </div>
-
-          {(() => {
-            let peak = { val: 0, day: '', hour: '' };
-            heatmap.forEach((dayRow, dIdx) => {
-              dayRow.forEach((val, hIdx) => {
-                if (val > peak.val) {
-                  peak = { val, day: DAYS[dIdx], hour: HOURS[hIdx] };
-                }
-              });
-            });
-            return peak.val > 0 ? (
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#FEF3C7', border: '1px solid #FDE68A', padding: '6px 14px', borderRadius: '999px', fontSize: '12px', fontWeight: 700, color: '#B45309' }}>
-                <span>🔥 Hora pico de mayor tráfico:</span>
-                <span style={{ color: '#78350F' }}>{peak.day} a las {peak.hour} ({peak.val} accesos)</span>
-              </div>
-            ) : (
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#F3F4F6', padding: '6px 12px', borderRadius: '999px', fontSize: '12px', color: '#6B7280' }}>
-                <span>Sin accesos en el rango seleccionado</span>
-              </div>
-            );
-          })()}
+        <div style={{ margin: '0 0 20px 0' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', margin: '0 0 4px 0' }}>
+            Mapa de Calor: Días y Horas de Actividad
+          </h3>
+          <p style={{ fontSize: '13px', color: '#6B7280', margin: 0 }}>
+            Frecuencia de accesos al portal por hora CDMX. Pasa el cursor sobre una celda para ver el detalle.
+          </p>
         </div>
-
-        <div style={{ minWidth: '820px' }}>
-          {/* Daylight periods */}
-          <div style={{ display: 'grid', gridTemplateColumns: '50px repeat(4, 1fr)', gap: '4px', marginBottom: '6px', fontSize: '10px', color: '#9CA3AF', fontWeight: 600, textTransform: 'uppercase' }}>
-            <div></div>
-            <div style={{ textAlign: 'center', borderBottom: '1px dashed #E5E7EB', paddingBottom: '2px' }}>Madrugada (12a-5a)</div>
-            <div style={{ textAlign: 'center', borderBottom: '1px dashed #E5E7EB', paddingBottom: '2px' }}>Mañana (6a-11a)</div>
-            <div style={{ textAlign: 'center', borderBottom: '1px dashed #E5E7EB', paddingBottom: '2px' }}>Tarde (12p-5p)</div>
-            <div style={{ textAlign: 'center', borderBottom: '1px dashed #E5E7EB', paddingBottom: '2px' }}>Noche (6p-11p)</div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '50px repeat(24, 1fr)', gap: '4px', marginBottom: '8px' }}>
-            <div></div>
-            {HOURS.map(h => <div key={h} style={{ fontSize: '11px', color: '#6B7280', textAlign: 'center', fontWeight: 500 }}>{h}</div>)}
-          </div>
-          {DAYS.map((day, dIdx) => (
-            <div key={day} style={{ display: 'grid', gridTemplateColumns: '50px repeat(24, 1fr)', gap: '4px', marginBottom: '4px' }}>
-              <div style={{ fontSize: '13px', fontWeight: 600, color: '#4B5563', display: 'flex', alignItems: 'center' }}>{day}</div>
-              {heatmap[dIdx].map((val, hIdx) => {
-                const opacity = val / maxHeat;
-                return (
-                  <div 
-                    key={hIdx} 
-                    title={`${val} accesos el ${day} a las ${HOURS[hIdx]}`}
-                    style={{ 
-                      height: '24px', 
-                      background: val === 0 ? '#F3F4F6' : '#00C4CC', 
-                      opacity: val === 0 ? 1 : Math.max(0.2, opacity),
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease',
-                      position: 'relative'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'scale(1.2)';
-                      e.currentTarget.style.zIndex = '5';
-                      e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.15)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'scale(1)';
-                      e.currentTarget.style.zIndex = '1';
-                      e.currentTarget.style.boxShadow = 'none';
-                    }}
-                  />
-                );
-              })}
-            </div>
-          ))}
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '8px', marginTop: '16px', fontSize: '12px', color: '#6B7280' }}>
-          <span>Menos actividad</span>
-          <div style={{ width: '16px', height: '16px', background: '#F3F4F6', borderRadius: '4px' }}></div>
-          <div style={{ width: '16px', height: '16px', background: '#00C4CC', opacity: 0.3, borderRadius: '4px' }}></div>
-          <div style={{ width: '16px', height: '16px', background: '#00C4CC', opacity: 0.6, borderRadius: '4px' }}></div>
-          <div style={{ width: '16px', height: '16px', background: '#00C4CC', opacity: 1, borderRadius: '4px' }}></div>
-          <span>Más actividad</span>
-        </div>
+        <HeatmapGrid heatmap={heatmap} labelType="accesos" />
       </div>
 
       {/* Sections and Devices */}

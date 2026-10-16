@@ -74,7 +74,7 @@ export default function ExpensesTab({
       onRefresh();
     } catch (err) {
       console.error('Error deleting expense:', err);
-      alert('Error al eliminar gasto.');
+      if (onShowToast) onShowToast('Error al eliminar gasto.');
     }
   };
 
@@ -87,7 +87,7 @@ export default function ExpensesTab({
       onRefresh();
     } catch (err) {
       console.error('Error toggling active:', err);
-      alert('Error al actualizar estado.');
+      if (onShowToast) onShowToast('Error al actualizar estado.');
     }
   };
 

@@ -25,12 +25,14 @@ import AdminAppointmentsPage from './pages/admin/AdminAppointmentsPage';
 import AdminTasksPage from './pages/admin/AdminTasksPage';
 import AdminFinancesPage from './pages/admin/AdminFinancesPage';
 import AdminNfcCardsPage from './pages/admin/AdminNfcCardsPage';
+import ActivityTracker from './components/ActivityTracker';
 
 export default function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
       <BrowserRouter>
+        <ActivityTracker />
         <Routes>
           {/* Public routes */}
           <Route path="/login" element={<LoginPage />} />

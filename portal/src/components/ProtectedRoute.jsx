@@ -4,28 +4,7 @@ import { useEffect, useRef } from 'react';
 import api from '../lib/api';
 
 export function ProtectedRoute({ children, adminOnly = false }) {
-  const { user, loading, isImpersonating, isAdmin } = useAuth();
-  const location = useLocation();
-  const trackedPathRef = useRef(null);
-
-  useEffect(() => {
-    if (!user || isImpersonating || isAdmin) return;
-
-    // Only track if path actually changed
-    if (trackedPathRef.current !== location.pathname) {
-      api.post('/analytics/pageview', { path: location.pathname }).catch(() => {});
-      trackedPathRef.current = location.pathname;
-    }
-
-    // Heartbeat every 60s
-    const heartbeatInterval = setInterval(() => {
-      if (document.visibilityState === 'visible') {
-        api.post('/analytics/heartbeat').catch(() => {});
-      }
-    }, 60000);
-
-    return () => clearInterval(heartbeatInterval);
-  }, [user, location.pathname, isImpersonating, isAdmin]);
+  const { user, loading, isImpersonating } = useAuth();
 
   if (loading) {
     return (

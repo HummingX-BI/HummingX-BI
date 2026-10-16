@@ -50,7 +50,7 @@ export default function HistoricalDealsTab({
       onRefresh();
     } catch (err) {
       console.error('Error deleting deal:', err);
-      alert('Error al eliminar proyecto.');
+      if (onShowToast) onShowToast('Error al eliminar proyecto.');
     }
   };
 

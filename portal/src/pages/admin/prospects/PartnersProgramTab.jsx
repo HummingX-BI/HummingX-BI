@@ -54,7 +54,8 @@ export default function PartnersProgramTab({ onAwardCreditsSuccess }) {
       await fetchOverview();
       if (onAwardCreditsSuccess) onAwardCreditsSuccess();
     } catch (err) {
-      alert(err.response?.data?.error || 'Error al abonar créditos.');
+      setToast(err.response?.data?.error || 'Error al abonar créditos.');
+      setTimeout(() => setToast(''), 4000);
     } finally {
       setAwardingId(null);
     }

@@ -44,6 +44,7 @@ export default function AppointmentDrawer({
   const [summaryText, setSummaryText] = useState(appointment.summary || '');
   const [savingSummary, setSavingSummary] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [summaryError, setSummaryError] = useState('');
 
   const memberCfg = TEAM_MEMBERS[appointment.assignedTo] || TEAM_MEMBERS.emmanuel;
   const statusCfg = STATUS_CONFIG[appointment.status] || STATUS_CONFIG.scheduled;
@@ -72,12 +73,14 @@ export default function AppointmentDrawer({
   const handleSaveSummary = async () => {
     setSavingSummary(true);
     setSavedSuccess(false);
+    setSummaryError('');
     try {
       await onUpdateSummary(appointment.id, summaryText);
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 3000);
     } catch (err) {
-      alert('Error al guardar minuta.');
+      setSummaryError('Error al guardar minuta.');
+      setTimeout(() => setSummaryError(''), 4000);
     } finally {
       setSavingSummary(false);
     }
@@ -389,6 +392,11 @@ export default function AppointmentDrawer({
             >
               {savingSummary ? 'Guardando...' : 'Guardar Minuta'}
             </button>
+            {summaryError && (
+              <span style={{ color: '#DC2626', fontSize: '12px', marginLeft: '10px', fontWeight: 500 }}>
+                {summaryError}
+              </span>
+            )}
           </div>
 
         </div>

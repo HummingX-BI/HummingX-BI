@@ -54,7 +54,7 @@ export default function App() {
           <Route path="/admin/finanzas" element={<ProtectedRoute adminOnly><AdminFinancesPage /></ProtectedRoute>} />
           <Route path="/admin/tarjetas-qr" element={<ProtectedRoute adminOnly><AdminNfcCardsPage /></ProtectedRoute>} />
           <Route path="/admin/analytics" element={<ProtectedRoute adminOnly><AdminAnalyticsPage /></ProtectedRoute>} />
-          <Route path="/admin/pagos" element={<ProtectedRoute adminOnly><AdminPaymentsPage /></ProtectedRoute>} />
+          <Route path="/admin/pagos" element={<ProtectedRoute adminOnly><Navigate to="/admin/finanzas" replace /></ProtectedRoute>} />
 
           {/* Default redirects */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />

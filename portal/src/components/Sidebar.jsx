@@ -48,25 +48,49 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
     navigate('/login');
   };
 
-  const clientLinks = [
-    { to: '/dashboard', icon: LayoutDashboard, label: 'Inicio' },
-    { to: '/project',   icon: FolderKanban,   label: 'Mi Proyecto' },
-    { to: '/pagos',     icon: Calendar,       label: 'Plan de Pagos' },
-    { to: '/referrals', icon: Users,           label: 'Mis Referidos' },
+  const clientSections = [
+    {
+      title: 'Navegación',
+      links: [
+        { to: '/dashboard', icon: LayoutDashboard, label: 'Inicio' },
+        { to: '/project',   icon: FolderKanban,   label: 'Mi Proyecto' },
+        { to: '/pagos',     icon: Calendar,       label: 'Plan de Pagos' },
+        { to: '/referrals', icon: Users,          label: 'Mis Referidos' },
+      ],
+    },
   ];
 
-  const adminLinks = [
-    { to: '/admin/clients',     icon: Users,        label: 'Clientes Activos' },
-    { to: '/admin/prospects',   icon: Briefcase,    label: 'CRM Prospectos' },
-    { to: '/admin/citas',       icon: CalendarDays, label: 'Agenda de Citas' },
-    { to: '/admin/finanzas',    icon: DollarSign,   label: 'Finanzas & Flujo' },
-    { to: '/admin/pagos',       icon: Calendar,     label: 'Calendario de Pagos' },
-    { to: '/admin/tareas',      icon: CheckSquare,  label: 'Tareas' },
-    { to: '/admin/tarjetas-qr', icon: QrCode,       label: 'Tarjetas QR & NFC' },
-    { to: '/admin/analytics',   icon: BarChart3,    label: 'Control & Analíticas' },
+  const adminSections = [
+    {
+      title: 'Comercial',
+      links: [
+        { to: '/admin/prospects',   icon: Briefcase,    label: 'CRM Prospectos' },
+        { to: '/admin/citas',       icon: CalendarDays, label: 'Agenda de Citas' },
+      ],
+    },
+    {
+      title: 'Operación',
+      links: [
+        { to: '/admin/clients',     icon: Users,        label: 'Clientes Activos' },
+        { to: '/admin/tareas',      icon: CheckSquare,  label: 'Tareas' },
+        { to: '/admin/tarjetas-qr', icon: QrCode,       label: 'Tarjetas QR & NFC' },
+      ],
+    },
+    {
+      title: 'Dinero',
+      links: [
+        { to: '/admin/finanzas',    icon: DollarSign,   label: 'Finanzas & Cobranza' },
+      ],
+    },
+    {
+      title: 'Control',
+      links: [
+        { to: '/admin/analytics',   icon: BarChart3,    label: 'Control & Analíticas' },
+      ],
+    },
   ];
 
-  const links = isAdmin ? adminLinks : clientLinks;
+  const sections = isAdmin ? adminSections : clientSections;
 
   const filteredClients = clients.filter(c =>
     c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -148,28 +172,41 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
         </div>
 
         {/* ── Nav Links ─────────────────────────────────────── */}
-        <nav className="client-nav" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px', padding: '12px 12px', minHeight: 0, overflowY: 'auto', overflowX: 'hidden' }}>
-          <div className="section-label">{isAdminRoute ? 'Gestión' : 'Navegación'}</div>
+        <nav className="client-nav" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px', padding: '12px 12px', minHeight: 0, overflowY: 'auto', overflowX: 'hidden' }}>
+          {sections.map((section, sIdx) => (
+            <div key={section.title} style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginBottom: sIdx < sections.length - 1 ? '4px' : '0' }}>
+              <div className="section-label" style={{
+                fontSize: '10.5px',
+                fontWeight: 700,
+                color: 'rgba(255,255,255,0.4)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                padding: '4px 8px 2px',
+              }}>
+                {section.title}
+              </div>
 
-          {links.map(({ to, icon: Icon, label, isDev }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={to === '/admin' || to === '/dashboard'}
-              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''} tour-step-${to.replace(/\//g, '')}`}
-            >
-              <Icon size={18} />
-              <span style={{ flex: 1 }}>{label}</span>
-              {isDev && (
-                <span style={{
-                  fontSize: '10px', background: 'rgba(255,255,255,0.1)',
-                  color: '#9CA3AF', padding: '2px 6px', borderRadius: '9999px', fontWeight: 600,
-                }}>Dev</span>
-              )}
-            </NavLink>
+              {section.links.map(({ to, icon: Icon, label, isDev }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  end={to === '/admin' || to === '/dashboard'}
+                  className={({ isActive }) => `nav-item ${isActive ? 'active' : ''} tour-step-${to.replace(/\//g, '')}`}
+                >
+                  <Icon size={17} />
+                  <span style={{ flex: 1 }}>{label}</span>
+                  {isDev && (
+                    <span style={{
+                      fontSize: '10px', background: 'rgba(255,255,255,0.1)',
+                      color: '#9CA3AF', padding: '2px 6px', borderRadius: '9999px', fontWeight: 600,
+                    }}>Dev</span>
+                  )}
+                </NavLink>
+              ))}
+            </div>
           ))}
 
-          <hr className="separator" style={{ margin: '12px 0', borderColor: 'rgba(255,255,255,0.1)' }} />
+          <hr className="separator" style={{ margin: '8px 0', borderColor: 'rgba(255,255,255,0.08)' }} />
 
           {isAdminRoute ? (
             /* Admin: quick client directory */

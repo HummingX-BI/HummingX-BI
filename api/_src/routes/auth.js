@@ -9,6 +9,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const prisma = require('../lib/prisma');
+const referralService = require('../services/referralService');
 const { authenticate } = require('../middleware/auth');
 const {
   loginLimiter,
@@ -221,9 +222,7 @@ router.post('/invite', authenticate, async (req, res) => {
     const token = crypto.randomBytes(32).toString('hex');
     const expires = new Date(Date.now() + 72 * 60 * 60 * 1000); // 72 hours
 
-    const referralCode = companyName
-      ? companyName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').slice(0, 20)
-      : email.split('@')[0].toLowerCase();
+    const referralCode = await referralService.generateNumericReferralCode(prisma);
 
     const user = await prisma.user.create({
       data: {

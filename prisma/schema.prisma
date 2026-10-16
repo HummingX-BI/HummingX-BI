@@ -55,6 +55,7 @@ model User {
   logoUrl           String?
   phone             String?
   referralCode      String?   @unique
+  legacyReferralCode String?  @unique
   level             Int       @default(1)
   active            Boolean   @default(true)
   invitationToken   String?   @unique
@@ -162,6 +163,8 @@ model Referral {
 
   // Relations
   referrer         User           @relation("ReferralMaker", fields: [referrerId], references: [id])
+  creditMovement   CreditMovement?
+  prospects        Prospect[]
 
   @@map("referrals")
 }
@@ -169,6 +172,7 @@ model Referral {
 model CreditMovement {
   id          String     @id @default(cuid())
   clientId    String
+  referralId  String?    @unique
   amount      Int        // positive = earned, negative = redeemed
   type        CreditType
   description String
@@ -176,6 +180,7 @@ model CreditMovement {
 
   // Relations
   client      User       @relation(fields: [clientId], references: [id])
+  referral    Referral?  @relation(fields: [referralId], references: [id], onDelete: SetNull)
 
   @@map("credit_movements")
 }
@@ -195,6 +200,7 @@ model Payment {
   amount      Float
   status      PaymentStatus @default(pending)
   dueDate     DateTime
+  paidAt      DateTime?
   invoiceLink String?
   receiptLink String?
   createdAt   DateTime      @default(now())
@@ -260,12 +266,14 @@ model Prospect {
   status              ProspectStatus     @default(lead)
   source              String?            // Origen (Visita en frío, Referido, etc.)
   referralCode        String?            // Código del socio que recomendó (ej. 58291)
+  referralId          String?            // ID de la recomendación en referrals
   notes               String?
   convertedToClientId String?            // ID del User creado si se convirtió
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
 
   // Relaciones
+  referral            Referral?          @relation(fields: [referralId], references: [id], onDelete: SetNull)
   documents           ProspectDocument[]
   appointments        Appointment[]
 
@@ -404,4 +412,37 @@ model NfcCard {
   @@map("nfc_cards")
 }
 
+// ─── HUMMINGX: GASTOS OPERATIVOS & COSTOS RECURRENTES ─────────
 
+enum ExpenseCategory {
+  infrastructure // Servidores, Hosting, Dominios, BD
+  software       // APIs (OpenAI, Gemini), Licencias, Herramientas
+  hardware       // Tarjetas NFC, Materiales, Soportes
+  marketing      // Publicidad, Pauta, Diseños
+  operations     // Gastos de operación, Viáticos, Reuniones
+  other          // Otros gastos
+}
+
+enum ExpenseFrequency {
+  one_time  // Gasto único
+  monthly   // Recurrente mensual
+  annual    // Recurrente anual
+}
+
+model Expense {
+  id          String           @id @default(cuid())
+  title       String           // Concepto del gasto
+  amount      Float            // Monto en MXN
+  category    ExpenseCategory  @default(infrastructure)
+  frequency   ExpenseFrequency @default(monthly)
+  paidBy      String           @default("company") // "company", "emmanuel", "juan_pablo", "curiel"
+  dueDate     DateTime?        // Fecha de próximo pago / corte
+  date        DateTime         @default(now())     // Fecha de registro
+  receiptUrl  String?          // Comprobante / Factura
+  notes       String?          // Notas o detalles
+  active      Boolean          @default(true)      // Para recurrentes activos
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@map("expenses")
+}

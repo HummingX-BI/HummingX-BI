@@ -179,10 +179,15 @@ router.get('/clients/:id', authenticate, requireAdmin, async (req, res) => {
         phone: true, level: true, active: true, referralCode: true,
         invitationAccepted: true, createdAt: true, activatedAt: true, role: true,
         loginCount: true, lastLoginAt: true, totalTimeSpent: true,
-        pageViews: { orderBy: { createdAt: 'desc' }, take: 50 },
+        pageViews: {
+          orderBy: { createdAt: 'desc' },
+          take: 50,
+          select: { id: true, path: true, createdAt: true }
+        },
         loginEvents: {
           orderBy: { createdAt: 'desc' },
-          take: 5
+          take: 5,
+          select: { id: true, createdAt: true, deviceType: true, ip: true }
         },
         projects: {
           orderBy: { updatedAt: 'desc' },

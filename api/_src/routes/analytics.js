@@ -73,18 +73,29 @@ router.post('/pageview', authenticate, async (req, res) => {
 
     const sid = (sessionId && typeof sessionId === 'string' && sessionId.length <= 64) ? sessionId : null;
 
-    await prisma.pageView.create({
-      data: {
-        userId: req.user.id,
-        path: path.substring(0, 255),
-        sessionId: sid
+    try {
+      await prisma.pageView.create({
+        data: {
+          userId: req.user.id,
+          path: path.substring(0, 255),
+          sessionId: sid
+        }
+      });
+    } catch (pvErr) {
+      if (pvErr.code === 'P2022') {
+        await prisma.pageView.create({
+          data: {
+            userId: req.user.id,
+            path: path.substring(0, 255)
+          }
+        }).catch(() => {});
       }
-    });
+    }
 
     res.json({ ok: true });
   } catch (err) {
     console.error('[ANALYTICS] pageview err:', err.message);
-    res.status(500).json({ error: 'Internal server error' });
+    res.json({ ok: true });
   }
 });
 

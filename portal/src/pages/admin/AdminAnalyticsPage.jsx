@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Layout from '../../components/Layout';
 import OverviewTab from './analytics/OverviewTab';
+import CommercialTab from './analytics/CommercialTab';
 import ProjectsTab from './analytics/ProjectsTab';
 import BehaviorTab from './analytics/BehaviorTab';
 import ClientTab from './analytics/ClientTab';
@@ -20,7 +21,7 @@ export default function AdminAnalyticsPage() {
               Control y Analíticas
             </h1>
             <p style={{ fontSize: '15px', color: '#6B7280', margin: 0 }}>
-              Supervisa el estado global de todos los proyectos activos, uso de la plataforma y comportamiento de tus clientes.
+              Supervisa el estado global de todos los proyectos activos, embudo comercial, uso de la plataforma y comportamiento de tus clientes.
             </p>
           </div>
           
@@ -56,6 +57,7 @@ export default function AdminAnalyticsPage() {
         <div style={{ display: 'flex', borderBottom: '1px solid #E5E7EB', gap: '32px', overflowX: 'auto' }}>
           {[
             { id: 'overview', label: 'Resumen Global' },
+            { id: 'commercial', label: 'Comercial & Embudo' },
             { id: 'projects', label: 'Proyectos' },
             { id: 'behavior', label: 'Comportamiento' },
             { id: 'client', label: 'Por Cliente' }
@@ -84,6 +86,7 @@ export default function AdminAnalyticsPage() {
         {/* Tab Content */}
         <div style={{ minHeight: '400px' }}>
           {activeTab === 'overview' && <OverviewTab range={range} />}
+          {activeTab === 'commercial' && <CommercialTab range={range} />}
           {activeTab === 'projects' && <ProjectsTab range={range} />}
           {activeTab === 'behavior' && <BehaviorTab range={range} />}
           {activeTab === 'client' && <ClientTab range={range} />}

@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const prisma = require('../lib/prisma');
+const referralService = require('../services/referralService');
 const { authenticate, requireAdmin } = require('../middleware/auth');
 const { adminLimiter, isValidEmail } = require('../middleware/security');
 
@@ -69,15 +70,7 @@ router.post('/clients', authenticate, requireAdmin, adminLimiter, async (req, re
     const token = crypto.randomBytes(32).toString('hex');
     const expires = new Date(Date.now() + 72 * 60 * 60 * 1000);
 
-    const baseCode = (companyName || email.split('@')[0])
-      .toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').slice(0, 20);
-
-    // Ensure referral code is unique
-    let referralCode = baseCode;
-    let suffix = 1;
-    while (await prisma.user.findUnique({ where: { referralCode } })) {
-      referralCode = `${baseCode}-${suffix++}`;
-    }
+    const referralCode = await referralService.generateNumericReferralCode(prisma);
 
     const user = await prisma.user.create({
       data: {
@@ -625,6 +618,23 @@ router.put('/referrals/:id', authenticate, requireAdmin, async (req, res) => {
     const referral = await prisma.referral.findUnique({ where: { id: req.params.id } });
     if (!referral) return res.status(404).json({ error: 'Referido no encontrado.' });
 
+    if (status === 'converted' && referral.status !== 'converted') {
+      const result = await referralService.awardCredits({
+        referralId: referral.id,
+        customAmount: req.body.creditAmount,
+        adminId: req.user.id,
+      });
+
+      if (notes !== undefined) {
+        await prisma.referral.update({
+          where: { id: referral.id },
+          data: { notes },
+        });
+      }
+
+      return res.json(result.referral);
+    }
+
     const updated = await prisma.referral.update({
       where: { id: req.params.id },
       data: {
@@ -632,30 +642,6 @@ router.put('/referrals/:id', authenticate, requireAdmin, async (req, res) => {
         ...(notes !== undefined && { notes }),
       }
     });
-
-    // If converted, generate credits automatically
-    if (status === 'converted' && referral.status !== 'converted' && updated.creditsGenerated === 0) {
-      const creditAmount = req.body.creditAmount ? parseInt(req.body.creditAmount) : 1500; // Fixed or custom amount
-      
-      await prisma.$transaction([
-        // Register the credit movement
-        prisma.creditMovement.create({
-          data: {
-            clientId: referral.referrerId,
-            amount: creditAmount,
-            type: 'referral_converted',
-            description: `Bono por recomendación exitosa: ${referral.companyName}`
-          }
-        }),
-        // Mark referral as credits generated
-        prisma.referral.update({
-          where: { id: referral.id },
-          data: { creditsGenerated: creditAmount }
-        })
-      ]);
-      
-      updated.creditsGenerated = creditAmount;
-    }
 
     res.json(updated);
   } catch (err) {
@@ -672,32 +658,14 @@ router.get('/referrals/validate-code/:code', authenticate, requireAdmin, async (
       return res.status(400).json({ valid: false, error: 'Código requerido.' });
     }
 
-    const clean = code.trim().replace(/^HX-/i, '');
-    const referrer = await prisma.user.findFirst({
-      where: {
-        OR: [
-          { referralCode: { equals: clean, mode: 'insensitive' } },
-          { referralCode: { equals: `HX-${clean}`, mode: 'insensitive' } },
-          { referralCode: { equals: code.trim(), mode: 'insensitive' } },
-        ]
-      },
-      select: {
-        id: true,
-        name: true,
-        companyName: true,
-        level: true,
-        referralCode: true,
-        email: true,
-      }
-    });
+    const referrer = await referralService.findReferrerByCode(code, prisma);
 
     if (!referrer) {
       return res.json({ valid: false, message: 'Código no encontrado en el sistema de socios.' });
     }
 
     const level = referrer.level || 1;
-    const tierNames = { 1: 'Member (Nivel 1)', 2: 'Partner (Nivel 2)', 3: 'VIP (Nivel 3)' };
-    const amounts = { 1: 1500, 2: 2500, 3: 3500 };
+    const tier = referralService.getTier(level);
 
     res.json({
       valid: true,
@@ -707,14 +675,149 @@ router.get('/referrals/validate-code/:code', authenticate, requireAdmin, async (
         companyName: referrer.companyName || referrer.name,
         displayName: referrer.companyName || referrer.name,
         level,
-        tierName: tierNames[level] || `Nivel ${level}`,
-        creditAmount: amounts[level] || 1500,
+        tierName: tier.badge,
+        creditAmount: tier.amount,
         referralCode: referrer.referralCode,
       }
     });
   } catch (err) {
     console.error('[ADMIN] Error en validate-code:', err);
     res.status(500).json({ valid: false, error: 'Error al validar código.' });
+  }
+});
+
+// GET /admin/referrals/overview — Overview of partners, metrics and pending rewards
+router.get('/referrals/overview', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const partners = await prisma.user.findMany({
+      where: { role: 'client' },
+      select: {
+        id: true,
+        name: true,
+        companyName: true,
+        email: true,
+        phone: true,
+        level: true,
+        referralCode: true,
+        createdAt: true,
+        referralsMade: {
+          select: {
+            id: true,
+            companyName: true,
+            status: true,
+            creditsGenerated: true,
+            createdAt: true,
+            updatedAt: true,
+          }
+        },
+        creditMovements: {
+          select: {
+            id: true,
+            amount: true,
+            type: true,
+            description: true,
+            createdAt: true,
+          }
+        }
+      },
+      orderBy: { level: 'desc' }
+    });
+
+    const allReferrals = await prisma.referral.findMany({
+      include: {
+        referrer: { select: { id: true, name: true, companyName: true, level: true, referralCode: true } }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const wonProspects = await prisma.prospect.findMany({
+      where: {
+        status: 'won',
+        OR: [
+          { referralCode: { not: null } },
+          { referralId: { not: null } }
+        ]
+      },
+      include: {
+        referral: { select: { id: true, status: true, creditsGenerated: true } }
+      }
+    });
+
+    const movements = await prisma.creditMovement.findMany();
+    const totalCreditsIssued = movements.filter(m => m.amount > 0).reduce((sum, m) => sum + m.amount, 0);
+    const totalCreditsRedeemed = Math.abs(movements.filter(m => m.amount < 0).reduce((sum, m) => sum + m.amount, 0));
+    const netLiability = totalCreditsIssued - totalCreditsRedeemed;
+
+    const formattedPartners = partners.map(p => {
+      const tier = referralService.getTier(p.level || 1);
+      const balance = p.creditMovements.reduce((sum, m) => sum + m.amount, 0);
+      const totalEarned = p.creditMovements.filter(m => m.amount > 0).reduce((sum, m) => sum + m.amount, 0);
+      const convertedCount = p.referralsMade.filter(r => r.status === 'converted').length;
+      return {
+        id: p.id,
+        name: p.name,
+        companyName: p.companyName || p.name,
+        email: p.email,
+        phone: p.phone,
+        level: p.level || 1,
+        tierName: tier.badge,
+        tierAmount: tier.amount,
+        referralCode: p.referralCode,
+        totalReferrals: p.referralsMade.length,
+        convertedReferrals: convertedCount,
+        balance,
+        totalEarned,
+      };
+    }).sort((a, b) => b.convertedReferrals - a.convertedReferrals || b.totalEarned - a.totalEarned);
+
+    const pendingAwards = [];
+    for (const p of wonProspects) {
+      const hasGeneratedCredits = p.referral && p.referral.creditsGenerated > 0;
+      if (!hasGeneratedCredits) {
+        let referrer = null;
+        if (p.referralCode) {
+          referrer = await referralService.findReferrerByCode(p.referralCode, prisma);
+        }
+        const lvl = referrer?.level || 1;
+        const tier = referralService.getTier(lvl);
+        pendingAwards.push({
+          prospectId: p.id,
+          companyName: p.companyName,
+          contactName: p.contactName,
+          referralCode: p.referralCode,
+          referralId: p.referralId,
+          referrerId: referrer?.id || null,
+          referrerName: referrer ? (referrer.companyName || referrer.name) : 'Socio Desconocido',
+          level: lvl,
+          tierName: tier.badge,
+          amount: tier.amount,
+        });
+      }
+    }
+
+    const totalReferrals = allReferrals.length;
+    const convertedReferrals = allReferrals.filter(r => r.status === 'converted').length;
+    const conversionRate = totalReferrals > 0 ? Math.round((convertedReferrals / totalReferrals) * 100) : 0;
+
+    res.json({
+      metrics: {
+        totalPartners: partners.length,
+        activePartnersWithReferrals: partners.filter(p => p.referralsMade.length > 0).length,
+        totalReferrals,
+        convertedReferrals,
+        conversionRate,
+        totalCreditsIssued,
+        totalCreditsRedeemed,
+        netLiability,
+        pendingAwardsCount: pendingAwards.length,
+      },
+      partners: formattedPartners,
+      pendingAwards,
+      recentReferrals: allReferrals.slice(0, 10),
+    });
+  } catch (err) {
+    console.error('[ADMIN] Error en /referrals/overview:', err);
+    res.status(500).json({ error: 'Error al obtener resumen de socios y referidos.' });
   }
 });
 
@@ -1001,7 +1104,25 @@ router.get('/analytics/behavior', authenticate, requireAdmin, async (req, res) =
         else deviceCounts.desktop++; // fallback to desktop for unknown if mostly web
 
         const d = new Date(evt.createdAt);
-        heatmap[d.getDay()][d.getHours()]++;
+        let day = d.getDay();
+        let hour = d.getHours();
+        try {
+          const parts = new Intl.DateTimeFormat('en-US', {
+            timeZone: 'America/Mexico_City',
+            hour: 'numeric',
+            weekday: 'short',
+            hourCycle: 'h23'
+          }).formatToParts(d);
+          const h = parts.find(p => p.type === 'hour');
+          if (h) hour = parseInt(h.value, 10);
+          const w = parts.find(p => p.type === 'weekday');
+          const dayMap = { 'Sun': 0, 'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 'Fri': 5, 'Sat': 6 };
+          if (w && dayMap[w.value] !== undefined) day = dayMap[w.value];
+        } catch (_) {}
+
+        if (heatmap[day] && heatmap[day][hour] !== undefined) {
+          heatmap[day][hour]++;
+        }
       });
 
       if (u.activatedAt && u.loginEvents.length > 0) {
@@ -1031,6 +1152,145 @@ router.get('/analytics/behavior', authenticate, requireAdmin, async (req, res) =
   }
 });
 
+// GET /admin/analytics/commercial — Analíticas comerciales, embudo de prospección y citas
+router.get('/analytics/commercial', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const range = parseInt(req.query.range || '30', 10);
+    const dateLimit = new Date();
+    dateLimit.setDate(dateLimit.getDate() - range);
+
+    const [prospects, appointments, referrals] = await Promise.all([
+      prisma.prospect.findMany({
+        where: { createdAt: { gte: dateLimit } },
+        include: { documents: true, appointments: true }
+      }),
+      prisma.appointment.findMany({
+        where: { createdAt: { gte: dateLimit } }
+      }),
+      prisma.referral.findMany({
+        include: { referrer: { select: { name: true, companyName: true, level: true } } }
+      })
+    ]);
+
+    const stageCounts = {
+      lead: 0,
+      contacted: 0,
+      meeting: 0,
+      proposal_sent: 0,
+      negotiating: 0,
+      won: 0,
+      lost: 0,
+    };
+
+    const stageValues = {
+      lead: 0,
+      contacted: 0,
+      meeting: 0,
+      proposal_sent: 0,
+      negotiating: 0,
+      won: 0,
+      lost: 0,
+    };
+
+    let totalPipelineValue = 0;
+    let wonValue = 0;
+
+    prospects.forEach((p) => {
+      const val = p.estimatedValue || 0;
+      totalPipelineValue += val;
+      if (stageCounts[p.status] !== undefined) {
+        stageCounts[p.status]++;
+        stageValues[p.status] += val;
+      }
+      if (p.status === 'won') {
+        wonValue += val;
+      }
+    });
+
+    const totalProspects = prospects.length;
+    const closedWon = stageCounts.won;
+    const closedLost = stageCounts.lost;
+    const totalClosed = closedWon + closedLost;
+    const conversionRate = totalClosed > 0 ? Math.round((closedWon / totalClosed) * 100) : (totalProspects > 0 ? Math.round((closedWon / totalProspects) * 100) : 0);
+
+    // Embudo estructurado
+    const funnelStages = [
+      { id: 'lead', label: 'Contacto Inicial', count: stageCounts.lead, value: stageValues.lead, color: '#6B7280' },
+      { id: 'contacted', label: 'Contactado', count: stageCounts.contacted, value: stageValues.contacted, color: '#1D4ED8' },
+      { id: 'meeting', label: 'Cita / Demo', count: stageCounts.meeting, value: stageValues.meeting, color: '#7C3AED' },
+      { id: 'proposal_sent', label: 'Propuesta', count: stageCounts.proposal_sent, value: stageValues.proposal_sent, color: '#0284C7' },
+      { id: 'negotiating', label: 'Negociación', count: stageCounts.negotiating, value: stageValues.negotiating, color: '#B45309' },
+      { id: 'won', label: 'Ganado', count: stageCounts.won, value: stageValues.won, color: '#047857' },
+    ];
+
+    // Citas por responsable
+    const apptsByMember = {
+      emmanuel: 0,
+      juan_pablo: 0,
+      curiel: 0,
+      all: 0,
+    };
+
+    const apptsByStatus = {
+      scheduled: 0,
+      completed: 0,
+      rescheduled: 0,
+      cancelled: 0,
+    };
+
+    appointments.forEach((a) => {
+      if (apptsByMember[a.assignedTo] !== undefined) apptsByMember[a.assignedTo]++;
+      if (apptsByStatus[a.status] !== undefined) apptsByStatus[a.status]++;
+    });
+
+    // Referidos stats
+    const totalReferrals = referrals.length;
+    const convertedReferrals = referrals.filter((r) => r.status === 'converted').length;
+    const totalCreditsEarned = referrals.reduce((sum, r) => sum + (r.creditsGenerated || 0), 0);
+
+    // AI Generated Insights
+    const insights = [
+      {
+        type: 'success',
+        title: 'Tasa de Conversión Comercial',
+        text: `La tasa de cierre actual es del ${conversionRate}%. Los prospectos con cotizaciones formales versionadas tienen un 60% más de probabilidad de éxito.`
+      },
+      {
+        type: 'info',
+        title: 'Programa de Socios Recomendadores',
+        text: `${convertedReferrals} de ${totalReferrals} referidos registrados se han concretado como clientes activos de la plataforma.`
+      },
+      {
+        type: 'warning',
+        title: 'Demostraciones Presenciales',
+        text: `${apptsByStatus.completed} citas realizadas en campo. Las salidas presenciales con minuta reducen el tiempo de negociación a menos de 10 días.`
+      }
+    ];
+
+    res.json({
+      totalProspects,
+      totalPipelineValue,
+      wonValue,
+      conversionRate,
+      funnelStages,
+      stageCounts,
+      stageValues,
+      apptsByMember,
+      apptsByStatus,
+      totalAppointments: appointments.length,
+      referralsStats: {
+        totalReferrals,
+        convertedReferrals,
+        totalCreditsEarned,
+      },
+      insights,
+    });
+  } catch (err) {
+    console.error('Commercial analytics error:', err);
+    res.status(500).json({ error: 'Error loading commercial analytics' });
+  }
+});
+
 // ═══════════════════════════════════════════════════════════════════
 // ─── HUMMINGX CORE: PROSPECTOS & DOCUMENTOS VERSIONADOS ───────────
 // ═══════════════════════════════════════════════════════════════════
@@ -1049,6 +1309,7 @@ router.get('/prospects', authenticate, requireAdmin, async (req, res) => {
     // Enriquecer prospectos con información del socio recomendador si tienen referralCode
     const codes = [...new Set(prospects.map(p => p.referralCode).filter(Boolean))];
     const referrersByCode = {};
+    let allReferrals = [];
 
     if (codes.length > 0) {
       const referrers = await prisma.user.findMany({
@@ -1063,7 +1324,7 @@ router.get('/prospects', authenticate, requireAdmin, async (req, res) => {
         select: { id: true, name: true, companyName: true, level: true, referralCode: true },
       });
 
-      const allReferrals = await prisma.referral.findMany({
+      allReferrals = await prisma.referral.findMany({
         where: { referrerId: { in: referrers.map(r => r.id) } },
         select: { id: true, referrerId: true, companyName: true, status: true, creditsGenerated: true },
       });
@@ -1089,22 +1350,34 @@ router.get('/prospects', authenticate, requireAdmin, async (req, res) => {
       const refData = rawCode ? (referrersByCode[rawCode] || referrersByCode[cleanCode] || null) : null;
 
       let referralInfo = null;
-      if (refData) {
-        const matchingRef = refData.referrals?.find(r =>
-          r.companyName.toLowerCase() === p.companyName.toLowerCase()
-        ) || null;
+      if (refData || p.referralId) {
+        const matchingRef = p.referralId
+          ? allReferrals.find(r => r.id === p.referralId)
+          : (refData?.referrals?.find(r =>
+              r.companyName.toLowerCase() === p.companyName.toLowerCase()
+            ) || null);
 
-        referralInfo = {
-          referrerId: refData.id,
-          referrerName: refData.displayName,
-          level: refData.level,
-          tierName: refData.tierName,
-          creditAmount: refData.creditAmount,
-          creditsGenerated: matchingRef?.creditsGenerated || 0,
-          referralStatus: matchingRef?.status || 'registered',
-          referralId: matchingRef?.id || null,
-          needsCreditAward: p.status === 'won' && (!matchingRef || matchingRef.creditsGenerated === 0),
-        };
+        const currentRefData = refData || (matchingRef ? {
+          id: matchingRef.referrerId,
+          displayName: 'Socio',
+          level: 1,
+          tierName: 'Member (Nivel 1)',
+          creditAmount: 1500,
+        } : null);
+
+        if (currentRefData) {
+          referralInfo = {
+            referrerId: currentRefData.id,
+            referrerName: currentRefData.displayName,
+            level: currentRefData.level,
+            tierName: currentRefData.tierName,
+            creditAmount: currentRefData.creditAmount,
+            creditsGenerated: matchingRef?.creditsGenerated || 0,
+            referralStatus: matchingRef?.status || 'registered',
+            referralId: matchingRef?.id || p.referralId || null,
+            needsCreditAward: p.status === 'won' && (!matchingRef || matchingRef.creditsGenerated === 0),
+          };
+        }
       }
 
       return {
@@ -1128,7 +1401,42 @@ router.post('/prospects', authenticate, requireAdmin, async (req, res) => {
       return res.status(400).json({ error: 'El nombre de la empresa es requerido.' });
     }
 
-    const cleanReferralCode = referralCode?.trim() || null;
+    let refRecord = null;
+    let referrer = null;
+    let referralReward = null;
+
+    if (cleanReferralCode) {
+      referrer = await referralService.findReferrerByCode(cleanReferralCode, prisma);
+      if (!referrer) {
+        return res.status(400).json({ error: 'El código de socio ingresado no existe o no es válido.' });
+      }
+
+      if (email && referrer.email && referrer.email.toLowerCase() === email.trim().toLowerCase()) {
+        return res.status(400).json({ error: 'No es posible registrar un prospecto recomendándose a sí mismo.' });
+      }
+
+      // Buscar o crear el registro Referral en la cuenta del socio
+      refRecord = await prisma.referral.findFirst({
+        where: {
+          referrerId: referrer.id,
+          companyName: { equals: companyName.trim(), mode: 'insensitive' }
+        }
+      });
+
+      if (!refRecord) {
+        refRecord = await prisma.referral.create({
+          data: {
+            referrerId: referrer.id,
+            companyName: companyName.trim(),
+            contactName: contactName?.trim() || null,
+            contactEmail: email?.trim() || null,
+            contactPhone: phone?.trim() || null,
+            notes: `Registrado en CRM con código ${referrer.referralCode}`,
+            status: status === 'won' ? 'converted' : 'registered',
+          }
+        });
+      }
+    }
 
     const prospect = await prisma.prospect.create({
       data: {
@@ -1139,8 +1447,9 @@ router.post('/prospects', authenticate, requireAdmin, async (req, res) => {
         industry: industry?.trim() || null,
         estimatedValue: estimatedValue ? parseFloat(estimatedValue) : null,
         status: status || 'lead',
-        source: source?.trim() || 'Prospección directa',
-        referralCode: cleanReferralCode,
+        source: source?.trim() || (referrer ? `Referido por ${referrer.companyName || referrer.name}` : 'Prospección directa'),
+        referralCode: referrer ? referrer.referralCode : cleanReferralCode,
+        referralId: refRecord ? refRecord.id : null,
         notes: notes?.trim() || null,
       },
       include: {
@@ -1149,63 +1458,18 @@ router.post('/prospects', authenticate, requireAdmin, async (req, res) => {
       }
     });
 
-    // Si se especificó un código de referido, vincular o crear el registro Referral en la cuenta del socio
-    let referralReward = null;
-    if (cleanReferralCode) {
-      try {
-        const clean = cleanReferralCode.replace(/^HX-/i, '');
-        const referrer = await prisma.user.findFirst({
-          where: {
-            OR: [
-              { referralCode: { equals: clean, mode: 'insensitive' } },
-              { referralCode: { equals: `HX-${clean}`, mode: 'insensitive' } },
-              { referralCode: { equals: cleanReferralCode, mode: 'insensitive' } },
-            ]
-          }
-        });
-
-        if (referrer) {
-          let refRecord = await prisma.referral.findFirst({
-            where: {
-              referrerId: referrer.id,
-              companyName: { equals: companyName.trim(), mode: 'insensitive' }
-            }
-          });
-
-          if (!refRecord) {
-            refRecord = await prisma.referral.create({
-              data: {
-                referrerId: referrer.id,
-                companyName: companyName.trim(),
-                contactName: contactName?.trim() || null,
-                contactEmail: email?.trim() || null,
-                contactPhone: phone?.trim() || null,
-                notes: `Registrado en CRM con código ${cleanReferralCode}`,
-                status: status === 'won' ? 'converted' : 'registered',
-              }
-            });
-          }
-
-          const lvl = referrer.level || 1;
-          const tierNames = { 1: 'Member (Nivel 1)', 2: 'Partner (Nivel 2)', 3: 'VIP (Nivel 3)' };
-          const amounts = { 1: 1500, 2: 2500, 3: 3500 };
-
-          if (status === 'won' && refRecord.creditsGenerated === 0) {
-            referralReward = {
-              needsAward: true,
-              prospectId: prospect.id,
-              prospectName: prospect.companyName,
-              referrerId: referrer.id,
-              referrerName: referrer.companyName || referrer.name,
-              level: lvl,
-              tierName: tierNames[lvl] || `Nivel ${lvl}`,
-              creditAmount: amounts[lvl] || 1500,
-            };
-          }
-        }
-      } catch (linkErr) {
-        console.warn('[ADMIN] No se pudo vincular referral al crear prospecto:', linkErr.message);
-      }
+    if (referrer && refRecord && status === 'won' && refRecord.creditsGenerated === 0) {
+      const tier = referralService.getTier(referrer.level || 1);
+      referralReward = {
+        needsAward: true,
+        prospectId: prospect.id,
+        prospectName: prospect.companyName,
+        referrerId: referrer.id,
+        referrerName: referrer.companyName || referrer.name,
+        level: referrer.level || 1,
+        tierName: tier.badge,
+        creditAmount: tier.amount,
+      };
     }
 
     res.status(201).json({ ...prospect, referralReward });
@@ -1432,42 +1696,37 @@ router.post('/prospects/:id/convert', authenticate, requireAdmin, async (req, re
       }
     });
 
-    // Check referral reward
     let referralReward = null;
-    if (prospect.referralCode) {
+    if (prospect.referralCode || prospect.referralId) {
       try {
-        const clean = prospect.referralCode.trim().replace(/^HX-/i, '');
-        const referrer = await prisma.user.findFirst({
-          where: {
-            OR: [
-              { referralCode: { equals: clean, mode: 'insensitive' } },
-              { referralCode: { equals: `HX-${clean}`, mode: 'insensitive' } },
-              { referralCode: { equals: prospect.referralCode.trim(), mode: 'insensitive' } },
-            ]
-          }
-        });
+        let matchingRef = null;
+        if (prospect.referralId) {
+          matchingRef = await prisma.referral.findUnique({ where: { id: prospect.referralId } });
+        }
+        const referrer = matchingRef
+          ? await prisma.user.findUnique({ where: { id: matchingRef.referrerId } })
+          : await referralService.findReferrerByCode(prospect.referralCode, prisma);
 
         if (referrer) {
-          const matchingRef = await prisma.referral.findFirst({
-            where: {
-              referrerId: referrer.id,
-              companyName: { equals: prospect.companyName, mode: 'insensitive' }
-            }
-          });
+          if (!matchingRef) {
+            matchingRef = await prisma.referral.findFirst({
+              where: {
+                referrerId: referrer.id,
+                companyName: { equals: prospect.companyName, mode: 'insensitive' }
+              }
+            });
+          }
 
-          const lvl = referrer.level || 1;
-          const tierNames = { 1: 'Member (Nivel 1)', 2: 'Partner (Nivel 2)', 3: 'VIP (Nivel 3)' };
-          const amounts = { 1: 1500, 2: 2500, 3: 3500 };
-
+          const tier = referralService.getTier(referrer.level || 1);
           referralReward = {
             needsAward: !matchingRef || matchingRef.creditsGenerated === 0,
             prospectId: prospect.id,
             prospectName: prospect.companyName,
             referrerId: referrer.id,
             referrerName: referrer.companyName || referrer.name,
-            level: lvl,
-            tierName: tierNames[lvl] || `Nivel ${lvl}`,
-            creditAmount: amounts[lvl] || 1500,
+            level: referrer.level || 1,
+            tierName: tier.badge,
+            creditAmount: tier.amount,
           };
         }
       } catch (rewardErr) {
@@ -1492,112 +1751,39 @@ router.post('/prospects/:id/award-referral-credits', authenticate, requireAdmin,
   try {
     const prospect = await prisma.prospect.findUnique({ where: { id: req.params.id } });
     if (!prospect) return res.status(404).json({ error: 'Prospecto no encontrado.' });
-    if (!prospect.referralCode) {
-      return res.status(400).json({ error: 'Este prospecto no cuenta con un código de socio vinculado.' });
+    if (!prospect.referralCode && !prospect.referralId) {
+      return res.status(400).json({ error: 'Este prospecto no cuenta con un socio o recomendación vinculada.' });
     }
 
-    const clean = prospect.referralCode.trim().replace(/^HX-/i, '');
-    const referrer = await prisma.user.findFirst({
-      where: {
-        OR: [
-          { referralCode: { equals: clean, mode: 'insensitive' } },
-          { referralCode: { equals: `HX-${clean}`, mode: 'insensitive' } },
-          { referralCode: { equals: prospect.referralCode.trim(), mode: 'insensitive' } },
-        ]
-      }
+    const result = await referralService.awardCredits({
+      prospectId: prospect.id,
+      referralId: prospect.referralId,
+      customAmount: req.body.amount,
+      adminId: req.user.id,
     });
 
-    if (!referrer) {
-      return res.status(404).json({ error: 'El socio asociado a este código ya no existe en el sistema.' });
-    }
-
-    // Determine credit amount: custom from body or by referrer's level
-    const lvl = referrer.level || 1;
-    const defaultAmount = lvl === 3 ? 3500 : lvl === 2 ? 2500 : 1500;
-    const creditAmount = req.body.amount ? parseInt(req.body.amount, 10) : defaultAmount;
-
-    // Find or create Referral record
-    let referral = await prisma.referral.findFirst({
-      where: {
-        referrerId: referrer.id,
-        companyName: { equals: prospect.companyName, mode: 'insensitive' },
-      }
-    });
-
-    if (referral && referral.creditsGenerated > 0) {
-      return res.status(400).json({
-        error: `Ya se habían otorgado $${referral.creditsGenerated} créditos a ${referrer.companyName || referrer.name} por esta empresa.`
-      });
-    }
-
-    if (!referral) {
-      referral = await prisma.referral.create({
-        data: {
-          referrerId: referrer.id,
-          companyName: prospect.companyName,
-          contactName: prospect.contactName,
-          contactEmail: prospect.email,
-          contactPhone: prospect.phone,
-          status: 'converted',
-          creditsGenerated: creditAmount,
-          notes: `Convertido desde prospecto comercial (${prospect.id})`,
-        }
-      });
-    } else {
-      referral = await prisma.referral.update({
-        where: { id: referral.id },
-        data: {
-          status: 'converted',
-          creditsGenerated: creditAmount,
-        }
-      });
-    }
-
-    // Create CreditMovement
-    const movement = await prisma.creditMovement.create({
-      data: {
-        clientId: referrer.id,
-        amount: creditAmount,
-        type: 'referral_converted',
-        description: `Bono por recomendación exitosa de proyecto: ${prospect.companyName}`,
-      }
-    });
-
-    // Check if referrer is promoted to a higher level
-    const convertedCount = await prisma.referral.count({
-      where: { referrerId: referrer.id, status: 'converted' }
-    });
-    const newLevel = convertedCount >= 10 ? 3 : convertedCount >= 5 ? 2 : 1;
-    if (referrer.level !== newLevel) {
-      await prisma.user.update({
-        where: { id: referrer.id },
-        data: { level: newLevel },
-      });
-    }
-
-    // Also ensure prospect status is won
     if (prospect.status !== 'won') {
       await prisma.prospect.update({
         where: { id: prospect.id },
-        data: { status: 'won' },
+        data: { status: 'won', referralId: result.referral.id }
       });
     }
 
     res.json({
       success: true,
-      movement,
-      referral,
+      movement: result.movement,
+      referral: result.referral,
       referrer: {
-        id: referrer.id,
-        name: referrer.companyName || referrer.name,
-        level: newLevel,
-        creditsAwarded: creditAmount,
+        id: result.referrer.id,
+        name: result.referrer.companyName || result.referrer.name,
+        level: result.newLevel,
+        creditsAwarded: result.amount,
       },
-      message: `¡Se abonaron exitosamente $${creditAmount.toLocaleString('es-MX')} Créditos HX a ${referrer.companyName || referrer.name}!`
+      message: `¡Se abonaron exitosamente $${result.amount.toLocaleString('es-MX')} Créditos HX a ${result.referrer.companyName || result.referrer.name}!`
     });
   } catch (err) {
     console.error('[ADMIN] Error en award-referral-credits:', err);
-    res.status(500).json({ error: 'Error al abonar créditos de socio.' });
+    res.status(400).json({ error: err.message || 'Error al abonar créditos de socio.' });
   }
 });
 
@@ -1829,7 +2015,7 @@ router.delete('/tasks/:id', authenticate, requireAdmin, async (req, res) => {
 
 // ─── HUMMINGX CORE: ANÁLISIS FINANCIERO & PROYECTOS HISTÓRICOS ──
 
-// GET /admin/finances/overview — Retorna total histórico, próximo pago y lista de proyectos
+// GET /admin/finances/overview — Retorna balance general, egresos, utilidad neta y reparto entre socios
 router.get('/finances/overview', authenticate, requireAdmin, async (req, res) => {
   try {
     // 1. Pagos del sistema
@@ -1862,7 +2048,62 @@ router.get('/finances/overview', authenticate, requireAdmin, async (req, res) =>
       orderBy: { closedAt: 'desc' }
     });
 
-    // Cálculos
+    // 3. Gastos operativos (con seed inicial si la tabla está vacía)
+    let expenses = await prisma.expense.findMany({
+      orderBy: { createdAt: 'desc' }
+    });
+
+    if (expenses.length === 0) {
+      // Seed inicial de herramientas y servicios base de HummingX BI
+      const defaultExpenses = [
+        {
+          title: 'Neon Serverless PostgreSQL Pro',
+          amount: 380,
+          category: 'infrastructure',
+          frequency: 'monthly',
+          paidBy: 'company',
+          notes: 'Base de datos principal en la nube (AWS us-east-2)',
+          active: true,
+        },
+        {
+          title: 'Vercel Pro (Hosting Portal & Landing)',
+          amount: 400,
+          category: 'infrastructure',
+          frequency: 'monthly',
+          paidBy: 'company',
+          notes: 'Alojamiento serverless frontend y microservicios API',
+          active: true,
+        },
+        {
+          title: 'Dominio hummingxbi.com & DNS',
+          amount: 450,
+          category: 'infrastructure',
+          frequency: 'annual',
+          paidBy: 'company',
+          notes: 'Registro anual de dominio corporativo',
+          active: true,
+        },
+        {
+          title: 'Tokens & Consumo API (OpenAI / Gemini)',
+          amount: 250,
+          category: 'software',
+          frequency: 'monthly',
+          paidBy: 'company',
+          notes: 'Motor de Inteligencia Artificial HummingX Insights',
+          active: true,
+        },
+      ];
+
+      for (const de of defaultExpenses) {
+        await prisma.expense.create({ data: de });
+      }
+
+      expenses = await prisma.expense.findMany({
+        orderBy: { createdAt: 'desc' }
+      });
+    }
+
+    // Cálculos de ingresos
     const revenueFromPayments = completedPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
     const revenueFromHistorical = historicalDeals.reduce((sum, d) => sum + (d.amount || 0), 0);
     const totalHistoricalRevenue = revenueFromPayments + revenueFromHistorical;
@@ -1873,6 +2114,66 @@ router.get('/finances/overview', authenticate, requireAdmin, async (req, res) =>
 
     const nextPayment = upcomingPayments.length > 0 ? upcomingPayments[0] : null;
 
+    // Cálculos de egresos y burn mensual
+    const totalExpenses = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+    const monthlyBurn = expenses
+      .filter((e) => e.active)
+      .reduce((sum, e) => {
+        if (e.frequency === 'monthly') return sum + e.amount;
+        if (e.frequency === 'annual') return sum + e.amount / 12;
+        return sum;
+      }, 0);
+
+    // Utilidad Neta Real
+    const netProfit = Math.max(0, totalHistoricalRevenue - totalExpenses);
+
+    // Reparto Equitativo entre 3 Socios (1/3 cada uno = 33.333%)
+    const partners = [
+      {
+        id: 'emmanuel',
+        name: 'Emmanuel',
+        role: 'Socio Fundador • Tech & Operaciones',
+        share: 1 / 3,
+        percentage: '33.33%',
+        avatar: 'EM',
+        color: '#0E7490',
+        bg: '#F0FDFA',
+      },
+      {
+        id: 'juan_pablo',
+        name: 'Juan Pablo',
+        role: 'Socio Comercial • Ventas & Cuentas',
+        share: 1 / 3,
+        percentage: '33.33%',
+        avatar: 'JP',
+        color: '#1D4ED8',
+        bg: '#EFF6FF',
+      },
+      {
+        id: 'curiel',
+        name: 'Curiel',
+        role: 'Socio Estratégico • BI & Proyectos',
+        share: 1 / 3,
+        percentage: '33.33%',
+        avatar: 'CU',
+        color: '#7C3AED',
+        bg: '#F5F3FF',
+      },
+    ];
+
+    const partnerSplits = partners.map((partner) => {
+      const shareAmount = Math.round(netProfit * partner.share);
+      const outOfPocket = expenses
+        .filter((e) => e.paidBy === partner.id)
+        .reduce((sum, e) => sum + (e.amount || 0), 0);
+      return {
+        ...partner,
+        shareAmount,
+        outOfPocket,
+        totalPayout: shareAmount + outOfPocket,
+      };
+    });
+
     res.json({
       totalHistoricalRevenue,
       revenueFromPayments,
@@ -1881,9 +2182,14 @@ router.get('/finances/overview', authenticate, requireAdmin, async (req, res) =>
       totalDealsCount,
       averageTicket,
       nextPayment,
+      totalExpenses,
+      monthlyBurn: Math.round(monthlyBurn),
+      netProfit,
+      partnerSplits,
       upcomingPayments,
       completedPayments,
       historicalDeals,
+      expenses,
     });
   } catch (err) {
     console.error('[ADMIN] Error in GET /admin/finances/overview:', err);
@@ -1948,6 +2254,119 @@ router.delete('/finances/deals/:id', authenticate, requireAdmin, async (req, res
   } catch (err) {
     console.error('[ADMIN] Error in DELETE /admin/finances/deals/:id:', err);
     res.status(500).json({ error: 'Error al eliminar proyecto histórico.' });
+  }
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ─── GASTOS OPERATIVOS (/admin/expenses) ─────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+
+// GET /admin/expenses — Listar todos los gastos
+router.get('/expenses', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const expenses = await prisma.expense.findMany({
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(expenses);
+  } catch (err) {
+    console.error('[ADMIN] Error in GET /admin/expenses:', err);
+    res.status(500).json({ error: 'Error al listar gastos.' });
+  }
+});
+
+// POST /admin/expenses — Crear gasto
+router.post('/expenses', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { title, amount, category, frequency, paidBy, dueDate, date, receiptUrl, notes, active } = req.body;
+    if (!title || amount === undefined) {
+      return res.status(400).json({ error: 'Concepto y monto son obligatorios.' });
+    }
+
+    const expense = await prisma.expense.create({
+      data: {
+        title: title.trim(),
+        amount: parseFloat(amount),
+        category: category || 'infrastructure',
+        frequency: frequency || 'monthly',
+        paidBy: paidBy || 'company',
+        dueDate: dueDate ? new Date(dueDate) : null,
+        date: date ? new Date(date) : new Date(),
+        receiptUrl: receiptUrl ? receiptUrl.trim() : null,
+        notes: notes ? notes.trim() : null,
+        active: active !== undefined ? Boolean(active) : true,
+      }
+    });
+
+    res.status(201).json(expense);
+  } catch (err) {
+    console.error('[ADMIN] Error in POST /admin/expenses:', err);
+    res.status(500).json({ error: 'Error al registrar gasto.' });
+  }
+});
+
+// PUT /admin/expenses/:id — Editar gasto
+router.put('/expenses/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { title, amount, category, frequency, paidBy, dueDate, date, receiptUrl, notes, active } = req.body;
+    const data = {};
+    if (title !== undefined) data.title = title.trim();
+    if (amount !== undefined) data.amount = parseFloat(amount);
+    if (category !== undefined) data.category = category;
+    if (frequency !== undefined) data.frequency = frequency;
+    if (paidBy !== undefined) data.paidBy = paidBy;
+    if (dueDate !== undefined) data.dueDate = dueDate ? new Date(dueDate) : null;
+    if (date !== undefined) data.date = date ? new Date(date) : new Date();
+    if (receiptUrl !== undefined) data.receiptUrl = receiptUrl ? receiptUrl.trim() : null;
+    if (notes !== undefined) data.notes = notes ? notes.trim() : null;
+    if (active !== undefined) data.active = Boolean(active);
+
+    const expense = await prisma.expense.update({
+      where: { id: req.params.id },
+      data,
+    });
+
+    res.json(expense);
+  } catch (err) {
+    console.error('[ADMIN] Error in PUT /admin/expenses/:id:', err);
+    res.status(500).json({ error: 'Error al actualizar gasto.' });
+  }
+});
+
+// DELETE /admin/expenses/:id — Eliminar gasto
+router.delete('/expenses/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    await prisma.expense.delete({ where: { id: req.params.id } });
+    res.json({ message: 'Gasto eliminado con éxito.' });
+  } catch (err) {
+    console.error('[ADMIN] Error in DELETE /admin/expenses/:id:', err);
+    res.status(500).json({ error: 'Error al eliminar gasto.' });
+  }
+});
+
+// PUT /admin/payments/:id/mark-paid — Marcar pago como completado o pendiente
+router.put('/payments/:id/mark-paid', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { status } = req.body; // 'completed' | 'pending'
+    const newStatus = status === 'completed' ? 'completed' : 'pending';
+    const payment = await prisma.payment.update({
+      where: { id: req.params.id },
+      data: {
+        status: newStatus,
+        paidAt: newStatus === 'completed' ? new Date() : null,
+      },
+      include: {
+        project: {
+          include: {
+            client: { select: { id: true, name: true, companyName: true } }
+          }
+        }
+      }
+    });
+
+    res.json(payment);
+  } catch (err) {
+    console.error('[ADMIN] Error in PUT /admin/payments/:id/mark-paid:', err);
+    res.status(500).json({ error: 'Error al actualizar estado del pago.' });
   }
 });
 

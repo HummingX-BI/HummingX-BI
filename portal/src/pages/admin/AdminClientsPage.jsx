@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
-import Layout from '../../components/Layout';
+import Layout, { getToast } from '../../components/Layout';
 import { SkeletonTableRow } from '../../components/Skeleton';
 import api from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
-import { Search, Plus, Building2, ChevronRight, UserPlus, FileText, X, Users, FolderKanban, TrendingUp, CreditCard, Mail, AlertTriangle, CheckCircle2, Trash2, Eye } from 'lucide-react';
+import { Search, Plus, Building2, ChevronRight, UserPlus, FileText, X, Users, FolderKanban, TrendingUp, CreditCard, Mail, AlertTriangle, CheckCircle2, Trash2, Eye, Copy } from 'lucide-react';
 
 export default function AdminClientsPage() {
   const navigate = useNavigate();
@@ -416,6 +416,50 @@ export default function AdminClientsPage() {
                           </div>
                           {client.companyName && (
                             <div style={{ fontSize: '12px', color: '#6B7280' }}>Rep: {client.name}</div>
+                          )}
+                          {client.referralCode && (
+                            <div style={{ marginTop: '4px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                              <span
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  padding: '2px 6px',
+                                  background: '#F3F4F6',
+                                  border: '1px solid #E5E7EB',
+                                  borderRadius: '4px',
+                                  fontSize: '11px',
+                                  fontFamily: 'monospace',
+                                  fontWeight: 600,
+                                  color: '#374151',
+                                }}
+                              >
+                                Cód. {client.referralCode}
+                                <button
+                                  type="button"
+                                  title="Copiar código"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigator.clipboard.writeText(client.referralCode);
+                                    getToast()?.success('Copiado', `Código ${client.referralCode} copiado`);
+                                  }}
+                                  style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    padding: '1px 2px',
+                                    cursor: 'pointer',
+                                    color: '#6B7280',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                  }}
+                                >
+                                  <Copy size={11} />
+                                </button>
+                              </span>
+                              {!/^\d{5,6}$/.test(String(client.referralCode)) && (
+                                <span style={{ fontSize: '10px', color: '#9CA3AF' }}>(código anterior)</span>
+                              )}
+                            </div>
                           )}
                         </div>
                       </div>

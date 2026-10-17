@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import api from '../../lib/api';
 import ProspectDrawer from './prospects/ProspectDrawer';
@@ -59,6 +59,7 @@ const DOC_TYPES = {
 
 export default function AdminProspectsPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   // Navigation tabs & views
   const [activeTab, setActiveTab] = useState('pipeline'); // 'pipeline' | 'partners'
@@ -70,6 +71,7 @@ export default function AdminProspectsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [highlightedId, setHighlightedId] = useState(null);
 
   // Modal states
   const [showProspectModal, setShowProspectModal] = useState(false);
@@ -156,6 +158,28 @@ export default function AdminProspectsPage() {
   useEffect(() => {
     fetchProspects();
   }, []);
+
+  useEffect(() => {
+    const hl = searchParams.get('highlight');
+    if (hl && prospects.length > 0) {
+      setStatusFilter('all');
+      setSearchTerm('');
+      setHighlightedId(hl);
+      const timer = setTimeout(() => {
+        const el = document.getElementById(`prospect-${hl}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 150);
+      const clearTimer = setTimeout(() => {
+        setHighlightedId(null);
+      }, 3000);
+      return () => {
+        clearTimeout(timer);
+        clearTimeout(clearTimer);
+      };
+    }
+  }, [searchParams, prospects]);
 
   const showNotification = (msg) => {
     setToastMessage(msg);
@@ -818,12 +842,14 @@ export default function AdminProspectsPage() {
                 convertingId={convertingId}
                 onEdit={openEditProspectModal}
                 onDelete={handleDeleteProspect}
+                highlightedId={highlightedId}
               />
             ) : (
               <ProspectKanban
                 prospects={filteredProspects}
                 onSelectProspect={setSelectedProspect}
                 onChangeStage={handleChangeStage}
+                highlightedId={highlightedId}
               />
             )}
           </>

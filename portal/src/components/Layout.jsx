@@ -5,6 +5,7 @@ import { Tour, useTour } from './ui/product-tour';
 import Sidebar from './Sidebar';
 import { ToastContainer } from './Toast';
 import { useToast } from '../lib/useToast';
+import NewReferralsNotice from './NewReferralsNotice';
 import { ChevronRight, Menu } from 'lucide-react';
 
 // Expose a global toast emitter so any component can call it without prop drilling
@@ -219,6 +220,9 @@ export default function Layout({ children, customBreadcrumbLabel, fullWidth = fa
 
       {/* Global Toast Container */}
       <ToastContainer toasts={toast.toasts} onDismiss={toast.dismiss} />
+
+      {/* Admin Notice for New Referrals */}
+      {user?.role === 'admin' && !isImpersonating && <NewReferralsNotice />}
     </div>
   );
 }

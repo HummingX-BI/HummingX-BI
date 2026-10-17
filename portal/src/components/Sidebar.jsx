@@ -30,11 +30,35 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
   const location = useLocation();
   const [clients, setClients] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [newReferralsCount, setNewReferralsCount] = useState(0);
 
   const isAdminRoute = location.pathname.startsWith('/admin');
 
   // Close drawer on route change
   useEffect(() => { onClose(); }, [location.pathname]);
+
+  // Sync new referrals count for CRM badge
+  useEffect(() => {
+    const handleCount = (e) => {
+      if (typeof e.detail?.count === 'number') {
+        setNewReferralsCount(e.detail.count);
+      }
+    };
+    window.addEventListener('hx:new-referrals-count', handleCount);
+
+    if (isAdminRoute) {
+      try {
+        const since = localStorage.getItem('hx_ref_seen') || '';
+        api.get(since ? `/admin/referrals/new?since=${encodeURIComponent(since)}` : '/admin/referrals/new')
+          .then(res => {
+            if (res.data?.count !== undefined) setNewReferralsCount(res.data.count);
+          })
+          .catch(() => {});
+      } catch {}
+    }
+
+    return () => window.removeEventListener('hx:new-referrals-count', handleCount);
+  }, [location.pathname, isAdminRoute]);
 
   // Fetch admin client list
   useEffect(() => {
@@ -196,6 +220,21 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
                 >
                   <Icon size={17} />
                   <span style={{ flex: 1 }}>{label}</span>
+                  {to === '/admin/prospects' && newReferralsCount > 0 && (
+                    <span style={{
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      background: '#00C4CC',
+                      color: '#0D1527',
+                      padding: '1px 6px',
+                      borderRadius: '9999px',
+                      minWidth: '18px',
+                      textAlign: 'center',
+                      lineHeight: '16px'
+                    }}>
+                      {newReferralsCount}
+                    </span>
+                  )}
                   {isDev && (
                     <span style={{
                       fontSize: '10px', background: 'rgba(255,255,255,0.1)',

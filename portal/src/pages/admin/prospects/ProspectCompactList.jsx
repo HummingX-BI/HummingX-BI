@@ -30,6 +30,7 @@ export default function ProspectCompactList({
   convertingId,
   onEdit,
   onDelete,
+  highlightedId,
 }) {
   return (
     <div
@@ -74,6 +75,7 @@ export default function ProspectCompactList({
           const docsCount = p.documents?.length || 0;
           const apptsCount = p.appointments?.length || 0;
           const isWon = p.status === 'won';
+          const isHighlighted = highlightedId === p.id;
 
           const rawPhone = (p.phone || '').replace(/[^0-9]/g, '');
           const cleanPhone = rawPhone.length === 10 ? `52${rawPhone}` : rawPhone;
@@ -84,6 +86,7 @@ export default function ProspectCompactList({
           return (
             <div
               key={p.id}
+              id={`prospect-${p.id}`}
               onClick={() => onSelectProspect(p)}
               style={{
                 display: 'grid',
@@ -93,10 +96,12 @@ export default function ProspectCompactList({
                 gap: '12px',
                 alignItems: 'center',
                 cursor: 'pointer',
-                transition: 'background 0.15s ease',
+                background: isHighlighted ? '#FEF3C7' : '#FFFFFF',
+                boxShadow: isHighlighted ? 'inset 0 0 0 2px #F59E0B' : 'none',
+                transition: 'background 0.5s ease, box-shadow 0.5s ease',
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = '#F8FAFC'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = '#FFFFFF'; }}
+              onMouseEnter={(e) => { if (!isHighlighted) e.currentTarget.style.background = '#F8FAFC'; }}
+              onMouseLeave={(e) => { if (!isHighlighted) e.currentTarget.style.background = '#FFFFFF'; }}
             >
               {/* Empresa & Giro */}
               <div style={{ minWidth: 0 }}>
@@ -218,7 +223,7 @@ export default function ProspectCompactList({
                   >
                     <Award size={12} />
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {p.referralInfo.referrerName}
+                      Socio: {p.referralInfo.referrerName}{p.referralCode ? ` · Cód. ${p.referralCode}` : ''}
                     </span>
                   </span>
                 ) : (

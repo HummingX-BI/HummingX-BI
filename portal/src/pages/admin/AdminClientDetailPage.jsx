@@ -1,16 +1,17 @@
 import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import api from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import { fmtDuration } from '../../lib/format';
 import { useToast } from '../../lib/useToast';
 import { ToastContainer } from '../../components/Toast';
+import ReferralsTab from './client-detail/ReferralsTab';
 import { 
   ArrowLeft, User, Mail, Phone, Building, Save, FolderOpen, AlertCircle,
   ClipboardList, Paintbrush, Code2, Search, Rocket, CheckCircle, CheckCircle2, Activity,
-  Plus, Trash2, Calendar, X, Users, DollarSign, Clock, Edit2, Sparkles, Check, Eye, Award
+  Plus, Trash2, Calendar, X, Users, DollarSign, Clock, Edit2, Sparkles, Check, Eye, Award, Copy
 } from 'lucide-react';
 
 const PHASES = [
@@ -41,6 +42,8 @@ const formatSafeDate = (dateVal) => {
 export default function AdminClientDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const currentTab = searchParams.get('tab') || 'general';
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [clientData, setClientData] = useState({});
@@ -638,6 +641,47 @@ export default function AdminClientDetailPage() {
             <div style={{ minWidth: 0, flex: 1 }}>
               <h1 style={{ fontSize: 'clamp(20px, 4vw, 24px)', fontWeight: 700, color: '#111827', margin: '0 0 2px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                 {client.companyName || client.name}
+                {client.referralCode && (
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '4px 10px',
+                      background: '#F3F4F6',
+                      border: '1px solid #E5E7EB',
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                      fontFamily: 'monospace',
+                      fontWeight: 600,
+                      color: '#374151',
+                    }}
+                  >
+                    Cód. {client.referralCode}
+                    <button
+                      type="button"
+                      title="Copiar código"
+                      onClick={() => {
+                        navigator.clipboard.writeText(client.referralCode);
+                        toast.success('Copiado', `Código ${client.referralCode} copiado al portapapeles`);
+                      }}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        padding: '2px',
+                        cursor: 'pointer',
+                        color: '#6B7280',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <Copy size={13} />
+                    </button>
+                    {!/^\d{5,6}$/.test(String(client.referralCode)) && (
+                      <span style={{ fontSize: '11px', color: '#9CA3AF', fontFamily: 'sans-serif', fontWeight: 400 }}>(código anterior)</span>
+                    )}
+                  </span>
+                )}
               </h1>
               {client.companyName && client.companyName !== client.name && (
                 <p style={{ color: '#4B5563', fontSize: '15px', margin: '0 0 2px', fontWeight: 500 }}>
@@ -731,7 +775,65 @@ export default function AdminClientDetailPage() {
           </div>
         </div>
 
-        <div className="admin-detail-grid-3">
+        {/* Tab switcher: General | Referidos */}
+        <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid #E5E7EB', margin: '20px 0 24px' }}>
+          <button
+            type="button"
+            onClick={() => setSearchParams({ tab: 'general' })}
+            style={{
+              padding: '10px 16px',
+              fontSize: '14px',
+              fontWeight: currentTab !== 'referrals' ? 700 : 500,
+              color: currentTab !== 'referrals' ? '#111827' : '#6B7280',
+              borderTop: 'none',
+              borderLeft: 'none',
+              borderRight: 'none',
+              borderBottom: currentTab !== 'referrals' ? '2px solid #00C4CC' : '2px solid transparent',
+              background: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            General
+          </button>
+          <button
+            type="button"
+            onClick={() => setSearchParams({ tab: 'referrals' })}
+            style={{
+              padding: '10px 16px',
+              fontSize: '14px',
+              fontWeight: currentTab === 'referrals' ? 700 : 500,
+              color: currentTab === 'referrals' ? '#111827' : '#6B7280',
+              borderTop: 'none',
+              borderLeft: 'none',
+              borderRight: 'none',
+              borderBottom: currentTab === 'referrals' ? '2px solid #00C4CC' : '2px solid transparent',
+              background: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            Referidos ({client.referralsMade?.length || 0})
+          </button>
+        </div>
+
+        {currentTab === 'referrals' ? (
+          <ReferralsTab
+            client={client}
+            onRefresh={fetchClient}
+            onOpenAwardModal={(ref) => {
+              const defaultTierAmount = client?.level === 3 ? 3500 : client?.level === 2 ? 2500 : 1500;
+              setRewardModalData({
+                referralId: ref.id,
+                companyName: ref.companyName || 'Empresa Recomendada',
+                defaultTierAmount,
+              });
+              setUseCustomReward(false);
+              setCustomRewardAmount('');
+            }}
+            toast={toast}
+          />
+        ) : (
+          <>
+            <div className="admin-detail-grid-3">
 
           {/* Client Details Form */}
           <div className="card responsive-card-p" style={{ padding: '28px' }}>
@@ -983,74 +1085,6 @@ export default function AdminClientDetailPage() {
                 </>
               )}
             </div>
-
-          {/* Referrals & Credits Control */}
-          <div className="card responsive-card-p" style={{ padding: '28px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111827', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Users size={16} color="#6B7280" /> Desempeño y Referidos
-            </h3>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
-              <div style={{ background: '#F9FAFB', padding: '16px', borderRadius: '12px', border: '1px solid #E5E7EB' }}>
-                <span style={{ fontSize: '12px', color: '#6B7280', display: 'block', marginBottom: '4px' }}>Créditos Actuales</span>
-                <span style={{ fontSize: '24px', fontWeight: 700, color: '#111827' }}>${client.totalCredits?.toLocaleString() || 0}</span>
-              </div>
-              <div style={{ background: '#F9FAFB', padding: '16px', borderRadius: '12px', border: '1px solid #E5E7EB' }}>
-                <span style={{ fontSize: '12px', color: '#6B7280', display: 'block', marginBottom: '4px' }}>Referidos</span>
-                <span style={{ fontSize: '24px', fontWeight: 700, color: '#111827' }}>{client.referralsMade?.length || 0}</span>
-              </div>
-            </div>
-
-            <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#374151', margin: '0 0 12px' }}>Ajustar Saldo (Créditos)</h4>
-            <form onSubmit={handleAdjustCredits} style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
-              <input type="number" className="hx-input" placeholder="Monto (ej. 500 o -500)" value={creditAmount} onChange={e => setCreditAmount(e.target.value)} style={{ flex: 1 }} required />
-              <button type="submit" className="btn-secondary" style={{ padding: '0 16px' }} disabled={adjustingCredits}>
-                {adjustingCredits ? '...' : 'Aplicar'}
-              </button>
-            </form>
-
-            <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#374151', margin: '0 0 12px' }}>Lista de Referidos</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {(!client.referralsMade || client.referralsMade.length === 0) ? (
-                <p style={{ fontSize: '13px', color: '#9CA3AF', margin: 0 }}>No ha recomendado a nadie aún.</p>
-              ) : (
-                client.referralsMade.map(ref => (
-                  <div key={ref.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', padding: '12px 14px', background: '#F9FAFB', borderRadius: '10px', border: '1px solid #E5E7EB' }}>
-                    <div style={{ flex: 1 }}>
-                      <span style={{ fontSize: '13.5px', fontWeight: 700, color: '#111827', display: 'block' }}>{ref.companyName}</span>
-                      <div style={{ fontSize: '11.5px', color: '#4B5563', display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '2px' }}>
-                        {ref.contactName && <span style={{ fontWeight: 500 }}>{ref.contactName}</span>}
-                        {ref.contactPhone && <span>• Tel: {ref.contactPhone}</span>}
-                        {ref.contactEmail && <span>• {ref.contactEmail}</span>}
-                      </div>
-                      {ref.notes && (
-                        <div style={{ fontSize: '11.5px', color: '#4B5563', fontStyle: 'italic', marginTop: '4px', background: '#FFFFFF', padding: '4px 8px', borderRadius: '6px', border: '1px solid #E5E7EB' }}>
-                          "{ref.notes}"
-                        </div>
-                      )}
-                      {ref.creditsGenerated > 0 && (
-                        <span style={{ display: 'inline-block', marginTop: '6px', fontSize: '11px', fontWeight: 700, color: '#047857', background: '#ECFDF5', border: '1px solid #A7F3D0', padding: '2px 8px', borderRadius: '6px' }}>
-                          +${ref.creditsGenerated.toLocaleString()} HX acreditados
-                        </span>
-                      )}
-                    </div>
-                    <select 
-                      className="hx-input" 
-                      style={{ padding: '6px 10px', fontSize: '11.5px', height: 'auto', width: 'auto', fontWeight: 600, flexShrink: 0 }}
-                      value={ref.status}
-                      onChange={(e) => handleUpdateReferral(ref.id, e.target.value)}
-                    >
-                      <option value="registered">Registrado</option>
-                      <option value="contacted">Contactado</option>
-                      <option value="negotiating">En Negociación</option>
-                      <option value="converted">Convertido (Acreditar)</option>
-                      <option value="inactive">Inactivo</option>
-                    </select>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
 
         </div>
 
@@ -1375,7 +1409,9 @@ export default function AdminClientDetailPage() {
             </div>
           </div>
         </div>
-      </div>
+      </>
+      )}
+    </div>
 
       {/* New Project Modal */}
       {showProjectModal && createPortal(

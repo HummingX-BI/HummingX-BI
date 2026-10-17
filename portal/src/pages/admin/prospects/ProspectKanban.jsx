@@ -25,6 +25,7 @@ export default function ProspectKanban({
   prospects,
   onSelectProspect,
   onChangeStage,
+  highlightedId,
 }) {
   const getStageTotal = (stageKey) => {
     return prospects
@@ -135,21 +136,24 @@ export default function ProspectKanban({
                   const apptsCount = p.appointments?.length || 0;
                   const currIdx = getStageIndex(p.status);
 
+                  const isHighlighted = highlightedId === p.id;
+
                   return (
                     <div
                       key={p.id}
+                      id={`prospect-${p.id}`}
                       onClick={() => onSelectProspect(p)}
                       style={{
                         padding: '12px 14px',
                         borderRadius: '10px',
-                        background: '#FFFFFF',
-                        border: '1px solid #E5E7EB',
-                        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+                        background: isHighlighted ? '#FEF3C7' : '#FFFFFF',
+                        border: isHighlighted ? '1px solid #F59E0B' : '1px solid #E5E7EB',
+                        boxShadow: isHighlighted ? '0 0 0 2px #F59E0B' : '0 1px 3px rgba(0, 0, 0, 0.04)',
                         cursor: 'pointer',
                         display: 'flex',
                         flexDirection: 'column',
                         gap: '8px',
-                        transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                        transition: 'transform 0.15s ease, box-shadow 0.15s ease, background 0.5s ease',
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.transform = 'translateY(-2px)';
@@ -157,7 +161,7 @@ export default function ProspectKanban({
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.transform = 'none';
-                        e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.04)';
+                        e.currentTarget.style.boxShadow = isHighlighted ? '0 0 0 2px #F59E0B' : '0 1px 3px rgba(0, 0, 0, 0.04)';
                       }}
                     >
                       {/* Top: Company & Value */}
@@ -194,7 +198,7 @@ export default function ProspectKanban({
                             width: 'fit-content',
                           }}
                         >
-                          <Award size={11} /> {p.referralInfo.referrerName}
+                          <Award size={11} /> Socio: {p.referralInfo.referrerName}{p.referralCode ? ` · Cód. ${p.referralCode}` : ''}
                         </div>
                       )}
 

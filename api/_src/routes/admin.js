@@ -2636,60 +2636,10 @@ router.get('/finances/overview', authenticate, requireAdmin, async (req, res) =>
       orderBy: { closedAt: 'desc' }
     });
 
-    // 3. Gastos operativos (con seed inicial si la tabla está vacía)
-    let expenses = await prisma.expense.findMany({
+    // 3. Gastos operativos
+    const expenses = await prisma.expense.findMany({
       orderBy: { createdAt: 'desc' }
     });
-
-    if (expenses.length === 0) {
-      // Seed inicial de herramientas y servicios base de HummingX BI
-      const defaultExpenses = [
-        {
-          title: 'Neon Serverless PostgreSQL Pro',
-          amount: 380,
-          category: 'infrastructure',
-          frequency: 'monthly',
-          paidBy: 'company',
-          notes: 'Base de datos principal en la nube (AWS us-east-2)',
-          active: true,
-        },
-        {
-          title: 'Vercel Pro (Hosting Portal & Landing)',
-          amount: 400,
-          category: 'infrastructure',
-          frequency: 'monthly',
-          paidBy: 'company',
-          notes: 'Alojamiento serverless frontend y microservicios API',
-          active: true,
-        },
-        {
-          title: 'Dominio hummingxbi.com & DNS',
-          amount: 450,
-          category: 'infrastructure',
-          frequency: 'annual',
-          paidBy: 'company',
-          notes: 'Registro anual de dominio corporativo',
-          active: true,
-        },
-        {
-          title: 'Tokens & Consumo API (OpenAI / Gemini)',
-          amount: 250,
-          category: 'software',
-          frequency: 'monthly',
-          paidBy: 'company',
-          notes: 'Motor de Inteligencia Artificial HummingX Insights',
-          active: true,
-        },
-      ];
-
-      for (const de of defaultExpenses) {
-        await prisma.expense.create({ data: de });
-      }
-
-      expenses = await prisma.expense.findMany({
-        orderBy: { createdAt: 'desc' }
-      });
-    }
 
     // Cálculos de ingresos
     const revenueFromPayments = completedPayments.reduce((sum, p) => sum + (p.amount || 0), 0);

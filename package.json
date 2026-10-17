@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "generate-qr": "node tools/qr-generator/generar.mjs",
     "postinstall": "prisma generate",
-    "predeploy:check": "node api/_scripts/predeploy_check.js"
+    "predeploy:check": "node api/_scripts/predeploy_check.js",
+    "test:e2e": "node api/_tests/run_all_e2e.js"
   },
   "devDependencies": {
     "vite": "^8.0.16"

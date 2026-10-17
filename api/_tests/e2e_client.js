@@ -8,12 +8,12 @@ require('dotenv').config({ path: 'api/.env' });
 
 const prisma = require('../_src/lib/prisma');
 const jwt = require('jsonwebtoken');
-const { assertSafeDb } = require('../_scripts/assert_safe_db');
+const { assertSafeDb, assertCreated } = require('../_scripts/assert_safe_db');
 const { isProtectedUser } = require('../_scripts/protected');
 
 assertSafeDb();
 
-const API_BASE = 'http://localhost:4000/api';
+const API_BASE = process.env.API_BASE || 'http://localhost:4010/api';
 let ADMIN_JWT = null;
 
 const created = {
@@ -34,6 +34,14 @@ function record(name, passed, detail = '') {
 }
 
 async function req(method, path, body = null, token = undefined, headers = {}) {
+  if (['PUT', 'DELETE', 'PATCH'].includes(method) || (method === 'POST' && (path.includes('/credit-movements') || path.includes('/referrals')))) {
+    const mutateMatch = path.match(/\/([a-zA-Z0-9_-]{20,})/);
+    if (mutateMatch) {
+      const targetId = mutateMatch[1];
+      assertCreated(created, targetId);
+    }
+  }
+
   const authToken = token === undefined ? ADMIN_JWT : token;
   const opts = {
     method,
@@ -66,11 +74,15 @@ async function runClientE2E() {
   console.log('🧪 INICIANDO AUDITORÍA E2E: PORTAL CLIENTE Y MIS RECOMENDADOS');
   console.log('═══════════════════════════════════════════════════════════════\n');
 
+  if (!process.env.JWT_SECRET) {
+    throw new Error('OPERACIÓN ABORTADA: JWT_SECRET no está configurada.');
+  }
+
   const adminUser = await prisma.user.findFirst({ where: { role: 'admin' } });
   if (!adminUser) throw new Error('No se encontró usuario admin en BD');
   ADMIN_JWT = jwt.sign(
     { id: adminUser.id, email: adminUser.email, role: 'admin' },
-    process.env.JWT_SECRET || 'test_secret',
+    process.env.JWT_SECRET,
     { expiresIn: '2h' }
   );
 
@@ -211,18 +223,21 @@ async function runClientE2E() {
 
     // ─── 5. PROGRESIÓN DE NIVELES (BRONCE -> PARTNER) ────────────────────────
     console.log('\n▶ [5/7] Verificando progresión de niveles por recomendaciones acumuladas...');
-    // Creamos 4 recomendaciones convertidas adicionales para Cliente A (total 5)
+    // Creamos 4 recomendaciones convertidas adicionales para Cliente A (total 5) vía flujo real
     for (let i = 2; i <= 5; i++) {
-      const extraRef = await prisma.referral.create({
-        data: {
-          referrerId: clientA.id,
-          companyName: `ZZ-TEST Empresa Extra ${i} ${now}`,
-          contactName: `Contacto Extra ${i}`,
-          status: 'converted',
-          creditsGenerated: 1500,
-        }
+      const resManual = await req('POST', `/admin/clients/${clientA.id}/referrals`, {
+        companyName: `ZZ-TEST Empresa Extra ${i} ${now}`,
+        contactName: `Contacto Extra ${i}`,
+        status: 'negotiating',
+        createInCrm: false,
       });
-      created.referrals.add(extraRef.id);
+      if (resManual.data?.referral?.id) {
+        created.referrals.add(resManual.data.referral.id);
+        await req('PUT', `/admin/referrals/${resManual.data.referral.id}`, {
+          status: 'converted',
+          creditAmount: 1500,
+        });
+      }
     }
 
     // Cliente A consulta su nivel: al llegar a 5 conversiones, debe subir a Nivel 2 (Partner)

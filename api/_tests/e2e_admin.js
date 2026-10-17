@@ -11,17 +11,13 @@ require('dotenv').config({ path: 'api/.env' });
 const assert = require('assert');
 const jwt = require('jsonwebtoken');
 const prisma = require('../_src/lib/prisma');
-const { assertSafeDb } = require('../_scripts/assert_safe_db');
+const { assertSafeDb, assertCreated } = require('../_scripts/assert_safe_db');
 const { isProtectedUser } = require('../_scripts/protected');
 
 assertSafeDb();
 
-const API_BASE = 'http://localhost:4000/api';
-const ADMIN_TOKEN = jwt.sign(
-  { id: 'cmukpjois00006if78udyu054', email: 'admin@hummingxbi.com', role: 'admin' },
-  process.env.JWT_SECRET || 'test_secret',
-  { expiresIn: '2h' }
-);
+const API_BASE = process.env.API_BASE || 'http://localhost:4010/api';
+let ADMIN_TOKEN = null;
 
 // Registry of created IDs for safe deletion
 const created = {
@@ -38,6 +34,14 @@ const created = {
 };
 
 async function req(method, endpoint, body = null) {
+  if (['PUT', 'DELETE', 'PATCH'].includes(method) || (method === 'POST' && (endpoint.includes('/credit-movements') || endpoint.includes('/referrals')))) {
+    const mutateMatch = endpoint.match(/\/([a-zA-Z0-9_-]{20,})/);
+    if (mutateMatch) {
+      const targetId = mutateMatch[1];
+      assertCreated(created, targetId);
+    }
+  }
+
   const headers = {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${ADMIN_TOKEN}`,
@@ -77,6 +81,21 @@ async function run() {
   console.log('═══════════════════════════════════════════════════════════════');
   console.log('🧪 INICIANDO AUDITORÍA FUNCIONAL ADMIN (E2E)');
   console.log('═══════════════════════════════════════════════════════════════\n');
+
+  if (!process.env.JWT_SECRET) {
+    throw new Error('OPERACIÓN ABORTADA: JWT_SECRET no está configurada.');
+  }
+
+  const adminUser = await prisma.user.findFirst({ where: { role: 'admin' } });
+  if (!adminUser) {
+    throw new Error('OPERACIÓN ABORTADA: No se encontró ningún administrador en la base de datos.');
+  }
+
+  ADMIN_TOKEN = jwt.sign(
+    { id: adminUser.id, email: adminUser.email, role: 'admin' },
+    process.env.JWT_SECRET,
+    { expiresIn: '2h' }
+  );
 
   const now = Date.now();
   let clientA = null;
@@ -414,7 +433,7 @@ async function run() {
       const resCredPos = await req('POST', `/admin/clients/${clientA.id}/credit-movements`, {
         amount: 1000,
         description: 'ZZ-TEST Ajuste bono fidelidad',
-        type: 'credit_adjustment',
+        type: 'adjustment',
       });
       record('Créditos: Ajuste manual positivo (+1000)', resCredPos.status === 201 || resCredPos.status === 200);
 
@@ -422,7 +441,7 @@ async function run() {
       const resCredNeg = await req('POST', `/admin/clients/${clientA.id}/credit-movements`, {
         amount: -500,
         description: 'ZZ-TEST Ajuste canje servicio',
-        type: 'credit_adjustment',
+        type: 'redeemed',
       });
       record('Créditos: Ajuste manual negativo (-500)', resCredNeg.status === 201 || resCredNeg.status === 200);
 

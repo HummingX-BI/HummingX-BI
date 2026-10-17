@@ -422,6 +422,10 @@ router.post('/projects/:id/notify-phase', authenticate, requireAdmin, adminLimit
     }
 
     const targetPhase = req.body.phase !== undefined ? Number(req.body.phase) : project.currentPhase;
+    if (!Number.isInteger(targetPhase) || targetPhase < 1 || targetPhase > 6) {
+      return res.status(400).json({ error: 'La fase debe ser un número entero entre 1 y 6.' });
+    }
+
     const sendResult = await sendPhaseNotification(project.client.email, project.client.name, targetPhase);
 
     res.json({

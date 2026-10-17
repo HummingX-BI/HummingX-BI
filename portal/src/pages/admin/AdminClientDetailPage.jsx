@@ -111,6 +111,53 @@ export default function AdminClientDetailPage() {
 
   const [isEditingClient, setIsEditingClient] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [notifyingPhase, setNotifyingPhase] = useState(false);
+  const [resendingInvitation, setResendingInvitation] = useState(false);
+  const [activationLink, setActivationLink] = useState(null);
+
+  const handleNotifyPhase = async () => {
+    if (!activeProject || !client?.email) return;
+    const phaseObj = PHASES.find(p => p.num === activeProject.currentPhase);
+    const phaseName = phaseObj ? phaseObj.label : `Fase ${activeProject.currentPhase}`;
+    const confirmed = window.confirm(`Se enviará un correo a ${client.email} sobre la fase ${phaseName}. ¿Continuar?`);
+    if (!confirmed) return;
+
+    setNotifyingPhase(true);
+    try {
+      const res = await api.post(`/admin/projects/${activeProject.id}/notify-phase`, { phase: activeProject.currentPhase });
+      const msg = res.data?.message || 'Notificación de fase enviada';
+      if (res.data?.dryRun === true) {
+        toast.info('Modo prueba', `${msg} (Modo prueba: no se envió correo real)`);
+      } else {
+        toast.success('Correo Enviado', msg);
+      }
+    } catch (err) {
+      const errorMsg = err.response?.data?.error || 'Error al enviar notificación de fase.';
+      toast.error('Error', errorMsg);
+    } finally {
+      setNotifyingPhase(false);
+    }
+  };
+
+  const handleResendInvitation = async () => {
+    if (!client) return;
+    const confirmed = window.confirm(`¿Reenviar invitación de acceso a ${client.email || client.name}?`);
+    if (!confirmed) return;
+
+    setResendingInvitation(true);
+    try {
+      const res = await api.post(`/admin/clients/${client.id}/resend-invitation`);
+      const msg = res.data?.message || 'Invitación enviada';
+      if (res.data?.activationLink) {
+        setActivationLink(res.data.activationLink);
+      }
+      toast.success('Invitación', msg);
+    } catch (err) {
+      toast.error('Error', err.response?.data?.error || 'Error al reenviar invitación');
+    } finally {
+      setResendingInvitation(false);
+    }
+  };
 
   useEffect(() => { 
     setClient(null);
@@ -682,6 +729,58 @@ export default function AdminClientDetailPage() {
                     )}
                   </span>
                 )}
+                {!client.invitationAccepted && (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                    <button
+                      type="button"
+                      onClick={handleResendInvitation}
+                      disabled={resendingInvitation}
+                      className="btn-secondary"
+                      style={{
+                        padding: '4px 10px',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        opacity: resendingInvitation ? 0.6 : 1,
+                        cursor: resendingInvitation ? 'not-allowed' : 'pointer',
+                        borderRadius: '6px'
+                      }}
+                      title="Enviar invitación de acceso al portal"
+                    >
+                      <Mail size={13} />
+                      {resendingInvitation ? 'Enviando...' : 'Enviar invitación'}
+                    </button>
+                    {activationLink && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(activationLink);
+                          toast.success('Enlace copiado', 'Enlace de activación copiado al portapapeles');
+                        }}
+                        className="btn-secondary"
+                        style={{
+                          padding: '4px 10px',
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          color: '#0284C7',
+                          borderColor: '#BAE6FD',
+                          background: '#F0F9FF',
+                          borderRadius: '6px',
+                          cursor: 'pointer'
+                        }}
+                        title="Copiar enlace de activación"
+                      >
+                        <Copy size={13} />
+                        Copiar enlace
+                      </button>
+                    )}
+                  </span>
+                )}
               </h1>
               {client.companyName && client.companyName !== client.name && (
                 <p style={{ color: '#4B5563', fontSize: '15px', margin: '0 0 2px', fontWeight: 500 }}>
@@ -990,7 +1089,30 @@ export default function AdminClientDetailPage() {
                     </div>
                     {/* Phase Selector */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                      <label style={{ fontSize: '13px', fontWeight: 500, color: '#374151' }}>Fase Actual</label>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                        <label style={{ fontSize: '13px', fontWeight: 500, color: '#374151' }}>Fase Actual</label>
+                        {client?.email && (
+                          <button
+                            type="button"
+                            onClick={handleNotifyPhase}
+                            disabled={notifyingPhase}
+                            className="btn-secondary"
+                            style={{
+                              padding: '5px 12px',
+                              fontSize: '12.5px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              opacity: notifyingPhase ? 0.6 : 1,
+                              cursor: notifyingPhase ? 'not-allowed' : 'pointer'
+                            }}
+                            title={`Enviar correo al cliente (${client.email}) sobre la fase actual`}
+                          >
+                            <Mail size={14} />
+                            {notifyingPhase ? 'Enviando...' : 'Notificar fase al cliente'}
+                          </button>
+                        )}
+                      </div>
                       <div className="admin-phase-grid">
                         {PHASES.map(phase => (
                           <button

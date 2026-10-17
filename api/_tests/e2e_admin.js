@@ -34,7 +34,7 @@ const created = {
 };
 
 async function req(method, endpoint, body = null) {
-  if (['PUT', 'DELETE', 'PATCH'].includes(method) || (method === 'POST' && (endpoint.includes('/credit-movements') || endpoint.includes('/referrals')))) {
+  if (['PUT', 'DELETE', 'PATCH'].includes(method) || (method === 'POST' && (endpoint.includes('/credit-movements') || endpoint.includes('/referrals') || endpoint.includes('/notify-phase')))) {
     const mutateMatch = endpoint.match(/\/([a-zA-Z0-9_-]{20,})/);
     if (mutateMatch) {
       const targetId = mutateMatch[1];
@@ -100,6 +100,7 @@ async function run() {
   const now = Date.now();
   let clientA = null;
   let clientB = null;
+  let clientAProject = null;
   let testProspect = null;
 
   try {
@@ -192,6 +193,25 @@ async function run() {
     if (clientA) {
       const resGet = await req('GET', `/admin/clients/${clientA.id}`);
       record('Clientes: Verificación cruzada GET /admin/clients/:id', resGet.status === 200 && resGet.data?.id === clientA.id);
+      if (resGet.data?.projects?.[0]) {
+        clientAProject = resGet.data.projects[0];
+        created.projects.add(clientAProject.id);
+      }
+    }
+
+    // 1.10 Notificación manual de fase (POST /admin/projects/:id/notify-phase)
+    if (clientAProject) {
+      const resNotifyValid = await req('POST', `/admin/projects/${clientAProject.id}/notify-phase`, { phase: 3 });
+      record(
+        'Proyectos: Notificar fase válida devuelve success y dryRun:true',
+        resNotifyValid.status === 200 && resNotifyValid.data?.success === true && resNotifyValid.data?.dryRun === true
+      );
+
+      const resNotifyInvalid = await req('POST', `/admin/projects/${clientAProject.id}/notify-phase`, { phase: 99 });
+      record(
+        'Proyectos: Notificar fase inválida (99) devuelve 400',
+        resNotifyInvalid.status === 400
+      );
     }
 
     // ─── 2. MÓDULO PROSPECTOS Y REFERIDOS ────────────────────────────────

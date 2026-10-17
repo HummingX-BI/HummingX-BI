@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Search, Plus, Building2, User, Phone, Mail, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { Search, Plus, Building2, User, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import ReferralTimeline from './ReferralTimeline';
 
 export default function ReferralList({ referrals = [], onOpenRecommendModal }) {
@@ -155,9 +155,18 @@ export default function ReferralList({ referrals = [], onOpenRecommendModal }) {
                       <h4 className="text-base font-bold text-gray-900 leading-tight">
                         {ref.companyName}
                       </h4>
-                      <span className="text-[11px] text-gray-400 font-medium">
-                        Registrado el {new Date(ref.createdAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}
-                      </span>
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1 text-xs text-gray-500">
+                        {ref.contactName && (
+                          <span className="flex items-center gap-1 font-medium text-gray-700">
+                            <User size={13} className="text-gray-400" />
+                            <span>{ref.contactName}</span>
+                          </span>
+                        )}
+                        {ref.contactName && <span className="text-gray-300">•</span>}
+                        <span className="text-[11px] text-gray-400 font-medium">
+                          Registrado el {new Date(ref.createdAt).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
@@ -178,40 +187,6 @@ export default function ReferralList({ referrals = [], onOpenRecommendModal }) {
                     </div>
                   )}
                 </div>
-
-                {/* Contact and Notes info */}
-                {(ref.contactName || ref.contactPhone || ref.contactEmail || ref.notes) && (
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-600 mb-4 bg-gray-50/80 rounded-xl p-2.5 border border-gray-100">
-                    {ref.contactName && (
-                      <span className="flex items-center gap-1">
-                        <User size={13} className="text-gray-400" />
-                        <strong className="text-gray-800">{ref.contactName}</strong>
-                      </span>
-                    )}
-                    {ref.contactPhone && (
-                      <a
-                        href={`https://wa.me/${ref.contactPhone.replace(/\D/g, '')}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-emerald-700 hover:underline"
-                      >
-                        <Phone size={13} />
-                        <span>{ref.contactPhone}</span>
-                      </a>
-                    )}
-                    {ref.contactEmail && (
-                      <span className="flex items-center gap-1 text-gray-500">
-                        <Mail size={13} />
-                        <span>{ref.contactEmail}</span>
-                      </span>
-                    )}
-                    {ref.notes && (
-                      <span className="w-full text-gray-500 italic mt-1 text-[11px]">
-                        "{ref.notes}"
-                      </span>
-                    )}
-                  </div>
-                )}
 
                 {/* Timeline Step Progression */}
                 <ReferralTimeline status={ref.status} creditsGenerated={ref.creditsGenerated} />

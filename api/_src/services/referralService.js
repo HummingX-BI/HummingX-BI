@@ -138,7 +138,8 @@ async function awardCredits({ prospectId, referralId, customAmount, adminId, rea
                   contactEmail: prospect.email,
                   contactPhone: prospect.phone,
                   notes: `Convertido desde prospecto CRM (${prospect.id})`,
-                  status: 'registered'
+                  status: 'registered',
+                  origin: 'admin_code',
                 }
               });
             }
@@ -258,6 +259,7 @@ async function createClientReferral({ referrerId, companyName, contactName, cont
         contactPhone: contactPhone?.trim() || null,
         notes: notes?.trim() || null,
         status: 'registered',
+        origin: 'client_portal',
       },
     });
 
@@ -282,6 +284,98 @@ async function createClientReferral({ referrerId, companyName, contactName, cont
   });
 }
 
+/**
+ * Sincroniza el estado del Referral a partir del estado de su Prospect vinculado en CRM.
+ * Mapeo:
+ *   lead -> registered
+ *   contacted -> contacted
+ *   meeting | proposal_sent | negotiating -> negotiating
+ *   lost -> inactive
+ *   won -> negotiating (permanece negotiating hasta que el admin abone créditos)
+ * Candado: NUNCA toca un referral 'converted' ni degrada creditsGenerated.
+ */
+async function syncReferralStatusFromProspect(prospect, db = prisma) {
+  if (!prospect) return null;
+  let referralId = prospect.referralId;
+
+  if (!referralId && prospect.referralCode) {
+    const referrer = await findReferrerByCode(prospect.referralCode, db);
+    if (referrer) {
+      const existingRef = await db.referral.findFirst({
+        where: {
+          referrerId: referrer.id,
+          companyName: { equals: prospect.companyName, mode: 'insensitive' }
+        }
+      });
+      if (existingRef) referralId = existingRef.id;
+    }
+  }
+
+  if (!referralId) return null;
+
+  const referral = await db.referral.findUnique({ where: { id: referralId } });
+  if (!referral) return null;
+
+  // Candado estricto: nunca tocar si ya está convertido o generó créditos
+  if (referral.status === 'converted' || (referral.creditsGenerated && referral.creditsGenerated > 0)) {
+    return referral;
+  }
+
+  let targetStatus = referral.status;
+  switch (prospect.status) {
+    case 'lead':
+      targetStatus = 'registered';
+      break;
+    case 'contacted':
+      targetStatus = 'contacted';
+      break;
+    case 'meeting':
+    case 'proposal_sent':
+    case 'negotiating':
+      targetStatus = 'negotiating';
+      break;
+    case 'lost':
+      targetStatus = 'inactive';
+      break;
+    case 'won':
+      // won permanece en negotiating hasta que se abone la recompensa
+      targetStatus = 'negotiating';
+      break;
+    default:
+      break;
+  }
+
+  if (targetStatus !== referral.status) {
+    return await db.referral.update({
+      where: { id: referral.id },
+      data: { status: targetStatus }
+    });
+  }
+
+  return referral;
+}
+
+/**
+ * Devuelve el resumen de nivel, tier y progreso para un socio cliente
+ */
+async function getReferralSummary(userId, db = prisma) {
+  const convertedCount = await db.referral.count({
+    where: { referrerId: userId, status: 'converted' }
+  });
+  const level = calculateLevel(convertedCount);
+  const tier = getTier(level);
+
+  return {
+    level,
+    tierName: tier.name,
+    badge: tier.badge,
+    rewardAmount: tier.amount,
+    convertedCount,
+    nextLevelAt: tier.nextMin,
+    remainingToNext: tier.nextMin !== null ? Math.max(0, tier.nextMin - convertedCount) : 0,
+  };
+}
+
 module.exports = {
   TIERS,
   calculateLevel,
@@ -291,4 +385,6 @@ module.exports = {
   recalcLevel,
   awardCredits,
   createClientReferral,
+  syncReferralStatusFromProspect,
+  getReferralSummary,
 };

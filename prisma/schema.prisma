@@ -177,6 +177,7 @@ model Referral {
   status           ReferralStatus @default(registered)
   creditsGenerated Int            @default(0)
   notes            String?
+  origin           String         @default("client_portal")
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
 

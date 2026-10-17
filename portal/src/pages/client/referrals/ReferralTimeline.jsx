@@ -20,6 +20,16 @@ export default function ReferralTimeline({ status = 'registered', creditsGenerat
 
   const currentIndex = getStepIndex(status);
 
+  if (status === 'inactive') {
+    return (
+      <div className="w-full pt-2 pb-1 text-center">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gray-50 border border-gray-200 text-gray-500 text-xs font-medium">
+          Oportunidad no concretada
+        </span>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full pt-3 pb-1">
       <div className="flex items-center justify-between w-full relative">

@@ -62,7 +62,7 @@ router.get('/my', authenticate, async (req, res) => {
 // POST /referrals — Client submits a new referral (synchronized with CRM Prospects)
 router.post('/', authenticate, async (req, res) => {
   try {
-    if (req.user.impersonatedBy) {
+    if (req.user.impersonatedBy || req.user.isImpersonating) {
       return res.status(403).json({
         error: 'Acción bloqueada: Estás en modo de visualización de administrador (solo lectura).'
       });
@@ -92,7 +92,7 @@ router.post('/', authenticate, async (req, res) => {
 
 // PUT /referrals/code — Personal code is permanent and system-assigned (numeric 5 digits)
 router.put('/code', authenticate, async (req, res) => {
-  if (req.user.impersonatedBy) {
+  if (req.user.impersonatedBy || req.user.isImpersonating) {
     return res.status(403).json({
       error: 'Acción bloqueada: Estás en modo de visualización de administrador (solo lectura).'
     });

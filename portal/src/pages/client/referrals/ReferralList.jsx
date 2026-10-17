@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Search, Plus, Building2, User, Phone, Mail, CheckCircle, Clock } from 'lucide-react';
+import { Search, Plus, Building2, User, Phone, Mail, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import ReferralTimeline from './ReferralTimeline';
 
 export default function ReferralList({ referrals = [], onOpenRecommendModal }) {
@@ -165,6 +165,11 @@ export default function ReferralList({ referrals = [], onOpenRecommendModal }) {
                     <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black self-start sm:self-auto">
                       <CheckCircle size={14} className="text-emerald-600" />
                       <span>Ganado · +${(ref.creditsGenerated || 1500).toLocaleString('es-MX')} HX</span>
+                    </div>
+                  ) : ref.status === 'inactive' ? (
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700 text-xs font-semibold self-start sm:self-auto">
+                      <AlertCircle size={12} className="text-rose-500" />
+                      <span>Inactivo</span>
                     </div>
                   ) : (
                     <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-700 text-xs font-semibold self-start sm:self-auto">

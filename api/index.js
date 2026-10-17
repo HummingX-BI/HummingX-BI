@@ -99,7 +99,7 @@ apiRouter.use('/payments', paymentRoutes);
 apiRouter.use('/analytics', analyticsRoutes);
 
 // ─── Health check (no auth needed, no sensitive data) ────────────────────────
-apiRouter.get('/health', (_req, res) => res.json({ status: 'ok' }));
+apiRouter.get('/health', (_req, res) => res.json({ status: 'ok', emailDryRun: process.env.EMAIL_DRY_RUN === '1' }));
 
 // ─── Mount all routes at both / and /api to handle Vercel routing ────────────
 app.use('/api', apiRouter);

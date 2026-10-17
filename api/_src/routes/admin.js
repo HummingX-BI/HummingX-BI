@@ -180,6 +180,7 @@ router.get('/clients/:id', authenticate, requireAdmin, async (req, res) => {
             status: true, 
             creditsGenerated: true, 
             notes: true, 
+            origin: true,
             createdAt: true 
           } 
         },
@@ -189,6 +190,17 @@ router.get('/clients/:id', authenticate, requireAdmin, async (req, res) => {
 
     if (!client || client.role !== 'client') {
       return res.status(404).json({ error: 'Cliente no encontrado.' });
+    }
+
+    // Asegurar código de socio numérico si no lo tiene
+    let referralCode = client.referralCode;
+    if (!referralCode || !/^\d{5,6}$/.test(referralCode)) {
+      referralCode = await referralService.generateNumericReferralCode(prisma);
+      await prisma.user.update({
+        where: { id: client.id },
+        data: { referralCode }
+      });
+      client.referralCode = referralCode;
     }
 
     // Compute total credits and session count
@@ -201,8 +213,12 @@ router.get('/clients/:id', authenticate, requireAdmin, async (req, res) => {
         sessionCount = 0;
       }
     }
+
+    // Resumen de referidos (nivel, recompensas y avance)
+    const referralSummary = await referralService.getReferralSummary(client.id, prisma);
+
     // SECURITY: No need to strip passwordHash — using select: {} above never fetches it
-    res.json({ ...client, sessionCount, totalCredits });
+    res.json({ ...client, sessionCount, totalCredits, referralSummary });
   } catch (err) {
     res.status(500).json({ error: 'Error al cargar el cliente.' });
   }
@@ -487,67 +503,352 @@ router.post(['/credits', '/clients/:id/credit-movements'], authenticate, require
     const clientId = req.params.id || req.body.clientId;
     const { amount, type, description } = req.body;
 
-    if (!clientId || amount === undefined || !description) {
-      return res.status(400).json({ error: 'clientId, amount y description son requeridos.' });
+    if (!clientId) {
+      return res.status(400).json({ error: 'clientId es requerido.' });
     }
 
-    const validTypes = ['referral_converted', 'welcome_bonus', 'redeemed', 'adjustment'];
-    let creditType = 'adjustment';
-    if (type && validTypes.includes(type)) {
-      creditType = type;
+    const client = await prisma.user.findUnique({ where: { id: clientId } });
+    if (!client) return res.status(404).json({ error: 'Cliente no encontrado.' });
+    if (client.role !== 'client') return res.status(400).json({ error: 'El usuario debe tener rol de cliente.' });
+
+    // Validación de amount: entero !== 0, |amount| <= 100000
+    const parsedAmount = Number(amount);
+    if (!Number.isInteger(parsedAmount) || parsedAmount === 0 || Math.abs(parsedAmount) > 100000) {
+      return res.status(400).json({ error: 'El monto debe ser un número entero diferente de cero y de valor absoluto no mayor a 100,000.' });
+    }
+
+    // Validación de description: 3-200 caracteres
+    if (!description || typeof description !== 'string' || description.trim().length < 3 || description.trim().length > 200) {
+      return res.status(400).json({ error: 'La descripción/motivo debe tener entre 3 y 200 caracteres.' });
+    }
+
+    // Validación de type: rechazar referral_converted y welcome_bonus manuales
+    if (type === 'referral_converted' || type === 'welcome_bonus') {
+      return res.status(400).json({ error: 'No se permite registrar manualmente movimientos de tipo referral_converted o welcome_bonus.' });
+    }
+
+    if (!type || !['adjustment', 'redeemed'].includes(type)) {
+      return res.status(400).json({ error: "El tipo de movimiento debe ser 'adjustment' o 'redeemed'." });
+    }
+
+    if (type === 'redeemed' && parsedAmount >= 0) {
+      return res.status(400).json({ error: 'Los movimientos de canje (redeemed) deben tener un monto negativo.' });
     }
 
     const movement = await prisma.creditMovement.create({
-      data: { clientId, amount: parseInt(amount, 10), type: creditType, description }
+      data: {
+        clientId,
+        amount: parsedAmount,
+        type,
+        description: description.trim()
+      }
     });
 
-    res.status(201).json(movement);
+    const allMovements = await prisma.creditMovement.findMany({ where: { clientId } });
+    const balance = allMovements.reduce((sum, m) => sum + m.amount, 0);
+
+    res.json({ movement, balance });
   } catch (err) {
     console.error('[ADMIN] Error al registrar movimiento de créditos:', err);
     res.status(500).json({ error: 'Error al registrar movimiento de créditos.' });
   }
 });
 
-// PUT /admin/referrals/:id — Update referral status
+// POST /admin/clients/:id/referrals — Admin manually creates referral for a client
+router.post('/clients/:id/referrals', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { companyName, contactName, contactEmail, contactPhone, status, clientNote, createdAt, createInCrm = true } = req.body;
+
+    if (!companyName || typeof companyName !== 'string' || companyName.trim().length < 2 || companyName.trim().length > 120) {
+      return res.status(400).json({ error: 'El nombre de la empresa debe tener entre 2 y 120 caracteres.' });
+    }
+
+    if (status === 'converted') {
+      return res.status(400).json({ error: 'Usa Abonar créditos para marcar una recomendación como concretada.' });
+    }
+
+    const validStatuses = ['registered', 'contacted', 'negotiating', 'inactive'];
+    const initialStatus = status && validStatuses.includes(status) ? status : 'contacted';
+
+    if (contactEmail && !isValidEmail(contactEmail.trim())) {
+      return res.status(400).json({ error: 'El formato de correo electrónico es inválido.' });
+    }
+
+    if (contactPhone && !/^[0-9+() -]{8,20}$/.test(contactPhone.trim())) {
+      return res.status(400).json({ error: 'El teléfono debe tener entre 8 y 20 dígitos.' });
+    }
+
+    const client = await prisma.user.findUnique({ where: { id } });
+    if (!client) return res.status(404).json({ error: 'Cliente no encontrado.' });
+    if (client.role !== 'client') return res.status(400).json({ error: 'El usuario especificado no es un cliente.' });
+
+    // Asegurar código numérico
+    let referralCode = client.referralCode;
+    if (!referralCode || !/^\d{5,6}$/.test(referralCode)) {
+      referralCode = await referralService.generateNumericReferralCode(prisma);
+      await prisma.user.update({
+        where: { id: client.id },
+        data: { referralCode }
+      });
+    }
+
+    const clientDisplayName = client.companyName || client.name || 'Cliente';
+
+    // Candado 409: Mismo cliente + misma empresa
+    const existingRef = await prisma.referral.findFirst({
+      where: {
+        referrerId: client.id,
+        companyName: { equals: companyName.trim(), mode: 'insensitive' }
+      }
+    });
+    if (existingRef) {
+      return res.status(409).json({ error: 'Ya existe una recomendación con esta empresa para este cliente.' });
+    }
+
+    const result = await prisma.$transaction(async (tx) => {
+      const referral = await tx.referral.create({
+        data: {
+          referrerId: client.id,
+          companyName: companyName.trim(),
+          contactName: contactName?.trim() || null,
+          contactEmail: contactEmail?.trim() || null,
+          contactPhone: contactPhone?.trim() || null,
+          notes: clientNote?.trim() || null,
+          status: initialStatus,
+          origin: 'admin_manual',
+          ...(createdAt && { createdAt: new Date(createdAt) })
+        }
+      });
+
+      let prospect = null;
+      let linked = false;
+
+      if (createInCrm) {
+        const existingProspect = await tx.prospect.findFirst({
+          where: {
+            companyName: { equals: companyName.trim(), mode: 'insensitive' },
+            referralId: null
+          }
+        });
+
+        if (existingProspect) {
+          prospect = await tx.prospect.update({
+            where: { id: existingProspect.id },
+            data: {
+              referralId: referral.id,
+              referralCode
+            }
+          });
+          linked = true;
+        } else {
+          let prospectStatus = 'lead';
+          if (initialStatus === 'contacted') prospectStatus = 'contacted';
+          else if (initialStatus === 'negotiating') prospectStatus = 'negotiating';
+          else if (initialStatus === 'inactive') prospectStatus = 'lost';
+
+          prospect = await tx.prospect.create({
+            data: {
+              companyName: companyName.trim(),
+              contactName: contactName?.trim() || null,
+              email: contactEmail?.trim() || null,
+              phone: contactPhone?.trim() || null,
+              source: `Recomendado por ${clientDisplayName} (Cód. ${referralCode})`,
+              referralCode,
+              referralId: referral.id,
+              notes: clientNote?.trim() || `Recomendación registrada manualmente para ${clientDisplayName}`,
+              status: prospectStatus,
+              ...(createdAt && { createdAt: new Date(createdAt) })
+            }
+          });
+        }
+      }
+
+      return { referral, linked, prospect };
+    });
+
+    res.status(201).json(result);
+  } catch (err) {
+    console.error('[ADMIN] Error en POST /clients/:id/referrals:', err);
+    res.status(500).json({ error: 'Error al registrar recomendación.' });
+  }
+});
+
+// GET /admin/referrals/new — List new referrals created from client portal
+router.get('/referrals/new', authenticate, requireAdmin, async (req, res) => {
+  try {
+    let { since } = req.query;
+    let sinceDate;
+    const now = Date.now();
+    const fourteenDaysMs = 14 * 24 * 60 * 60 * 1000;
+    const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+
+    if (since) {
+      const parsed = new Date(since);
+      if (isNaN(parsed.getTime()) || (now - parsed.getTime()) > fourteenDaysMs) {
+        sinceDate = new Date(now - sevenDaysMs);
+      } else {
+        sinceDate = parsed;
+      }
+    } else {
+      sinceDate = new Date(now - sevenDaysMs);
+    }
+
+    let referrals = [];
+    try {
+      referrals = await prisma.referral.findMany({
+        where: {
+          origin: 'client_portal',
+          createdAt: { gt: sinceDate }
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 20,
+        include: {
+          referrer: {
+            select: { id: true, name: true, companyName: true, referralCode: true, level: true }
+          },
+          prospects: {
+            select: { id: true },
+            take: 1
+          }
+        }
+      });
+    } catch (dbErr) {
+      if (dbErr.code === 'P2022') {
+        return res.json({ count: 0, items: [], latest: null });
+      }
+      throw dbErr;
+    }
+
+    const items = referrals.map(r => {
+      const tier = referralService.getTier(r.referrer?.level || 1);
+      return {
+        referralId: r.id,
+        prospectId: r.prospects?.[0]?.id || null,
+        companyName: r.companyName,
+        contactName: r.contactName,
+        createdAt: r.createdAt,
+        referrer: {
+          id: r.referrer?.id,
+          displayName: r.referrer?.companyName || r.referrer?.name || 'Cliente',
+          referralCode: r.referrer?.referralCode,
+          level: r.referrer?.level || 1,
+          tierName: tier.name
+        }
+      };
+    });
+
+    const latest = items.length > 0 ? items[0].createdAt : null;
+
+    res.json({
+      count: items.length,
+      items,
+      latest
+    });
+  } catch (err) {
+    console.error('[ADMIN] Error en GET /admin/referrals/new:', err);
+    res.status(500).json({ error: 'Error al consultar nuevos recomendados.' });
+  }
+});
+
+// PUT /admin/referrals/:id — Update referral status and sync linked prospect
 router.put('/referrals/:id', authenticate, requireAdmin, async (req, res) => {
   try {
-    const { status, notes } = req.body;
+    const { companyName, contactName, contactEmail, contactPhone, notes, status } = req.body;
 
     const referral = await prisma.referral.findUnique({ where: { id: req.params.id } });
     if (!referral) return res.status(404).json({ error: 'Referido no encontrado.' });
 
-    if (status === 'converted' && referral.status !== 'converted') {
-      const result = await referralService.awardCredits({
-        referralId: referral.id,
-        customAmount: req.body.creditAmount,
-        adminId: req.user.id,
-      });
-
-      if (notes !== undefined) {
-        await prisma.referral.update({
-          where: { id: referral.id },
-          data: { notes },
-        });
+    if (status === 'converted') {
+      if (referral.status === 'converted') {
+        return res.json(referral);
       }
+      if (req.body.creditAmount || req.body.amount) {
+        const result = await referralService.awardCredits({
+          referralId: referral.id,
+          customAmount: req.body.creditAmount || req.body.amount,
+          adminId: req.user.id,
+        });
+        return res.json(result.referral);
+      }
+      return res.status(400).json({ error: 'Usa Abonar créditos para marcar como concretada.' });
+    }
 
-      return res.json(result.referral);
+    const validStatuses = ['registered', 'contacted', 'negotiating', 'inactive'];
+    if (status && !validStatuses.includes(status)) {
+      return res.status(400).json({ error: 'Estado de referido inválido.' });
     }
 
     const updated = await prisma.referral.update({
       where: { id: req.params.id },
       data: {
+        ...(companyName !== undefined && { companyName: companyName.trim() }),
+        ...(contactName !== undefined && { contactName: contactName ? contactName.trim() : null }),
+        ...(contactEmail !== undefined && { contactEmail: contactEmail ? contactEmail.trim().toLowerCase() : null }),
+        ...(contactPhone !== undefined && { contactPhone: contactPhone ? contactPhone.trim() : null }),
+        ...(notes !== undefined && { notes: notes ? notes.trim() : null }),
         ...(status !== undefined && { status }),
-        ...(notes !== undefined && { notes }),
       }
     });
 
-    res.json(updated);
+    // Si cambia status y hay prospecto vinculado no won/lost, sincronizar con mapeo inverso
+    if (status && status !== referral.status) {
+      const prospect = await prisma.prospect.findFirst({ where: { referralId: referral.id } });
+      if (prospect && prospect.status !== 'won' && prospect.status !== 'lost') {
+        let inverseStatus = null;
+        if (status === 'registered') inverseStatus = 'lead';
+        else if (status === 'contacted') inverseStatus = 'contacted';
+        else if (status === 'negotiating') inverseStatus = 'negotiating';
+        else if (status === 'inactive') inverseStatus = 'lost';
+
+        if (inverseStatus && inverseStatus !== prospect.status) {
+          await prisma.prospect.update({
+            where: { id: prospect.id },
+            data: { status: inverseStatus }
+          });
+        }
+      }
+    }
+
+    res.json({ referral: updated, ...updated });
   } catch (err) {
     console.error('[ADMIN] Error al actualizar referido:', err);
     if (err.message && (err.message.includes('Ya se habían') || err.message.includes('Ya existe') || err.message.includes('No se encontró'))) {
       return res.status(400).json({ error: err.message });
     }
     res.status(500).json({ error: err.message || 'Error al actualizar referido.' });
+  }
+});
+
+// DELETE /admin/referrals/:id — Delete referral if no credits were generated
+router.delete('/referrals/:id', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const referral = await prisma.referral.findUnique({ where: { id: req.params.id } });
+    if (!referral) return res.status(404).json({ error: 'Referido no encontrado.' });
+
+    if (referral.creditsGenerated > 0) {
+      return res.status(409).json({ error: 'No se puede eliminar una recomendación que ya generó créditos.' });
+    }
+
+    const existingMovement = await prisma.creditMovement.findFirst({
+      where: { referralId: referral.id }
+    });
+    if (existingMovement) {
+      return res.status(409).json({ error: 'No se puede eliminar una recomendación con movimientos de créditos vinculados.' });
+    }
+
+    // Desvincular prospecto si existe
+    await prisma.prospect.updateMany({
+      where: { referralId: referral.id },
+      data: { referralId: null }
+    });
+
+    await prisma.referral.delete({ where: { id: referral.id } });
+
+    res.json({ success: true, message: 'Recomendación eliminada correctamente.' });
+  } catch (err) {
+    console.error('[ADMIN] Error al eliminar referido:', err);
+    res.status(500).json({ error: 'Error al eliminar referido.' });
   }
 });
 
@@ -1638,6 +1939,11 @@ router.post('/prospects', authenticate, requireAdmin, async (req, res) => {
       });
 
       if (!refRecord) {
+        let initialRefStatus = 'registered';
+        if (status === 'contacted') initialRefStatus = 'contacted';
+        else if (status === 'won' || ['meeting', 'proposal_sent', 'negotiating'].includes(status)) initialRefStatus = 'negotiating';
+        else if (status === 'lost') initialRefStatus = 'inactive';
+
         refRecord = await prisma.referral.create({
           data: {
             referrerId: referrer.id,
@@ -1646,7 +1952,8 @@ router.post('/prospects', authenticate, requireAdmin, async (req, res) => {
             contactEmail: email?.trim() || null,
             contactPhone: phone?.trim() || null,
             notes: `Registrado en CRM con código ${referrer.referralCode}`,
-            status: status === 'won' ? 'converted' : 'registered',
+            status: initialRefStatus,
+            origin: 'admin_code',
           }
         });
       }
@@ -1661,7 +1968,7 @@ router.post('/prospects', authenticate, requireAdmin, async (req, res) => {
         industry: industry?.trim() || null,
         estimatedValue: estimatedValue ? parseFloat(estimatedValue) : null,
         status: status || 'lead',
-        source: source?.trim() || (referrer ? `Referido por ${referrer.companyName || referrer.name}` : 'Prospección directa'),
+        source: source?.trim() || (referrer ? `Recomendado por ${referrer.companyName || referrer.name} (Cód. ${referrer.referralCode})` : 'Prospección directa'),
         referralCode: referrer ? referrer.referralCode : cleanReferralCode,
         referralId: refRecord ? refRecord.id : null,
         notes: notes?.trim() || null,
@@ -1671,6 +1978,11 @@ router.post('/prospects', authenticate, requireAdmin, async (req, res) => {
         appointments: true,
       }
     });
+
+    // Sincronizar estado del Referral con el prospecto
+    if (refRecord || cleanReferralCode) {
+      await referralService.syncReferralStatusFromProspect(prospect, prisma);
+    }
 
     if (referrer && refRecord && status === 'won' && refRecord.creditsGenerated === 0) {
       const tier = referralService.getTier(referrer.level || 1);
@@ -1746,6 +2058,11 @@ router.put('/prospects/:id', authenticate, requireAdmin, async (req, res) => {
           });
 
           if (!refRecord) {
+            let initialRefStatus = 'registered';
+            if (prospect.status === 'contacted') initialRefStatus = 'contacted';
+            else if (prospect.status === 'won' || ['meeting', 'proposal_sent', 'negotiating'].includes(prospect.status)) initialRefStatus = 'negotiating';
+            else if (prospect.status === 'lost') initialRefStatus = 'inactive';
+
             refRecord = await prisma.referral.create({
               data: {
                 referrerId: referrer.id,
@@ -1754,14 +2071,25 @@ router.put('/prospects/:id', authenticate, requireAdmin, async (req, res) => {
                 contactEmail: prospect.email,
                 contactPhone: prospect.phone,
                 notes: `Vinculado en CRM con código ${activeCode}`,
-                status: prospect.status === 'won' ? 'converted' : 'registered',
+                status: initialRefStatus,
+                origin: 'admin_code',
               }
             });
           }
 
+          if (refRecord && prospect.referralId !== refRecord.id) {
+            await prisma.prospect.update({
+              where: { id: prospect.id },
+              data: { referralId: refRecord.id }
+            });
+            prospect.referralId = refRecord.id;
+          }
+
+          // Sincronizar estado del Referral con el prospecto
+          await referralService.syncReferralStatusFromProspect(prospect, prisma);
+
           const lvl = referrer.level || 1;
-          const tierNames = { 1: 'Member (Nivel 1)', 2: 'Partner (Nivel 2)', 3: 'VIP (Nivel 3)' };
-          const amounts = { 1: 1500, 2: 2500, 3: 3500 };
+          const tier = referralService.getTier(lvl);
 
           if (prospect.status === 'won' && refRecord.creditsGenerated === 0) {
             referralReward = {
@@ -1771,8 +2099,8 @@ router.put('/prospects/:id', authenticate, requireAdmin, async (req, res) => {
               referrerId: referrer.id,
               referrerName: referrer.companyName || referrer.name,
               level: lvl,
-              tierName: tierNames[lvl] || `Nivel ${lvl}`,
-              creditAmount: amounts[lvl] || 1500,
+              tierName: tier.badge,
+              creditAmount: tier.amount,
             };
           }
         }

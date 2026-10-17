@@ -15,8 +15,8 @@ async function sendInvitationEmail(user, options = {}) {
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        activationToken: token,
-        activationExpires: expires
+        invitationToken: token,
+        invitationExpires: expires
       }
     });
   }

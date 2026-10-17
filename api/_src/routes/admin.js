@@ -481,21 +481,29 @@ router.delete('/projects/:projectId/activities/:id', authenticate, requireAdmin,
   }
 });
 
-// POST /admin/credits — Add/adjust credits for a client
-router.post('/credits', authenticate, requireAdmin, async (req, res) => {
+// POST /admin/credits & /admin/clients/:id/credit-movements — Add/adjust credits for a client
+router.post(['/credits', '/clients/:id/credit-movements'], authenticate, requireAdmin, async (req, res) => {
   try {
-    const { clientId, amount, type, description } = req.body;
+    const clientId = req.params.id || req.body.clientId;
+    const { amount, type, description } = req.body;
 
     if (!clientId || amount === undefined || !description) {
       return res.status(400).json({ error: 'clientId, amount y description son requeridos.' });
     }
 
+    const validTypes = ['referral_converted', 'welcome_bonus', 'redeemed', 'adjustment'];
+    let creditType = 'adjustment';
+    if (type && validTypes.includes(type)) {
+      creditType = type;
+    }
+
     const movement = await prisma.creditMovement.create({
-      data: { clientId, amount, type: type || 'adjustment', description }
+      data: { clientId, amount: parseInt(amount, 10), type: creditType, description }
     });
 
     res.status(201).json(movement);
   } catch (err) {
+    console.error('[ADMIN] Error al registrar movimiento de créditos:', err);
     res.status(500).json({ error: 'Error al registrar movimiento de créditos.' });
   }
 });
@@ -540,6 +548,23 @@ router.put('/referrals/:id', authenticate, requireAdmin, async (req, res) => {
       return res.status(400).json({ error: err.message });
     }
     res.status(500).json({ error: err.message || 'Error al actualizar referido.' });
+  }
+});
+
+// POST /admin/referrals/:id/award-credits — Award referral credits directly by referralId
+router.post('/referrals/:id/award-credits', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const result = await referralService.awardCredits({
+      referralId: req.params.id,
+      customAmount: req.body.amount,
+      adminId: req.user.id,
+    });
+    res.json(result);
+  } catch (err) {
+    if (err.message && (err.message.includes('Ya se habían') || err.message.includes('Ya existe') || err.message.includes('No se encontró'))) {
+      return res.status(400).json({ error: err.message });
+    }
+    res.status(500).json({ error: err.message || 'Error al abonar créditos.' });
   }
 });
 
@@ -1589,7 +1614,7 @@ router.post('/prospects', authenticate, requireAdmin, async (req, res) => {
     if (!companyName || !companyName.trim()) {
       return res.status(400).json({ error: 'El nombre de la empresa es requerido.' });
     }
-
+    const cleanReferralCode = referralCode ? referralCode.trim().replace(/^HX-/i, '') : null;
     let refRecord = null;
     let referrer = null;
     let referralReward = null;

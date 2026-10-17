@@ -13,26 +13,42 @@ async function backup() {
     fs.mkdirSync(backupDir, { recursive: true });
   }
 
+  async function safeFetch(modelName, tableName) {
+    try {
+      return await prisma[modelName].findMany();
+    } catch (e) {
+      if (e.code === 'P2022' || e.code === 'P2021') {
+        try {
+          return await prisma.$queryRawUnsafe(`SELECT * FROM "${tableName}"`);
+        } catch (rawErr) {
+          console.warn(`Aviso: tabla ${tableName} no encontrada o vacia:`, rawErr.message);
+          return [];
+        }
+      }
+      throw e;
+    }
+  }
+
   const data = {
     metadata: {
       timestamp: new Date().toISOString(),
       databaseUrlSource: process.env.DATABASE_URL ? 'configured' : 'missing'
     },
-    users: await prisma.user.findMany(),
-    loginEvents: await prisma.loginEvent.findMany(),
-    pageViews: await prisma.pageView.findMany(),
-    projects: await prisma.project.findMany(),
-    projectActivities: await prisma.projectActivity.findMany(),
-    referrals: await prisma.referral.findMany(),
-    creditMovements: await prisma.creditMovement.findMany(),
-    payments: await prisma.payment.findMany(),
-    proposals: await prisma.proposal.findMany(),
-    prospects: await prisma.prospect.findMany(),
-    prospectDocuments: await prisma.prospectDocument.findMany(),
-    appointments: await prisma.appointment.findMany(),
-    teamTasks: await prisma.teamTask.findMany(),
-    historicalDeals: await prisma.historicalDeal.findMany(),
-    nfcCards: await prisma.nfcCard.findMany(),
+    users: await safeFetch('user', 'users'),
+    loginEvents: await safeFetch('loginEvent', 'login_events'),
+    pageViews: await safeFetch('pageView', 'page_views'),
+    projects: await safeFetch('project', 'projects'),
+    projectActivities: await safeFetch('projectActivity', 'project_activities'),
+    referrals: await safeFetch('referral', 'referrals'),
+    creditMovements: await safeFetch('creditMovement', 'credit_movements'),
+    payments: await safeFetch('payment', 'payments'),
+    proposals: await safeFetch('proposal', 'proposals'),
+    prospects: await safeFetch('prospect', 'prospects'),
+    prospectDocuments: await safeFetch('prospectDocument', 'prospect_documents'),
+    appointments: await safeFetch('appointment', 'appointments'),
+    teamTasks: await safeFetch('teamTask', 'team_tasks'),
+    historicalDeals: await safeFetch('historicalDeal', 'historical_deals'),
+    nfcCards: await safeFetch('nfcCard', 'nfc_cards'),
   };
 
   const filePath = path.join(backupDir, `backup_${timestamp}.json`);

@@ -107,15 +107,18 @@ Sigue este procedimiento estricto para desplegar cualquier cambio sin riesgo de 
 
 ## 6. Incidente C — localhost usa la BD de producción
 
-**Riesgo:**
-Actualmente los archivos `.env` y `api/.env` en el entorno local apuntan a la base de datos Neon de producción (`ep-silent-surf-...`). Cualquier prueba con mutaciones (POST, PUT, DELETE, scripts de seed o smoke tests) impacta datos reales de clientes.
+## 7. Interruptor de correos automáticos y guarda de seguridad
 
-**Recomendación de arquitectura (para implementar a futuro):**
-Crear una rama de base de datos aislada en la consola de Neon para desarrollo local:
-1. Entrar a [Neon Console](https://console.neon.tech/) → Proyecto HummingX BI.
-2. Ir a la pestaña **Branches** y hacer clic en **Create Branch**.
-3. Nombrar la rama como `dev` o `staging` con snapshot de la rama `main`.
-4. Copiar la connection string de la nueva rama `dev`.
-5. Reemplazar `DATABASE_URL` únicamente en los archivos locales `.env` y `api/.env`.
-6. Con esto, cualquier prueba de mutación local o migración experimental no afectará la base de producción.
+### Correos automáticos (EMAIL_AUTO_NOTIFICATIONS)
+Por ahora los correos son manuales; para volver a automáticos poner `EMAIL_AUTO_NOTIFICATIONS=1` en las variables de entorno de Vercel y local.
+- Con `EMAIL_AUTO_NOTIFICATIONS` apagado (default):
+  - `POST /admin/clients` y `POST /admin/prospects/:id/convert` crean registros sin enviar correos desatendidos, retornando `activationLink`.
+  - Las transiciones de fase de proyectos no envían correos automáticos (el admin usa el botón manual "Notificar al cliente esta fase").
+  - `resend-invitation` y `/auth/forgot-password` siguen operativos cuando el usuario o admin lo solicitan expresamente.
+- Para pruebas locales y suites E2E, usar `EMAIL_DRY_RUN=1` en `api/.env` para registrar envíos en consola sin contactar SMTP.
+
+### Guarda de base de datos segura (assert_safe_db)
+- El módulo `api/_scripts/assert_safe_db.js` valida que los scripts de prueba no muten BD de producción sin aislamiento ni consentimiento explícito.
+- `api/_scripts/protected.js` salvaguarda a usuarios de producción (como JM Nutriólogo y Zammir) contra cualquier mutación, empleando prefijos `ZZ-TEST` para todas las pruebas locales con limpieza automática garantizada.
+
 

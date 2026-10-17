@@ -103,6 +103,15 @@ export default function AdminProspectsPage() {
     submitting: false,
   });
 
+  // Modal para solicitar email real antes de convertir
+  const [emailModal, setEmailModal] = useState({
+    isOpen: false,
+    prospect: null,
+    email: '',
+    error: '',
+    submitting: false,
+  });
+
   // Form state for Prospect
   const [prospectForm, setProspectForm] = useState({
     companyName: '',
@@ -429,14 +438,17 @@ export default function AdminProspectsPage() {
     }
   };
 
-  const handleConvertProspect = async (prospect) => {
-    if (!window.confirm(`¿Convertir a "${prospect.companyName}" en Cliente Activo del portal? Esto creará su cuenta de cliente e iniciará su proyecto formal.`)) return;
-
+  const executeConvert = async (prospect, emailOverride = null, linkExisting = false) => {
     setConvertingId(prospect.id);
     try {
-      const { data } = await api.post(`/admin/prospects/${prospect.id}/convert`);
-      showNotification(`¡Felicidades! "${prospect.companyName}" ahora es un cliente activo.`);
+      const payload = {};
+      if (emailOverride) payload.email = emailOverride.trim().toLowerCase();
+      if (linkExisting) payload.linkExisting = true;
+
+      const { data } = await api.post(`/admin/prospects/${prospect.id}/convert`, payload);
+      showNotification('Cliente creado. No se envió correo; envíalo cuando quieras desde su ficha.');
       await fetchProspects();
+      setEmailModal({ isOpen: false, prospect: null, email: '', error: '', submitting: false });
 
       if (data.referralReward?.needsAward) {
         const rew = data.referralReward;
@@ -456,10 +468,45 @@ export default function AdminProspectsPage() {
       }
     } catch (err) {
       console.error(err);
-      alert('Error al convertir prospecto.');
+      if (err.response?.status === 409 && err.response?.data?.existingClient) {
+        const ec = err.response.data.existingClient;
+        const confirmLink = window.confirm(
+          `Ya existe un cliente con ese correo ("${ec.companyName || ec.name}"). ¿Deseas vincular este prospecto y crear un nuevo proyecto para él?`
+        );
+        if (confirmLink) {
+          return await executeConvert(prospect, emailOverride, true);
+        }
+      } else if (err.response?.status === 400 && (!prospect.email || !emailOverride)) {
+        setEmailModal({
+          isOpen: true,
+          prospect,
+          email: '',
+          error: 'Este prospecto no tiene correo registrado. Ingrésalo para continuar.',
+          submitting: false,
+        });
+      } else {
+        alert(err.response?.data?.error || 'Error al convertir prospecto.');
+      }
     } finally {
       setConvertingId(null);
     }
+  };
+
+  const handleConvertProspect = async (prospect) => {
+    if (!prospect.email) {
+      setEmailModal({
+        isOpen: true,
+        prospect,
+        email: '',
+        error: '',
+        submitting: false,
+      });
+      return;
+    }
+
+    if (!window.confirm(`¿Convertir a "${prospect.companyName}" en Cliente Activo del portal? Esto creará su cuenta de cliente e iniciará su proyecto formal.`)) return;
+
+    await executeConvert(prospect);
   };
 
   const handleOpenNewAppointment = (prospect) => {
@@ -1274,6 +1321,69 @@ export default function AdminProspectsPage() {
                 style={{ width: '100%', padding: '10px' }}
               >
                 Hacerlo más tarde
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Modal para ingresar correo real del prospecto antes de convertir */}
+      {emailModal.isOpen && createPortal(
+        <div style={{ position: 'fixed', inset: 0, zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', background: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(4px)' }}>
+          <div style={{ background: '#FFFFFF', borderRadius: '20px', maxWidth: '440px', width: '100%', padding: '28px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#111827', margin: '0 0 8px 0' }}>
+              Correo del Cliente Requerido
+            </h3>
+            <p style={{ fontSize: '13px', color: '#6B7280', margin: '0 0 20px 0', lineHeight: 1.5 }}>
+              Para convertir a <strong>{emailModal.prospect?.companyName}</strong> en cliente formal, ingresa su correo electrónico real.
+            </p>
+
+            {emailModal.error && (
+              <div style={{ background: '#FEF2F2', border: '1px solid #FCA5A5', color: '#B91C1C', padding: '10px 14px', borderRadius: '10px', fontSize: '13px', marginBottom: '16px' }}>
+                {emailModal.error}
+              </div>
+            )}
+
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#374151', marginBottom: '6px' }}>
+                Correo electrónico institucional o de contacto *
+              </label>
+              <input
+                type="email"
+                placeholder="ejemplo@empresa.com"
+                className="hx-input"
+                style={{ width: '100%' }}
+                value={emailModal.email}
+                onChange={(e) => setEmailModal(prev => ({ ...prev, email: e.target.value, error: '' }))}
+                autoFocus
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                type="button"
+                onClick={() => setEmailModal({ isOpen: false, prospect: null, email: '', error: '', submitting: false })}
+                className="btn-secondary"
+                style={{ flex: 1, padding: '12px' }}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={emailModal.submitting || !emailModal.email.trim()}
+                onClick={() => {
+                  const val = emailModal.email.trim();
+                  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+                    setEmailModal(prev => ({ ...prev, error: 'Por favor ingresa un correo con formato válido.' }));
+                    return;
+                  }
+                  executeConvert(emailModal.prospect, val);
+                }}
+                className="btn-primary"
+                style={{ flex: 1, padding: '12px', background: 'linear-gradient(135deg, #00C4CC 0%, #0099AA 100%)' }}
+              >
+                {emailModal.submitting ? 'Convirtiendo...' : 'Convertir Cliente'}
               </button>
             </div>
           </div>

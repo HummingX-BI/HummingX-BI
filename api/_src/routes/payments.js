@@ -138,8 +138,15 @@ router.put('/:id', authenticate, requireAdmin, async (req, res, next) => {
     if (title !== undefined) data.title = title;
     if (description !== undefined) data.description = description;
     if (amount !== undefined) data.amount = parseFloat(amount);
-    if (status !== undefined) data.status = status;
     if (dueDate !== undefined) data.dueDate = parseSafeDate(dueDate);
+    if (status !== undefined) {
+      data.status = status;
+      if (status === 'completed') {
+        data.paidAt = new Date();
+      } else {
+        data.paidAt = null;
+      }
+    }
     if (invoiceLink !== undefined) data.invoiceLink = invoiceLink;
     if (receiptLink !== undefined) data.receiptLink = receiptLink;
 

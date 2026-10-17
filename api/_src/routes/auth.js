@@ -7,7 +7,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const nodemailer = require('nodemailer');
+const { sendMailSafe } = require('../lib/mailer');
 const prisma = require('../lib/prisma');
 const referralService = require('../services/referralService');
 const { authenticate } = require('../middleware/auth');
@@ -19,15 +19,6 @@ const {
 } = require('../middleware/security');
 
 const router = express.Router();
-
-// ─── Email transporter ────────────────────────────────────────────────────────
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
 
 // ─── Login Tracking Helper ───────────────────────────────────────────────────
 async function trackLogin(req, userId, kind = 'login') {
@@ -419,13 +410,13 @@ router.post('/forgot-password', forgotPasswordLimiter, async (req, res) => {
     // On serverless (Vercel), we MUST await the email send before returning the response,
     // otherwise the function freezes the event loop immediately and the email is dropped.
     try {
-      await transporter.sendMail({
+      await sendMailSafe({
         from: `"HummingX BI" <${process.env.EMAIL_USER}>`,
         to: user.email,  // SECURITY: Send to DB email, NOT the user-supplied email
         subject: 'Recuperación de contraseña - HummingX BI',
         html: buildResetEmail(user.name, resetLink),
-      });
-      console.log(`[AUTH] Reset email successfully sent to: ${user.email}`);
+      }, { kind: 'forgot_password' });
+      console.log(`[AUTH] Reset email successfully processed for: ${user.email}`);
     } catch (emailErr) {
       console.error('[AUTH] Error sending reset email:', emailErr.message);
     }

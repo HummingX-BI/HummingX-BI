@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Building2, User, Mail, Phone, FileText, Send, Sparkles } from 'lucide-react';
 import api from '../../../lib/api';
 
@@ -35,9 +36,27 @@ export default function RecommendModal({ isOpen, onClose, onCreated }) {
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-gray-100 overflow-hidden relative animate-scale-up">
+  return createPortal(
+    <div
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      className="animate-fade-in"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 99999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '16px',
+        backgroundColor: 'rgba(0, 0, 0, 0.65)',
+        backdropFilter: 'blur(6px)',
+        WebkitBackdropFilter: 'blur(6px)'
+      }}
+    >
+      <div
+        className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-gray-100 overflow-hidden relative animate-scale-up"
+        style={{ maxHeight: '92vh', display: 'flex', flexDirection: 'column' }}
+      >
         {/* Header */}
         <div className="bg-gradient-to-r from-[#1B0C2E] to-[#2E124D] text-white p-6 relative">
           <button
@@ -173,6 +192,7 @@ export default function RecommendModal({ isOpen, onClose, onCreated }) {
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

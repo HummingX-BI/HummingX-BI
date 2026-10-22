@@ -110,9 +110,9 @@ Sigue este procedimiento estricto para desplegar cualquier cambio sin riesgo de 
 ## 7. Interruptor de correos automáticos y guarda de seguridad
 
 ### Correos automáticos (EMAIL_AUTO_NOTIFICATIONS)
-Por ahora los correos son manuales; para volver a automáticos poner `EMAIL_AUTO_NOTIFICATIONS=1` en las variables de entorno de Vercel y local.
+La **invitación de primera vez** se envía siempre al crear un cliente (`POST /admin/clients` y `POST /admin/prospects/:id/convert` cuando crea cuenta nueva), sin importar este interruptor. Vigencia del enlace: 72 h (también en reenvíos).
+El resto de avisos (fases, diseño) siguen siendo manuales; para volverlos automáticos poner `EMAIL_AUTO_NOTIFICATIONS=1` en las variables de entorno de Vercel y local.
 - Con `EMAIL_AUTO_NOTIFICATIONS` apagado (default):
-  - `POST /admin/clients` y `POST /admin/prospects/:id/convert` crean registros sin enviar correos desatendidos, retornando `activationLink`.
   - Las transiciones de fase de proyectos no envían correos automáticos (el admin usa el botón manual "Notificar al cliente esta fase").
   - `resend-invitation` y `/auth/forgot-password` siguen operativos cuando el usuario o admin lo solicitan expresamente.
 - Para pruebas locales y suites E2E, usar `EMAIL_DRY_RUN=1` en `api/.env` para registrar envíos en consola sin contactar SMTP.

@@ -470,7 +470,7 @@ export default function AdminProspectsPage() {
       if (linkExisting) payload.linkExisting = true;
 
       const { data } = await api.post(`/admin/prospects/${prospect.id}/convert`, payload);
-      showNotification('Cliente creado. No se envió correo; envíalo cuando quieras desde su ficha.');
+      showNotification(data.message || 'Cliente creado.');
       await fetchProspects();
       setEmailModal({ isOpen: false, prospect: null, email: '', error: '', submitting: false });
 

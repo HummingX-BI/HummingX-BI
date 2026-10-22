@@ -9,8 +9,8 @@ async function sendInvitationEmail(user, options = {}) {
 
   if (!token) {
     token = crypto.randomBytes(32).toString('hex');
-    const expires = new Date();
-    expires.setHours(expires.getHours() + 48);
+    // Misma vigencia que la invitación original: 72 h (3 días)
+    const expires = new Date(Date.now() + 72 * 60 * 60 * 1000);
 
     await prisma.user.update({
       where: { id: user.id },

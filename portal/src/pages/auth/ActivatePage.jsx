@@ -2,211 +2,246 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../lib/api';
-import { Eye, EyeOff, Lock, CheckCircle, AlertCircle, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, Lock, CheckCircle, AlertCircle, ArrowRight, Clock } from 'lucide-react';
 import { WelcomeAudio } from '../../lib/welcomeAudio';
 import './WelcomeActivate.css';
 
 const logoSrc = '/logo.png';
 
+const HERO_WORDS = [
+  { text: 'Bienvenido', cls: '' },
+  { text: 'a', cls: '' },
+  { text: 'HummingX', cls: 'brand-name' },
+  { text: 'BI', cls: 'brand-name' },
+];
+
+const MIDDLE_WORDS = [
+  { text: 'Gracias', cls: '' },
+  { text: 'por', cls: '' },
+  { text: 'confiar', cls: 'text-cyan-400' },
+  { text: 'en', cls: '' },
+  { text: 'nosotros.', cls: '' },
+  { text: 'Nos', cls: '' },
+  { text: 'emociona', cls: 'text-purple-400' },
+  { text: 'acompañarte', cls: '' },
+  { text: 'en', cls: '' },
+  { text: 'este', cls: '' },
+  { text: 'viaje', cls: '' },
+  { text: 'y', cls: '' },
+  { text: 'ver', cls: '' },
+  { text: 'crecer', cls: 'text-blue-400' },
+  { text: 'tu', cls: '' },
+  { text: 'negocio.', cls: '' },
+];
+
+/*
+ * Línea de tiempo en "pantallas" de scroll (1 = una altura de viewport).
+ * La pista mide END + 1 pantallas (ver .welcome-track en WelcomeActivate.css: 490%).
+ */
+const T = {
+  heroOut:  [0.45, 1.0],
+  midIn:    [0.85, 1.25],
+  midWords: [1.05, 2.15],
+  midOut:   [2.35, 2.7],
+  placeIn:  [2.6, 2.95],
+  placeOut: [3.25, 3.55],
+  splashAt: 3.45,
+  end: 3.9,
+};
+
+const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
+const range = (p, [a, b]) => clamp01((p - a) / (b - a));
+const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
 function WelcomeScrollSequence({ onComplete }) {
-  const hasEnteredRef = useRef(false);
+  const rootRef = useRef(null);
+  const heroPanelRef = useRef(null);
+  const midPanelRef = useRef(null);
+  const placePanelRef = useRef(null);
+  const splashRef = useRef(null);
+  const hintRef = useRef(null);
+  const progressRef = useRef(null);
+  const midWordRefs = useRef([]);
+  const [exiting, setExiting] = useState(false);
 
   useEffect(() => {
-    // Restauramos scroll a 0 por si acaso
-    window.scrollTo(0, 0);
+    const root = rootRef.current;
+    if (!root) return undefined;
+
+    const html = document.documentElement;
     const originalBodyBg = document.body.style.backgroundColor;
     document.body.style.backgroundColor = '#040810';
-    document.documentElement.classList.add('hide-scrollbar-global');
+    html.classList.add('welcome-lock');
 
-    const heroWords = [
-      { text: 'Bienvenido',  classes: [] },
-      { text: 'a',  classes: [] },
-      { text: 'HummingX', classes: ['brand-name'] },
-      { text: 'BI', classes: ['brand-name'] },
-    ];
+    root.scrollTop = 0;
+    try { root.focus({ preventScroll: true }); } catch { /* noop */ }
 
-    const heroEl = document.getElementById('hero-text');
-    if (heroEl && heroEl.children.length === 0) {
-      heroWords.forEach((w, i) => {
-        const span = document.createElement('span');
-        span.className = 'word ' + w.classes.join(' ');
-        span.textContent = w.text + (i < heroWords.length - 1 ? '\u00A0' : '');
-        span.style.transitionDelay = `${i * 0.15}s`;
-        heroEl.appendChild(span);
-      });
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const heroPanel = heroPanelRef.current;
+    const midPanel = midPanelRef.current;
+    const placePanel = placePanelRef.current;
+    const splash = splashRef.current;
+    const hint = hintRef.current;
+    const bar = progressRef.current;
+    const words = midWordRefs.current.filter(Boolean);
+    const n = words.length;
+
+    let vh = root.clientHeight || window.innerHeight;
+    let target = 0;
+    let current = 0;
+    let raf = 0;
+    let lastTs = 0;
+    let splashOn = false;
+    let hintTimer = null;
+
+    // Pequeño desplazamiento según el tamaño de pantalla (menos en móvil = más limpio)
+    const shift = () => Math.min(64, vh * 0.07);
+
+    function panelStyle(el, opacity, y, scale = 1) {
+      if (!el) return;
+      el.style.opacity = opacity.toFixed(3);
+      el.style.transform = reduceMotion
+        ? 'none'
+        : `translate3d(0, ${y.toFixed(1)}px, 0) scale(${scale.toFixed(4)})`;
+      el.style.visibility = opacity <= 0.001 ? 'hidden' : 'visible';
     }
 
-    const middleWords = [
-      { text: 'Gracias', classes: [] },
-      { text: 'por', classes: [] },
-      { text: 'confiar', classes: ['text-cyan-400'] },
-      { text: 'en', classes: [] },
-      { text: 'nosotros.', classes: [] },
-      { text: 'Nos', classes: [] },
-      { text: 'emociona', classes: ['text-purple-400'] },
-      { text: 'acompañarte', classes: [] },
-      { text: 'en', classes: [] },
-      { text: 'este', classes: [] },
-      { text: 'viaje', classes: [] },
-      { text: 'y', classes: [] },
-      { text: 'ver', classes: [] },
-      { text: 'crecer', classes: ['text-blue-400'] },
-      { text: 'tu', classes: [] },
-      { text: 'negocio.', classes: [] },
-    ];
+    function render(p) {
+      const d = shift();
 
-    const middleEl = document.getElementById('middle-text');
-    if (middleEl && middleEl.children.length === 0) {
-      middleWords.forEach((w, i) => {
-        const span = document.createElement('span');
-        span.className = 'word ' + w.classes.join(' ');
-        span.textContent = w.text + (i < middleWords.length - 1 ? '\u00A0' : '');
-        middleEl.appendChild(span);
-      });
+      // 1) Hero: sale hacia arriba con un leve zoom-out
+      const heroOut = easeInOut(range(p, T.heroOut));
+      panelStyle(heroPanel, 1 - heroOut, -heroOut * d, 1 - heroOut * 0.05);
+
+      // 2) Mensaje: entra desde abajo, las palabras se "encienden" una por una
+      const midIn = easeOut(range(p, T.midIn));
+      const midOut = easeInOut(range(p, T.midOut));
+      panelStyle(midPanel, midIn * (1 - midOut), (1 - midIn) * d - midOut * d, 0.97 + midIn * 0.03);
+
+      const s = range(p, T.midWords);
+      for (let i = 0; i < n; i++) {
+        const start = (i / n) * 0.82;
+        const t = easeOut(clamp01((s - start) / 0.18));
+        const w = words[i];
+        w.style.opacity = (0.14 + 0.86 * t).toFixed(3);
+        w.style.transform = reduceMotion ? 'none' : `translate3d(0, ${((1 - t) * 14).toFixed(1)}px, 0)`;
+      }
+
+      // 3) "Tu portal está preparado"
+      const placeIn = easeOut(range(p, T.placeIn));
+      const placeOut = easeInOut(range(p, T.placeOut));
+      panelStyle(placePanel, placeIn * (1 - placeOut), (1 - placeIn) * d - placeOut * d, 1 + placeOut * 0.04);
+
+      // 4) Splash final (sus elementos tienen transiciones escalonadas en CSS)
+      const wantSplash = p >= T.splashAt;
+      if (wantSplash !== splashOn) {
+        splashOn = wantSplash;
+        splash?.classList.toggle('active', wantSplash);
+      }
+
+      if (bar) bar.style.transform = `scaleX(${clamp01(p / T.end).toFixed(4)})`;
     }
 
-    const TOTAL_SECTIONS = 4.5;
-    const trackHeight = window.innerHeight * TOTAL_SECTIONS;
-    const trackEl = document.getElementById('track');
-    if (trackEl) trackEl.style.height = trackHeight + 'px';
-
-    const panelHero  = document.getElementById('panel-hero');
-    const panelCards = document.getElementById('panel-cards');
-    const panelPlace = document.getElementById('panel-place');
-    const finalSplash = document.getElementById('final-splash');
-    const heroSub = document.getElementById('hero-sub');
-
-    let heroWordsNodes = null;
-    let middleWordsNodes = null;
-
-    setTimeout(() => {
-      heroWordsNodes = heroEl?.querySelectorAll('.word') || null;
-      middleWordsNodes = middleEl?.querySelectorAll('.word') || null;
-    }, 50);
-
-    function showPanel(el) {
-      [panelHero, panelCards, panelPlace].forEach(p => p?.classList.remove('active'));
-      if (el) el.classList.add('active');
+    function tick(ts) {
+      raf = 0;
+      const dt = lastTs ? Math.min(64, ts - lastTs) : 16.67;
+      lastTs = ts;
+      const diff = target - current;
+      if (reduceMotion || Math.abs(diff) < 0.0008) {
+        current = target;
+      } else {
+        // Suavizado independiente de los fps (60/90/120 Hz se sienten igual)
+        const k = 1 - Math.pow(1 - 0.16, dt / 16.67);
+        current += diff * k;
+      }
+      render(current);
+      if (current !== target) raf = requestAnimationFrame(tick);
+      else lastTs = 0;
     }
 
-    function triggerCards(secProgress) {
-      const progress = Math.max(0, Math.min(1, (secProgress - 1.2) / 0.8));
-      middleWordsNodes?.forEach((w, i) => {
-        const threshold = i / (middleWordsNodes?.length || 1);
-        if (progress > threshold) w.classList.add('shown');
-        else w.classList.remove('shown');
-      });
+    function kick() {
+      if (!raf) raf = requestAnimationFrame(tick);
     }
 
-    function triggerPlace() {
-      document.getElementById('place-text')?.classList.add('shown');
-      document.getElementById('place-sub')?.classList.add('shown');
-    }
-
-    function showSplash() {
-      if (finalSplash) finalSplash.classList.add('active');
-    }
-
-    function hideSplash() {
-      if (finalSplash) finalSplash.classList.remove('active');
-    }
-
-    let scrollTimeout = null;
-    const globalHint = document.getElementById('global-scroll-hint');
-
-    function resetScrollHint(sec) {
-      if (globalHint) globalHint.classList.remove('visible');
-      if (scrollTimeout) clearTimeout(scrollTimeout);
-      
-      // If we are not at the very end, set a timeout to show the hint
-      if (sec < 3.2) {
-        scrollTimeout = setTimeout(() => {
-          if (globalHint) globalHint.classList.add('visible');
-        }, 4000);
+    function scheduleHint() {
+      hint?.classList.remove('visible');
+      if (hintTimer) clearTimeout(hintTimer);
+      if (target < T.splashAt) {
+        hintTimer = setTimeout(() => hint?.classList.add('visible'), 3800);
       }
     }
 
-    let ticking = false;
     function onScroll() {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          handleScroll();
-          ticking = false;
-        });
-        ticking = true;
-      }
+      target = root.scrollTop / vh;
+      scheduleHint();
+      kick();
     }
 
-    function handleScroll() {
-      const scrollY = window.scrollY;
-      const vh = window.innerHeight;
-      const sec = scrollY / vh;
-      resetScrollHint(sec);
-
-      if (sec < 1.2) {
-        showPanel(panelHero);
-        heroWordsNodes?.forEach((w, i) => {
-          if (sec >= i * 0.15) w.classList.add('shown');
-          else w.classList.remove('shown');
-        });
-        if (sec > 0.6 && heroSub) heroSub.classList.add('shown');
-        else if (sec <= 0.6 && heroSub) heroSub.classList.remove('shown');
-      }
-      else if (sec < 2.5) {
-        showPanel(panelCards);
-        triggerCards(sec);
-      }
-      else if (sec < 3.2) {
-        showPanel(panelPlace);
-        triggerPlace();
-        hideSplash();
-      }
-      else {
-        showPanel(null);
-        showSplash();
-      }
+    function onResize() {
+      vh = root.clientHeight || window.innerHeight;
+      target = root.scrollTop / vh;
+      kick();
     }
 
-    window.addEventListener('scroll', onScroll, { passive: true });
-    if (panelHero) panelHero.classList.add('active');
+    root.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onResize);
 
-    try {
-      WelcomeAudio.start();
-    } catch (e) { console.warn(e) }
+    render(0);
+    scheduleHint();
+    // El hero se anima solo al entrar (no espera al primer scroll)
+    const introTimer = setTimeout(() => root.classList.add('is-ready'), 60);
+
+    try { WelcomeAudio.start(); } catch (e) { console.warn(e); }
 
     return () => {
-      window.removeEventListener('scroll', onScroll);
-      if (scrollTimeout) clearTimeout(scrollTimeout);
+      root.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onResize);
+      if (raf) cancelAnimationFrame(raf);
+      if (hintTimer) clearTimeout(hintTimer);
+      clearTimeout(introTimer);
       document.body.style.backgroundColor = originalBodyBg;
-      document.documentElement.classList.remove('hide-scrollbar-global');
+      html.classList.remove('welcome-lock');
     };
   }, []);
 
   const handleEnter = () => {
+    if (exiting) return;
+    setExiting(true);
     WelcomeAudio.startDashboardFadeOut(4);
-    const overlay = document.getElementById('exit-overlay');
-    if (overlay) overlay.classList.add('active');
-    setTimeout(() => {
-      onComplete();
-    }, 900);
+    setTimeout(() => onComplete(), 900);
   };
 
   return (
-    <div className="welcome-root">
-      <div className="ambient">
-        <div className="light light-purple" id="lp"></div>
-        <div className="light light-cyan"   id="lc"></div>
-        <div className="light light-blue"   id="lb"></div>
+    <div className="welcome-root" ref={rootRef} tabIndex={-1}>
+      <div className="welcome-progress" aria-hidden="true">
+        <div className="welcome-progress__bar" ref={progressRef}></div>
       </div>
-      <div className="particles"></div>
 
-      <div className="scroll-track" id="track"></div>
+      <div className="ambient" aria-hidden="true">
+        <div className="light light-purple"></div>
+        <div className="light light-cyan"></div>
+        <div className="light light-blue"></div>
+      </div>
+      <div className="particles" aria-hidden="true"></div>
+
+      <div className="welcome-track" aria-hidden="true"></div>
 
       <div className="stage">
-        <div className="panel" id="panel-hero">
-          <h1 className="hero-greeting" id="hero-text"></h1>
-          <p className="hero-sub" id="hero-sub">
-            Tu portal interactivo está listo.<br/>
+        <div className="panel" ref={heroPanelRef}>
+          <h1 className="hero-greeting">
+            {HERO_WORDS.map((w, i) => (
+              <span
+                key={i}
+                className={`word word--intro ${w.cls}`}
+                style={{ transitionDelay: `${0.15 + i * 0.14}s` }}
+              >
+                {w.text}{i < HERO_WORDS.length - 1 ? ' ' : ''}
+              </span>
+            ))}
+          </h1>
+          <p className="hero-sub">
+            Tu portal interactivo está listo.<br />
             Nos entusiasma acompañarte en cada paso de tu proyecto.
           </p>
           <div className="scroll-hint">
@@ -215,34 +250,38 @@ function WelcomeScrollSequence({ onComplete }) {
           </div>
         </div>
 
-        <div className="panel" id="panel-cards">
-          <h2 className="middle-greeting" id="middle-text"></h2>
+        <div className="panel" ref={midPanelRef}>
+          <h2 className="middle-greeting">
+            {MIDDLE_WORDS.map((w, i) => (
+              <span key={i} ref={(el) => { midWordRefs.current[i] = el; }} className={`word ${w.cls}`}>
+                {w.text}{i < MIDDLE_WORDS.length - 1 ? ' ' : ''}
+              </span>
+            ))}
+          </h2>
         </div>
 
-        <div className="panel" id="panel-place">
-          <p className="place-text" id="place-text">Tu portal interactivo<br/>ya está preparado.</p>
-          <p className="place-sub"  id="place-sub">Prepárate para llevar tu operación al siguiente nivel.</p>
+        <div className="panel" ref={placePanelRef}>
+          <p className="place-text">Tu portal interactivo<br />ya está preparado.</p>
+          <p className="place-sub">Prepárate para llevar tu operación al siguiente nivel.</p>
         </div>
       </div>
 
-      <div id="final-splash" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <img src={logoSrc} alt="HummingX BI" className="splash-title" style={{ width: '90px', height: '90px', objectFit: 'contain', margin: '0 auto 24px', display: 'block', filter: 'drop-shadow(0 0 20px rgba(0, 188, 212, 0.3))' }} />
-        <h1 className="splash-title hero-greeting" style={{ margin: '0 0 16px', color: '#fff' }}>
-          Todo <span style={{ background: 'linear-gradient(135deg, #00C4CC, #00E5FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>listo.</span>
+      <div id="final-splash" ref={splashRef}>
+        <img src={logoSrc} alt="HummingX BI" className="splash-logo" />
+        <h1 className="splash-title">
+          Todo <span className="splash-title__accent">listo.</span>
         </h1>
-        <p className="splash-sub" style={{ fontSize: '1.2rem', color: 'rgba(255,255,255,0.7)', margin: '0 0 40px' }}>
-          Tu ecosistema digital está configurado y altamente asegurado.
-        </p>
-        <button onClick={handleEnter} style={{ background: 'none', border: 'none', color: '#00C4CC', fontSize: '1.1rem', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '50px', transition: 'all 0.3s' }} onMouseEnter={(e) => e.target.style.textShadow = '0 0 10px rgba(0,196,204,0.5)'} onMouseLeave={(e) => e.target.style.textShadow = 'none'}>
+        <p className="splash-sub">Tu ecosistema digital está configurado y altamente asegurado.</p>
+        <button type="button" className="splash-cta" onClick={handleEnter}>
           Acceder al portal <ArrowRight size={20} />
         </button>
       </div>
 
-      <div id="global-scroll-hint" className="global-scroll-hint">
+      <div ref={hintRef} className="global-scroll-hint" aria-hidden="true">
         <span>Sigue deslizando hacia abajo</span>
         <div className="scroll-arrow"></div>
       </div>
-      <div id="exit-overlay"></div>
+      <div id="exit-overlay" className={exiting ? 'active' : ''}></div>
     </div>
   );
 }
@@ -260,6 +299,7 @@ export default function ActivatePage() {
   const [error, setError] = useState('');
   const [activatedUser, setActivatedUser] = useState(null);
   const [alreadyActivated, setAlreadyActivated] = useState(false);
+  const [linkInvalid, setLinkInvalid] = useState(null); // null | 'expired' | 'replaced'
   const [checkingToken, setCheckingToken] = useState(token !== 'test');
 
   useEffect(() => {
@@ -274,8 +314,14 @@ export default function ActivatePage() {
         }
       })
       .catch(err => {
-        // Si el token ya fue activado, no existe o expiró, mostramos la pantalla limpia para iniciar sesión
-        setAlreadyActivated(true);
+        const status = err.response?.status;
+        if (err.response?.data?.alreadyActivated) setAlreadyActivated(true);
+        // 400 = el enlace caducó (72 h). 404 = el token ya no existe: lo reemplazó un
+        // correo de recordatorio más reciente. Antes ambos casos mostraban
+        // "¡Ya creaste tu contraseña!", que es falso y deja al cliente atorado.
+        else if (status === 400) setLinkInvalid('expired');
+        else if (status === 404) setLinkInvalid('replaced');
+        // Error de red/servidor: dejamos el formulario; el POST validará de nuevo.
       })
       .finally(() => setCheckingToken(false));
   }, [token]);
@@ -312,6 +358,8 @@ export default function ActivatePage() {
     } catch (err) {
       if (err.response?.data?.alreadyActivated || err.response?.data?.error?.includes('ya fue activada') || err.response?.data?.error?.includes('creado tu contraseña')) {
         setAlreadyActivated(true);
+      } else if (err.response?.data?.error?.includes('inválido o expirado')) {
+        setLinkInvalid('expired');
       } else {
         setError(err.response?.data?.error || 'El enlace de activación es inválido o ha expirado.');
       }
@@ -372,14 +420,31 @@ export default function ActivatePage() {
                 </div>
               </div>
             </div>
-            {!alreadyActivated && (
+            {!alreadyActivated && !linkInvalid && (
               <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)', marginTop: '12px' }}>
                 Crea tu contraseña para activar tu cuenta
               </p>
             )}
           </div>
 
-          {alreadyActivated ? (
+          {linkInvalid && !alreadyActivated ? (
+            <div className="activate-expired">
+              <div className="activate-expired__icon">
+                <Clock size={30} />
+              </div>
+              <h3 className="activate-expired__title">
+                {linkInvalid === 'expired' ? 'Este enlace ya caducó' : 'Este enlace ya no es válido'}
+              </h3>
+              <p className="activate-expired__text">
+                {linkInvalid === 'expired'
+                  ? 'Por seguridad, los enlaces de activación duran 3 días. Pídele a tu contacto de HummingX BI que te reenvíe la invitación y usa el enlace del correo nuevo.'
+                  : 'Te enviamos un correo más reciente con un enlace nuevo. Búscalo en tu bandeja (o en spam) y ábrelo desde ahí. Si no lo encuentras, pide que te reenvíen la invitación.'}
+              </p>
+              <button type="button" className="activate-expired__btn" onClick={() => navigate('/login')}>
+                Ir a Iniciar Sesión →
+              </button>
+            </div>
+          ) : alreadyActivated ? (
             <div style={{ textAlign: 'center', padding: '10px 0 16px' }}>
               <div style={{
                 width: '64px',

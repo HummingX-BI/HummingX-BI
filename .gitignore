@@ -2,6 +2,8 @@ node_modules/
 dist/
 .vercel
 .env*
+!.env.example
+!api/.env.example
 api/_src/generated/
 qr-output/
 backups/

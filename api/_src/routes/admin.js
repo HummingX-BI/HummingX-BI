@@ -103,12 +103,9 @@ router.post('/clients', authenticate, requireAdmin, adminLimiter, async (req, re
 
     const activationLink = `${process.env.FRONTEND_URL}/activate/${token}`;
     
-    // Send Email if automated notifications are enabled
-    let emailSent = false;
-    if (isAutoNotificationEnabled()) {
-      const inviteResult = await sendInvitationEmail(user, { token });
-      emailSent = inviteResult.emailSent;
-    }
+    // La invitación de primera vez SIEMPRE se envía al crear el cliente (no depende de
+    // EMAIL_AUTO_NOTIFICATIONS, que solo controla avisos de fase/diseño). EMAIL_DRY_RUN sigue aplicando.
+    const { emailSent } = await sendInvitationEmail(user, { token });
 
     res.status(201).json({
       ...user,
@@ -116,7 +113,7 @@ router.post('/clients', authenticate, requireAdmin, adminLimiter, async (req, re
       activationLink,
       message: emailSent
         ? 'Cliente creado exitosamente. Se envió la invitación por correo.'
-        : 'Cliente creado. Invitación pendiente de envío manual.'
+        : 'Cliente creado, pero el correo de invitación falló. Reenvíalo desde su ficha.'
     });
   } catch (err) {
     console.error('Create client error:', err);
@@ -2319,14 +2316,25 @@ router.post('/prospects/:id/convert', authenticate, requireAdmin, async (req, re
     const frontendUrl = process.env.FRONTEND_URL || 'https://portal.hummingxbi.com';
     const activationLink = user.invitationToken ? `${frontendUrl}/activate/${user.invitationToken}` : null;
 
+    // Cliente nuevo → enviar invitación de primera vez automáticamente.
+    // Cliente existente vinculado → no se reenvía nada (ya tiene cuenta).
+    let emailSent = false;
+    if (!isExistingClient && user.invitationToken) {
+      ({ emailSent } = await sendInvitationEmail(user, { token: user.invitationToken }));
+    }
+
     res.json({
       prospect: updatedProspect,
       client: user,
       project,
       referralReward,
-      emailSent: false,
+      emailSent,
       activationLink,
-      message: 'Cliente creado. No se envió correo; envíalo cuando quieras desde su ficha.'
+      message: isExistingClient
+        ? 'Proyecto vinculado al cliente existente.'
+        : emailSent
+          ? 'Cliente creado. Se envió la invitación por correo.'
+          : 'Cliente creado, pero el correo de invitación falló. Reenvíalo desde su ficha.'
     });
   } catch (err) {
     console.error('[ADMIN] Error in convert prospect:', err);

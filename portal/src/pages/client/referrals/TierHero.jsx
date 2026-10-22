@@ -76,7 +76,7 @@ export default function TierHero({
       <div className="relative z-10 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-8">
         
         {/* Left: Level Insignia & Member Title */}
-        <div className="flex items-center gap-5">
+        <div id="tour-referrals-tier" className="flex items-center gap-5">
           <div className="hx-tier-icon-wrap">
             <img
               src={current.icon}
@@ -109,7 +109,7 @@ export default function TierHero({
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5">
           
           {/* Radial Progress Ring & Giant Balance */}
-          <div className="flex items-center gap-4">
+          <div id="tour-referrals-balance" className="flex items-center gap-4">
             <div className="relative w-20 h-20 flex items-center justify-center shrink-0">
               <svg className="w-20 h-20 transform -rotate-90">
                 <circle
@@ -168,7 +168,7 @@ export default function TierHero({
           </div>
 
           {/* Code Pill & Buttons */}
-          <div className="border-t sm:border-t-0 sm:border-l border-white/10 pt-4 sm:pt-0 sm:pl-5 flex flex-col gap-2 w-full sm:w-auto">
+          <div id="tour-referrals-code" className="border-t sm:border-t-0 sm:border-l border-white/10 pt-4 sm:pt-0 sm:pl-5 flex flex-col gap-2 w-full sm:w-auto">
             <div className="flex items-center gap-2">
               <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
                 Tu Código de Socio

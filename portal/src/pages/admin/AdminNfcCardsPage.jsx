@@ -173,6 +173,8 @@ export default function AdminNfcCardsPage() {
   const [showQrModal, setShowQrModal] = useState(false);
   const [activeCardForQr, setActiveCardForQr] = useState(null);
   const [qrModalDataUrl, setQrModalDataUrl] = useState('');
+  // Color del QR: 'black' (default, fondo blanco) o 'white' (módulos blancos, fondo transparente)
+  const [qrColor, setQrColor] = useState('black');
   const [closingModal, setClosingModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [unlinking, setUnlinking] = useState(false);
@@ -639,16 +641,35 @@ export default function AdminNfcCardsPage() {
     }
   };
 
+  const qrColors = (color) => (color === 'white'
+    ? { dark: '#FFFFFF', light: '#00000000' } // blanco sobre transparente (para madera/acrílico oscuro)
+    : { dark: '#000000', light: '#FFFFFF' });
+  const qrSuffix = (color) => (color === 'white' ? '_Blanco' : '');
+
+  const renderQrPreview = async (card, color) => {
+    const redirectUrl = `https://hummingxbi.com/t/${card.code}`;
+    return QRCode.toDataURL(redirectUrl, {
+      width: 600,
+      margin: 2,
+      color: qrColors(color),
+      errorCorrectionLevel: 'Q',
+    });
+  };
+
+  const changeQrColor = async (color) => {
+    setQrColor(color);
+    if (!activeCardForQr) return;
+    try {
+      setQrModalDataUrl(await renderQrPreview(activeCardForQr, color));
+    } catch (err) {
+      console.error('Error generando QR:', err);
+    }
+  };
+
   const openQrPreview = async (card) => {
     setActiveCardForQr(card);
-    const redirectUrl = `https://hummingxbi.com/t/${card.code}`;
     try {
-      const dataUrl = await QRCode.toDataURL(redirectUrl, {
-        width: 600,
-        margin: 2,
-        color: { dark: '#000000', light: '#FFFFFF' },
-        errorCorrectionLevel: 'Q',
-      });
+      const dataUrl = await renderQrPreview(card, qrColor);
       setQrModalDataUrl(dataUrl);
       setShowQrModal(true);
     } catch (err) {
@@ -669,13 +690,13 @@ export default function AdminNfcCardsPage() {
         type: 'svg',
         margin: 0,
         errorCorrectionLevel: 'Q',
-        color: { dark: '#000000', light: '#FFFFFF' },
+        color: qrColors(qrColor),
       });
       const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `HummingX_QR_${card.code}_SinMargen.svg`;
+      link.download = `HummingX_QR_${card.code}${qrSuffix(qrColor)}_SinMargen.svg`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -690,7 +711,7 @@ export default function AdminNfcCardsPage() {
   const downloadQrPng = (card, dataUrl) => {
     const link = document.createElement('a');
     link.href = dataUrl;
-    link.download = `HummingX_QR_${card.code}.png`;
+    link.download = `HummingX_QR_${card.code}${qrSuffix(qrColor)}.png`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -1986,10 +2007,33 @@ export default function AdminNfcCardsPage() {
               Código vectorial de alta resolución listo para grabado láser o serigrafía en tarjetas físicas.
             </p>
 
+            <div style={{ display: 'inline-flex', gap: '4px', padding: '4px', background: '#F3F4F6', borderRadius: '9999px', marginBottom: '14px' }}>
+              {[['black', 'QR negro'], ['white', 'QR blanco']].map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => changeQrColor(value)}
+                  style={{
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '6px 16px',
+                    borderRadius: '9999px',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    background: qrColor === value ? '#111827' : 'transparent',
+                    color: qrColor === value ? '#FFFFFF' : '#6B7280',
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
             {qrModalDataUrl && (
               <div
                 style={{
-                  background: '#FFFFFF',
+                  // Fondo oscuro tipo madera para poder ver el QR blanco
+                  background: qrColor === 'white' ? '#3B2A1E' : '#FFFFFF',
                   padding: '16px',
                   borderRadius: '16px',
                   display: 'inline-block',

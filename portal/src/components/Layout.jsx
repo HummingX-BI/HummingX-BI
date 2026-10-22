@@ -75,38 +75,38 @@ export default function Layout({ children, customBreadcrumbLabel, fullWidth = fa
     }
   }, [user, tour.seen, isImpersonating]);
 
+  // Cada paso indica en qué página vive (`page`). En celular el menú lateral está
+  // oculto, así que los pasos del menú apuntan al botón ☰ (`mobileTarget`).
+  const MENU = { mobileTarget: '.mobile-menu-btn' };
   const tourSteps = [
-    { target: 'body', title: 'Bienvenido', content: '¡Bienvenido a tu Portal de Clientes HummingX! Vamos a dar un rápido recorrido guiado para que sepas dónde encontrar todo. Haz clic en "Siguiente" para comenzar.', placement: 'center' },
-    { target: '.tour-step-dashboard', title: 'Inicio', content: 'Este es tu panel principal donde verás el resumen de todo.', placement: 'right' },
-    { target: '#tour-active-project', title: 'Tu Proyecto Activo', content: 'Aquí verás el nombre de tu proyecto, en qué etapa se encuentra actualmente, y botones para revisar los avances.', placement: 'bottom' },
-    { target: '#tour-progress', title: 'Barra de Progreso', content: 'Este indicador te mostrará el avance general de todo el proyecto en tiempo real.', placement: 'top' },
-    { target: '#tour-payments', title: 'Próximo Pago', content: 'Aquí podrás ver la fecha y monto de tu siguiente pago. Haz clic para ver el plan de pagos.', placement: 'top' },
-    { target: '#tour-milestone', title: 'Siguiente Hito', content: 'El siguiente gran objetivo a cumplir en la ruta de tu proyecto.', placement: 'top' },
-    { target: '#tour-credits', title: 'Créditos HX', content: 'Acumula créditos que podrás canjear por nuevos módulos o servicios.', placement: 'top' },
-    { target: '#tour-referrals', title: 'Referidos', content: 'La cantidad de empresas que nos has recomendado. ¡Invita a más para ganar créditos!', placement: 'top' },
-    { target: '#tour-level', title: 'Tu Nivel HummingX', content: 'Aquí puedes ver tu nivel actual de cliente, tus beneficios acumulados y lo que necesitas para subir de categoría.', placement: 'top' },
-    { target: '#tour-activity', title: 'Actividad Reciente', content: 'Un resumen de las últimas actualizaciones, entregas y mensajes de tu proyecto.', placement: 'top' },
-    { target: '#tour-recommendations', title: 'Recomendaciones', content: 'Sugerencias para escalar tu negocio digital o aprovechar al máximo tus créditos disponibles.', placement: 'top' },
-    { target: '.tour-step-project', title: 'Mi Proyecto', content: 'Aquí puedes ver los detalles a fondo. En el siguiente paso te llevaremos ahí automáticamente.', placement: 'right' },
-    { target: '#tour-project-timeline', title: 'Ruta de trabajo', content: 'En esta sección podrás ver toda la metodología y los pasos que seguiremos hasta lanzar tu proyecto.', placement: 'bottom' },
-    { target: '#tour-active-stage', title: 'Detalles de la etapa', content: 'Te mantendremos al tanto de qué estamos haciendo exactamente y si necesitamos que revises algo.', placement: 'top' },
-    { target: '#tour-next-step', title: 'Próximo Paso', content: 'Aquí verás el hito o etapa inmediatamente posterior y lo que viene en el proceso de tu proyecto.', placement: 'top' },
-    { target: '#entregables', title: 'Entregables (Documentos)', content: 'Aquí podrás descargar contratos, cotizaciones, manuales y cualquier documento relacionado a tu proyecto.', placement: 'top' },
-    { target: '#tour-bitacora', title: 'Bitácora de Desarrollo', content: 'El registro cronológico detallado con todas las actividades, notas y avances que nuestro equipo va realizando día a día.', placement: 'top' },
-    { target: '#tour-referrals-balance', title: 'Mis Referidos & Créditos HX', content: 'Aquí puedes consultar tu saldo acumulado de Créditos HX, canjeables por horas de consultoría y mejoras en tu sistema.', placement: 'top' },
-    { target: '#tour-referrals-tier', title: 'Tu Nivel de Socio', content: 'Conforme recomiendes y se concreten nuevos proyectos, subirás de Member a Partner o VIP, desbloqueando mayores recompensas.', placement: 'top' },
-    { target: '#tour-referrals-code', title: 'Tu Código de Socio', content: 'Comparte tu código único con directores o empresarios. Al contactarnos por WhatsApp o llamada con tu código, quedarán vinculados a tu cuenta para otorgarte créditos.', placement: 'top' },
-    { target: '.tour-step-support', title: 'Soporte 24/7', content: 'Si tienes cualquier duda, usa este botón para mandarnos mensaje directo por WhatsApp. ¡Eso es todo, disfruta tu portal!', placement: 'right' },
+    { page: '/dashboard', target: 'body', title: 'Bienvenido', content: '¡Bienvenido a tu Portal de Clientes HummingX! Vamos a dar un rápido recorrido guiado para que sepas dónde encontrar todo. Haz clic en "Siguiente" para comenzar.', placement: 'center' },
+    { page: '/dashboard', target: '.tour-step-dashboard', ...MENU, title: 'Inicio', content: 'Este es tu panel principal donde verás el resumen de todo.', mobileContent: 'Desde este menú (☰) navegas por todo tu portal. "Inicio" es tu panel principal con el resumen de todo.', placement: 'right' },
+    { page: '/dashboard', target: '#tour-active-project', title: 'Tu Proyecto Activo', content: 'Aquí verás el nombre de tu proyecto, en qué etapa se encuentra actualmente, y botones para revisar los avances.', placement: 'bottom' },
+    { page: '/dashboard', target: '#tour-progress', title: 'Barra de Progreso', content: 'Este indicador te mostrará el avance general de todo el proyecto en tiempo real.', placement: 'top' },
+    { page: '/dashboard', target: '#tour-payments', title: 'Próximo Pago', content: 'Aquí podrás ver la fecha y monto de tu siguiente pago. Haz clic para ver el plan de pagos.', placement: 'top' },
+    { page: '/dashboard', target: '#tour-milestone', title: 'Siguiente Hito', content: 'El siguiente gran objetivo a cumplir en la ruta de tu proyecto.', placement: 'top' },
+    { page: '/dashboard', target: '#tour-credits', title: 'Créditos HX', content: 'Acumula créditos que podrás canjear por nuevos módulos o servicios.', placement: 'top' },
+    { page: '/dashboard', target: '#tour-referrals', title: 'Referidos', content: 'La cantidad de empresas que nos has recomendado. ¡Invita a más para ganar créditos!', placement: 'top' },
+    { page: '/dashboard', target: '#tour-level', title: 'Tu Nivel HummingX', content: 'Aquí puedes ver tu nivel actual de cliente, tus beneficios acumulados y lo que necesitas para subir de categoría.', placement: 'top' },
+    { page: '/dashboard', target: '#tour-activity', title: 'Actividad Reciente', content: 'Un resumen de las últimas actualizaciones, entregas y mensajes de tu proyecto.', placement: 'top' },
+    { page: '/dashboard', target: '#tour-recommendations', title: 'Recomendaciones', content: 'Sugerencias para escalar tu negocio digital o aprovechar al máximo tus créditos disponibles.', placement: 'top' },
+    { page: '/dashboard', target: '.tour-step-project', ...MENU, title: 'Mi Proyecto', content: 'Aquí puedes ver los detalles a fondo. En el siguiente paso te llevaremos ahí automáticamente.', mobileContent: 'En el menú (☰) encontrarás "Mi Proyecto" con todos los detalles. En el siguiente paso te llevamos ahí.', placement: 'right' },
+    { page: '/project', target: '#tour-project-timeline', title: 'Ruta de trabajo', content: 'En esta sección podrás ver toda la metodología y los pasos que seguiremos hasta lanzar tu proyecto.', placement: 'bottom' },
+    { page: '/project', target: '#tour-active-stage', title: 'Detalles de la etapa', content: 'Te mantendremos al tanto de qué estamos haciendo exactamente y si necesitamos que revises algo.', placement: 'top' },
+    { page: '/project', target: '#tour-next-step', title: 'Próximo Paso', content: 'Aquí verás el hito o etapa inmediatamente posterior y lo que viene en el proceso de tu proyecto.', placement: 'top' },
+    { page: '/project', target: '#entregables', title: 'Entregables (Documentos)', content: 'Aquí podrás descargar contratos, cotizaciones, manuales y cualquier documento relacionado a tu proyecto.', placement: 'top' },
+    { page: '/project', target: '#tour-bitacora', title: 'Bitácora de Desarrollo', content: 'El registro cronológico detallado con todas las actividades, notas y avances que nuestro equipo va realizando día a día.', placement: 'top' },
+    { page: '/project', target: '.tour-step-referrals', ...MENU, title: 'Mis Referidos', content: 'Recomiéndanos con otras empresas y gana Créditos HX. En el siguiente paso te llevamos ahí.', mobileContent: 'En el menú (☰) está "Mis Referidos": recomiéndanos y gana Créditos HX. En el siguiente paso te llevamos ahí.', placement: 'right' },
+    { page: '/referrals', target: '#tour-referrals-tier', title: 'Tu Nivel de Socio', content: 'Conforme recomiendes y se concreten nuevos proyectos, subirás de Member a Partner o VIP, desbloqueando mayores recompensas.', placement: 'bottom' },
+    { page: '/referrals', target: '#tour-referrals-balance', title: 'Tus Créditos HX', content: 'Tu saldo acumulado de Créditos HX, canjeables por horas de consultoría y mejoras en tu sistema, y cuánto te falta para el siguiente nivel.', placement: 'bottom' },
+    { page: '/referrals', target: '#tour-referrals-code', title: 'Tu Código de Socio', content: 'Comparte tu código único con directores o empresarios. Al contactarnos por WhatsApp o llamada con tu código, quedarán vinculados a tu cuenta para otorgarte créditos.', placement: 'bottom' },
+    { page: '/referrals', target: '#tour-referrals-list', title: 'Tus Recomendaciones', content: 'Aquí registras a las empresas que nos recomiendas y sigues en tiempo real su avance y los créditos que te generan.', placement: 'bottom' },
+    { page: '/referrals', target: '.tour-step-support', ...MENU, title: 'Soporte 24/7', content: 'Si tienes cualquier duda, usa este botón para mandarnos mensaje directo por WhatsApp. ¡Eso es todo, disfruta tu portal!', mobileContent: 'En el menú (☰) tienes el botón de Soporte para escribirnos directo por WhatsApp. ¡Eso es todo, disfruta tu portal!', placement: 'right' },
   ];
 
   const handleIndexChange = (i) => {
-    if (i <= 11) {
-      if (location.pathname !== '/dashboard') navigate('/dashboard');
-    } else if (i >= 12 && i <= 16) {
-      if (location.pathname !== '/project') navigate('/project');
-    } else if (i >= 17 && i <= 19) {
-      if (location.pathname !== '/referrals') navigate('/referrals');
-    }
+    const page = tourSteps[i]?.page;
+    if (page && location.pathname !== page) navigate(page);
     tour.setIndex(i);
   };
 

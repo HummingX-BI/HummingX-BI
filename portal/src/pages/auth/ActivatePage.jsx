@@ -346,6 +346,9 @@ export default function ActivatePage() {
       return setError('La contraseña debe tener al menos 8 caracteres.');
     }
     setLoading(true);
+    // Desbloquear audio dentro del click (requisito de iOS) para que la música
+    // suene y luego se pueda desvanecer suavemente.
+    try { WelcomeAudio.prime(); } catch { /* noop */ }
     try {
       let user;
       if (token === 'test') {

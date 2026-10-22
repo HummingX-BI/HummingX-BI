@@ -40,7 +40,13 @@ export function Tour({
 
   useEffect(() => setMounted(true), []);
 
-  const step = steps[index];
+  const rawStep = steps[index];
+  const isMobile = vp.w < 769;
+  // En celular, algunos pasos (menú lateral oculto) usan otro objetivo/texto
+  const step = rawStep && isMobile
+    ? { ...rawStep, target: rawStep.mobileTarget || rawStep.target, content: rawStep.mobileContent || rawStep.content }
+    : rawStep;
+  const target = step?.target;
   const count = steps.length;
   const isFirst = index === 0;
   const isLast = index === count - 1;
@@ -67,36 +73,72 @@ export function Tour({
     if (!isFirst) setIndex(index - 1);
   }, [isFirst, index, setIndex]);
 
+  // Busca el objetivo; tras cambiar de página el elemento puede tardar en
+  // aparecer (carga de datos), así que reintentamos hasta ~5 s.
+  const findTarget = (sel) => {
+    if (!sel || sel === 'body') return null;
+    const el = document.querySelector(sel);
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    const hidden = r.width === 0 || r.height === 0 || r.right <= 0 || r.left >= window.innerWidth;
+    return hidden ? null : el;
+  };
+
   useEffect(() => {
     if (!open) return;
+    let cancelled = false;
+    let poll = null;
+    let settle = null;
+
     const measure = () => {
       setVp({ w: window.innerWidth, h: window.innerHeight });
-      if (!step?.target || step?.target === 'body') {
-        setRect(null);
-        return;
-      }
-      const el = document.querySelector(step.target);
-      if (!el) {
-        setRect(null);
-        return;
-      }
+      const el = findTarget(target);
+      if (!el) { setRect(null); return; }
       const r = el.getBoundingClientRect();
       setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
     };
 
-    const el = (step?.target && step?.target !== 'body') ? document.querySelector(step.target) : null;
-    el?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center", inline: "center" });
-
-    measure();
-    const settle = window.setTimeout(measure, reduce ? 0 : 320);
-    window.addEventListener("scroll", measure, true);
-    window.addEventListener("resize", measure);
-    return () => {
-      window.clearTimeout(settle);
-      window.removeEventListener("scroll", measure, true);
-      window.removeEventListener("resize", measure);
+    const focusTarget = (el) => {
+      const r = el.getBoundingClientRect();
+      const tall = r.height > window.innerHeight * 0.6;
+      el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: tall ? 'start' : 'center', inline: 'nearest' });
+      measure();
+      settle = window.setTimeout(measure, reduce ? 0 : 450);
     };
-  }, [open, index, step, reduce]);
+
+    setVp({ w: window.innerWidth, h: window.innerHeight });
+    if (!target || target === 'body') {
+      setRect(null);
+    } else {
+      const first = findTarget(target);
+      if (first) {
+        focusTarget(first);
+      } else {
+        setRect(null);
+        let tries = 0;
+        poll = window.setInterval(() => {
+          tries++;
+          const el = findTarget(target);
+          if (el && !cancelled) {
+            window.clearInterval(poll); poll = null;
+            focusTarget(el);
+          } else if (tries > 50) {
+            window.clearInterval(poll); poll = null;
+          }
+        }, 100);
+      }
+    }
+
+    window.addEventListener('scroll', measure, true);
+    window.addEventListener('resize', measure);
+    return () => {
+      cancelled = true;
+      if (poll) window.clearInterval(poll);
+      if (settle) window.clearTimeout(settle);
+      window.removeEventListener('scroll', measure, true);
+      window.removeEventListener('resize', measure);
+    };
+  }, [open, index, target, reduce]);
 
   useLayoutEffect(() => {
     if (cardRef.current) {
@@ -178,6 +220,16 @@ export function Tour({
       top = cy - cardSize.h / 2;
     }
   }
+  // Celular: la tarjeta va pegada arriba o abajo (donde no tape el elemento)
+  if (isMobile && rect) {
+    left = 12;
+    const cy = rect.top + rect.height / 2;
+    const fitsBelow = rect.top + rect.height + pad + gap + cardSize.h < vp.h - 12;
+    const fitsAbove = rect.top - pad - gap - cardSize.h > 12;
+    if (fitsBelow) top = rect.top + rect.height + pad + gap;
+    else if (fitsAbove) top = rect.top - pad - gap - cardSize.h;
+    else top = cy < vp.h / 2 ? vp.h - 12 - cardSize.h : 12;
+  }
   left = Math.min(Math.max(12, left), vp.w - 12 - cardSize.w);
   top = Math.min(Math.max(12, top), vp.h - 12 - cardSize.h);
 
@@ -251,7 +303,7 @@ export function Tour({
             animate={{ opacity: 1, scale: 1, left, top }}
             transition={reduce ? { duration: 0 } : SPRING}
             style={{ 
-              position: 'absolute', left, top, width: '320px', maxWidth: 'calc(100vw - 24px)', 
+              position: 'absolute', left, top, width: isMobile ? 'calc(100vw - 24px)' : '320px', maxWidth: 'calc(100vw - 24px)', 
               borderRadius: '16px', border: '1px solid #E5E7EB', background: '#FFFFFF', padding: '16px', 
               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' 
             }}

@@ -37,7 +37,7 @@ export default function ReferralList({ referrals = [], onOpenRecommendModal }) {
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-6">
       {/* Top Header & Search */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div id="tour-referrals-list" className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h3 className="text-lg font-bold text-gray-900">
             Tus Recomendaciones ({referrals.length})

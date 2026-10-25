@@ -24,4 +24,13 @@ const requireAdmin = (req, res, next) => {
   next();
 };
 
-module.exports = { authenticate, requireAdmin };
+const requireAdminOrNfcOperator = (req, res, next) => {
+  const role = req.user && req.user.role ? String(req.user.role).toLowerCase() : '';
+  if (role !== 'admin' && role !== 'nfc_operator') {
+    return res.status(403).json({ error: 'Acceso denegado. Se requieren permisos de administrador u operador NFC.' });
+  }
+  next();
+};
+
+module.exports = { authenticate, requireAdmin, requireAdminOrNfcOperator };
+

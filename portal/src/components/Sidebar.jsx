@@ -25,19 +25,20 @@ import {
 const logoSrc = '/logo.png';
 
 export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
-  const { user, logout, isAdmin } = useAuth();
+  const { user, logout, isAdmin, isNfcOperator: authIsNfc } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [clients, setClients] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [newReferralsCount, setNewReferralsCount] = useState(0);
 
+  const isNfcOperator = authIsNfc || user?.role === 'nfc_operator' || user?.role === 'NFC_OPERATOR';
   const isAdminRoute = location.pathname.startsWith('/admin');
 
   // Close drawer on route change
   useEffect(() => { onClose(); }, [location.pathname]);
 
-  // Sync new referrals count for CRM badge
+  // Sync new referrals count for CRM badge (only for full admin)
   useEffect(() => {
     const handleCount = (e) => {
       if (typeof e.detail?.count === 'number') {
@@ -46,7 +47,7 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
     };
     window.addEventListener('hx:new-referrals-count', handleCount);
 
-    if (isAdminRoute) {
+    if (isAdminRoute && !isNfcOperator && isAdmin) {
       try {
         const since = localStorage.getItem('hx_ref_seen') || '';
         api.get(since ? `/admin/referrals/new?since=${encodeURIComponent(since)}` : '/admin/referrals/new')
@@ -58,14 +59,14 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
     }
 
     return () => window.removeEventListener('hx:new-referrals-count', handleCount);
-  }, [location.pathname, isAdminRoute]);
+  }, [location.pathname, isAdminRoute, isNfcOperator, isAdmin]);
 
-  // Fetch admin client list
+  // Fetch admin client list (only for full admin)
   useEffect(() => {
-    if (isAdminRoute) {
+    if (isAdminRoute && !isNfcOperator && isAdmin) {
       api.get('/admin/clients').then(res => setClients(res.data)).catch(console.error);
     }
-  }, [isAdminRoute]);
+  }, [isAdminRoute, isNfcOperator, isAdmin]);
 
   const handleLogout = () => {
     logout();
@@ -115,7 +116,18 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
     },
   ];
 
-  const sections = isAdmin ? adminSections : clientSections;
+  const nfcOperatorSections = [
+    {
+      title: 'Módulo Asignado',
+      links: [
+        { to: '/admin/tarjetas-qr', icon: QrCode, label: 'Tarjetas QR & NFC' },
+      ],
+    },
+  ];
+
+  const sections = isNfcOperator
+    ? nfcOperatorSections
+    : (isAdmin ? adminSections : clientSections);
 
   const filteredClients = clients.filter(c =>
     c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -172,14 +184,17 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
               letterSpacing: '-0.01em', lineHeight: 1.3,
             }}>HummingX BI</h2>
             <p style={{ fontSize: '11px', fontWeight: 500, color: '#00C4CC', margin: 0, lineHeight: 1.3 }}>
-              {isAdminRoute ? 'Panel Administrativo' : 'Portal de Clientes'}
+              {isAdminRoute ? (isNfcOperator ? 'Módulo NFC & QR' : 'Panel Administrativo') : 'Portal de Clientes'}
             </p>
           </div>
           {isAdminRoute && (
             <span style={{
               fontSize: '10px', fontWeight: 600, padding: '2px 8px',
-              borderRadius: '9999px', background: '#DBEAFE', color: '#1D4ED8', flexShrink: 0,
-            }}>Admin</span>
+              borderRadius: '9999px',
+              background: isNfcOperator ? '#CCFBF1' : '#DBEAFE',
+              color: isNfcOperator ? '#0F766E' : '#1D4ED8',
+              flexShrink: 0,
+            }}>{isNfcOperator ? 'Operador' : 'Admin'}</span>
           )}
           {/* Close button — shown via CSS on mobile */}
           <button
@@ -246,9 +261,9 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
             </div>
           ))}
 
-          <hr className="separator" style={{ margin: '8px 0', borderColor: 'rgba(255,255,255,0.08)' }} />
+          {!isNfcOperator && <hr className="separator" style={{ margin: '8px 0', borderColor: 'rgba(255,255,255,0.08)' }} />}
 
-          {isAdminRoute ? (
+          {isAdminRoute && !isNfcOperator ? (
             /* Admin: quick client directory */
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
               <div className="section-label" style={{ marginBottom: '8px' }}>Directorio Rápido</div>
@@ -293,7 +308,7 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
                 })}
               </div>
             </div>
-          ) : (
+          ) : (!isAdminRoute && !isNfcOperator ? (
             /* Client: WhatsApp support */
             <>
               <div className="section-label">Soporte</div>
@@ -309,13 +324,13 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
                 <ChevronRight size={14} style={{ color: '#9CA3AF' }} />
               </a>
             </>
-          )}
+          ) : null)}
         </nav>
 
         {/* ── User Card + Logout ────────────────────────────── */}
         <div style={{ padding: '12px 12px 16px', flexShrink: 0, marginTop: 'auto' }}>
           {/* User info row */}
-          {user && !isAdminRoute && (
+          {user && (!isAdminRoute || isNfcOperator) && (
             <div style={{
               display: 'flex', alignItems: 'center', gap: '10px',
               padding: '10px 10px', borderRadius: '10px',

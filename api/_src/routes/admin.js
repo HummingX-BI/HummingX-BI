@@ -8,7 +8,7 @@ const { sendMailSafe, isAutoNotificationEnabled } = require('../lib/mailer');
 const { sendInvitationEmail } = require('../services/invitationService');
 const { sendPhaseNotification } = require('../services/phaseEmail');
 const { mxParts } = require('../lib/mxTime');
-const { authenticate, requireAdmin } = require('../middleware/auth');
+const { authenticate, requireAdmin, requireAdminOrNfcOperator } = require('../middleware/auth');
 const { adminLimiter, isValidEmail } = require('../middleware/security');
 
 const router = express.Router();
@@ -2921,7 +2921,7 @@ router.put('/payments/:id/mark-paid', authenticate, requireAdmin, async (req, re
 // ══════════════════════════════════════════════════════════════════════════════
 
 // GET /admin/nfc-cards — Listar todas las tarjetas y estadísticas
-router.get('/nfc-cards', authenticate, requireAdmin, async (req, res) => {
+router.get('/nfc-cards', authenticate, requireAdminOrNfcOperator, async (req, res) => {
   try {
     const cards = await (prisma.executeWithRetry
       ? prisma.executeWithRetry(() => prisma.nfcCard.findMany({ orderBy: { code: 'asc' } }))
@@ -2959,7 +2959,7 @@ router.get('/nfc-cards', authenticate, requireAdmin, async (req, res) => {
 });
 
 // POST /admin/nfc-cards — Crear o configurar nueva tarjeta
-router.post('/nfc-cards', authenticate, requireAdmin, async (req, res) => {
+router.post('/nfc-cards', authenticate, requireAdminOrNfcOperator, async (req, res) => {
   try {
     let { code, clientName, type, targetUrl, active, notes, latitude, longitude, locationName, photoUrl } = req.body;
 
@@ -3027,7 +3027,7 @@ router.post('/nfc-cards', authenticate, requireAdmin, async (req, res) => {
 });
 
 // POST /admin/nfc-cards/batch — Generar lote de tarjetas QR/NFC en la base de datos
-router.post('/nfc-cards/batch', authenticate, requireAdmin, async (req, res) => {
+router.post('/nfc-cards/batch', authenticate, requireAdminOrNfcOperator, async (req, res) => {
   try {
     let { desde, hasta, cantidad, note, defaultUrl, type } = req.body;
 
@@ -3095,7 +3095,7 @@ router.post('/nfc-cards/batch', authenticate, requireAdmin, async (req, res) => 
 });
 
 // PUT /nfc-cards/:id — Actualizar tarjeta
-router.put(['/nfc-cards/:id', '/admin/nfc-cards/:id'], authenticate, requireAdmin, async (req, res) => {
+router.put(['/nfc-cards/:id', '/admin/nfc-cards/:id'], authenticate, requireAdminOrNfcOperator, async (req, res) => {
   try {
     let { code, clientName, type, targetUrl, active, notes, latitude, longitude, locationName, photoUrl } = req.body;
     const data = {};
@@ -3146,7 +3146,7 @@ router.put(['/nfc-cards/:id', '/admin/nfc-cards/:id'], authenticate, requireAdmi
 });
 
 // POST /nfc-cards/:id/unlink — Desvincular tarjeta (desvinculación limpia)
-router.post(['/nfc-cards/:id/unlink', '/admin/nfc-cards/:id/unlink'], authenticate, requireAdmin, async (req, res) => {
+router.post(['/nfc-cards/:id/unlink', '/admin/nfc-cards/:id/unlink'], authenticate, requireAdminOrNfcOperator, async (req, res) => {
   try {
     const card = await prisma.executeWithRetry(() =>
       prisma.nfcCard.update({
@@ -3175,7 +3175,7 @@ router.post(['/nfc-cards/:id/unlink', '/admin/nfc-cards/:id/unlink'], authentica
 });
 
 // DELETE /admin/nfc-cards/:id — Eliminar tarjeta
-router.delete('/nfc-cards/:id', authenticate, requireAdmin, async (req, res) => {
+router.delete('/nfc-cards/:id', authenticate, requireAdminOrNfcOperator, async (req, res) => {
   try {
     await (prisma.executeWithRetry
       ? prisma.executeWithRetry(() => prisma.nfcCard.delete({ where: { id: req.params.id } }))
@@ -3191,7 +3191,7 @@ router.delete('/nfc-cards/:id', authenticate, requireAdmin, async (req, res) => 
 });
 
 // GET /admin/nfc-cards/:id/qr — Generar imagen QR en alta resolución
-router.get('/nfc-cards/:id/qr', authenticate, requireAdmin, async (req, res) => {
+router.get('/nfc-cards/:id/qr', authenticate, requireAdminOrNfcOperator, async (req, res) => {
   try {
     const card = await (prisma.executeWithRetry
       ? prisma.executeWithRetry(() => prisma.nfcCard.findUnique({ where: { id: req.params.id } }))

@@ -35,8 +35,14 @@ export default function LoginPage() {
     try {
       const user = await login(email, password);
       clearTimeout(timerRef.current);
-      setRetryStatus('');
-      navigate(user.role === 'admin' ? '/admin' : '/dashboard', { replace: true });
+      const isNfc = user.role === 'nfc_operator' || user.role === 'NFC_OPERATOR';
+      if (isNfc) {
+        navigate('/admin/tarjetas-qr', { replace: true });
+      } else if (user.role === 'admin') {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
     } catch (err) {
       clearTimeout(timerRef.current);
       const isWaking = err.response?.data?.isWakingUp || err.response?.status === 503 || err.response?.status === 504 || (err.message || '').includes('timeout');

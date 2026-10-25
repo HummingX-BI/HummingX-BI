@@ -6,6 +6,8 @@ import api from '../lib/api';
 export function ProtectedRoute({ children, adminOnly = false }) {
   const { user, loading, isImpersonating } = useAuth();
 
+  const location = useLocation();
+
   if (loading) {
     return (
       <div style={{
@@ -31,6 +33,15 @@ export function ProtectedRoute({ children, adminOnly = false }) {
   }
 
   if (!user) return <Navigate to="/login" replace />;
+
+  const isNfc = user.role === 'nfc_operator' || user.role === 'NFC_OPERATOR';
+  if (isNfc) {
+    if (location.pathname !== '/admin/tarjetas-qr') {
+      return <Navigate to="/admin/tarjetas-qr" replace />;
+    }
+    return children;
+  }
+
   if (adminOnly && user.role !== 'admin') return <Navigate to="/dashboard" replace />;
 
   if (user.role === 'client' && user.active === false && !isImpersonating) {

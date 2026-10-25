@@ -107,6 +107,7 @@ export function AuthProvider({ children }) {
       logout, 
       activate, 
       isAdmin: user?.role === 'admin',
+      isNfcOperator: user?.role === 'nfc_operator' || user?.role === 'NFC_OPERATOR',
       isImpersonating,
       impersonate,
       stopImpersonating

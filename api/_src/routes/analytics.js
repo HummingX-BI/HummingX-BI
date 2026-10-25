@@ -6,7 +6,7 @@ const router = express.Router();
 router.post('/heartbeat', authenticate, async (req, res) => {
   try {
     if (req.headers['x-impersonating'] === 'true') return res.json({ ok: true });
-    if (req.user.role === 'admin') return res.json({ ok: true });
+    if (req.user.role === 'admin' || req.user.role === 'nfc_operator') return res.json({ ok: true });
 
     const { sessionId, path } = req.body;
     if (!sessionId || typeof sessionId !== 'string' || sessionId.length < 8 || sessionId.length > 64) {
@@ -66,7 +66,7 @@ router.post('/heartbeat', authenticate, async (req, res) => {
 router.post('/pageview', authenticate, async (req, res) => {
   try {
     if (req.headers['x-impersonating'] === 'true') return res.json({ ok: true });
-    if (req.user.role === 'admin') return res.json({ ok: true });
+    if (req.user.role === 'admin' || req.user.role === 'nfc_operator') return res.json({ ok: true });
 
     const { path, sessionId } = req.body;
     if (!path || typeof path !== 'string') return res.status(400).json({ error: 'Path required' });

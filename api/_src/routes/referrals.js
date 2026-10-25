@@ -68,6 +68,10 @@ router.post('/', authenticate, async (req, res) => {
       });
     }
 
+    if (req.user.role !== 'client') {
+      return res.status(403).json({ error: 'Solo los clientes pueden registrar recomendaciones.' });
+    }
+
     const { companyName, contactName, contactEmail, contactPhone, notes } = req.body;
 
     if (!companyName || !companyName.trim()) {

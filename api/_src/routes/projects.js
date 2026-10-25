@@ -76,13 +76,13 @@ router.get('/:id', authenticate, async (req, res) => {
 
     if (!project) return res.status(404).json({ error: 'Proyecto no encontrado.' });
 
-    // Client can only see their own projects
-    if (req.user.role === 'client' && project.clientId !== req.user.id) {
+    // Non-admin can only see their own projects
+    if (req.user.role !== 'admin' && project.clientId !== req.user.id) {
       return res.status(403).json({ error: 'Acceso denegado.' });
     }
 
-    // Hide internal notes from clients
-    if (req.user.role === 'client') {
+    // Hide internal notes from non-admins
+    if (req.user.role !== 'admin') {
       project.internalNotes = undefined;
     }
 

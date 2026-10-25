@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../lib/api';
 
 export default function ActivityTracker() {
-  const { user, isAdmin, isImpersonating } = useAuth();
+  const { user, isAdmin, isNfcOperator, isImpersonating } = useAuth();
   const location = useLocation();
 
   const pendingRef = useRef(0);
@@ -30,18 +30,18 @@ export default function ActivityTracker() {
 
   // Pageview tracking on pathname change
   useEffect(() => {
-    if (!user || isAdmin || isImpersonating) return;
+    if (!user || isAdmin || isNfcOperator || isImpersonating) return;
     if (!sessionIdRef.current) return;
 
     api.post('/analytics/pageview', {
       path: location.pathname,
       sessionId: sessionIdRef.current
     }).catch(() => {});
-  }, [location.pathname, user, isAdmin, isImpersonating]);
+  }, [location.pathname, user, isAdmin, isNfcOperator, isImpersonating]);
 
   // Heartbeat & Activity listeners
   useEffect(() => {
-    if (!user || isAdmin || isImpersonating) return;
+    if (!user || isAdmin || isNfcOperator || isImpersonating) return;
 
     // Passive interaction listeners
     const handleInteraction = () => {
@@ -117,7 +117,7 @@ export default function ActivityTracker() {
       document.removeEventListener('visibilitychange', handleVisibility);
       window.removeEventListener('pagehide', flushHeartbeat);
     };
-  }, [user, isAdmin, isImpersonating]);
+  }, [user, isAdmin, isNfcOperator, isImpersonating]);
 
   return null;
 }

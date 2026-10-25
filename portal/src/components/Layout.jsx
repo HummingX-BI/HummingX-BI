@@ -69,7 +69,7 @@ export default function Layout({ children, customBreadcrumbLabel, fullWidth = fa
   const tour = useTour(tourStorageKey);
 
   useEffect(() => {
-    if (user && user.role !== 'admin' && !isImpersonating && !tour.seen() && !sessionStorage.getItem('hummingx_tour_started')) {
+    if (user && user.role === 'client' && !isImpersonating && !tour.seen() && !sessionStorage.getItem('hummingx_tour_started')) {
       sessionStorage.setItem('hummingx_tour_started', 'true');
       setTimeout(() => tour.start(), 1000);
     }
